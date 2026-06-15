@@ -1,0 +1,51 @@
+.loadingState,.empty{min-height:55vh;display:grid;place-items:center;align-content:center;gap:12px;color:var(--text-secondary)}.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.page{width:min(1280px,calc(100% - 36px));margin:0 auto;padding:16px 0 60px}.breadcrumbs{margin:0 0 16px;display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:.58rem;font-weight:700}.breadcrumbs strong{color:var(--primary)}.layout{display:grid;grid-template-columns:285px minmax(0,1fr);gap:16px;align-items:start}.sidebar{display:grid;gap:14px}.progressCard,.curriculumCard,.infoCard,.instructorCard{border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm)}.progressCard{padding:18px;text-align:center}.cardTitle{display:flex;align-items:center;gap:7px;color:var(--text-main);font-size:.66rem}.progressCard>b{margin:14px 0 3px;display:block;color:var(--primary);font-size:1.45rem}.progressCard>span,.progressCard>small{color:var(--text-secondary);font-size:.56rem;font-weight:700}.progressTrack{height:6px;margin:13px 0 9px;overflow:hidden;border-radius:99px;background:var(--border-light)}.progressTrack i{height:100%;display:block;border-radius:inherit;background:linear-gradient(90deg,var(--primary),#9a57ff)}.curriculumCard{padding:14px 10px}.curriculumCard>.cardTitle{padding:0 7px 10px}.curriculum{max-height:360px;overflow:auto}.sectionGroup h4{padding:8px 7px 6px;color:var(--text-secondary);font-size:.57rem}.sectionGroup button{width:100%;min-height:40px;padding:6px 7px;display:grid;grid-template-columns:21px 1fr auto;align-items:center;gap:5px;border:0;border-radius:8px;color:var(--text-muted);background:transparent;text-align:start;cursor:pointer}.sectionGroup button:hover{background:var(--surface-hover)}.sectionGroup button>span{color:var(--border)}.sectionGroup button strong{font-size:.56rem;line-height:1.4}.sectionGroup button small{font-size:.47rem}.sectionGroup .activeLesson{color:white;background:linear-gradient(135deg,var(--primary),#8f45f5)}.sectionGroup .activeLesson>span{color:white}.showAll{width:100%;min-height:36px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);border-radius:8px;color:var(--primary);background:transparent;font-size:.56rem;font-weight:800;cursor:pointer}
+.main{min-width:0}.mediaStage{max-width:960px;margin-inline:auto;overflow:hidden;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-sm)}.lessonHeader{min-height:88px;padding:14px 17px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--border);background:radial-gradient(circle at 15% 20%,rgba(126,68,230,.14),transparent 34%),linear-gradient(135deg,#f4f0fd,#fff 70%)}.stageButtons{display:flex;gap:6px;flex:0 0 auto}.stageButtons button{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--border);border-radius:9px;color:var(--text-main);background:rgba(255,255,255,.82)}.stageHeading{max-width:75%;text-align:right}.stageHeading>span{color:var(--text-muted);font-size:.62rem}.stageHeading h1{margin:4px 0 7px;color:var(--primary);font-size:1.4rem}.stageHeading>div{display:flex;gap:14px;color:var(--text-secondary);font-size:.52rem;font-weight:700}.stageHeading>div span{display:flex;align-items:center;gap:4px}.mediaContent{position:relative;width:100%;aspect-ratio:16/8.3;max-height:470px;background:#000}.videoContainer{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#000}.iframePlayer,.htmlVideo{width:100%;height:100%;border:0;object-fit:contain}.articleCard,.fallback{position:absolute;inset:0;padding:18px;display:grid;place-items:center;align-content:center;gap:9px;background:rgba(255,255,255,.96);text-align:center}.articleCard{display:block;overflow:auto;text-align:start}.fallback a{padding:8px 14px;border-radius:8px;color:white;background:var(--primary)}
+.infoGrid{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px}.infoCard{min-height:220px;overflow:hidden}.tabs{height:58px;padding:0 20px;display:flex;align-items:end;justify-content:flex-start;gap:34px;border-bottom:1px solid var(--border)}.tabs button{height:100%;border:0;border-bottom:2px solid transparent;color:var(--text-secondary);background:transparent;font-size:.68rem;font-weight:800;cursor:pointer}.tabs .activeTab{color:var(--primary);border-color:var(--primary)}.tabPanel{padding:24px;color:var(--text-muted);font-size:.67rem;line-height:1.9}.fileItem{max-width:260px;padding:13px;display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:10px;color:var(--text-main)}.fileItem svg:last-child{margin-inline-start:auto;color:var(--primary)}.instructorCard{padding:20px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px}.avatar{width:62px;height:62px;display:grid;place-items:center;border-radius:50%;color:var(--primary);background:#eee7ff}.instructorCard div:nth-child(2){display:grid;gap:4px}.instructorCard strong{font-size:.72rem}.instructorCard small{color:var(--text-secondary);font-size:.53rem}.instructorCard a{grid-column:1/-1;min-height:34px;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;color:var(--primary);font-size:.58rem;font-weight:800}.lessonNav{margin-top:18px;display:flex;justify-content:space-between;gap:14px}.lessonNav button{min-width:190px;min-height:48px;padding:0 20px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--border);border-radius:11px;color:var(--primary);background:var(--surface);font-weight:800;cursor:pointer}.lessonNav button:last-child{color:white;border-color:var(--primary);background:var(--primary)}.lessonNav button:disabled{opacity:.35;cursor:not-allowed}.sidebarToggle{display:none}
+[data-theme=dark] .lessonHeader{background:radial-gradient(circle at 15% 20%,rgba(139,69,245,.22),transparent 35%),linear-gradient(135deg,#211438,#100b1e 70%)}[data-theme=dark] .stageButtons button{background:rgba(19,13,31,.75)}[data-theme=dark] .articleCard,[data-theme=dark] .fallback{background:rgba(20,15,34,.94)}[data-theme=dark] .avatar{background:#2a1d43}
+@media(max-width:1000px){.layout{grid-template-columns:280px minmax(0,1fr)}.infoGrid{grid-template-columns:1fr}.instructorCard{grid-template-columns:auto 1fr auto}.instructorCard a{grid-column:auto;padding:0 12px}.stageHeading h1{font-size:1.8rem}}
+@media(max-width:900px){.page{width:min(100% - 20px,680px)}.layout{display:block}.sidebarToggle{position:fixed;z-index:220;left:14px;bottom:82px;width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;color:white;background:var(--primary)}.sidebar{position:fixed;z-index:210;top:70px;bottom:75px;left:10px;width:min(330px,calc(100% - 20px));padding:10px;overflow:auto;transform:translateX(-110%);transition:.25s ease;border-radius:16px;background:var(--background);box-shadow:var(--shadow-lg)}.sidebarVisible{transform:translateX(0)}.infoGrid{grid-template-columns:1fr}.instructorCard{grid-template-columns:auto 1fr}.instructorCard a{grid-column:1/-1}.lessonNav button{min-width:0;flex:1}}
+@media(max-width:560px){.breadcrumbs{overflow:hidden;white-space:nowrap}.mediaStage{border-radius:13px}.lessonHeader{padding:15px;align-items:flex-start}.stageButtons button{width:36px;height:36px}.stageHeading{max-width:calc(100% - 82px)}.stageHeading h1{font-size:1.25rem}.stageHeading>div{gap:8px;flex-wrap:wrap}.tabs{padding:0 8px;gap:0;justify-content:space-between}.tabs button{font-size:.55rem}.tabPanel{padding:18px}.lessonNav{margin-bottom:30px}}
+
+/* Compact lesson-player layout */
+.page{width:min(1280px,calc(100% - 32px));padding:14px 0 48px}
+.breadcrumbs{margin-bottom:14px}
+.layout{grid-template-columns:270px minmax(0,1fr);gap:16px}
+.sidebar{gap:12px}
+.progressCard{padding:16px}
+.progressCard>b{margin:12px 0 2px;font-size:1.35rem}
+.progressTrack{margin:12px 0 8px}
+.curriculumCard{padding:14px 9px}
+.curriculum{max-height:360px}
+.sectionGroup button{min-height:40px;padding:6px}
+.mediaStage{border-radius:14px}
+.lessonHeader{min-height:82px;padding:12px 16px}
+.stageHeading>span{font-size:.62rem}
+.stageHeading h1{margin:3px 0 7px;font-size:1.3rem}
+.stageButtons button{width:36px;height:36px}
+.mediaContent{height:clamp(340px,38vw,470px);aspect-ratio:auto}
+.infoGrid{margin-top:14px;grid-template-columns:minmax(0,1fr) 250px;gap:14px}
+.infoCard{min-height:180px}
+.tabs{height:48px}
+.tabPanel{padding:18px}
+.instructorCard{padding:15px}
+.avatar{width:52px;height:52px}
+.lessonNav{margin-top:14px}
+.lessonNav button{min-width:150px;min-height:42px}
+
+@media(max-width:1000px) and (min-width:901px){
+  .layout{grid-template-columns:245px minmax(0,1fr)}
+  .mediaContent{height:400px}
+}
+
+@media(max-width:900px){
+  .page{width:min(100% - 24px,1280px)}
+  .mediaContent{height:auto;aspect-ratio:16/9}
+}
+
+@media(max-width:560px){
+  .page{width:min(100% - 20px,1280px);padding-bottom:32px}
+  .lessonHeader{min-height:72px;padding:10px 12px}
+  .stageHeading h1{font-size:1.15rem}
+  .mediaContent{height:auto;aspect-ratio:16/9}
+}

@@ -1,0 +1,75 @@
+.successContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding: 24px;
+}
+
+.card {
+  text-align: center;
+  padding: 60px 40px;
+  border-radius: var(--radius-xl);
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: var(--shadow-lg);
+}
+
+.successIcon {
+  color: var(--success);
+  filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3));
+  margin-bottom: 8px;
+}
+
+.errorIcon {
+  color: var(--error);
+  filter: drop-shadow(0 4px 12px rgba(239, 68, 68, 0.3));
+  margin-bottom: 8px;
+}
+
+.errorText {
+  color: var(--error);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.message {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.dashboardBtn {
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--transition-fast);
+}
+
+.dashboardBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(127, 19, 236, 0.5);
+}

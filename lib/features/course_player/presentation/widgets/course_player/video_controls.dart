@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/animations/widgets/micro/pulse_animation.dart';
 
@@ -115,32 +116,64 @@ class VideoControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Left controls
+        Tooltip(
+          message: 'course_player.playback_speed'.tr(),
+          child: IconButton(
+            onPressed: onSpeedTap,
+            icon: const Icon(Icons.speed, color: Colors.white),
+            iconSize: 24,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          ),
+        ),
         Row(
           children: [
-            IconButton(
-              onPressed: onReplay10,
-              icon: const Icon(Icons.replay_10, color: Colors.white),
-              iconSize: 24,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            Tooltip(
+              message: 'course_player.replay_10'.tr(),
+              child: IconButton(
+                onPressed: onReplay10,
+                icon: const Icon(Icons.replay_10, color: Colors.white),
+                iconSize: 24,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              ),
             ),
-            IconButton(
-              onPressed: onSpeedTap,
-              icon: const Icon(Icons.speed, color: Colors.white),
-              iconSize: 24,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            Tooltip(
+              message: isPlaying
+                  ? 'course_player.pause'.tr()
+                  : 'course_player.play'.tr(),
+              child: IconButton(
+                onPressed: onPlayPause,
+                icon: Icon(
+                  isPlaying ? Icons.pause_circle_filled : Icons.play_circle,
+                  color: Colors.white,
+                ),
+                iconSize: 32,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 40),
+              ),
+            ),
+            Tooltip(
+              message: 'course_player.forward_10'.tr(),
+              child: IconButton(
+                onPressed: onForward10,
+                icon: const Icon(Icons.forward_10, color: Colors.white),
+                iconSize: 24,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              ),
             ),
           ],
         ),
-        // Right controls
-        IconButton(
-          onPressed: onFullscreen,
-          icon: const Icon(Icons.fullscreen, color: Colors.white),
-          iconSize: 24,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        Tooltip(
+          message: 'course_player.fullscreen'.tr(),
+          child: IconButton(
+            onPressed: onFullscreen,
+            icon: const Icon(Icons.fullscreen, color: Colors.white),
+            iconSize: 24,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          ),
         ),
       ],
     );

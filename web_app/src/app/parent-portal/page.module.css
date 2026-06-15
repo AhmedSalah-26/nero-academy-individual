@@ -1,0 +1,259 @@
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pageTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.searchCard {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 40px auto;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+}
+
+.searchForm {
+  display: flex;
+  gap: 12px;
+}
+
+.inputWrapper {
+  position: relative;
+  flex-grow: 1;
+}
+
+.mailIcon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+[dir="rtl"] .mailIcon {
+  left: auto;
+  right: 16px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+[dir="rtl"] .input {
+  padding: 14px 44px 14px 16px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface-card);
+}
+
+.searchBtn {
+  padding: 0 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.resultsSection {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.errorAlert {
+  padding: 18px 24px;
+  border-radius: var(--radius-md);
+  border-color: var(--error);
+  color: var(--error);
+  text-align: center;
+  font-weight: 600;
+}
+
+.reportCard {
+  padding: 40px;
+  border-radius: var(--radius-xl);
+}
+
+.studentInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.avatarPlaceholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.studentName {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.studentEmailText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.reportTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 24px;
+}
+
+.noEnrollments {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 0;
+}
+
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.progressItem {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progressDetails {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.courseTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.statsLabel {
+  font-size: 0.8rem;
+  background: var(--border);
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.barContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progressBarBg {
+  flex-grow: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: 10px;
+}
+
+.percentageText {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  width: 45px;
+  text-align: right;
+}
+
+[dir="rtl"] .percentageText {
+  text-align: left;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.footerIcon {
+  color: var(--primary-light);
+}
+
+@media (max-width: 600px) {
+  .searchForm {
+    flex-direction: column;
+  }
+  .searchBtn {
+    padding: 14px;
+  }
+  .reportCard {
+    padding: 24px;
+  }
+}

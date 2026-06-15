@@ -38,6 +38,26 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   @override
   Future<CartModel> getCart(String userId) async {
     try {
+      // Fetch active/completed enrollments to filter them out of the cart
+      final enrolledResponse = await supabase
+          .from('enrollments')
+          .select('course_id')
+          .eq('user_id', userId)
+          .inFilter('status', ['active', 'completed']);
+
+      final enrolledIds = (enrolledResponse as List)
+          .map((e) => e['course_id'] as String)
+          .toSet();
+
+      // Remove cart items for already-enrolled courses to prevent duplicate key issues
+      if (enrolledIds.isNotEmpty) {
+        await supabase
+            .from('cart_items')
+            .delete()
+            .eq('user_id', userId)
+            .inFilter('course_id', enrolledIds.toList());
+      }
+
       final response = await supabase.from('cart_items').select('''
             *,
             courses (
@@ -233,11 +253,47 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       AppLogger.i('🛒 [Checkout] Found ${cartItems.length} items in cart');
 
+      // Pre-flight check: filter out any courses already enrolled (active/completed)
+      // to prevent unique constraint violation on enrollments table
+      final enrolledCheck = await supabase
+          .from('enrollments')
+          .select('course_id')
+          .eq('user_id', userId)
+          .inFilter('status', ['active', 'completed']);
+
+      final alreadyEnrolledIds = (enrolledCheck as List)
+          .map((e) => e['course_id'] as String)
+          .toSet();
+
+      final filteredCartItems = (cartItems as List)
+          .where((item) => !alreadyEnrolledIds.contains(item['course_id']))
+          .toList();
+
+      if (filteredCartItems.isEmpty) {
+        throw const ValidationException(
+            'All courses in your cart are already enrolled.');
+      }
+
+      // If some items were filtered, clean them from cart silently
+      if (filteredCartItems.length < cartItems.length) {
+        final toRemove = (cartItems as List)
+            .where((item) => alreadyEnrolledIds.contains(item['course_id']))
+            .map((item) => item['course_id'] as String)
+            .toList();
+        await supabase
+            .from('cart_items')
+            .delete()
+            .eq('user_id', userId)
+            .inFilter('course_id', toRemove);
+        AppLogger.w(
+            '🛒 [Checkout] Removed ${toRemove.length} already-enrolled course(s) from cart');
+      }
+
       // Calculate total using current effective prices (considering flash sales)
       double total = 0;
       final List<Map<String, dynamic>> processedItems = [];
 
-      for (final item in cartItems) {
+      for (final item in filteredCartItems) {
         final courseId = item['course_id'] as String;
         final priceAtAdd = (item['price_at_add'] as num?)?.toDouble() ?? 0;
 
