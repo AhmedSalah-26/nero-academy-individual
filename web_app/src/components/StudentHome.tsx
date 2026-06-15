@@ -143,7 +143,8 @@ export function StudentHome() {
               return (
                 <article className={styles.courseCard} key={enrollment.id}>
                   <div className={styles.courseImage}>
-                    {course.thumbnail_url ? <img src={course.thumbnail_url} alt={title} /> : <BookOpen size={36} />}
+                    <BookOpen size={36} />
+                    {course.thumbnail_url && <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
                     <Link href={`/learn/${enrollment.course_id}`}><Play size={17} fill="currentColor" /></Link>
                   </div>
                   <div className={styles.courseBody}>

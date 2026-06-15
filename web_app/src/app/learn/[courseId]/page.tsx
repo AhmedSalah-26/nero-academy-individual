@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, ArrowRight, BarChart3, Bookmark, CheckCircle, ChevronLeft,
   ClipboardCheck, Clock3, Download, FileText, ListVideo, Lock, Menu,
-  Play, Share2, User,
+  MessageCircleQuestion, Play, Share2, User,
 } from 'lucide-react';
 import { useApp } from '../../../context/AppContext';
 import { supabase } from '../../../lib/supabaseClient';
@@ -17,6 +17,8 @@ interface Lesson {
   id: string;
   title_ar: string;
   title_en: string;
+  description_ar: string;
+  description_en: string;
   type: string;
   video_url: string;
   article_content_ar: string;
@@ -34,10 +36,37 @@ interface Section {
 }
 
 interface CourseSummary {
+  instructor_id: string;
   title_ar: string;
   title_en: string;
   description_ar: string;
   description_en: string;
+  profiles?: { id: string; name?: string; avatar_url?: string } | null;
+}
+
+interface Attachment {
+  id: string;
+  file_name: string;
+  file_name_ar?: string;
+  file_url: string;
+  file_type?: string;
+  file_size?: number;
+}
+
+interface Question {
+  id: string;
+  title: string;
+  content: string;
+  is_answered: boolean;
+  answers_count: number;
+  profiles?: { name?: string } | null;
+}
+
+interface Instructor {
+  display_name?: string;
+  headline_ar?: string;
+  headline_en?: string;
+  avatar_url?: string;
 }
 
 export default function CoursePlayerPage() {
@@ -51,6 +80,11 @@ export default function CoursePlayerPage() {
   const [lastPositions, setLastPositions] = useState<Record<string, number>>({});
   const [enrollmentId, setEnrollmentId] = useState('');
   const [quizzesByLesson, setQuizzesByLesson] = useState<Record<string, string>>({});
+  const [courseAttachments, setCourseAttachments] = useState<Attachment[]>([]);
+  const [lessonAttachments, setLessonAttachments] = useState<Attachment[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [tabLoading, setTabLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'files' | 'homework' | 'questions'>('description');
@@ -78,8 +112,23 @@ export default function CoursePlayerPage() {
         setEnrollmentId(enrollData.id);
 
         const { data: courseData } = await supabase.from('courses')
-          .select('title_ar, title_en, description_ar, description_en').eq('id', courseId).maybeSingle();
-        if (courseData) setCourse(courseData as CourseSummary);
+          .select('instructor_id, title_ar, title_en, description_ar, description_en, profiles!courses_instructor_id_fkey(id,name,avatar_url)')
+          .eq('id', courseId).maybeSingle();
+        if (courseData) {
+          const courseRecord = courseData as unknown as CourseSummary;
+          setCourse(courseRecord);
+          const { data: instructorData } = await supabase.from('instructor_profiles')
+            .select('display_name, headline_ar, headline_en, avatar_url')
+            .eq('instructor_id', courseData.instructor_id).limit(1).maybeSingle();
+          setInstructor((instructorData as Instructor | null) || {
+            display_name: courseRecord.profiles?.name,
+            avatar_url: courseRecord.profiles?.avatar_url,
+          });
+        }
+
+        const { data: courseFiles } = await supabase.from('course_attachments').select('*')
+          .eq('course_id', courseId).order('sort_order');
+        setCourseAttachments((courseFiles || []) as Attachment[]);
 
         const { data: sectionsData } = await supabase.from('sections').select('*')
           .eq('course_id', courseId).eq('is_published', true).order('sort_order');
@@ -115,6 +164,29 @@ export default function CoursePlayerPage() {
     }
     fetchCourseData();
   }, [authLoading, courseId, router, userId]);
+
+  useEffect(() => {
+    if (!activeLesson || !courseId) return;
+    let cancelled = false;
+    const loadingTimer = window.setTimeout(() => setTabLoading(true), 0);
+
+    Promise.all([
+      supabase.from('lesson_attachments').select('*').eq('lesson_id', activeLesson.id).order('sort_order'),
+      supabase.from('qa_questions').select('id,title,content,is_answered,answers_count,profiles(name)')
+        .eq('course_id', courseId).eq('lesson_id', activeLesson.id).eq('is_visible', true)
+        .order('created_at', { ascending: false }),
+    ]).then(([filesResult, questionsResult]) => {
+      if (cancelled) return;
+      setLessonAttachments((filesResult.data || []) as Attachment[]);
+      setQuestions((questionsResult.data || []) as unknown as Question[]);
+      setTabLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(loadingTimer);
+    };
+  }, [activeLesson, courseId]);
 
   const saveProgress = useCallback(async (lessonId: string, isCompleted: boolean) => {
     if (!userId) return;
@@ -167,6 +239,15 @@ export default function CoursePlayerPage() {
   const progress = flatLessons.length ? Math.round((completedLessons.length / flatLessons.length) * 100) : 0;
   const title = activeLesson ? (lang === 'ar' ? activeLesson.title_ar : activeLesson.title_en) : '';
   const sectionTitle = activeSection ? (lang === 'ar' ? activeSection.title_ar : activeSection.title_en) : '';
+  const allAttachments = [
+    ...(activeLesson?.file_url ? [{ id: `lesson-file-${activeLesson.id}`, file_name: activeLesson.file_name || 'Lesson file', file_name_ar: activeLesson.file_name || 'ملف الدرس', file_url: activeLesson.file_url }] : []),
+    ...lessonAttachments,
+    ...courseAttachments,
+  ].filter((file, index, files) => files.findIndex((item) => item.file_url === file.file_url) === index);
+  const assignments = activeSection?.lessons.filter((lesson) => lesson.type === 'assignment') || [];
+  const instructorName = instructor?.display_name || course?.profiles?.name || (lang === 'ar' ? 'مدرس الكورس' : 'Course instructor');
+  const instructorHeadline = lang === 'ar' ? instructor?.headline_ar || 'مدرس الكيمياء للمرحلة الثانوية' : instructor?.headline_en || 'High school chemistry teacher';
+  const instructorAvatar = instructor?.avatar_url || course?.profiles?.avatar_url;
   const selectLesson = (lesson: Lesson | null) => {
     if (!lesson) return;
     setActiveLesson(lesson);
@@ -226,13 +307,14 @@ export default function CoursePlayerPage() {
               <section className={styles.infoCard}>
                 <div className={styles.tabs}>{(['description', 'files', 'homework', 'questions'] as const).map((tab) => <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? styles.activeTab : ''}>{tab === 'description' ? (lang === 'ar' ? 'الوصف' : 'Description') : tab === 'files' ? (lang === 'ar' ? 'الملفات' : 'Files') : tab === 'homework' ? (lang === 'ar' ? 'الواجب' : 'Homework') : (lang === 'ar' ? 'الأسئلة' : 'Questions')}</button>)}</div>
                 <div className={styles.tabPanel}>
-                  {activeTab === 'description' && <div dangerouslySetInnerHTML={{ __html: (lang === 'ar' ? activeLesson.article_content_ar : activeLesson.article_content_en) || (course ? (lang === 'ar' ? course.description_ar : course.description_en) : '') || (lang === 'ar' ? 'في هذا الدرس ستتعرف على المفاهيم الأساسية مع أمثلة وتطبيقات.' : 'Learn the core concepts with examples and practice.') }} />}
-                  {activeTab === 'files' && (activeLesson.file_url ? <a href={activeLesson.file_url} target="_blank" rel="noreferrer" className={styles.fileItem}><FileText size={20} /><span>{activeLesson.file_name || (lang === 'ar' ? 'ملخص الدرس' : 'Lesson summary')}</span><Download size={16} /></a> : <p>{lang === 'ar' ? 'لا توجد ملفات مرفقة.' : 'No attached files.'}</p>)}
-                  {activeTab === 'homework' && <p>{lang === 'ar' ? 'سيظهر واجب الدرس هنا عند إضافته.' : 'Homework will appear here.'}</p>}
-                  {activeTab === 'questions' && <p>{lang === 'ar' ? 'راجع وناقش أسئلة الدرس هنا.' : 'Review lesson questions here.'}</p>}
+                  {tabLoading && activeTab !== 'description' && <p>{lang === 'ar' ? 'جاري تحميل بيانات الدرس...' : 'Loading lesson data...'}</p>}
+                  {activeTab === 'description' && <div dangerouslySetInnerHTML={{ __html: (lang === 'ar' ? activeLesson.description_ar || activeLesson.article_content_ar : activeLesson.description_en || activeLesson.article_content_en) || (course ? (lang === 'ar' ? course.description_ar : course.description_en) : '') || (lang === 'ar' ? 'في هذا الدرس ستتعرف على المفاهيم الأساسية مع أمثلة وتطبيقات.' : 'Learn the core concepts with examples and practice.') }} />}
+                  {activeTab === 'files' && !tabLoading && (allAttachments.length ? <div className={styles.resourceList}>{allAttachments.map((file) => <a href={file.file_url} target="_blank" rel="noreferrer" className={styles.fileItem} key={file.id}><FileText size={20} /><span><strong>{lang === 'ar' ? file.file_name_ar || file.file_name : file.file_name}</strong><small>{file.file_type || (lang === 'ar' ? 'ملف مرفق' : 'Attachment')}</small></span><Download size={16} /></a>)}</div> : <p>{lang === 'ar' ? 'لا توجد ملفات مرفقة بهذا الدرس أو الكورس.' : 'No lesson or course attachments.'}</p>)}
+                  {activeTab === 'homework' && !tabLoading && (assignments.length ? <div className={styles.resourceList}>{assignments.map((assignment) => <button className={styles.assignmentItem} key={assignment.id} onClick={() => selectLesson(assignment)}><ClipboardCheck size={20} /><span><strong>{lang === 'ar' ? assignment.title_ar : assignment.title_en}</strong><small>{lang === 'ar' ? 'افتح الواجب وابدأ الحل' : 'Open assignment'}</small></span><ChevronLeft size={16} /></button>)}</div> : <p>{lang === 'ar' ? 'لا يوجد واجب مرتبط بهذا الباب حاليًا.' : 'No assignment is linked to this section yet.'}</p>)}
+                  {activeTab === 'questions' && !tabLoading && <div className={styles.questionsBlock}>{questions.length ? questions.slice(0, 3).map((question) => <article className={styles.questionItem} key={question.id}><MessageCircleQuestion size={18} /><div><strong>{question.title}</strong><p>{question.content}</p><small>{question.profiles?.name || (lang === 'ar' ? 'طالب' : 'Student')} · {question.is_answered ? (lang === 'ar' ? 'تمت الإجابة' : 'Answered') : `${question.answers_count || 0} ${lang === 'ar' ? 'إجابة' : 'answers'}`}</small></div></article>) : <p>{lang === 'ar' ? 'لا توجد أسئلة على هذا الدرس حتى الآن.' : 'No questions for this lesson yet.'}</p>}<Link className={styles.qaLink} href={`/qa?courseId=${courseId}&lessonId=${activeLesson.id}`}>{lang === 'ar' ? 'عرض الأسئلة أو إضافة سؤال' : 'View questions or ask'}<ArrowLeft size={15} /></Link></div>}
                 </div>
               </section>
-              <aside className={styles.instructorCard}><div className={styles.avatar}><User size={28} /></div><div><strong>{lang === 'ar' ? 'د/ أحمد الشيخ' : 'Dr. Ahmed El-Sheikh'}</strong><small>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</small></div><Link href="/settings">{lang === 'ar' ? 'عرض الملف الشخصي' : 'View profile'}</Link></aside>
+              <aside className={styles.instructorCard}><div className={styles.avatar}>{instructorAvatar ? <img src={instructorAvatar} alt={instructorName} /> : <User size={28} />}</div><div><strong>{instructorName}</strong><small>{instructorHeadline}</small></div><Link href={`/courses/${courseId}`}>{lang === 'ar' ? 'عرض تفاصيل المدرس والكورس' : 'View instructor and course'}</Link></aside>
             </div>
 
             <nav className={styles.lessonNav}><button onClick={() => selectLesson(previousLesson)} disabled={!previousLesson}><ArrowRight size={18} />{lang === 'ar' ? 'السابق' : 'Previous'}</button><button onClick={() => selectLesson(nextLesson)} disabled={!nextLesson}>{lang === 'ar' ? 'التالي' : 'Next'}<ArrowLeft size={18} /></button></nav>

@@ -3,6 +3,14 @@
   margin: 18px auto 72px;
 }
 
+/* Simple internal-page header */
+.hero{min-height:auto;padding:10px 0 18px;align-items:flex-start;border:0;border-bottom:1px solid var(--border-light);border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+.hero::after{display:none}
+.hero span{font-size:.58rem}.hero h1{margin:5px 0;font-size:clamp(1.45rem,3vw,2rem)}.hero p{font-size:.74rem;line-height:1.7}
+.heroIcon{width:38px;height:38px;order:-1;border-radius:10px;color:var(--primary);background:var(--primary-glow);box-shadow:none}
+.heroIcon svg{width:20px;height:20px}
+@media(max-width:650px){.hero{min-height:auto;padding:8px 0 16px;border-radius:0}.heroIcon{width:34px;height:34px;border-radius:9px}.heroIcon svg{width:18px}}
+
 .hero {
   min-height: 190px;
   padding: 34px 40px;
@@ -160,3 +168,6 @@
   .grid { grid-template-columns: 1fr; gap: 13px; }
   .card { padding: 17px; border-radius: 17px; }
 }
+
+.hero{min-height:auto;padding:10px 0 18px;align-items:flex-start;border:0;border-bottom:1px solid var(--border-light);border-radius:0;background:transparent;box-shadow:none;overflow:visible}
+.hero::after{display:none}.hero span{font-size:.58rem}.hero h1{margin:5px 0;font-size:clamp(1.45rem,3vw,2rem)}.hero p{font-size:.74rem;line-height:1.7}.heroIcon{width:38px;height:38px;order:-1;border-radius:10px;color:var(--primary);background:var(--primary-glow);box-shadow:none}.heroIcon svg{width:20px;height:20px}

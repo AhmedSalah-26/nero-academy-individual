@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CircleHelp, CheckCircle2, MessageCircle, Send, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useApp } from '../../context/AppContext';
@@ -35,14 +35,32 @@ export default function QAPage() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [answerText, setAnswerText] = useState('');
   const [showAsk, setShowAsk] = useState(false);
+  const [routeFilters] = useState(() => {
+    if (typeof window === 'undefined') return { courseId: '', lessonId: '' };
+    const params = new URLSearchParams(window.location.search);
+    return { courseId: params.get('courseId') || '', lessonId: params.get('lessonId') || '' };
+  });
   const [courses, setCourses] = useState<{ id: string; title_ar: string; title_en?: string }[]>([]);
-  const [newQuestion, setNewQuestion] = useState({ course_id: '', title: '', content: '' });
+  const [newQuestion, setNewQuestion] = useState({ course_id: routeFilters.courseId, title: '', content: '' });
   const [message, setMessage] = useState('');
 
   const isInstructor = profile?.role === 'instructor';
 
+  const loadQuestions = useCallback(async () => {
+    setLoading(true);
+    let query = supabase
+      .from('qa_questions')
+      .select('*,courses(title_ar,title_en),profiles(name)')
+      .eq('is_visible', true);
+    if (routeFilters.courseId) query = query.eq('course_id', routeFilters.courseId);
+    if (routeFilters.lessonId) query = query.eq('lesson_id', routeFilters.lessonId);
+    const { data } = await query.order('created_at', { ascending: false });
+    setItems((data || []) as unknown as Question[]);
+    setLoading(false);
+  }, [routeFilters]);
+
   useEffect(() => {
-    loadQuestions();
+    const questionsTimer = window.setTimeout(() => void loadQuestions(), 0);
 
     if (user) {
       supabase
@@ -62,18 +80,9 @@ export default function QAPage() {
           setCourses(list);
         });
     }
-  }, [user]);
 
-  async function loadQuestions() {
-    setLoading(true);
-    const { data } = await supabase
-      .from('qa_questions')
-      .select('*,courses(title_ar,title_en),profiles(name)')
-      .eq('is_visible', true)
-      .order('created_at', { ascending: false });
-    setItems((data || []) as unknown as Question[]);
-    setLoading(false);
-  }
+    return () => window.clearTimeout(questionsTimer);
+  }, [loadQuestions, user]);
 
   async function openQuestion(q: Question) {
     setSelected(q);
@@ -113,6 +122,7 @@ export default function QAPage() {
     const { error } = await supabase.from('qa_questions').insert({
       user_id: user.id,
       course_id: newQuestion.course_id,
+      lesson_id: routeFilters.lessonId || null,
       title: newQuestion.title.trim(),
       content: newQuestion.content.trim(),
     });
@@ -121,7 +131,7 @@ export default function QAPage() {
       setMessage(error.message);
     } else {
       setMessage(lang === 'ar' ? 'تم إرسال السؤال' : 'Question submitted');
-      setNewQuestion({ course_id: '', title: '', content: '' });
+      setNewQuestion({ course_id: routeFilters.courseId, title: '', content: '' });
       setShowAsk(false);
       loadQuestions();
     }

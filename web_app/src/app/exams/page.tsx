@@ -153,7 +153,6 @@ export default function ExamsPage() {
               : 'Start attempts, track time, and review previous results just like the mobile app.'}
           </p>
         </div>
-        <div className={styles.heroIcon}><ClipboardCheck size={38} /></div>
       </section>
 
       {loading || authLoading ? (

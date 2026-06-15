@@ -113,17 +113,17 @@ export default function MyLearningPage() {
 
             return (
               <div key={enroll.id} className={`${styles.courseCard} glass animate-hover`}>
-                {courseDetails.thumbnail_url ? (
+                <div className={styles.cardMedia}>
+                  <BookOpen size={40} className={styles.placeholderIcon} />
+                  {courseDetails.thumbnail_url && (
                   <img 
                     src={courseDetails.thumbnail_url} 
                     alt={lang === 'ar' ? courseDetails.title_ar : courseDetails.title_en}
                     className={styles.cardImg}
+                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
                   />
-                ) : (
-                  <div className={styles.placeholderImg}>
-                    <BookOpen size={40} className={styles.placeholderIcon} />
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div className={styles.cardBody}>
                   <div className={styles.badgeRow}>

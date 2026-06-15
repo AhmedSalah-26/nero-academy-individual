@@ -489,7 +489,6 @@ export default function QuizPage() {
   return (
     <main className={styles.page}>
       <section className={styles.infoHero}>
-        <div className={styles.infoIcon}><ClipboardCheck size={32} /></div>
         <div>
           <span>{courseTitle || (lang === 'ar' ? 'اختبار الكورس' : 'Course exam')}</span>
           <h1>{lang === 'ar' ? quiz.title_ar : quiz.title_en || quiz.title_ar}</h1>
