@@ -890,3 +890,1058 @@
   .heroStats strong { font-size: .8rem; }
   .heroStats small { font-size: .43rem; }
 }
+
+/* Luxury Lab redesign: final intentional layer. */
+.page {
+  --ink: var(--text-main);
+  --muted: var(--text-muted);
+  --purple: var(--primary);
+  --purple-dark: var(--primary-dark);
+  --lime: var(--accent);
+  width: min(1380px, calc(100% - 36px));
+  padding: 34px 0 90px;
+}
+
+.hero {
+  isolation: isolate;
+  min-height: 690px;
+  margin: 6px 0 118px;
+  padding: clamp(34px, 5vw, 74px);
+  grid-template-columns: minmax(430px, .92fr) minmax(0, 1fr);
+  gap: 36px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 36px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 14% 22%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 18rem),
+    radial-gradient(circle at 80% 26%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 26rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-card) 90%, transparent), rgba(239,232,219,.58));
+  box-shadow: var(--shadow-lg);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 24px;
+  z-index: -1;
+  border: 1px solid var(--border-light);
+  border-radius: 27px;
+  background:
+    repeating-linear-gradient(-12deg, transparent 0 28px, color-mix(in srgb, var(--primary) 7%, transparent) 28px 29px);
+  opacity: .8;
+}
+
+.hero::after {
+  display: block;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 520px;
+  height: 520px;
+  left: -180px;
+  bottom: -260px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.heroCopy {
+  max-width: 640px;
+  justify-self: end;
+  align-self: center;
+}
+
+.eyebrow {
+  padding: 9px 15px;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--surface-card) 72%, transparent);
+  box-shadow: 0 10px 26px rgba(23,16,36,.06);
+}
+
+.hero h1,
+.sectionHeading h2,
+.gradesCopy h2,
+.journeyIntro h2,
+.cta h2 {
+  font-family: var(--font-display);
+  letter-spacing: -.035em;
+}
+
+.hero h1 {
+  margin: 20px 0 18px;
+  font-size: clamp(3.3rem, 6.2vw, 6.4rem);
+  line-height: .98;
+  color: var(--text-main);
+  text-shadow: none;
+}
+
+.hero h1 span {
+  width: fit-content;
+  margin-inline-start: auto;
+  color: var(--primary);
+  background: linear-gradient(90deg, var(--primary), var(--plasma));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroCopy > p {
+  max-width: 560px;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 2;
+}
+
+.heroActions { margin-top: 32px; gap: 18px; }
+
+.primaryButton {
+  min-height: 54px;
+  padding: 0 25px;
+  border-radius: 17px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.textButton {
+  padding: 0 4px;
+  color: var(--primary);
+  background: transparent;
+}
+
+.hero .primaryButton {
+  color: var(--accent-ink);
+  background: var(--accent);
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.heroVisual {
+  height: 570px;
+  align-self: end;
+}
+
+.teacherHalo {
+  width: 560px;
+  height: 560px;
+  background:
+    radial-gradient(circle at 50% 54%, color-mix(in srgb, var(--primary) 10%, transparent) 0 45%, transparent 45.5%),
+    radial-gradient(circle at 50% 54%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 64%),
+    linear-gradient(145deg, rgba(255,255,255,.26), color-mix(in srgb, var(--accent) 16%, transparent));
+  box-shadow:
+    inset 0 0 0 58px rgba(255,255,255,.24),
+    0 40px 80px rgba(23,16,36,.13);
+}
+
+.teacherFrame {
+  width: 510px;
+  height: 610px;
+  bottom: -42px;
+}
+
+.teacherBadge {
+  left: 6px;
+  bottom: 72px;
+  border-radius: 18px;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+}
+
+.teacherBadge > span {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.heroStats {
+  bottom: -74px;
+  min-height: 116px;
+  border-radius: 24px;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--shadow-md);
+}
+
+.heroStats span,
+.heroStats strong {
+  color: var(--primary);
+}
+
+.section {
+  margin-bottom: 108px;
+}
+
+.sectionHeading {
+  position: relative;
+  align-items: end;
+}
+
+.sectionHeading > div > span,
+.gradesCopy > span,
+.journeyIntro > span {
+  color: var(--primary);
+  font-size: .68rem;
+  letter-spacing: .08em;
+}
+
+.searchBox {
+  max-width: 510px;
+  min-height: 56px;
+  padding: 0 17px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.courseGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.courseCard,
+.reviewCard {
+  position: relative;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.courseCard::after {
+  content: '';
+  position: absolute;
+  inset: auto 18px -1px 18px;
+  height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--primary), transparent);
+  opacity: .75;
+}
+
+.courseMedia {
+  border-radius: 22px 22px 10px 10px;
+  background:
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 35%),
+    var(--surface-soft);
+}
+
+.courseBody h3 {
+  font-family: var(--font-display);
+  font-size: 1.07rem;
+}
+
+.cardAction {
+  border-radius: 14px;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.gradesSection {
+  align-items: stretch;
+}
+
+.gradeItem {
+  --grade-float: 0px;
+  min-height: 230px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(216,255,74,.18), transparent 28%),
+    linear-gradient(145deg, #171024, #35137e);
+  animation: gradeFloat 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.gradeItem:nth-child(2) {
+  --grade-float: 16px;
+  animation-delay: -2.1s;
+  background:
+    radial-gradient(circle at 80% 12%, rgba(216,255,74,.16), transparent 25%),
+    linear-gradient(145deg, #2e145d, #6c2ff2);
+}
+
+.gradeItem:nth-child(3) {
+  --grade-float: -10px;
+  animation-delay: -4.2s;
+  background:
+    radial-gradient(circle at 34% 14%, rgba(216,255,74,.16), transparent 24%),
+    linear-gradient(145deg, #120b20, #4c3187);
+}
+
+.gradeItem:nth-child(1) {
+  --grade-float: -4px;
+}
+
+.journey {
+  padding: 64px;
+  border: 1px solid var(--glass-border);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(216,255,74,.12), transparent 20rem),
+    radial-gradient(circle at 88% 70%, rgba(108,47,242,.22), transparent 24rem),
+    linear-gradient(135deg, #171024, #08050f);
+}
+
+.journeyIntro h2,
+.journeyIntro p {
+  color: #fff;
+}
+
+.journeyIntro p { color: rgba(255,255,255,.66); }
+.journeyIntro > span { color: var(--accent); }
+
+.steps {
+  gap: 14px;
+}
+
+.steps article {
+  min-height: 210px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,.045);
+  backdrop-filter: blur(10px);
+}
+
+.steps article > span {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.steps h3 { color: #fff; }
+.steps p { color: rgba(255,255,255,.62); }
+
+.cta {
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 18rem),
+    linear-gradient(135deg, var(--surface-card), var(--surface-soft));
+  box-shadow: var(--shadow-md);
+}
+
+.cta h2 { color: var(--text-main); }
+.cta span { color: var(--primary); }
+.ctaButton { color: var(--accent-ink); background: var(--accent); }
+
+[data-theme="dark"] .hero {
+  background:
+    radial-gradient(circle at 14% 22%, rgba(216,255,74,.1), transparent 18rem),
+    radial-gradient(circle at 80% 26%, rgba(155,77,255,.3), transparent 26rem),
+    linear-gradient(135deg, #12091f, #07040f);
+}
+
+[data-theme="dark"] .hero h1,
+[data-theme="dark"] .sectionHeading h2,
+[data-theme="dark"] .gradesCopy h2,
+[data-theme="dark"] .cta h2 {
+  color: #fff;
+}
+
+[data-theme="dark"] .hero h1 span {
+  background: linear-gradient(90deg, var(--accent), var(--plasma));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .courseCard,
+[data-theme="dark"] .reviewCard,
+[data-theme="dark"] .searchBox,
+[data-theme="dark"] .cta {
+  background: var(--surface-card);
+}
+
+[data-theme="dark"] .teacherHalo {
+  background:
+    radial-gradient(circle at 50% 54%, rgba(216,255,74,.08) 0 45%, transparent 45.5%),
+    radial-gradient(circle at 50% 54%, rgba(155,77,255,.24), transparent 64%);
+}
+
+@media (max-width: 1040px) {
+  .hero {
+    grid-template-columns: 1fr .82fr;
+    padding: 42px 32px 92px;
+  }
+  .courseGrid { grid-template-columns: repeat(2, 1fr); }
+  .teacherHalo { width: 420px; height: 420px; }
+  .teacherFrame { width: 395px; height: 510px; }
+}
+
+@media (max-width: 760px) {
+  .page { width: min(100% - 20px, 540px); padding-top: 14px; }
+  .hero {
+    min-height: 820px;
+    margin-bottom: 98px;
+    padding: 30px 18px 94px;
+    display: flex;
+    border-radius: 26px;
+  }
+  .hero::before { inset: 12px; border-radius: 20px; }
+  .hero h1 { font-size: clamp(2.65rem, 14vw, 4rem); }
+  .hero h1 span { margin-inline: auto; }
+  .heroCopy > p { font-size: .78rem; }
+  .heroVisual { height: 350px; }
+  .teacherHalo { width: 300px; height: 300px; }
+  .teacherFrame { width: 286px; height: 355px; }
+  .teacherBadge { bottom: 16px; min-width: 220px; }
+  .heroStats { grid-template-columns: repeat(2, 1fr); gap: 8px; min-height: 138px; bottom: -82px; }
+  .heroStats > div { border: 0; }
+  .courseGrid, .reviewGrid { grid-template-columns: 1fr; }
+  .gradeItem:nth-child(2) { --grade-float: 0px; }
+  .journey { padding: 30px 18px; border-radius: 26px; }
+  .cta { border-radius: 24px; }
+}
+
+@keyframes gradeFloat {
+  0%, 100% { transform: translateY(var(--grade-float)); }
+  50% { transform: translateY(calc(var(--grade-float) - 22px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradeItem {
+    animation: none;
+    transform: translateY(var(--grade-float));
+  }
+}
+
+/* Headline clipping fix: Changa is wide at large desktop sizes, so keep it bold without letting it exceed the hero column. */
+.heroCopy {
+  min-width: 0;
+  width: 100%;
+}
+
+.hero h1 {
+  max-width: 100%;
+  font-size: clamp(3rem, 5.25vw, 5.55rem);
+  line-height: 1.12;
+  letter-spacing: -.018em;
+}
+
+.hero h1 span {
+  display: block;
+  width: auto;
+  margin-inline-start: 0;
+}
+
+@media (max-width: 1120px) {
+  .hero h1 {
+    font-size: clamp(2.8rem, 5vw, 4.7rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero h1 {
+    font-size: clamp(2.35rem, 11.8vw, 3.45rem);
+    line-height: 1.18;
+  }
+}
+
+/* White-mode polish: keep the premium lab mood without turning whole sections into dark blocks. */
+.hero {
+  overflow: visible;
+}
+
+.heroStats {
+  z-index: 8;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 16rem),
+    color-mix(in srgb, var(--surface-card) 94%, white);
+  border-color: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.heroStats small {
+  color: var(--text-muted);
+}
+
+.journey {
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 14% 18%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 21rem),
+    radial-gradient(circle at 86% 72%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 24rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-card) 96%, white), color-mix(in srgb, var(--surface-soft) 86%, white));
+  box-shadow: var(--shadow-md);
+}
+
+.journeyIntro h2 {
+  color: var(--text-main);
+}
+
+.journeyIntro p {
+  color: var(--text-muted);
+}
+
+.journeyIntro > span {
+  color: var(--primary);
+}
+
+.steps article {
+  border-color: var(--glass-border);
+  background: color-mix(in srgb, var(--surface-card) 86%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+
+.steps h3 {
+  color: var(--text-main);
+}
+
+.steps p {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .journey {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(216,255,74,.12), transparent 20rem),
+    radial-gradient(circle at 88% 70%, rgba(108,47,242,.22), transparent 24rem),
+    linear-gradient(135deg, #171024, #08050f);
+}
+
+[data-theme="dark"] .journeyIntro h2,
+[data-theme="dark"] .steps h3 {
+  color: #fff;
+}
+
+[data-theme="dark"] .journeyIntro p,
+[data-theme="dark"] .steps p {
+  color: rgba(255,255,255,.66);
+}
+
+[data-theme="dark"] .journeyIntro > span {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .steps article {
+  border-color: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.045);
+}
+
+/* Final light-mode pass for the method section. */
+:global(html:not([data-theme="dark"])) .journey {
+  color: var(--text-main);
+  border: 1px solid rgba(64, 44, 92, .12);
+  background:
+    radial-gradient(circle at 13% 18%, rgba(216, 255, 74, .26), transparent 22rem),
+    radial-gradient(circle at 86% 72%, rgba(108, 47, 242, .11), transparent 25rem),
+    linear-gradient(135deg, rgba(255, 253, 248, .96), rgba(245, 240, 229, .9));
+  box-shadow: 0 22px 60px rgba(25, 15, 51, .1);
+}
+
+:global(html:not([data-theme="dark"])) .journeyIntro h2,
+:global(html:not([data-theme="dark"])) .steps h3 {
+  color: var(--text-main);
+}
+
+:global(html:not([data-theme="dark"])) .journeyIntro p,
+:global(html:not([data-theme="dark"])) .steps p {
+  color: var(--text-muted);
+}
+
+:global(html:not([data-theme="dark"])) .journeyIntro > span {
+  color: var(--primary);
+}
+
+:global(html:not([data-theme="dark"])) .steps article {
+  border: 1px solid rgba(64, 44, 92, .12);
+  background: rgba(255, 253, 248, .78);
+  box-shadow: 0 14px 32px rgba(25, 15, 51, .07);
+}
+
+:global(html:not([data-theme="dark"])) .steps article:hover {
+  background: rgba(255, 253, 248, .94);
+}
+
+:global(html:not([data-theme="dark"])) .steps article > span {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+}
+
+/* Premium refinement layer: keeps the same structure and identity, only improves hierarchy and finish. */
+.page {
+  padding-top: 38px;
+}
+
+.hero {
+  min-height: 672px;
+  margin-bottom: 112px;
+  border-radius: 34px;
+  box-shadow: 0 22px 56px rgba(25, 15, 51, .095);
+}
+
+.hero::before {
+  opacity: .36;
+  background:
+    repeating-linear-gradient(-12deg, transparent 0 38px, color-mix(in srgb, var(--primary) 4%, transparent) 38px 39px);
+}
+
+.eyebrow {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-color: color-mix(in srgb, var(--primary) 16%, transparent);
+  border-radius: 14px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+  box-shadow: 0 10px 24px rgba(25, 15, 51, .045);
+}
+
+.hero h1 {
+  font-size: clamp(2.85rem, 4.95vw, 5.05rem);
+  line-height: 1.16;
+}
+
+.heroCopy > p {
+  color: color-mix(in srgb, var(--text-main) 64%, var(--text-muted));
+  font-size: 1.04rem;
+  font-weight: 700;
+}
+
+.hero .primaryButton {
+  min-height: 56px;
+  padding-inline: 28px;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, white);
+  border-radius: 18px;
+  box-shadow:
+    0 18px 34px color-mix(in srgb, var(--accent) 30%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.58);
+}
+
+.hero .textButton {
+  min-height: 44px;
+  padding-inline: 10px;
+  color: color-mix(in srgb, var(--primary) 78%, var(--text-main));
+  font-weight: 900;
+}
+
+.teacherHalo {
+  background:
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--primary) 12%, transparent) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--plasma) 15%, transparent), transparent 63%),
+    linear-gradient(145deg, rgba(255,255,255,.34), color-mix(in srgb, var(--accent) 12%, transparent));
+  box-shadow:
+    inset 0 0 0 50px rgba(255,255,255,.22),
+    0 32px 70px rgba(25, 15, 51, .12);
+}
+
+.teacherImage {
+  filter:
+    drop-shadow(0 28px 18px rgba(25, 15, 51, .18))
+    saturate(1.04)
+    contrast(1.04);
+}
+
+.teacherBadge {
+  border-radius: 18px;
+  box-shadow: 0 14px 32px rgba(25, 15, 51, .09);
+}
+
+.teacherBadge strong {
+  font-size: .72rem;
+}
+
+.teacherBadge small {
+  color: color-mix(in srgb, var(--text-main) 52%, var(--text-muted));
+  font-size: .58rem;
+}
+
+.heroStats {
+  min-height: 120px;
+  padding: 20px 28px;
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(255,253,248,.88));
+  box-shadow: 0 18px 42px rgba(25, 15, 51, .09);
+}
+
+.heroStats > div {
+  gap: 3px 13px;
+}
+
+.heroStats span {
+  color: var(--primary);
+}
+
+.heroStats strong {
+  color: var(--primary-dark);
+  font-size: 1.28rem;
+}
+
+.heroStats small {
+  color: color-mix(in srgb, var(--text-main) 56%, var(--text-muted));
+  font-size: .62rem;
+  font-weight: 900;
+}
+
+.section {
+  margin-bottom: 96px;
+}
+
+.sectionHeading {
+  margin-bottom: 24px;
+}
+
+.sectionHeading h2,
+.gradesCopy h2 {
+  color: var(--text-main);
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  text-shadow: none;
+}
+
+.sectionHeading p,
+.gradesCopy p {
+  color: color-mix(in srgb, var(--text-main) 56%, var(--text-muted));
+}
+
+.searchBox {
+  min-height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 253, 248, .9);
+  box-shadow: 0 12px 28px rgba(25, 15, 51, .055);
+}
+
+.searchBox input {
+  color: var(--text-main);
+  font-size: .82rem;
+}
+
+.courseGrid {
+  align-items: stretch;
+}
+
+.courseCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 440px;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(25, 15, 51, .075);
+}
+
+.courseMedia {
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9.4;
+  border-radius: 20px 20px 12px 12px;
+}
+
+.coursePlaceholder {
+  position: relative;
+  overflow: hidden;
+  color: var(--primary);
+  background:
+    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 28%),
+    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--plasma) 28%, transparent), transparent 32%),
+    linear-gradient(145deg, #f7f2ff, #efe6ff 48%, #fffdf8);
+}
+
+.coursePlaceholder::before,
+.coursePlaceholder::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.coursePlaceholder::before {
+  width: 150px;
+  height: 150px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  transform: rotate(-18deg) scaleX(1.5);
+}
+
+.coursePlaceholder::after {
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  box-shadow:
+    44px 28px 0 color-mix(in srgb, var(--primary) 70%, white),
+    -38px 38px 0 color-mix(in srgb, var(--plasma) 72%, white);
+}
+
+.coursePlaceholder svg {
+  position: relative;
+  z-index: 1;
+  width: 58px;
+  height: 58px;
+}
+
+.courseBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.courseMeta {
+  color: color-mix(in srgb, var(--text-main) 50%, var(--text-muted));
+  font-size: .66rem;
+}
+
+.courseBody h3 {
+  color: var(--text-main);
+  font-size: 1.12rem;
+}
+
+.courseBody > p {
+  color: color-mix(in srgb, var(--text-main) 52%, var(--text-muted));
+}
+
+.courseFooter {
+  margin-top: auto;
+  border-color: color-mix(in srgb, var(--primary) 11%, transparent);
+}
+
+.price strong {
+  color: var(--primary-dark);
+  font-size: .98rem;
+}
+
+.price del {
+  color: color-mix(in srgb, var(--text-muted) 78%, white);
+  font-size: .64rem;
+}
+
+.cardAction {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  box-shadow: 0 12px 22px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.gradesSection {
+  gap: 34px;
+}
+
+.gradesCopy p {
+  margin-bottom: 20px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.gradeList {
+  gap: 18px;
+}
+
+.gradeItem {
+  min-height: 250px;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 18px 42px rgba(25, 15, 51, .11);
+}
+
+.gradeItem b {
+  color: var(--accent);
+  font-size: 2.15rem;
+  opacity: .92;
+  line-height: 1;
+}
+
+.gradeItem h3 {
+  margin-bottom: 7px;
+  color: #fff;
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+.gradeItem p {
+  color: rgba(255,255,255,.78);
+  font-size: .66rem;
+  font-weight: 800;
+}
+
+[data-theme="dark"] .hero {
+  box-shadow: 0 18px 46px rgba(0,0,0,.26);
+}
+
+[data-theme="dark"] .hero::before {
+  opacity: .18;
+}
+
+[data-theme="dark"] .heroCopy > p {
+  color: rgba(255,255,255,.74);
+}
+
+[data-theme="dark"] .teacherHalo {
+  background:
+    radial-gradient(circle at 50% 54%, rgba(216,255,74,.08) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 50% 54%, rgba(155,77,255,.22), transparent 62%);
+  box-shadow: 0 0 46px rgba(137,55,241,.25), inset 0 0 44px rgba(121,45,218,.18);
+}
+
+[data-theme="dark"] .heroStats {
+  background: rgba(24, 14, 42, .86);
+  box-shadow: 0 16px 36px rgba(0,0,0,.22);
+}
+
+[data-theme="dark"] .heroStats strong {
+  color: #fff;
+}
+
+[data-theme="dark"] .heroStats small {
+  color: rgba(255,255,255,.68);
+}
+
+[data-theme="dark"] .searchBox {
+  background: rgba(24, 14, 42, .78);
+}
+
+[data-theme="dark"] .price strong {
+  color: var(--accent);
+}
+
+@media (max-width: 1040px) {
+  .hero h1 {
+    font-size: clamp(2.6rem, 4.7vw, 4.35rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: 800px;
+    margin-bottom: 96px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.25rem, 10.8vw, 3.2rem);
+  }
+
+  .heroCopy > p {
+    font-size: .82rem;
+  }
+
+  .heroStats small {
+    font-size: .5rem;
+  }
+
+  .courseCard {
+    min-height: 410px;
+  }
+
+  .gradesSection {
+    gap: 24px;
+  }
+
+  .gradeItem {
+    min-height: 180px;
+    padding: 24px;
+  }
+}
+
+/* Cooler comfort pass: keep lime as an accent only, not a page tint. */
+.hero {
+  background:
+    radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 25rem),
+    radial-gradient(circle at 14% 82%, color-mix(in srgb, var(--plasma) 7%, transparent), transparent 22rem),
+    linear-gradient(135deg, rgba(255,255,255,.9), rgba(244,243,250,.76));
+}
+
+.hero::before {
+  opacity: .18;
+  background:
+    repeating-linear-gradient(-12deg, transparent 0 44px, color-mix(in srgb, var(--primary) 3%, transparent) 44px 45px);
+}
+
+.hero::after {
+  opacity: .28;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.eyebrow {
+  background: rgba(255,255,255,.72);
+}
+
+.hero .primaryButton {
+  box-shadow:
+    0 16px 30px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.58);
+}
+
+.teacherHalo {
+  background:
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--primary) 10%, transparent) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--plasma) 12%, transparent), transparent 63%),
+    linear-gradient(145deg, rgba(255,255,255,.42), color-mix(in srgb, var(--primary) 5%, transparent));
+  box-shadow:
+    inset 0 0 0 50px rgba(255,255,255,.2),
+    0 28px 58px rgba(25, 15, 51, .1);
+}
+
+.heroStats {
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(247,247,251,.9));
+}
+
+.coursePlaceholder {
+  background:
+    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 28%),
+    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--plasma) 22%, transparent), transparent 32%),
+    linear-gradient(145deg, #fbfbff, #f1effb 48%, #ffffff);
+}
+
+.coursePlaceholder::after {
+  background: color-mix(in srgb, var(--accent) 82%, white);
+}
+
+.courseMedia {
+  background:
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 35%),
+    var(--surface-soft);
+}
+
+.courseCard::after {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 30%, transparent), var(--primary), transparent);
+  opacity: .48;
+}
+
+.cardAction {
+  box-shadow: 0 12px 22px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.gradeItem,
+.gradeItem:nth-child(2),
+.gradeItem:nth-child(3) {
+  background:
+    radial-gradient(circle at 78% 10%, rgba(216,255,74,.055), transparent 24%),
+    linear-gradient(145deg, #171024, #35137e);
+}
+
+.gradeItem:nth-child(2) {
+  background:
+    radial-gradient(circle at 80% 12%, rgba(216,255,74,.05), transparent 22%),
+    linear-gradient(145deg, #2b1458, #6c2ff2);
+}
+
+.gradeItem:nth-child(3) {
+  background:
+    radial-gradient(circle at 34% 14%, rgba(216,255,74,.045), transparent 22%),
+    linear-gradient(145deg, #120b20, #473080);
+}
+
+:global(html:not([data-theme="dark"])) .journey {
+  background:
+    radial-gradient(circle at 86% 72%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 25rem),
+    linear-gradient(135deg, rgba(255,255,255,.96), rgba(242,241,248,.9));
+}
+
+:global(html:not([data-theme="dark"])) .steps article {
+  background: rgba(255,255,255,.8);
+}
+
+.cta {
+  background:
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 18rem),
+    linear-gradient(135deg, var(--surface-card), var(--surface-soft));
+}
+
+[data-theme="dark"] .hero {
+  background:
+    radial-gradient(circle at 80% 26%, rgba(155,77,255,.22), transparent 26rem),
+    linear-gradient(135deg, #12091f, #07040f);
+}
+
+[data-theme="dark"] .teacherHalo {
+  background:
+    radial-gradient(circle at 50% 54%, rgba(155,77,255,.08) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 50% 54%, rgba(155,77,255,.22), transparent 62%);
+}
+
+[data-theme="dark"] .journey {
+  background:
+    radial-gradient(circle at 88% 70%, rgba(108,47,242,.18), transparent 24rem),
+    linear-gradient(135deg, #171024, #08050f);
+}

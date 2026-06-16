@@ -23,13 +23,22 @@ import styles from './Header.module.css';
 export function Header() {
   const { lang, t, user, profile, cart, toggleLang, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
-  const isActive = (path: string) => path === '/' ? pathname === path : pathname.startsWith(path);
+  const isActive = (path: string) => {
+    if (path === '/') return pathname === path;
+    if (path === '/courses') {
+      return pathname.startsWith('/courses') || pathname.startsWith('/search');
+    }
+    if (path === '/forums') {
+      return pathname.startsWith('/forums') || pathname.startsWith('/community');
+    }
+    return pathname.startsWith(path);
+  };
 
   const mobileNavItems = user ? [
     { href: '/', label: lang === 'ar' ? 'الرئيسية' : 'Home', icon: Home },
     { href: '/courses', label: lang === 'ar' ? 'الكورسات' : 'Courses', icon: BookOpen },
     { href: '/my-learning', label: lang === 'ar' ? 'تعلمي' : 'Learning', icon: ClipboardCheck },
-    { href: '/community', label: lang === 'ar' ? 'المجتمع' : 'Community', icon: Users },
+    { href: '/forums', label: lang === 'ar' ? 'المجتمع' : 'Community', icon: Users },
     { href: '/profile', label: lang === 'ar' ? 'حسابي' : 'Profile', icon: User },
   ] : [
     { href: '/', label: lang === 'ar' ? 'الرئيسية' : 'Home', icon: Home },
@@ -41,7 +50,7 @@ export function Header() {
     { href: '/', label: lang === 'ar' ? 'الرئيسية' : 'Home' },
     { href: '/courses', label: lang === 'ar' ? 'الكورسات' : 'Courses' },
     { href: '/my-learning', label: lang === 'ar' ? 'كورساتي' : 'My learning' },
-    { href: '/community', label: lang === 'ar' ? 'المجتمع' : 'Community' },
+    { href: '/forums', label: lang === 'ar' ? 'المجتمع' : 'Community' },
     { href: '/exams', label: lang === 'ar' ? 'الامتحانات' : 'Exams' },
   ] : [
     { href: '/', label: lang === 'ar' ? 'الرئيسية' : 'Home' },

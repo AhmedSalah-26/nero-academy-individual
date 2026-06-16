@@ -251,3 +251,88 @@
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(127, 19, 236, 0.5);
 }
+
+/* Luxury Lab learning archive. */
+.dashboardHeader {
+  position: relative;
+  margin: 30px 0 28px;
+  padding: 30px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 14% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 16rem),
+    linear-gradient(135deg, var(--surface-card), var(--surface-soft));
+  box-shadow: var(--shadow-md);
+}
+
+.dashboardHeader::after {
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  inset-inline-end: -95px;
+  top: -125px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.pageTitle {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.15;
+}
+
+.subtext {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
+  font-size: .86rem;
+  line-height: 1.8;
+}
+
+.coursesGrid {
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 18px;
+}
+
+.courseCard {
+  border-color: var(--glass-border);
+  border-radius: 26px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardMedia,
+.placeholderImg {
+  height: 190px;
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 36%),
+    var(--surface-soft);
+}
+
+.cardBody { padding: 20px; }
+.courseTitle { font-family: var(--font-display); font-size: 1.05rem; }
+.activeBadge { color: var(--primary); background: var(--primary-glow); border-color: var(--primary); }
+.progressBarFill { background: linear-gradient(90deg, var(--accent), var(--primary)); }
+.playBtn,
+.browseBtn {
+  border-radius: 16px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  box-shadow: 0 15px 34px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.emptyContainer {
+  border: 1px solid var(--glass-border);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .dashboardHeader,
+[data-theme="dark"] .courseCard,
+[data-theme="dark"] .emptyContainer {
+  background: var(--surface-card);
+}

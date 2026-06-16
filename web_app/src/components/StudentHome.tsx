@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { CSSProperties } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  Award,
   Bell,
   BookOpen,
   ChevronLeft,
@@ -41,13 +42,48 @@ interface Enrollment {
 const actions = [
   { href: '/courses', labelAr: 'كل الكورسات', labelEn: 'All courses', icon: Search },
   { href: '/my-learning', labelAr: 'كورساتي', labelEn: 'My learning', icon: BookOpen },
-  { href: '/community', labelAr: 'المجتمع', labelEn: 'Community', icon: MessagesSquare },
+  { href: '/forums', labelAr: 'المجتمع', labelEn: 'Community', icon: MessagesSquare },
   { href: '/exams', labelAr: 'الامتحانات', labelEn: 'Exams', icon: ClipboardCheck },
   { href: '/qa', labelAr: 'الأسئلة', labelEn: 'Questions', icon: MessageCircleQuestion },
   { href: '/wishlist', labelAr: 'المفضلة', labelEn: 'Wishlist', icon: Heart },
   { href: '/history', labelAr: 'سجل التعلم', labelEn: 'History', icon: History },
   { href: '/notifications', labelAr: 'التنبيهات', labelEn: 'Notifications', icon: Bell },
 ];
+
+const actionDescriptions = {
+  '/courses': {
+    ar: 'تصفح محتوى السنة الدراسية',
+    en: 'Browse your school-year content',
+  },
+  '/my-learning': {
+    ar: 'الكورسات المشترك بها',
+    en: 'Your enrolled courses',
+  },
+  '/forums': {
+    ar: 'ناقش واسأل زملاءك',
+    en: 'Discuss with classmates',
+  },
+  '/exams': {
+    ar: 'اختبر فهمك بسرعة',
+    en: 'Test your understanding',
+  },
+  '/qa': {
+    ar: 'اسأل في أي جزئية',
+    en: 'Ask about any topic',
+  },
+  '/wishlist': {
+    ar: 'الكورسات المحفوظة',
+    en: 'Saved courses',
+  },
+  '/history': {
+    ar: 'تابع آخر تقدمك',
+    en: 'Track your latest progress',
+  },
+  '/notifications': {
+    ar: 'آخر التحديثات المهمة',
+    en: 'Important updates',
+  },
+} as const;
 
 export function StudentHome() {
   const { lang, user, profile } = useApp();
@@ -91,10 +127,6 @@ export function StudentHome() {
   }, [user?.id]);
 
   const firstName = profile?.name?.split(' ')[0] || user?.email?.split('@')[0] || '';
-  const averageProgress = enrollments.length
-    ? Math.round(enrollments.reduce((sum, item) => sum + Number(item.progress_percentage || 0), 0) / enrollments.length)
-    : 0;
-
   return (
     <main className={styles.page}>
       <section className={styles.welcome}>
@@ -107,8 +139,24 @@ export function StudentHome() {
             <Link href="/courses">{lang === 'ar' ? 'استكشف الكورسات' : 'Explore courses'}<ArrowLeft size={16} /></Link>
           </div>
         </div>
-        <div className={styles.progressRing} style={{ '--progress': `${averageProgress * 3.6}deg` } as CSSProperties}>
-          <div><strong>{averageProgress}%</strong><span>{lang === 'ar' ? 'متوسط تقدمك' : 'Average progress'}</span></div>
+        <div className={styles.welcomeVisual} aria-hidden="true">
+          <div className={styles.teacherGlow} />
+          <div className={styles.teacherImage}>
+            <Image
+              src="/chemistry-teacher-v2.png"
+              alt=""
+              fill
+              sizes="(max-width: 900px) 260px, 360px"
+              priority
+            />
+          </div>
+          <div className={styles.teacherBadge}>
+            <span><Award size={21} /></span>
+            <div>
+              <strong>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</strong>
+              <small>{lang === 'ar' ? 'خبرة أكثر من 10 سنوات' : 'More than 10 years of experience'}</small>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -117,13 +165,18 @@ export function StudentHome() {
           <div><span>{lang === 'ar' ? 'وصول سريع' : 'Quick access'}</span><h2>{lang === 'ar' ? 'كل أدواتك' : 'Your tools'}</h2></div>
         </div>
         <div className={styles.actionsGrid}>
-          {actions.map(({ href, labelAr, labelEn, icon: Icon }) => (
-            <Link href={href} key={href} className={styles.actionCard}>
-              <span><Icon size={20} /></span>
-              <strong>{lang === 'ar' ? labelAr : labelEn}</strong>
-              <ChevronLeft size={15} />
-            </Link>
-          ))}
+          {actions.map(({ href, labelAr, labelEn, icon: Icon }) => {
+            const description = actionDescriptions[href as keyof typeof actionDescriptions];
+
+            return (
+              <Link href={href} key={href} className={styles.actionCard}>
+                <span><Icon size={20} /></span>
+                <strong>{lang === 'ar' ? labelAr : labelEn}</strong>
+                <small>{lang === 'ar' ? description.ar : description.en}</small>
+                <ChevronLeft size={15} />
+              </Link>
+            );
+          })}
         </div>
       </section>
 

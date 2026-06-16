@@ -420,3 +420,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Luxury Lab course detail. */
+.courseHeader{
+  margin:28px 0 28px;
+  padding:34px;
+  overflow:hidden;
+  border:1px solid var(--glass-border);
+  border-radius:32px;
+  background:
+    radial-gradient(circle at 14% 18%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 17rem),
+    radial-gradient(circle at 90% 18%,color-mix(in srgb,var(--primary) 16%,transparent),transparent 18rem),
+    linear-gradient(135deg,var(--surface-card),var(--surface-soft));
+  box-shadow:var(--shadow-md)
+}
+.title{font-family:var(--font-display);font-size:clamp(2.2rem,4vw,3.6rem);line-height:1.12}.subtitle{max-width:780px;font-size:.95rem;line-height:1.9}.statsRow{flex-wrap:wrap;gap:12px}.statItem{padding:8px 11px;border:1px solid var(--border-light);border-radius:99px;background:var(--glass-bg);font-size:.75rem}
+.contentGrid{gap:24px}.mediaSection,.cardSection,.sidebarCard{
+  border:1px solid var(--glass-border);
+  border-radius:28px;
+  background:var(--surface-card);
+  box-shadow:var(--shadow-sm)
+}
+.mediaSection{overflow:hidden}.courseImg,.imagePlaceholder{border-radius:28px}.cardSection{padding:28px}.sectionTitle{font-family:var(--font-display);font-size:1.55rem}.objectiveItem{padding:14px;border:1px solid var(--border-light);border-radius:16px;background:var(--surface-soft)}
+.sectionItem{border-color:var(--glass-border);border-radius:18px;background:var(--surface-card)}.sectionTrigger{padding:18px 20px}.lessonsList{background:var(--surface-soft)}.lessonItem{border-color:var(--border-light)}
+.rightCol{top:106px}.sidebarCard{padding:26px}.price{font-family:var(--font-display);font-size:2.35rem}.primaryBtn{border-radius:17px;color:var(--accent-ink);background:var(--accent);box-shadow:0 16px 34px color-mix(in srgb,var(--accent) 24%,transparent)}.cartBtn{border-radius:17px;background:var(--surface-soft)}
+.previewTag{color:var(--primary);border-color:var(--primary);border-radius:99px}.specList li::before{color:var(--accent)}
+[data-theme=dark] .courseHeader,[data-theme=dark] .mediaSection,[data-theme=dark] .cardSection,[data-theme=dark] .sidebarCard,[data-theme=dark] .sectionItem{background:var(--surface-card)}
+[data-theme=dark] .title,[data-theme=dark] .sectionTitle,[data-theme=dark] .price,[data-theme=dark] .specTitle{color:#fff}
+@media(max-width:700px){.courseHeader{padding:24px 20px;border-radius:25px}.statsRow{gap:8px}.cardSection,.sidebarCard{padding:20px;border-radius:22px}}

@@ -52,3 +52,31 @@
 
 .resourceList,.questionsBlock{display:grid;gap:10px}.resourceList .fileItem{max-width:none}.fileItem span,.assignmentItem span{min-width:0;display:grid;gap:2px}.fileItem strong,.assignmentItem strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.64rem}.fileItem small,.assignmentItem small{color:var(--text-secondary);font-size:.5rem}.assignmentItem{width:100%;padding:13px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;border:1px solid var(--border);border-radius:10px;color:var(--text-main);background:var(--surface-soft);text-align:start;cursor:pointer}.assignmentItem:hover{border-color:var(--primary);background:var(--primary-glow)}.assignmentItem>svg:first-child{color:var(--primary)}.assignmentItem>svg:last-child{color:var(--text-secondary)}.questionItem{padding:12px;display:grid;grid-template-columns:auto 1fr;gap:9px;border:1px solid var(--border);border-radius:10px;background:var(--surface-soft)}.questionItem>svg{color:var(--primary)}.questionItem div{min-width:0}.questionItem strong{display:block;color:var(--text-main);font-size:.64rem}.questionItem p{margin:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.56rem}.questionItem small{color:var(--text-secondary);font-size:.49rem}.qaLink{min-height:36px;padding:0 12px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--primary);border-radius:9px;color:var(--primary);font-size:.56rem;font-weight:900}.avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .lessonHeader,[data-theme=dark] .lessonHeader{background:var(--surface)}
+
+/* Luxury Lab lesson room. */
+.page{width:min(1320px,calc(100% - 34px));padding:26px 0 60px}
+.breadcrumbs{margin-bottom:18px;color:var(--text-secondary);letter-spacing:.02em}.breadcrumbs strong{color:var(--accent)}
+.layout{grid-template-columns:285px minmax(0,1fr);gap:18px}
+.progressCard,.curriculumCard,.infoCard,.instructorCard,.mediaStage{
+  border-color:var(--glass-border);
+  border-radius:24px;
+  background:var(--surface-card);
+  box-shadow:var(--shadow-sm)
+}
+.progressCard{padding:22px}.cardTitle{font-weight:900}.progressCard>b{font-family:var(--font-display);font-size:1.8rem}.progressTrack{height:7px;background:color-mix(in srgb,var(--primary) 14%,transparent)}.progressTrack i{background:linear-gradient(90deg,var(--accent),var(--primary))}
+.curriculumCard{padding:16px 11px}.sectionGroup h4{color:var(--primary);font-weight:900;letter-spacing:.05em}.sectionGroup button{min-height:44px;border-radius:14px}.sectionGroup button:hover{background:var(--surface-hover)}.sectionGroup .activeLesson{color:var(--accent-ink);background:var(--accent)}.sectionGroup .activeLesson>span{color:var(--accent-ink)}.showAll{border-radius:14px;color:var(--primary);background:var(--primary-glow)}
+.mediaStage{overflow:hidden}.lessonHeader{
+  min-height:96px;
+  padding:18px 20px;
+  border-bottom-color:var(--glass-border);
+  background:
+    radial-gradient(circle at 14% 16%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 14rem),
+    linear-gradient(135deg,var(--surface-card),var(--surface-soft))!important
+}
+.stageButtons button{border-color:var(--glass-border);border-radius:14px;background:var(--surface-card)}.stageHeading h1{font-family:var(--font-display);font-size:1.7rem;color:var(--primary)}.mediaContent{height:clamp(360px,42vw,520px)}
+.tabs{height:56px;border-bottom-color:var(--border-light)}.tabs .activeTab{color:var(--primary);border-color:var(--accent)}.tabPanel{font-size:.72rem}.fileItem,.assignmentItem,.questionItem{border-color:var(--glass-border);border-radius:16px;background:var(--surface-soft)}
+.avatar{border-radius:18px;color:var(--accent-ink);background:var(--accent)}.instructorCard a,.qaLink{border-radius:14px;color:var(--primary);background:var(--primary-glow)}
+.lessonNav button{min-height:48px;border-radius:16px;background:var(--surface-card)}.lessonNav button:last-child{color:var(--accent-ink);border-color:var(--accent);background:var(--accent)}
+[data-theme=dark] .progressCard,[data-theme=dark] .curriculumCard,[data-theme=dark] .infoCard,[data-theme=dark] .instructorCard,[data-theme=dark] .mediaStage{background:var(--surface-card)}
+[data-theme=dark] .stageHeading h1,[data-theme=dark] .cardTitle,[data-theme=dark] .instructorCard strong{color:#fff}
+@media(max-width:900px){.page{width:min(100% - 20px,760px)}.sidebar{background:var(--surface-card);border:1px solid var(--glass-border)}.sidebarToggle{color:var(--accent-ink);background:var(--accent)}} 
