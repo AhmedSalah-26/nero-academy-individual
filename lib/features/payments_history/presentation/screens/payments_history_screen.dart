@@ -36,7 +36,7 @@ class _PaymentsHistoryView extends StatelessWidget {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         title: Text(
-          isRtl ? 'سجل المدفوعات' : 'Payment History',
+          isRtl ? 'حالة الطلبات' : 'Orders Status',
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -100,7 +100,7 @@ class _PaymentsHistoryView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      isRtl ? 'لا توجد مدفوعات' : 'No payments yet',
+                      isRtl ? 'لا توجد طلبات' : 'No orders yet',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -111,8 +111,8 @@ class _PaymentsHistoryView extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       isRtl
-                          ? 'ستظهر مدفوعاتك هنا'
-                          : 'Your payments will appear here',
+                          ? 'ستظهر طلباتك هنا'
+                          : 'Your orders will appear here',
                       style: TextStyle(
                         fontSize: 14,
                         color:

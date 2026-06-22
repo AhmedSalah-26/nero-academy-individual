@@ -135,17 +135,18 @@ class _PricingStepState extends State<PricingStep> {
                 ),
               ),
               const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.cardDark : AppColors.white,
+              Material(
+                color: isDark ? AppColors.cardDark : AppColors.white,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
+                  side: BorderSide(
                     color:
                         isDark ? AppColors.borderDark : AppColors.borderLight,
                   ),
                 ),
-                child: Column(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Price Section Header
@@ -372,7 +373,7 @@ class _PricingStepState extends State<PricingStep> {
                     _buildPricePreview(state, isArabic, isDark),
                   ],
                 ),
-              ),
+              )),
               const SizedBox(height: 24),
               _buildPricingTips(isArabic, isDark),
               const SizedBox(height: 32),

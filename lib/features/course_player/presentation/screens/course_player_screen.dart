@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -171,40 +170,54 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
           leading: AppBackButton(
             onPressed: _handleBack,
           ),
-          title: Directionality(
-            textDirection: ui.TextDirection.rtl,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'كيمياء - الصف الثالث الثانوي',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
+          title: BlocBuilder<CoursePlayerCubit, CoursePlayerState>(
+            builder: (context, state) {
+              final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+              String subtitle = '';
+              if (state.currentLesson != null) {
+                for (final section in state.sections) {
+                  if (section.lessons.any((l) => l.id == state.currentLesson!.id)) {
+                    subtitle = isArabic ? (section.titleAr ?? '') : (section.titleEn ?? '');
+                    break;
+                  }
+                }
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.courseTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: isDark
+                          ? AppColors.textMainDark
+                          : AppColors.textMainLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'الباب الأول: البناء الذري والجدول الدوري',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
           centerTitle: true,
         ),

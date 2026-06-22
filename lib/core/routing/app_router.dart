@@ -58,6 +58,8 @@ import '../../features/course_search/presentation/cubit/course_search_cubit.dart
 import '../../features/course_search/presentation/screens/course_search_screen.dart';
 import '../../features/course_search/presentation/screens/course_filter_screen.dart';
 import '../../features/course_search/domain/entities/search_filter_entity.dart';
+// Payments History / Orders Status
+import '../../features/payments_history/presentation/screens/payments_history_screen.dart';
 // Course Details
 import '../../features/course_details/presentation/cubit/course_details_cubit.dart';
 import '../../features/course_details/presentation/screens/course_details_screen.dart';
@@ -268,6 +270,13 @@ class AppRouter {
         path: '/history',
         name: 'history',
         builder: (context, state) => const HistoryScreen(),
+      ),
+
+      // Orders Status (Payments History)
+      GoRoute(
+        path: '/orders-status',
+        name: 'orders-status',
+        builder: (context, state) => const PaymentsHistoryScreen(),
       ),
 
       // Wishlist (moved from nav bar)
@@ -1126,6 +1135,8 @@ class AppRouter {
   }
 
   static void goToHistory(BuildContext context) => context.pushNamed('history');
+
+  static void goToOrdersStatus(BuildContext context) => context.pushNamed('orders-status');
 
   static void goToSettings(BuildContext context) =>
       context.pushNamed('settings');

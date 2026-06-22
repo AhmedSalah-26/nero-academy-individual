@@ -251,6 +251,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             _buildDivider(isDark),
             _buildMenuItem(
+              icon: Icons.receipt_long_outlined,
+              title: isArabic ? 'حالة الطلبات' : 'Orders Status',
+              onTap: () => AppRouter.goToOrdersStatus(context),
+              isDark: isDark,
+            ),
+            _buildDivider(isDark),
+            _buildMenuItem(
               icon: Icons.forum_outlined,
               title: isArabic ? 'المنتديات' : 'Forums',
               onTap: () => context.pushNamed('forums-tab'),

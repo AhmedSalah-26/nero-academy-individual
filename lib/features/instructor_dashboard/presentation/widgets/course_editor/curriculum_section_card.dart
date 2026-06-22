@@ -42,12 +42,10 @@ class _SectionCardState extends State<SectionCard> {
       child: Column(
         children: [
           // Section Header
-          Container(
-            decoration: BoxDecoration(
-              color: widget.isDark ? AppColors.surfaceDark : AppColors.grey50,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+          Material(
+            color: widget.isDark ? AppColors.surfaceDark : AppColors.grey50,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(12),
             ),
             child: ListTile(
               leading: ReorderableDragStartListener(
@@ -149,16 +147,17 @@ class LessonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Material(
         color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
         ),
-      ),
-      child: ListTile(
+        child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12),
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -266,7 +265,7 @@ class LessonTile extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   IconData _getLessonIcon(String type) {

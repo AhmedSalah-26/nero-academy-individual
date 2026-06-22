@@ -36,7 +36,7 @@ class AuthState extends Equatable {
 
   const AuthState.loading() : this(status: AuthStatus.loading);
 
-  AuthState.authenticated(UserEntity user)
+  const AuthState.authenticated(UserEntity user)
       : this(
           status: AuthStatus.authenticated,
           user: user,

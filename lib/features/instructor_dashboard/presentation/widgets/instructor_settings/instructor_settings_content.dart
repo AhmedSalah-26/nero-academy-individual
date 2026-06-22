@@ -312,12 +312,13 @@ class _InstructorSettingsContentState extends State<InstructorSettingsContent> {
                 color:
                     isDark ? AppColors.textMainDark : AppColors.textMainLight)),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.cardDark : AppColors.white,
+        Material(
+          color: isDark ? AppColors.cardDark : AppColors.white,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight),
+            side: BorderSide(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            ),
           ),
           child: Column(
             children: items.asMap().entries.map((entry) {
