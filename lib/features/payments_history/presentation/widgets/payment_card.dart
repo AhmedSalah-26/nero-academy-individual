@@ -135,7 +135,7 @@ class PaymentCard extends StatelessWidget {
     } else if (payment.isPending) {
       backgroundColor = Colors.orange.shade50;
       textColor = Colors.orange.shade700;
-    } else if (payment.isFailed) {
+    } else if (payment.isCancelled || payment.isFailed) {
       backgroundColor = Colors.red.shade50;
       textColor = Colors.red.shade700;
     } else {
@@ -166,6 +166,10 @@ class PaymentCard extends StatelessWidget {
         return Icons.credit_card;
       case 'wallet':
         return Icons.account_balance_wallet;
+      case 'manual':
+        return Icons.receipt_long_rounded;
+      case 'free':
+        return Icons.card_giftcard_rounded;
       case 'cash':
         return Icons.money;
       default:

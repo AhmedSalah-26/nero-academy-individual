@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
+
 import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/entities/lesson_entity.dart';
 import '../../../domain/entities/section_entity.dart';
@@ -38,96 +38,93 @@ class LessonHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = context.locale.languageCode;
 
-    return Directionality(
-      textDirection: ui.TextDirection.rtl,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: GestureDetector(
-          onTap: onHeaderTap,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.cardDark : AppColors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : const Color(0xFFE8DDF7),
-              ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: GestureDetector(
+        onTap: onHeaderTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.cardDark : AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : const Color(0xFFE8DDF7),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${'course_player.section'.tr()} ${sectionIndex + 1} • ${'course_player.lesson'.tr()} ${lessonIndex + 1}',
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          height: 1.35,
-                        ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${'course_player.section'.tr()} ${sectionIndex + 1} • ${'course_player.lesson'.tr()} ${lessonIndex + 1}',
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        height: 1.35,
                       ),
-                      const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      lesson.getTitle(locale),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textMainDark
+                            : AppColors.textMainLight,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w900,
+                        height: 1.25,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (lesson.getDescription(locale) != null) ...[
+                      const SizedBox(height: 10),
                       Text(
-                        lesson.getTitle(locale),
-                        textAlign: TextAlign.right,
+                        lesson.getDescription(locale)!,
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           color: isDark
-                              ? AppColors.textMainDark
-                              : AppColors.textMainLight,
-                          fontSize: 21,
-                          fontWeight: FontWeight.w900,
-                          height: 1.25,
+                              ? AppColors.textMutedDark
+                              : AppColors.textMutedLight,
+                          fontSize: 13,
+                          height: 1.5,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (lesson.getDescription(locale) != null) ...[
-                        const SizedBox(height: 10),
-                        Text(
-                          lesson.getDescription(locale)!,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.textMutedDark
-                                : AppColors.textMutedLight,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
                     ],
+                  ],
+                ),
+              ),
+              if (onBookmarkTap != null) ...[
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: onBookmarkTap,
+                  icon: Icon(
+                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    color: isBookmarked
+                        ? AppColors.primary
+                        : (isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight),
+                  ),
+                  iconSize: 24,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
                   ),
                 ),
-                if (onBookmarkTap != null) ...[
-                  const SizedBox(width: 12),
-                  IconButton(
-                    onPressed: onBookmarkTap,
-                    icon: Icon(
-                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                      color: isBookmarked
-                          ? AppColors.primary
-                          : (isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight),
-                    ),
-                    iconSize: 24,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
         ),
       ),

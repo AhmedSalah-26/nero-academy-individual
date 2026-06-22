@@ -32,18 +32,22 @@ class PaymentEntity extends Equatable {
   });
 
   bool get isPaid => paymentStatus == 'paid';
-  bool get isPending => paymentStatus == 'pending';
+  bool get isPending =>
+      paymentStatus == 'pending' || paymentStatus == 'pending_manual_payment';
   bool get isFailed => paymentStatus == 'failed';
   bool get isRefunded => paymentStatus == 'refunded';
+  bool get isCancelled => paymentStatus == 'cancelled';
 
   String get statusAr {
     switch (paymentStatus) {
       case 'paid':
         return 'مدفوع';
       case 'pending':
-        return 'قيد الانتظار';
+      case 'pending_manual_payment':
+        return 'قيد المراجعة';
       case 'failed':
-        return 'فشل';
+      case 'cancelled':
+        return 'ملغي';
       case 'refunded':
         return 'مسترد';
       default:
@@ -56,9 +60,11 @@ class PaymentEntity extends Equatable {
       case 'paid':
         return 'Paid';
       case 'pending':
+      case 'pending_manual_payment':
         return 'Pending';
       case 'failed':
-        return 'Failed';
+      case 'cancelled':
+        return 'Cancelled';
       case 'refunded':
         return 'Refunded';
       default:
@@ -72,6 +78,10 @@ class PaymentEntity extends Equatable {
         return 'بطاقة ائتمان';
       case 'wallet':
         return 'محفظة إلكترونية';
+      case 'manual':
+        return 'دفع يدوي';
+      case 'free':
+        return 'مجاني';
       case 'cash':
         return 'نقدي';
       default:
@@ -85,6 +95,10 @@ class PaymentEntity extends Equatable {
         return 'Credit Card';
       case 'wallet':
         return 'Mobile Wallet';
+      case 'manual':
+        return 'Manual Payment';
+      case 'free':
+        return 'Free';
       case 'cash':
         return 'Cash';
       default:

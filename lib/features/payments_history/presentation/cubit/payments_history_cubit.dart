@@ -12,14 +12,22 @@ class PaymentsHistoryCubit extends Cubit<PaymentsHistoryState> {
     required this.getUserPaymentsUseCase,
   }) : super(PaymentsHistoryInitial());
 
-  Future<void> loadPayments(String userId) async {
+  Future<void> loadPayments(String? userId) async {
+    final normalizedUserId = userId?.trim();
+    if (normalizedUserId == null || normalizedUserId.isEmpty) {
+      emit(const PaymentsHistoryError(
+        'Please sign in to view your orders.',
+        type: PaymentsHistoryErrorType.unauthorized,
+      ));
+      return;
+    }
+
     emit(PaymentsHistoryLoading());
 
-    final result = await getUserPaymentsUseCase(userId);
+    final result = await getUserPaymentsUseCase(normalizedUserId);
 
     result.fold(
-      (failure) =>
-          emit(PaymentsHistoryError(failure.message)),
+      (failure) => emit(PaymentsHistoryError(failure.message)),
       (payments) => emit(PaymentsHistoryLoaded(payments)),
     );
   }

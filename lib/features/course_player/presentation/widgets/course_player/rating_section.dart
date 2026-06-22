@@ -152,7 +152,7 @@ class _RatingSectionState extends State<RatingSection> {
   Future<void> _submitRating() async {
     if (_rating == 0) {
       AppLogger.w('[RatingSection] Rating is 0, cannot submit');
-      ToastUtils.showError('يرجى اختيار تقييم');
+      ToastUtils.showError('course_player.select_rating'.tr());
       return;
     }
 
@@ -208,7 +208,7 @@ class _RatingSectionState extends State<RatingSection> {
     } catch (e) {
       AppLogger.e('[RatingSection] Error submitting rating: $e');
       if (mounted) {
-        ToastUtils.showError('حدث خطأ أثناء إرسال التقييم');
+        ToastUtils.showError('course_player.rating_submit_error'.tr());
       }
     } finally {
       if (mounted) {
@@ -298,9 +298,16 @@ class _RatingSectionState extends State<RatingSection> {
     }
 
     if (_reviews.isEmpty) {
-      return const EmptyState(
-        type: EmptyStateType.reviews,
-        compact: true,
+      return SizedBox(
+        width: double.infinity,
+        child: Center(
+          child: EmptyState(
+            type: EmptyStateType.reviews,
+            compact: true,
+            title: 'empty.reviews_title'.tr(),
+            message: 'empty.reviews_message'.tr(),
+          ),
+        ),
       );
     }
 
@@ -310,7 +317,7 @@ class _RatingSectionState extends State<RatingSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'التقييمات',
+          'reviews.reviews'.tr(),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

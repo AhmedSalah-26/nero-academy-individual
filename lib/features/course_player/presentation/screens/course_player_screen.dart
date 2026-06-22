@@ -172,12 +172,15 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
           ),
           title: BlocBuilder<CoursePlayerCubit, CoursePlayerState>(
             builder: (context, state) {
-              final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+              final isArabic =
+                  Localizations.localeOf(context).languageCode == 'ar';
               String subtitle = '';
               if (state.currentLesson != null) {
                 for (final section in state.sections) {
-                  if (section.lessons.any((l) => l.id == state.currentLesson!.id)) {
-                    subtitle = isArabic ? (section.titleAr ?? '') : (section.titleEn ?? '');
+                  if (section.lessons
+                      .any((l) => l.id == state.currentLesson!.id)) {
+                    subtitle =
+                        isArabic ? section.titleAr : (section.titleEn ?? '');
                     break;
                   }
                 }

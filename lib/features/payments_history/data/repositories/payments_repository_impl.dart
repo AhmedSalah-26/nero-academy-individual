@@ -16,7 +16,7 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
       final payments = await remoteDataSource.getUserPayments(userId);
       return Right(payments);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(ServerFailure('Unable to load orders right now.'));
     }
   }
 
@@ -27,7 +27,8 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
       final payment = await remoteDataSource.getPaymentById(paymentId);
       return Right(payment);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return const Left(
+          ServerFailure('Unable to load order details right now.'));
     }
   }
 }

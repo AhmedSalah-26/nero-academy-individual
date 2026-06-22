@@ -13,9 +13,16 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
 
   @override
   Future<List<PaymentModel>> getUserPayments(String userId) async {
+    final normalizedUserId = userId.trim();
+    if (normalizedUserId.isEmpty) {
+      throw const FormatException('Invalid user id');
+    }
+
     try {
       // Get parent enrollments with courses
-      final response = await supabase.from('parent_enrollments').select('''
+      final response = await supabase
+          .from('parent_enrollments')
+          .select('''
             *,
             enrollments!parent_enrollment_id(
               course_id,
@@ -27,7 +34,9 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
                 price
               )
             )
-          ''').eq('user_id', userId).order('created_at', ascending: false);
+          ''')
+          .eq('user_id', normalizedUserId)
+          .order('created_at', ascending: false);
 
       final List<PaymentModel> payments = [];
 
@@ -41,7 +50,9 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
             if (course != null) {
               courses.add(PaymentCourseModel(
                 courseId: course['id'] as String,
-                title: course['title_ar'] as String? ?? course['title_en'] as String? ?? '',
+                title: course['title_ar'] as String? ??
+                    course['title_en'] as String? ??
+                    '',
                 thumbnailUrl: course['thumbnail_url'] as String?,
                 price: (course['price'] as num).toDouble(),
               ));
@@ -64,12 +75,17 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
 
       return payments;
     } catch (e) {
-      throw Exception('Failed to fetch payments: $e');
+      throw Exception('Unable to load payments.');
     }
   }
 
   @override
   Future<PaymentModel?> getPaymentById(String paymentId) async {
+    final normalizedPaymentId = paymentId.trim();
+    if (normalizedPaymentId.isEmpty) {
+      throw const FormatException('Invalid payment id');
+    }
+
     try {
       final response = await supabase.from('parent_enrollments').select('''
             *,
@@ -83,7 +99,7 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
                 price
               )
             )
-          ''').eq('id', paymentId).maybeSingle();
+          ''').eq('id', normalizedPaymentId).maybeSingle();
 
       if (response == null) return null;
 
@@ -96,7 +112,9 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
           if (course != null) {
             courses.add(PaymentCourseModel(
               courseId: course['id'] as String,
-              title: course['title_ar'] as String? ?? course['title_en'] as String? ?? '',
+              title: course['title_ar'] as String? ??
+                  course['title_en'] as String? ??
+                  '',
               thumbnailUrl: course['thumbnail_url'] as String?,
               price: (course['price'] as num).toDouble(),
             ));
@@ -116,7 +134,7 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
             .toList(),
       });
     } catch (e) {
-      throw Exception('Failed to fetch payment: $e');
+      throw Exception('Unable to load payment details.');
     }
   }
 }

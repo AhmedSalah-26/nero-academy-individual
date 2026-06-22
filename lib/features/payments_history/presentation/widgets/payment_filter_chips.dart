@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../cubit/payments_history_cubit.dart';
 
 class PaymentFilterChips extends StatelessWidget {
@@ -40,23 +41,13 @@ class PaymentFilterChips extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label: isRtl ? 'قيد الانتظار' : 'Pending',
-                isSelected: selectedStatus == 'pending',
+                label: isRtl ? 'قيد المراجعة' : 'Pending',
+                isSelected: selectedStatus == 'pending_manual_payment',
                 onTap: () => context
                     .read<PaymentsHistoryCubit>()
-                    .filterByStatus('pending'),
+                    .filterByStatus('pending_manual_payment'),
                 theme: theme,
                 color: Colors.orange,
-              ),
-              const SizedBox(width: 8),
-              _FilterChip(
-                label: isRtl ? 'فشل' : 'Failed',
-                isSelected: selectedStatus == 'failed',
-                onTap: () => context
-                    .read<PaymentsHistoryCubit>()
-                    .filterByStatus('failed'),
-                theme: theme,
-                color: Colors.red,
               ),
               const SizedBox(width: 8),
               _FilterChip(
@@ -67,6 +58,16 @@ class PaymentFilterChips extends StatelessWidget {
                     .filterByStatus('refunded'),
                 theme: theme,
                 color: Colors.grey,
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: isRtl ? 'ملغي' : 'Cancelled',
+                isSelected: selectedStatus == 'cancelled',
+                onTap: () => context
+                    .read<PaymentsHistoryCubit>()
+                    .filterByStatus('cancelled'),
+                theme: theme,
+                color: Colors.red,
               ),
             ],
           ),
