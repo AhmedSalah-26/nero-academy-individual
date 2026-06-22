@@ -8,6 +8,9 @@ class SocialLoginButtons extends StatelessWidget {
   final VoidCallback? onAppleTap;
   final VoidCallback? onFacebookTap;
   final bool isLoading;
+  final bool showApple;
+  final bool showFacebook;
+  final String? googleLabel;
 
   const SocialLoginButtons({
     super.key,
@@ -15,6 +18,9 @@ class SocialLoginButtons extends StatelessWidget {
     this.onAppleTap,
     this.onFacebookTap,
     this.isLoading = false,
+    this.showApple = true,
+    this.showFacebook = true,
+    this.googleLabel,
   });
 
   @override
@@ -25,33 +31,41 @@ class SocialLoginButtons extends StatelessWidget {
         _buildDivider(context),
         AppSpacing.verticalGapLg,
         // Social buttons
-        Row(
-          children: [
-            // Google
-            Expanded(
-              child: _SocialButton(
-                icon: _googleIcon,
-                onTap: isLoading ? null : onGoogleTap,
+        if (!showApple && !showFacebook)
+          _SocialButton(
+            icon: _googleIcon,
+            label: googleLabel,
+            onTap: isLoading ? null : onGoogleTap,
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: _SocialButton(
+                  icon: _googleIcon,
+                  onTap: isLoading ? null : onGoogleTap,
+                ),
               ),
-            ),
-            AppSpacing.horizontalGapMd,
-            // Apple
-            Expanded(
-              child: _SocialButton(
-                icon: _appleIcon(context),
-                onTap: isLoading ? null : onAppleTap,
-              ),
-            ),
-            AppSpacing.horizontalGapMd,
-            // Facebook
-            Expanded(
-              child: _SocialButton(
-                icon: _facebookIcon,
-                onTap: isLoading ? null : onFacebookTap,
-              ),
-            ),
-          ],
-        ),
+              if (showApple) ...[
+                AppSpacing.horizontalGapMd,
+                Expanded(
+                  child: _SocialButton(
+                    icon: _appleIcon(context),
+                    onTap: isLoading ? null : onAppleTap,
+                  ),
+                ),
+              ],
+              if (showFacebook) ...[
+                AppSpacing.horizontalGapMd,
+                Expanded(
+                  child: _SocialButton(
+                    icon: _facebookIcon,
+                    onTap: isLoading ? null : onFacebookTap,
+                  ),
+                ),
+              ],
+            ],
+          ),
       ],
     );
   }
@@ -109,10 +123,12 @@ class SocialLoginButtons extends StatelessWidget {
 
 class _SocialButton extends StatelessWidget {
   final Widget icon;
+  final String? label;
   final VoidCallback? onTap;
 
   const _SocialButton({
     required this.icon,
+    this.label,
     this.onTap,
   });
 
@@ -134,7 +150,29 @@ class _SocialButton extends StatelessWidget {
               color: isDark ? AppColors.grey700 : AppColors.grey200,
             ),
           ),
-          child: Center(child: icon),
+          child: Center(
+            child: label == null
+                ? icon
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      icon,
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          label!,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isDark ? AppColors.white : AppColors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

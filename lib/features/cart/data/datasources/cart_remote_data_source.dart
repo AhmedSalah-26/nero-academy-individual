@@ -261,9 +261,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           .eq('user_id', userId)
           .inFilter('status', ['active', 'completed']);
 
-      final alreadyEnrolledIds = (enrolledCheck as List)
-          .map((e) => e['course_id'] as String)
-          .toSet();
+      final alreadyEnrolledIds =
+          (enrolledCheck as List).map((e) => e['course_id'] as String).toSet();
 
       final filteredCartItems = (cartItems as List)
           .where((item) => !alreadyEnrolledIds.contains(item['course_id']))
@@ -355,6 +354,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       final finalTotal =
           (total - couponDiscountTotal).clamp(0, double.infinity);
+      final isFreeOrder = finalTotal == 0;
 
       AppLogger.i(
           '🛒 [Checkout] Total amount: $total, couponDiscount: $couponDiscountTotal, finalTotal: $finalTotal');
@@ -368,10 +368,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'subtotal': total,
             'discount': couponDiscountTotal,
             'coupon_discount': couponDiscountTotal,
-            'payment_method': paymentMethod.name,
-            'payment_status': finalTotal == 0 ? 'paid' : 'pending',
-            'paid_at':
-                finalTotal == 0 ? DateTime.now().toIso8601String() : null,
+            'payment_method': isFreeOrder ? 'free' : 'manual',
+            'payment_status': isFreeOrder ? 'paid' : 'pending_manual_payment',
+            'paid_at': isFreeOrder ? DateTime.now().toIso8601String() : null,
           })
           .select('id')
           .single();
@@ -422,7 +421,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                 'course_id': courseId,
                 'instructor_id': instructorId,
                 'parent_enrollment_id': parentEnrollmentId,
-                'status': finalTotal == 0 ? 'active' : 'pending',
+                'status': isFreeOrder ? 'active' : 'pending',
                 'progress_percentage': 0,
                 'completed_lessons': 0,
                 'price': priceAtAdd,
@@ -494,10 +493,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         } else {
           final existingStatus = existing['status'] as String?;
           if (existingStatus == 'pending') {
-            AppLogger.i('🛒 [Checkout] Updating existing pending enrollment...');
+            AppLogger.i(
+                '🛒 [Checkout] Updating existing pending enrollment...');
             await supabase.from('enrollments').update({
               'parent_enrollment_id': parentEnrollmentId,
-              'status': finalTotal == 0 ? 'active' : 'pending',
+              'status': isFreeOrder ? 'active' : 'pending',
               'price': priceAtAdd,
               'discount': itemCouponDiscount,
               'enrolled_at': DateTime.now().toIso8601String(),
@@ -509,11 +509,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
-      // If free (total = 0), activate immediately and clear cart
-      if (finalTotal == 0) {
-        await supabase.from('cart_items').delete().eq('user_id', userId);
-        AppLogger.i('🛒 [Checkout] Free order - Cart cleared');
-      }
+      await supabase.from('cart_items').delete().eq('user_id', userId);
+      AppLogger.i('🛒 [Checkout] Cart cleared after order request');
 
       AppLogger.success('🛒 [Checkout] Checkout completed successfully!');
 
@@ -522,8 +519,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'user_id': userId,
         'total_amount': finalTotal,
         'currency': 'EGP',
-        'status': finalTotal == 0 ? 'completed' : 'pending_payment',
-        'payment_method': paymentMethod.name,
+        'status': isFreeOrder ? 'completed' : 'pending',
+        'payment_method': isFreeOrder ? 'free' : 'manual',
         'created_at': DateTime.now().toIso8601String(),
       });
     } on PostgrestException catch (e) {

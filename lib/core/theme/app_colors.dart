@@ -5,31 +5,31 @@ class AppColors {
   AppColors._();
 
   // ============ Primary Colors ============
-  static const Color primary = Color(0xFF7F13EC);
-  static const Color primaryLight = Color(0xFFD4BBFF);
-  static const Color primaryDark = Color(0xFF5A0DB3);
+  static const Color primary = Color(0xFF2563EB);
+  static const Color primaryLight = Color(0xFFBFDBFE);
+  static const Color primaryDark = Color(0xFF1D4ED8);
 
   // Primary for dark mode (brighter/more visible)
-  static const Color primaryOnDark = Color(0xFFB57BFF);
+  static const Color primaryOnDark = Color(0xFF93C5FD);
 
   // ============ Background Colors ============
-  static const Color backgroundLight = Color(0xFFEEE4FC);
-  static const Color backgroundDark = Color(0xFF0D0A1E);
+  static const Color backgroundLight = Color(0xFFEFF6FF);
+  static const Color backgroundDark = Color(0xFF07111F);
 
   // ============ Surface Colors ============
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF15122A);
-  static const Color cardDark = Color(0xFF1C1835);
+  static const Color surfaceDark = Color(0xFF0F172A);
+  static const Color cardDark = Color(0xFF172033);
 
   // ============ Text Colors ============
-  static const Color textMainLight = Color(0xFF140D1B);
+  static const Color textMainLight = Color(0xFF0F172A);
   static const Color textMainDark = Color(0xFFFFFFFF);
   static const Color textMutedLight =
       Color(0xFF4B5563); // Changed from 6B7280 for better contrast (4.6:1)
   static const Color textMutedDark =
       Color(0xFFD1D5DB); // Changed from 9CA3AF for better contrast
-  static const Color textSecondary = Color(0xFF756189);
-  static const Color textSecondaryDark = Color(0xFFA08BB6);
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textSecondaryDark = Color(0xFFCBD5E1);
 
   // ============ Accessible Text Colors ============
   static const Color textHintLight = Color(0xFF6B7280); // For placeholders only
@@ -73,8 +73,8 @@ class AppColors {
   static const Color grey900 = Color(0xFF111827);
 
   // ============ Shimmer Colors ============
-  static const Color shimmerBase = Color(0xFFE5D5FC);       // Soft light purple
-  static const Color shimmerHighlight = Color(0xFFF3EBFF);  // Glowing light purple
-  static const Color shimmerBaseDark = Color(0xFF221A3D);    // Deep purple base
-  static const Color shimmerHighlightDark = Color(0xFF322854); // Brighter purple highlight
+  static const Color shimmerBase = Color(0xFFDCEBFF);
+  static const Color shimmerHighlight = Color(0xFFF0F7FF);
+  static const Color shimmerBaseDark = Color(0xFF15223A);
+  static const Color shimmerHighlightDark = Color(0xFF1F3152);
 }

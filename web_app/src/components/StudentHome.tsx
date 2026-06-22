@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Award,
   Bell,
   BookOpen,
   ChevronLeft,
@@ -143,19 +142,12 @@ export function StudentHome() {
           <div className={styles.teacherGlow} />
           <div className={styles.teacherImage}>
             <Image
-              src="/chemistry-teacher-v2.png"
+              src="/home_hero_cutout.png"
               alt=""
               fill
               sizes="(max-width: 900px) 260px, 360px"
               priority
             />
-          </div>
-          <div className={styles.teacherBadge}>
-            <span><Award size={21} /></span>
-            <div>
-              <strong>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</strong>
-              <small>{lang === 'ar' ? 'خبرة أكثر من 10 سنوات' : 'More than 10 years of experience'}</small>
-            </div>
           </div>
         </div>
       </section>

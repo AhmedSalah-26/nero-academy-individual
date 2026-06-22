@@ -190,7 +190,9 @@ mixin AuthCoreMixin {
     return supabase.auth.onAuthStateChange.asyncMap((event) async {
       if (event.session?.user == null) return null;
       try {
-        return await getProfile(event.session!.user.id);
+        final profile = await getOrCreateProfile(event.session!.user);
+        checkUserAccess(profile);
+        return profile;
       } catch (e) {
         return null;
       }

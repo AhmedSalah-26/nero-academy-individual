@@ -31,10 +31,14 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   final _maxAttemptsController = TextEditingController();
 
   List<Map<String, dynamic>> _courses = [];
+  List<Map<String, dynamic>> _lessons = [];
   String? _selectedCourseId;
+  String? _selectedLessonId;
 
   bool _isLoading = false;
   bool _isLoadingCourses = true;
+  bool _isLoadingLessons = false;
+  bool _isCourseLevelQuiz = true;
   bool _shuffleQuestions = false;
   bool _shuffleAnswers = false;
   bool _showCorrectAnswers = true;
@@ -82,6 +86,33 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     }
   }
 
+  Future<void> _loadLessons(String courseId) async {
+    setState(() {
+      _isLoadingLessons = true;
+      _selectedLessonId = null;
+      _lessons = [];
+    });
+
+    try {
+      final response = await Supabase.instance.client
+          .from('lessons')
+          .select('id, title_ar, title_en, sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order');
+
+      if (!mounted) return;
+      setState(() {
+        _lessons = List<Map<String, dynamic>>.from(response);
+        _isLoadingLessons = false;
+      });
+    } catch (e) {
+      AppLogger.e('📝 [CreateQuizScreen] Error loading lessons: $e');
+      if (mounted) {
+        setState(() => _isLoadingLessons = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -113,6 +144,8 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               ),
               const SizedBox(height: 20),
               _buildCourseSection(isArabic, isDark),
+              const SizedBox(height: 20),
+              _buildQuizScopeSection(isArabic, isDark),
               const SizedBox(height: 20),
               _buildTitleSection(isArabic, isDark),
               const SizedBox(height: 20),
@@ -172,7 +205,16 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                   ),
                 );
               }).toList(),
-              onChanged: (value) => setState(() => _selectedCourseId = value),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCourseId = value;
+                  _selectedLessonId = null;
+                  _lessons = [];
+                });
+                if (value != null) {
+                  _loadLessons(value);
+                }
+              },
               validator: (value) {
                 if (value == null) {
                   return isArabic
@@ -182,6 +224,98 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 return null;
               },
             ),
+    );
+  }
+
+  Widget _buildQuizScopeSection(bool isArabic, bool isDark) {
+    return QuizSectionCard(
+      icon: Icons.account_tree_outlined,
+      iconColor: AppColors.info,
+      title: isArabic ? 'نطاق الاختبار' : 'Quiz Scope',
+      isRequired: true,
+      isArabic: isArabic,
+      isDark: isDark,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SegmentedButton<bool>(
+            segments: [
+              ButtonSegment<bool>(
+                value: true,
+                icon: const Icon(Icons.school_outlined),
+                label: Text(isArabic ? 'اختبار شامل' : 'Course quiz'),
+              ),
+              ButtonSegment<bool>(
+                value: false,
+                icon: const Icon(Icons.menu_book_outlined),
+                label: Text(isArabic ? 'اختبار درس' : 'Lesson quiz'),
+              ),
+            ],
+            selected: {_isCourseLevelQuiz},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _isCourseLevelQuiz = selection.first;
+                if (_isCourseLevelQuiz) {
+                  _selectedLessonId = null;
+                }
+              });
+              if (!_isCourseLevelQuiz &&
+                  _selectedCourseId != null &&
+                  _lessons.isEmpty &&
+                  !_isLoadingLessons) {
+                _loadLessons(_selectedCourseId!);
+              }
+            },
+          ),
+          if (!_isCourseLevelQuiz) ...[
+            const SizedBox(height: 16),
+            if (_selectedCourseId == null)
+              Text(
+                isArabic
+                    ? 'اختر الكورس أولاً لعرض الدروس'
+                    : 'Select a course first to load lessons',
+                style: TextStyle(
+                  color: isDark ? AppColors.textMutedDark : AppColors.grey600,
+                ),
+              )
+            else if (_isLoadingLessons)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              DropdownButtonFormField<String>(
+                initialValue: _selectedLessonId,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
+                  prefixIcon: const Icon(Icons.play_lesson_outlined),
+                ),
+                items: _lessons.map((lesson) {
+                  return DropdownMenuItem<String>(
+                    value: lesson['id'] as String,
+                    child: Text(
+                      isArabic
+                          ? lesson['title_ar'] ?? ''
+                          : lesson['title_en'] ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _selectedLessonId = value),
+                validator: (value) {
+                  if (!_isCourseLevelQuiz && value == null) {
+                    return isArabic
+                        ? 'يرجى اختيار الدرس'
+                        : 'Please select a lesson';
+                  }
+                  return null;
+                },
+              ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -379,6 +513,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     try {
       final success = await widget.cubit.createQuiz(
         courseId: _selectedCourseId!,
+        lessonId: _isCourseLevelQuiz ? null : _selectedLessonId,
         titleAr: _titleArController.text,
         titleEn: _titleEnController.text,
         descriptionAr:

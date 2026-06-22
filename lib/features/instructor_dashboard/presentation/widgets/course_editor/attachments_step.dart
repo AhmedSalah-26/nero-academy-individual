@@ -604,7 +604,7 @@ class _AttachmentCard extends StatelessWidget {
         return Colors.orange;
       case 'zip':
       case 'rar':
-        return Colors.purple;
+        return Colors.blue;
       case 'jpg':
       case 'jpeg':
       case 'png':

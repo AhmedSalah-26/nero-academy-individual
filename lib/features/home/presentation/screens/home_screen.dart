@@ -238,6 +238,44 @@ class _HomeScreenState extends State<HomeScreen> {
     // Bottom Spacing
     sections.add(SizedBox(height: (screenHeight * 0.08).clamp(110.0, 130.0)));
 
+    // If no courses at all, show empty state message
+    final hasCourses = state.hasFlashSale ||
+        state.featuredCourses.isNotEmpty ||
+        state.popularCourses.isNotEmpty ||
+        state.newCourses.isNotEmpty;
+
+    if (!hasCourses) {
+      sections.insert(
+        sections.length - 1,
+        _EmptyCoursesState(isDark: isDark),
+      );
+    }
+
     return sections;
+  }
+}
+
+class _EmptyCoursesState extends StatelessWidget {
+  final bool isDark;
+
+  const _EmptyCoursesState({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 60),
+      child: Center(
+        child: Text(
+          'لا يوجد كورسات متاحة حاليا',
+          style: TextStyle(
+            color: isDark
+                ? AppColors.textMutedDark
+                : const Color(0xFF6B7280),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 }

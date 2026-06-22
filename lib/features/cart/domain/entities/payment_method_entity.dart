@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 /// Payment Method Type Enum
 enum PaymentMethodType {
+  manual,
   card,
   wallet,
   vodafoneCash,
@@ -10,6 +11,8 @@ enum PaymentMethodType {
 
   static PaymentMethodType fromString(String? value) {
     switch (value?.toLowerCase()) {
+      case 'manual':
+        return PaymentMethodType.manual;
       case 'card':
         return PaymentMethodType.card;
       case 'wallet':
@@ -28,6 +31,8 @@ enum PaymentMethodType {
 
   String get displayName {
     switch (this) {
+      case PaymentMethodType.manual:
+        return 'Manual Payment';
       case PaymentMethodType.card:
         return 'Credit/Debit Card';
       case PaymentMethodType.wallet:

@@ -18,13 +18,13 @@
   --shadow-sm: 0 10px 26px rgba(25, 15, 51, 0.055);
   --shadow-md: 0 18px 48px rgba(25, 15, 51, 0.085);
   --shadow-lg: 0 26px 72px rgba(25, 15, 51, 0.11);
-  --shadow-primary: 0 16px 34px rgba(106, 54, 220, 0.18);
+  --shadow-primary: 0 16px 34px rgba(37, 99, 235, 0.18);
 
-  --primary: #6C2FF2;
-  --primary-rgb: 108, 47, 242;
-  --primary-light: #EEE7FF;
-  --primary-dark: #35137E;
-  --primary-glow: rgba(108, 47, 242, 0.10);
+  --primary: #2563EB;
+  --primary-rgb: 37, 99, 235;
+  --primary-light: #DBEAFE;
+  --primary-dark: #1D4ED8;
+  --primary-glow: rgba(37, 99, 235, 0.10);
   --accent: #DDFB55;
   --accent-ink: #171024;
   --plasma: #B87CFF;
@@ -32,7 +32,7 @@
   --background: #F7F7FB;
   --surface: rgba(255, 255, 255, 0.86);
   --surface-card: rgba(255, 255, 255, 0.94);
-  --surface-hover: rgba(238, 231, 255, 0.56);
+  --surface-hover: rgba(219, 234, 254, 0.56);
   --surface-soft: rgba(242, 241, 248, 0.78);
   
   --text-main: #171024;
@@ -105,8 +105,8 @@ body {
   height: min(38vw, 560px);
   bottom: -240px;
   left: -150px;
-  background: rgba(108, 47, 242, .18);
-  box-shadow: 0 0 130px rgba(108, 47, 242, .14);
+  background: rgba(37, 99, 235, .18);
+  box-shadow: 0 0 130px rgba(37, 99, 235, .14);
 }
 
 body::before {

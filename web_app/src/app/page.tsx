@@ -7,12 +7,13 @@ import {
   ArrowLeft,
   ArrowRight,
   Atom,
-  Award,
   BookOpen,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Code2,
   Heart,
   MessageCircleQuestion,
   NotebookPen,
@@ -22,6 +23,7 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  Terminal,
   Trophy,
   Users,
   Video,
@@ -120,25 +122,25 @@ export default function HomePage() {
         <div className={styles.heroCopy}>
           <div className={styles.eyebrow}>
             <Sparkles size={16} />
-            {lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}
+            {lang === 'ar' ? 'برمجة مفهومة، خطوة بخطوة' : 'Programming, clearly explained'}
           </div>
           <h1>
             {lang === 'ar' ? (
               <>
-                افهم الكيمياء.
-                <span>حقق الدرجة.</span>
+                ابدأ البرمجة.
+                <span>وابني أول مشروع.</span>
               </>
             ) : (
               <>
-                Understand chemistry.
-                <span>Earn the grade.</span>
+                Start coding.
+                <span>Build your first project.</span>
               </>
             )}
           </h1>
           <p>
             {lang === 'ar'
-              ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
-              : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
+              ? 'شرح بسيط وتطبيق عملي يساعدك تفهم الأساسيات وتبدأ تكتب كود بنفسك.'
+              : 'Clear lessons and practical practice to help you understand the basics and start writing code yourself.'}
           </p>
           <div className={styles.heroActions}>
             <Link href={user ? '/my-learning' : '/login'} className={styles.primaryButton}>
@@ -150,27 +152,44 @@ export default function HomePage() {
               {arrow}
             </a>
           </div>
-          <p className={styles.teacherNote}>{lang === 'ar' ? 'د/ أحمد الشيخ • مدرس الكيمياء للمرحلة الثانوية' : 'Dr. Ahmed El-Sheikh • High school chemistry teacher'}</p>
+          <p className={styles.teacherNote}>{lang === 'ar' ? 'شهاب اكاديمى • تعلم البرمجة من البداية' : 'Shehab Academy • Learn programming from the start'}</p>
         </div>
 
         <div className={styles.heroVisual}>
           <div className={styles.teacherHalo} />
+
+          {/* Floating badge – Python lesson */}
+          <div className={`${styles.heroBadge} ${styles.heroBadgeLesson}`}>
+            <span><Terminal size={18} /></span>
+            <div>
+              <b>{lang === 'ar' ? 'Python • الدرس الأول' : 'Python • Lesson 1'}</b>
+              <small>{lang === 'ar' ? 'ابدأ من الصفر' : 'Start from scratch'}</small>
+            </div>
+          </div>
+
+          {/* Floating badge – challenge solved */}
+          <div className={`${styles.heroBadge} ${styles.heroBadgeChallenge}`}>
+            <span><CheckCircle2 size={18} /></span>
+            <div>
+              <b>{lang === 'ar' ? 'تحدي محلول ✓' : 'Challenge solved ✓'}</b>
+              <small>{lang === 'ar' ? 'أول كود بتكتبه' : 'Your first code'}</small>
+            </div>
+          </div>
+
+          {/* Decorative code dot top-right */}
+          <div className={`${styles.heroDot} ${styles.heroDotOne}`}><Code2 size={20} /></div>
+          {/* Decorative code dot bottom-left */}
+          <div className={`${styles.heroDot} ${styles.heroDotTwo}`}><Atom size={18} /></div>
+
           <div className={styles.teacherFrame}>
             <Image
-              src="/chemistry-teacher-v2.png"
-              alt={lang === 'ar' ? 'مدرس الكيمياء أحمد الشيخ' : 'Chemistry teacher Ahmed El-Sheikh'}
+              src="/home_hero_cutout.png"
+              alt={lang === 'ar' ? 'شهاب اكاديمى' : 'Shehab Academy'}
               fill
               priority
               sizes="(max-width: 760px) 78vw, 520px"
               className={styles.teacherImage}
             />
-          </div>
-          <div className={styles.teacherBadge}>
-            <span><Award size={22} /></span>
-            <div>
-              <strong>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</strong>
-              <small>{lang === 'ar' ? 'خبرة أكثر من 10 سنوات' : 'More than 10 years of experience'}</small>
-            </div>
           </div>
         </div>
 
@@ -178,7 +197,7 @@ export default function HomePage() {
           <div><span><Users size={24} /></span><strong>+15K</strong><small>{lang === 'ar' ? 'طالب سجل معنا' : 'students joined'}</small></div>
           <div><span><Clock3 size={24} /></span><strong>+200</strong><small>{lang === 'ar' ? 'ساعة محتوى' : 'content hours'}</small></div>
           <div><span><Star size={24} /></span><strong>+98%</strong><small>{lang === 'ar' ? 'نتائج مميزة' : 'great results'}</small></div>
-          <div><span><Award size={24} /></span><strong>+10</strong><small>{lang === 'ar' ? 'سنوات خبرة' : 'years experience'}</small></div>
+          <div><span><Code2 size={24} /></span><strong>0</strong><small>{lang === 'ar' ? 'لسه هنبدأ' : 'fresh start'}</small></div>
         </div>
       </section>
 
@@ -342,7 +361,7 @@ export default function HomePage() {
       <section className={styles.cta}>
         <div>
           <span><Users size={17} /> {lang === 'ar' ? 'انضم لطلابنا اليوم' : 'Join our students today'}</span>
-          <h2>{lang === 'ar' ? 'جاهز تخلي الكيمياء أسهل مادة عندك؟' : 'Ready to make chemistry your easiest subject?'}</h2>
+          <h2>{lang === 'ar' ? 'جاهز تبدأ رحلتك في البرمجة؟' : 'Ready to start your coding journey?'}</h2>
         </div>
         <Link href={user ? '/my-learning' : '/login'} className={styles.ctaButton}>
           {lang === 'ar' ? 'ابدأ مجانًا' : 'Start for free'}

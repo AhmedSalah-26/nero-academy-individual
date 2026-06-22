@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
 /// App Spacing - Consistent spacing values (8px grid system)
 class AppSpacing {
   AppSpacing._();
@@ -167,7 +169,7 @@ class AppShadows {
 
   static List<BoxShadow> primaryGlow = [
     BoxShadow(
-      color: const Color(0xFF7F13EC).withValues(alpha: 0.3),
+      color: AppColors.primary.withValues(alpha: 0.3),
       blurRadius: 12,
       offset: const Offset(0, 4),
     ),

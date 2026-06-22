@@ -543,7 +543,7 @@ class _QuizPreviewScreenState extends State<QuizPreviewScreen> {
       case 'single_choice':
         return Colors.blue;
       case 'multiple_choice':
-        return Colors.purple;
+        return Colors.blue;
       case 'true_false':
         return Colors.orange;
       case 'short_answer':

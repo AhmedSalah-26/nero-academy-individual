@@ -6,12 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
 
 import 'core/core.dart';
-import 'core/config/paymob_config.dart';
 import 'core/di/injection_container.dart';
 import 'core/routing/app_router.dart';
 import 'core/services/dev_http_overrides.dart';
 import 'core/services/theme_service.dart';
-import 'features/payment/data/services/paymob_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,17 +34,6 @@ void main() async {
 
   // Initialize Dependencies
   await initDependencies();
-
-  // Initialize Paymob (only if configured)
-  if (PaymobConfig.isConfigured) {
-    await PaymobService.initialize(
-      apiKey: PaymobConfig.apiKey,
-      integrationId: PaymobConfig.integrationId,
-      iFrameId: PaymobConfig.iFrameId,
-      walletIntegrationId: PaymobConfig.walletIntegrationId,
-    );
-    debugPrint('✅ [Main] Paymob initialized successfully');
-  }
 
   // Initialize Theme Service
   await ThemeService.instance.init();

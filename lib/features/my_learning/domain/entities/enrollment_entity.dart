@@ -63,7 +63,7 @@ class EnrollmentEntity extends Equatable {
   /// Get progress color based on percentage
   String get progressColorHex {
     if (progressPercentage >= 80) return '#10B981'; // emerald
-    if (progressPercentage >= 30) return '#7f13ec'; // primary
+    if (progressPercentage >= 30) return '#2563EB'; // primary
     return '#F59E0B'; // amber
   }
 

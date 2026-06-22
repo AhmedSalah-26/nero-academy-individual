@@ -19,6 +19,7 @@ import '../widgets/login/auth_tab_bar.dart';
 import '../widgets/login/auth_text_field.dart';
 import '../widgets/login/avatar_picker.dart';
 import '../widgets/login/multi_stage_register.dart';
+import '../widgets/login/social_login_buttons.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -161,6 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   const SizedBox(height: 24),
                                                   _submitBtn(),
                                                   const SizedBox(height: 16),
+                                                  _googleAuthSection(),
+                                                  const SizedBox(height: 16),
                                                   _parentLoginBtn(isDark),
                                                   const SizedBox(height: 32),
                                                   _terms(),
@@ -200,6 +203,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   if (!_isLogin) ...[
+                                    const SizedBox(height: 16),
+                                    FadeIn(
+                                      delay: const Duration(milliseconds: 350),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24),
+                                        child: _googleAuthSection(),
+                                      ),
+                                    ),
                                     const SizedBox(height: 16),
                                     FadeIn(
                                       delay: const Duration(milliseconds: 400),
@@ -251,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
   Widget _brandNameText(bool isArabic, bool isDark) {
-    final brandName = isArabic ? 'نيرو اكاديمى' : 'Nero Academy';
+    final brandName = isArabic ? 'شهاب اكاديمى' : 'Shehab Academy';
     final gradient = isDark
         ? const LinearGradient(
             colors: [
@@ -385,6 +397,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
           ),
         ),
+      );
+
+  Widget _googleAuthSection() => BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, state) {
+          return SocialLoginButtons(
+            isLoading: state.isLoading,
+            showApple: false,
+            showFacebook: false,
+            googleLabel: _isLogin
+                ? (context.locale.languageCode == 'ar'
+                    ? 'الدخول بحساب Google'
+                    : 'Continue with Google')
+                : (context.locale.languageCode == 'ar'
+                    ? 'التسجيل بحساب Google'
+                    : 'Sign up with Google'),
+            onGoogleTap: () => context.read<AuthCubit>().loginWithGoogle(),
+          );
+        },
       );
 
   Widget _parentLoginBtn(bool isDark) {

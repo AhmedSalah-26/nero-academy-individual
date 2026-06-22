@@ -54,9 +54,9 @@ Future<Either<Failure, User>> login(String email, String password) async {
 
 ```dart
 // Primary
-AppColors.primary        // #7F13EC - البنفسجي الأساسي
-AppColors.primaryLight   // #D4BBFF - البنفسجي الفاتح
-AppColors.primaryDark    // #5A0DB3 - البنفسجي الداكن
+AppColors.primary        // #2563EB - الأزرق الأساسي
+AppColors.primaryLight   // #BFDBFE - الأزرق الفاتح
+AppColors.primaryDark    // #1D4ED8 - الأزرق الداكن
 
 // Background
 AppColors.backgroundLight  // #F7F6F8 - خلفية Light Mode

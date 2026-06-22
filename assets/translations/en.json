@@ -1,5 +1,5 @@
 {
-  "app_name": "Nero Academy",
+  "app_name": "Shehab Academy",
   "splash_slogan": "We will continue the journey together",
   "clear_all": "Clear All",
   "common": {
@@ -190,7 +190,7 @@
     "hello": "Hello",
     "greeting": "Hello, Student",
     "explore_courses": "Explore Courses",
-    "search_placeholder": "Search for anything...",
+    "search_placeholder": "Search for a lesson, exam, note...",
     "all": "All",
     "flash_sale": "Flash Sale",
     "flash_sale_subtitle": "Limited time offers!",
@@ -204,7 +204,8 @@
     "continue": "Continue",
     "completed": "completed",
     "recommended_for_you": "Recommended for You",
-    "based_on_interests": "Based on your interests"
+    "based_on_interests": "Based on your interests",
+    "no_courses_available": "No courses currently available"
   },
   "course": {
     "course": "Course",

@@ -1,8 +1,8 @@
 .page {
   --ink: #181326;
   --muted: #6e687b;
-  --purple: #6d32e8;
-  --purple-dark: #4720a5;
+  --brand: #2563eb;
+  --brand-dark: #1d4ed8;
   --lime: #c9f64a;
   width: min(1240px, calc(100% - 40px));
   margin: 0 auto;
@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--purple);
+  color: var(--brand);
   font-size: .78rem;
   font-weight: 800;
   letter-spacing: .02em;
@@ -67,7 +67,7 @@
   line-height: 1.04;
   letter-spacing: -.07em;
 }
-.hero h1 span { display: block; color: var(--purple); }
+.hero h1 span { display: block; color: var(--brand); }
 .heroCopy > p {
   max-width: 500px;
   color: var(--muted);
@@ -90,12 +90,12 @@
   min-height: 52px;
   padding: 0 23px;
   color: white;
-  background: var(--purple);
+  background: var(--brand);
   box-shadow: 0 14px 30px rgba(109, 50, 232, .26);
 }
 .primaryButton:hover, .darkButton:hover, .ctaButton:hover { transform: translateY(-3px); }
 .textButton { color: var(--ink); background: transparent; }
-.textButton:hover { color: var(--purple); transform: translateX(-3px); }
+.textButton:hover { color: var(--brand); transform: translateX(-3px); }
 .heroTrust { margin-top: 36px; display: flex; align-items: center; gap: 14px; color: var(--muted); }
 .heroTrust > div:nth-child(2) { display: grid; gap: 1px; }
 .heroTrust strong { color: var(--ink); font-size: .8rem; }
@@ -110,7 +110,7 @@
   border: 2px solid #f4f0ff;
   border-radius: 50%;
   color: white;
-  background: var(--purple);
+  background: var(--brand);
   font-size: .65rem;
 }
 .avatarStack span:nth-child(2) { background: #2d2443; }
@@ -126,7 +126,7 @@
   bottom: 12px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: var(--purple);
+  background: var(--brand);
   box-shadow: inset 0 0 0 22px rgba(255,255,255,.07), 0 34px 60px rgba(83, 40, 176, .25);
 }
 .visualHalo::before, .visualHalo::after {
@@ -161,7 +161,7 @@
   backdrop-filter: blur(10px);
   animation: float 5s ease-in-out infinite;
 }
-.floatingCard > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--purple); background: #eee7ff; }
+.floatingCard > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--brand); background: #dbeafe; }
 .floatingCard div { display: grid; gap: 1px; }
 .floatingCard b { color: var(--ink); font-size: .83rem; }
 .floatingCard small { color: var(--muted); font-size: .6rem; font-weight: 700; }
@@ -173,7 +173,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--purple);
+  color: var(--brand);
   background: var(--lime);
 }
 .atomOne { width: 47px; height: 47px; top: 36px; right: 16px; }
@@ -192,14 +192,14 @@
 }
 .proofBar div { padding: 5px 18px; display: flex; align-items: center; justify-content: center; gap: 10px; border-inline-end: 1px solid rgba(67, 42, 116, .1); }
 .proofBar div:last-child { border: 0; }
-.proofBar span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--purple); background: #f1ebff; }
+.proofBar span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--brand); background: #e0f2fe; }
 .proofBar b { color: var(--ink); font-size: .72rem; }
 
 .section { margin-bottom: 116px; scroll-margin-top: 100px; animation: sectionEnter .6s ease both; }
 .sectionHeading { margin-bottom: 28px; display: flex; align-items: end; justify-content: space-between; gap: 28px; }
 .sectionHeading h2, .journeyIntro h2, .cta h2 { margin: 8px 0 7px; color: var(--ink); font-size: clamp(1.8rem, 3.2vw, 3rem); line-height: 1.25; letter-spacing: -.045em; }
 .sectionHeading p, .journeyIntro p { color: var(--muted); font-size: .85rem; font-weight: 600; line-height: 1.75; }
-.outlineButton { min-height: 43px; padding: 0 16px; flex: 0 0 auto; color: var(--purple); border: 1px solid rgba(109, 50, 232, .24); background: transparent; font-size: .72rem; }
+.outlineButton { min-height: 43px; padding: 0 16px; flex: 0 0 auto; color: var(--brand); border: 1px solid rgba(37, 99, 235, .24); background: transparent; font-size: .72rem; }
 .outlineButton:hover { transform: translateY(-2px); background: #f3edff; }
 .searchBox {
   max-width: 440px;
@@ -211,7 +211,7 @@
   gap: 10px;
   border: 1px solid rgba(67, 42, 116, .13);
   border-radius: 13px;
-  color: var(--purple);
+  color: var(--brand);
   background: white;
   box-shadow: 0 10px 28px rgba(53, 33, 91, .05);
 }
@@ -224,7 +224,7 @@
 .courseMedia { position: relative; aspect-ratio: 16 / 9.2; overflow: hidden; background: #ede6fa; }
 .courseMedia img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
 .courseCard:hover .courseMedia img { transform: scale(1.04); }
-.coursePlaceholder { width: 100%; height: 100%; display: grid; place-items: center; color: var(--purple); background: linear-gradient(145deg, #ece4ff, #f7f4ff); }
+.coursePlaceholder { width: 100%; height: 100%; display: grid; place-items: center; color: var(--brand); background: linear-gradient(145deg, #dbeafe, #f0f9ff); }
 .courseNumber { position: absolute; top: 13px; right: 14px; color: rgba(255,255,255,.86); font-size: 1.1rem; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
 .favoriteButton, .cardAction, .reviewArrows button {
   display: grid;
@@ -233,7 +233,7 @@
   cursor: pointer;
 }
 .favoriteButton { position: absolute; top: 12px; left: 12px; width: 36px; height: 36px; border-radius: 50%; color: var(--ink); background: rgba(255,255,255,.9); backdrop-filter: blur(8px); }
-.favoriteActive { color: var(--purple); }
+.favoriteActive { color: var(--brand); }
 .courseBody { padding: 18px; }
 .courseMeta { display: flex; gap: 14px; color: var(--muted); font-size: .61rem; font-weight: 700; }
 .courseMeta span { display: flex; align-items: center; gap: 5px; }
@@ -241,11 +241,11 @@
 .courseBody > p { min-height: 40px; color: var(--muted); font-size: .67rem; font-weight: 600; line-height: 1.7; }
 .courseFooter { margin-top: 17px; padding-top: 14px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eeeaf3; }
 .price { display: flex; align-items: baseline; gap: 7px; }
-.price strong { color: var(--purple); font-size: .86rem; }
+.price strong { color: var(--brand); font-size: .86rem; }
 .price del { color: #a69eaf; font-size: .58rem; }
-.cardAction { width: 36px; height: 36px; border-radius: 11px; color: white; background: var(--purple); transition: transform .2s ease, background .2s ease; }
-.cardAction:hover { transform: rotate(-6deg) scale(1.05); background: var(--purple-dark); }
-.cardAction:disabled { color: var(--purple); background: #eee7ff; }
+.cardAction { width: 36px; height: 36px; border-radius: 11px; color: white; background: var(--brand); transition: transform .2s ease, background .2s ease; }
+.cardAction:hover { transform: rotate(-6deg) scale(1.05); background: var(--brand-dark); }
+.cardAction:disabled { color: var(--brand); background: #dbeafe; }
 .emptyState { min-height: 180px; display: grid; place-items: center; align-content: center; gap: 10px; border: 1px dashed rgba(109, 50, 232, .22); border-radius: 20px; color: var(--muted); background: white; font-size: .8rem; font-weight: 700; }
 
 .journey {
@@ -270,12 +270,12 @@
 
 .reviewArrows { display: flex; gap: 7px; }
 .reviewArrows button { width: 38px; height: 38px; border: 1px solid rgba(67, 42, 116, .14); border-radius: 50%; color: var(--ink); background: white; }
-.reviewArrows button:hover { color: white; background: var(--purple); }
+.reviewArrows button:hover { color: white; background: var(--brand); }
 .reviewGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .reviewCard { padding: 24px; border: 1px solid rgba(67, 42, 116, .1); border-radius: 18px; background: white; transition: transform .22s ease; }
 .reviewCard:hover { transform: translateY(-5px); }
 .reviewTop { display: flex; align-items: center; gap: 10px; }
-.reviewTop > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--purple); font-weight: 900; }
+.reviewTop > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--brand); font-weight: 900; }
 .reviewTop div { display: grid; gap: 1px; }
 .reviewTop h3 { color: var(--ink); font-size: .76rem; }
 .reviewTop small { color: var(--muted); font-size: .58rem; font-weight: 700; }
@@ -291,8 +291,8 @@
   gap: 30px;
   overflow: hidden;
   border-radius: 26px;
-  background: var(--purple);
-  box-shadow: 0 25px 60px rgba(109, 50, 232, .24);
+  background: var(--brand);
+  box-shadow: 0 25px 60px rgba(37, 99, 235, .24);
 }
 .cta span { display: flex; align-items: center; gap: 7px; color: var(--lime); font-size: .68rem; font-weight: 800; }
 .cta h2 { max-width: 700px; margin-bottom: 0; color: white; }
@@ -532,7 +532,7 @@
   .steps article:last-child { border-bottom: 0; }
 }
 
-/* El Gohary-inspired landing structure, adapted to Nero's purple identity. */
+/* El Gohary-inspired landing structure, adapted to Nero's blue identity. */
 .page {
   width: min(1320px, calc(100% - 40px));
   padding-top: 22px;
@@ -555,7 +555,7 @@
 .hero h1 span { color: var(--lime); }
 .heroCopy > p { color: rgba(255,255,255,.78); }
 .heroActions { margin-top: 26px; }
-.hero .primaryButton { color: var(--purple-dark); background: white; box-shadow: none; }
+.hero .primaryButton { color: var(--brand-dark); background: white; box-shadow: none; }
 .hero .textButton { color: white; }
 .teacherNote { margin-top: 34px; color: rgba(255,255,255,.66) !important; font-size: .66rem !important; }
 .heroVisual { height: 510px; align-self: end; }
@@ -564,7 +564,7 @@
 
 .section { margin-bottom: 100px; padding-top: 0; border-top: 0; }
 .sectionHeading { align-items: center; }
-.sectionHeading > div > span, .gradesCopy > span, .journeyIntro > span { color: var(--purple); font-weight: 900; }
+.sectionHeading > div > span, .gradesCopy > span, .journeyIntro > span { color: var(--brand); font-weight: 900; }
 .sectionHeading h2, .gradesCopy h2, .journeyIntro h2 { font-size: clamp(2rem, 3vw, 3.2rem); }
 
 .searchBox { margin-bottom: 20px; }
@@ -641,8 +641,8 @@
   height: 44px;
   margin-bottom: 24px;
   border: 0;
-  color: var(--purple);
-  background: #eee7ff;
+  color: var(--brand);
+  background: #dbeafe;
 }
 .steps h3 { color: var(--ink); }
 .steps p { color: var(--muted); }
@@ -665,9 +665,9 @@
   background: #eee9f7;
   box-shadow: none;
 }
-.cta span { color: var(--purple); }
+.cta span { color: var(--brand); }
 .cta h2 { color: var(--ink); }
-.ctaButton { color: white; background: var(--purple); }
+.ctaButton { color: white; background: var(--brand); }
 
 [data-theme="dark"] .courseCard,
 [data-theme="dark"] .reviewCard { background: #151124; }
@@ -726,7 +726,7 @@
 
 .eyebrow {
   padding: 9px 15px;
-  color: var(--purple);
+  color: var(--brand);
   border: 0;
   border-radius: 99px;
   background: #f4effd;
@@ -738,10 +738,10 @@
   font-size: clamp(3.5rem, 5.2vw, 5.9rem);
   text-shadow: 0 7px 22px rgba(35, 22, 60, .08);
 }
-.hero h1 span { color: var(--purple); }
+.hero h1 span { color: var(--brand); }
 .heroCopy > p { color: var(--muted); }
-.hero .primaryButton { color: white; background: var(--purple); box-shadow: 0 14px 28px rgba(109,50,232,.22); }
-.hero .textButton { color: var(--purple); }
+.hero .primaryButton { color: white; background: var(--brand); box-shadow: 0 14px 28px rgba(37,99,235,.22); }
+.hero .textButton { color: var(--brand); }
 .teacherNote { display: none; }
 
 .heroVisual {
@@ -788,7 +788,7 @@
   box-shadow: 0 16px 35px rgba(51,31,88,.1);
   backdrop-filter: blur(12px);
 }
-.teacherBadge > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--purple); background: #f0e8ff; }
+.teacherBadge > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; color: var(--brand); background: #dbeafe; }
 .teacherBadge div { display: grid; gap: 3px; }
 .teacherBadge strong { color: var(--ink); font-size: .68rem; }
 .teacherBadge small { color: var(--muted); font-size: .55rem; font-weight: 700; }
@@ -813,8 +813,8 @@
 }
 .heroStats > div { min-width: 0; display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 2px 12px; border-inline-end: 1px solid rgba(109,50,232,.12); }
 .heroStats > div:last-child { border: 0; }
-.heroStats span { grid-row: span 2; color: var(--purple); }
-.heroStats strong { color: var(--purple); font-size: 1.2rem; }
+.heroStats span { grid-row: span 2; color: var(--brand); }
+.heroStats strong { color: var(--brand); font-size: 1.2rem; }
 .heroStats small { color: var(--muted); font-size: .56rem; font-weight: 700; white-space: nowrap; }
 
 [data-theme="dark"] .hero {
@@ -895,8 +895,8 @@
 .page {
   --ink: var(--text-main);
   --muted: var(--text-muted);
-  --purple: var(--primary);
-  --purple-dark: var(--primary-dark);
+  --brand: var(--primary);
+  --brand-dark: var(--primary-dark);
   --lime: var(--accent);
   width: min(1380px, calc(100% - 36px));
   padding: 34px 0 90px;
@@ -1944,4 +1944,102 @@
   background:
     radial-gradient(circle at 88% 70%, rgba(108,47,242,.18), transparent 24rem),
     linear-gradient(135deg, #171024, #08050f);
+}
+
+/* ── Programming floating badges around teacher ── */
+.heroBadge {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--glass-bg);
+  box-shadow: 0 18px 42px rgba(23,16,36,.14);
+  backdrop-filter: blur(14px);
+  animation: float 5s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.heroBadge > span {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.heroBadge div { display: grid; gap: 2px; }
+.heroBadge b   { color: var(--text-main); font-size: .78rem; }
+.heroBadge small { color: var(--text-muted); font-size: .58rem; font-weight: 700; }
+
+.heroBadgeLesson {
+  left: -14px;
+  top: 90px;
+  animation-delay: 0s;
+}
+
+.heroBadgeChallenge {
+  right: -14px;
+  bottom: 110px;
+  animation-delay: -2.5s;
+}
+
+.heroDot {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-card));
+  box-shadow: 0 8px 22px rgba(23,16,36,.12);
+  animation: float 6s ease-in-out infinite;
+}
+
+.heroDotOne {
+  width: 50px;
+  height: 50px;
+  top: 28px;
+  right: 22px;
+  animation-delay: -1s;
+}
+
+.heroDotTwo {
+  width: 40px;
+  height: 40px;
+  bottom: 50px;
+  left: 22px;
+  animation-delay: -3s;
+}
+
+[data-theme="dark"] .heroBadge {
+  background: rgba(22,12,44,.82);
+  border-color: rgba(155,77,255,.3);
+  box-shadow: 0 18px 42px rgba(0,0,0,.28);
+}
+[data-theme="dark"] .heroBadge b { color: #fff; }
+[data-theme="dark"] .heroBadge small { color: #b9aecb; }
+[data-theme="dark"] .heroBadge > span { color: #0f0a1c; }
+[data-theme="dark"] .heroDot { background: rgba(109,50,232,.22); color: var(--accent); }
+
+@media (max-width: 900px) {
+  .heroBadgeLesson { left: -6px; }
+  .heroBadgeChallenge { right: -6px; }
+}
+
+@media (max-width: 760px) {
+  .heroBadge { padding: 8px 12px; gap: 8px; }
+  .heroBadge > span { width: 30px; height: 30px; }
+  .heroBadge b { font-size: .67rem; }
+  .heroBadge small { font-size: .5rem; }
+  .heroBadgeLesson { top: 60px; left: 0; }
+  .heroBadgeChallenge { bottom: 70px; right: 0; }
+  .heroDotOne { width: 38px; height: 38px; top: 16px; right: 6px; }
+  .heroDotTwo { display: none; }
 }

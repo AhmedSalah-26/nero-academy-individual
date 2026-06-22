@@ -12,6 +12,7 @@ import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/services/screen_protection_service.dart';
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../quizzes/domain/entities/quiz_entity.dart';
 import '../../../quizzes/domain/repositories/quizzes_repository.dart';
 import '../cubit/course_player_cubit.dart';
 import '../cubit/course_player_state.dart';
@@ -410,7 +411,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
               context.goNamed(
                 'quiz-info',
                 pathParameters: {'quizId': quiz.id},
-                queryParameters: _buildQuizNavigationQueryParameters(state),
+                queryParameters:
+                    _buildQuizNavigationQueryParameters(state, quiz),
               );
             },
           )
@@ -430,7 +432,9 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   }
 
   Map<String, String> _buildQuizNavigationQueryParameters(
-      CoursePlayerState state) {
+    CoursePlayerState state,
+    QuizEntity quiz,
+  ) {
     final params = <String, String>{
       'enrollment': state.enrollmentId ?? '',
     };
@@ -441,9 +445,9 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     if (state.courseId != null && state.courseId!.trim().isNotEmpty) {
       params['courseId'] = state.courseId!;
     }
-    if (state.currentLesson?.id != null &&
-        state.currentLesson!.id.trim().isNotEmpty) {
-      params['lesson'] = state.currentLesson!.id;
+    final quizLessonId = quiz.lessonId;
+    if (quizLessonId != null && quizLessonId.trim().isNotEmpty) {
+      params['lesson'] = quizLessonId;
     }
     if (state.instructorId != null && state.instructorId!.trim().isNotEmpty) {
       params['instructorId'] = state.instructorId!;

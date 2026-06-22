@@ -66,7 +66,7 @@ class HomeAppBar extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.right,
                       style: AppTextStyles.headlineMedium.copyWith(
-                        color: const Color(0xFF6D28D9),
+                        color: AppColors.primaryDark,
                         fontWeight: FontWeight.w800,
                         fontSize: (screenWidth * 0.040).clamp(15.0, 17.0),
                         fontFamily: 'Almarai',

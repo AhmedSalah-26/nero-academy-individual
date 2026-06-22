@@ -16,6 +16,7 @@ import '../widgets/instructor_quizzes/instructor_quizzes_content.dart';
 import '../widgets/instructor_settings/instructor_settings_content.dart';
 import '../widgets/instructor_categories/instructor_categories_content.dart';
 import '../widgets/instructor_banners/instructor_banners_content.dart';
+import 'manual_purchase_requests_screen.dart';
 
 /// Instructor Dashboard Screen
 class InstructorDashboardScreen extends StatefulWidget {
@@ -54,6 +55,11 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
       label: 'Enrollments',
       labelAr: 'التسجيلات',
       icon: Icons.assignment_ind_rounded,
+    ),
+    DashboardNavItem(
+      label: 'Purchase Requests',
+      labelAr: 'طلبات الشراء',
+      icon: Icons.fact_check_rounded,
     ),
     DashboardNavItem(
       label: 'Earnings',
@@ -124,27 +130,30 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
         content = const InstructorEnrollmentsContent();
         break;
       case 5:
-        content = const InstructorEarningsContent();
+        content = const ManualPurchaseRequestsScreen();
         break;
       case 6:
-        content = const InstructorCouponsContent();
+        content = const InstructorEarningsContent();
         break;
       case 7:
-        content = const InstructorQuizzesContent();
+        content = const InstructorCouponsContent();
         break;
       case 8:
-        content = const InstructorQAContent();
+        content = const InstructorQuizzesContent();
         break;
       case 9:
-        content = const InstructorReviewsContent();
+        content = const InstructorQAContent();
         break;
       case 10:
-        content = const InstructorCategoriesContent();
+        content = const InstructorReviewsContent();
         break;
       case 11:
-        content = const InstructorBannersContent();
+        content = const InstructorCategoriesContent();
         break;
       case 12:
+        content = const InstructorBannersContent();
+        break;
+      case 13:
         content = const InstructorSettingsContent();
         break;
       default:

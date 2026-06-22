@@ -10,6 +10,7 @@ export 'domain/usecases/logout_usecase.dart';
 export 'domain/usecases/get_current_user_usecase.dart';
 export 'domain/usecases/forgot_password_usecase.dart';
 export 'domain/usecases/update_interests_usecase.dart';
+export 'domain/usecases/login_with_google_usecase.dart';
 
 // ============ Data ============
 export 'data/models/user_model.dart';

@@ -161,6 +161,7 @@ class _QuestionEditorScreenState extends State<QuestionEditorScreen> {
     bool success;
     if (isEditing) {
       success = await widget.cubit.updateQuestion(
+        quizId: widget.quizId,
         questionId: widget.question!.id,
         questionAr: _questionArController.text,
         questionEn: _questionEnController.text,

@@ -71,12 +71,36 @@ class _QuizzesSectionState extends State<QuizzesSection> {
         final quizzes = snapshot.data ?? [];
         if (quizzes.isEmpty) return _buildEmptyState();
 
-        return ListView.builder(
+        final lessonQuizzes =
+            quizzes.where((quiz) => !quiz.isCourseLevelQuiz).toList();
+        final courseQuizzes =
+            quizzes.where((quiz) => quiz.isCourseLevelQuiz).toList();
+
+        return ListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-          itemCount: quizzes.length,
-          itemBuilder: (_, index) => _buildQuizItem(quizzes[index]),
+          children: [
+            if (lessonQuizzes.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'اختبارات الدروس',
+                subtitle: 'اختبارات مرتبطة بدروس محددة داخل الكورس',
+                icon: Icons.menu_book_outlined,
+              ),
+              const SizedBox(height: 12),
+              ...lessonQuizzes.map(_buildQuizItem),
+              const SizedBox(height: 20),
+            ],
+            if (courseQuizzes.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'اختبار شامل',
+                subtitle: 'اختبارات على محتوى الكورس بالكامل',
+                icon: Icons.school_outlined,
+              ),
+              const SizedBox(height: 12),
+              ...courseQuizzes.map(_buildQuizItem),
+            ],
+          ],
         );
       },
     );
@@ -87,6 +111,52 @@ class _QuizzesSectionState extends State<QuizzesSection> {
       child: EmptyState(
         type: EmptyStateType.quizzes,
       ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 22),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color:
+                      widget.isDark ? AppColors.white : AppColors.textMainLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -150,6 +220,27 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           ),
         ),
         const SizedBox(height: 4),
+        if (!quiz.isCourseLevelQuiz) ...[
+          Row(
+            children: [
+              Icon(
+                Icons.menu_book_outlined,
+                size: 14,
+                color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'اختبار درس',
+                style: TextStyle(
+                  color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+        ],
         Row(
           children: [
             Icon(

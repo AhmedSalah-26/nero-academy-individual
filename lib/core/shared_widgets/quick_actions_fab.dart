@@ -93,11 +93,14 @@ class _QuickActionsFabState extends State<QuickActionsFab>
                     (1.0 - delay).clamp(0.01, 1.0),
               );
 
-              return Transform.translate(
-                offset: Offset(0, 20 * (1 - progress)),
-                child: Opacity(
-                  opacity: progress.clamp(0.0, 1.0),
-                  child: child,
+              return IgnorePointer(
+                ignoring: !_isExpanded,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - progress)),
+                  child: Opacity(
+                    opacity: progress.clamp(0.0, 1.0),
+                    child: child,
+                  ),
                 ),
               );
             },

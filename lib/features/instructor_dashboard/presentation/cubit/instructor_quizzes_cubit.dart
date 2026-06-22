@@ -113,9 +113,10 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     loadQuizzes(refresh: true);
   }
 
-  /// Create quiz (course-level)
+  /// Create quiz. When lessonId is null, the quiz is course-level.
   Future<bool> createQuiz({
     required String courseId,
+    String? lessonId,
     required String titleAr,
     required String titleEn,
     String? descriptionAr,
@@ -134,7 +135,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
           .from('quizzes')
           .insert({
             'course_id': courseId,
-            'lesson_id': null, // Course-level quiz
+            'lesson_id': lessonId,
             'title_ar': titleAr,
             'title_en': titleEn,
             'description_ar': descriptionAr,
@@ -247,6 +248,30 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     }
   }
 
+  Future<void> _refreshQuizQuestionTotals(String quizId) async {
+    try {
+      final response = await _supabase
+          .from('quiz_questions')
+          .select('points')
+          .eq('quiz_id', quizId);
+      final questions = response as List;
+      final totalPoints = questions.fold<int>(0, (sum, question) {
+        final points = question['points'];
+        if (points is int) return sum + points;
+        if (points is num) return sum + points.toInt();
+        return sum;
+      });
+
+      await _supabase.from('quizzes').update({
+        'total_questions': questions.length,
+        'total_points': totalPoints,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', quizId);
+    } catch (e, s) {
+      AppLogger.e('[$_tag] refresh quiz question totals error', e, s);
+    }
+  }
+
   /// Add question
   Future<bool> addQuestion({
     required String quizId,
@@ -309,17 +334,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
           .single();
       AppLogger.d('📝 [$_tag] Insert response: $response');
 
-      // Update quiz total_questions count
-      AppLogger.d('📝 [$_tag] Updating quiz count...');
-      try {
-        await _supabase.rpc('increment_quiz_questions', params: {
-          'p_quiz_id': quizId,
-          'p_points': points,
-        });
-      } catch (rpcError) {
-        AppLogger.w(
-            '📝 [$_tag] RPC failed (function may not exist): $rpcError');
-      }
+      await _refreshQuizQuestionTotals(quizId);
 
       AppLogger.success('[$_tag] Question added successfully');
       return true;
@@ -332,6 +347,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
 
   /// Update question
   Future<bool> updateQuestion({
+    required String quizId,
     required String questionId,
     String? questionAr,
     String? questionEn,
@@ -370,6 +386,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
             .from('quiz_questions')
             .update(updates)
             .eq('id', questionId);
+        await _refreshQuizQuestionTotals(quizId);
       }
 
       AppLogger.success('[$_tag] Question updated');
@@ -386,21 +403,8 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     AppLogger.i('📝 [$_tag] deleteQuestion: questionId=$questionId');
 
     try {
-      // Get question points before deleting
-      final question = await _supabase
-          .from('quiz_questions')
-          .select('points')
-          .eq('id', questionId)
-          .single();
-      final points = question['points'] as int? ?? 1;
-
       await _supabase.from('quiz_questions').delete().eq('id', questionId);
-
-      // Update quiz total_questions count
-      await _supabase.rpc('decrement_quiz_questions', params: {
-        'p_quiz_id': quizId,
-        'p_points': points,
-      });
+      await _refreshQuizQuestionTotals(quizId);
 
       AppLogger.success('[$_tag] Question deleted');
       return true;

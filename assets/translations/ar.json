@@ -1,5 +1,5 @@
 {
-  "app_name": "نيرو اكاديمى",
+  "app_name": "شهاب اكاديمى",
   "splash_slogan": "معاك هنكمل المشوار",
   "clear_all": "مسح الكل",
   "common": {
@@ -190,7 +190,7 @@
     "hello": "مرحباً",
     "greeting": "مرحباً، طالب",
     "explore_courses": "استكشف الدورات",
-    "search_placeholder": "ابحث عن ما تريد...",
+    "search_placeholder": "ابحث عن درس، امتحان، مذكرة ...",
     "all": "الكل",
     "flash_sale": "عرض خاص",
     "flash_sale_subtitle": "عروض لفترة محدودة!",
@@ -204,7 +204,8 @@
     "continue": "استكمل",
     "completed": "مكتمل",
     "recommended_for_you": "مقترح لك",
-    "based_on_interests": "بناءً على اهتماماتك"
+    "based_on_interests": "بناءً على اهتماماتك",
+    "no_courses_available": "لا يوجد كورسات متاحة حاليا"
   },
   "course": {
     "course": "دورة",

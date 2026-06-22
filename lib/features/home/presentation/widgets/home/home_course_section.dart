@@ -80,15 +80,32 @@ class HomeCourseSection extends StatelessWidget {
           ),
         ),
         // Course List with BlocBuilder for proper rebuilds
-        BlocBuilder<WishlistCubit, WishlistState>(
-          builder: (context, wishlistState) {
-            if (isVertical) {
-              return _buildVerticalList(context, screenWidth, wishlistState);
-            }
-            return _buildHorizontalList(
-                context, screenWidth, screenHeight, wishlistState);
-          },
-        ),
+        if (courses.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30),
+            child: Center(
+              child: Text(
+                'home.no_courses_available'.tr(),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : const Color(0xFF6B7280),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          )
+        else
+          BlocBuilder<WishlistCubit, WishlistState>(
+            builder: (context, wishlistState) {
+              if (isVertical) {
+                return _buildVerticalList(context, screenWidth, wishlistState);
+              }
+              return _buildHorizontalList(
+                  context, screenWidth, screenHeight, wishlistState);
+            },
+          ),
       ],
     );
   }
