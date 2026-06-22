@@ -165,7 +165,7 @@ class _LogoMark extends StatelessWidget {
       width: 140,
       height: 140,
       decoration: BoxDecoration(
-        color: Colors.transparent,
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
@@ -177,18 +177,21 @@ class _LogoMark extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32),
-        child: Image.asset(
-          'assets/logo2.png',
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const ColoredBox(
-            color: Colors.transparent,
-            child: Center(
-              child: Text(
-                'ش',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 54,
-                  fontWeight: FontWeight.w900,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Image.asset(
+            'assets/logo2.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const ColoredBox(
+              color: Colors.transparent,
+              child: Center(
+                child: Text(
+                  'ش',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 54,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
