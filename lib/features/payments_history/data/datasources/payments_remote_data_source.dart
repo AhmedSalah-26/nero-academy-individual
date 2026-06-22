@@ -21,7 +21,8 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
               course_id,
               courses!inner(
                 id,
-                title,
+                title_ar,
+                title_en,
                 thumbnail_url,
                 price
               )
@@ -40,7 +41,7 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
             if (course != null) {
               courses.add(PaymentCourseModel(
                 courseId: course['id'] as String,
-                title: course['title'] as String,
+                title: course['title_ar'] as String? ?? course['title_en'] as String? ?? '',
                 thumbnailUrl: course['thumbnail_url'] as String?,
                 price: (course['price'] as num).toDouble(),
               ));
@@ -76,7 +77,8 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
               course_id,
               courses!inner(
                 id,
-                title,
+                title_ar,
+                title_en,
                 thumbnail_url,
                 price
               )
@@ -94,7 +96,7 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
           if (course != null) {
             courses.add(PaymentCourseModel(
               courseId: course['id'] as String,
-              title: course['title'] as String,
+              title: course['title_ar'] as String? ?? course['title_en'] as String? ?? '',
               thumbnailUrl: course['thumbnail_url'] as String?,
               price: (course['price'] as num).toDouble(),
             ));

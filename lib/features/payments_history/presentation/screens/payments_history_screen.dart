@@ -134,7 +134,7 @@ class _PaymentsHistoryView extends StatelessWidget {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      final authState = context.read<AuthCubit>().state;
+                      final authState = sl<AuthCubit>().state;
                       final userId = authState.user?.id ?? '';
                       await context
                           .read<PaymentsHistoryCubit>()
