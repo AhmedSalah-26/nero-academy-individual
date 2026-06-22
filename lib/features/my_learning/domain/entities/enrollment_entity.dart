@@ -14,22 +14,6 @@ class EnrollmentEntity extends Equatable {
   final String? instructorId;
   final String? instructorName;
   final String? instructorAvatar;
-import 'package:equatable/equatable.dart';
-
-/// Enrollment Status
-enum EnrollmentStatus { active, completed, expired }
-
-/// Enrollment Entity - Pure Dart Object
-class EnrollmentEntity extends Equatable {
-  final String id;
-  final String courseId;
-  final String userId;
-  final String? titleAr;
-  final String? titleEn;
-  final String? thumbnailUrl;
-  final String? instructorId;
-  final String? instructorName;
-  final String? instructorAvatar;
   final double progressPercentage;
   final int completedLessons;
   final int totalLessons;
