@@ -261,13 +261,7 @@ class CourseCard extends StatelessWidget {
   Widget _buildThumbnailFallback(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: isDark
-              ? const [Color(0xFF251643), Color(0xFF151225)]
-              : const [Color(0xFFE7D7FF), Color(0xFFF7F0FF)],
-        ),
+        color: isDark ? AppColors.surfaceDark : AppColors.grey200,
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -277,10 +271,9 @@ class CourseCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.12),
+              color: AppColors.grey400.withValues(alpha: isDark ? 0.18 : 0.12),
               border: Border.all(
-                color:
-                    AppColors.primary.withValues(alpha: isDark ? 0.34 : 0.28),
+                color: AppColors.grey400.withValues(alpha: isDark ? 0.34 : 0.28),
                 width: 1.5,
               ),
             ),
@@ -288,7 +281,7 @@ class CourseCard extends StatelessWidget {
               Icons.play_arrow_rounded,
               color: isDark
                   ? Colors.white.withValues(alpha: 0.82)
-                  : AppColors.primary.withValues(alpha: 0.82),
+                  : AppColors.grey600.withValues(alpha: 0.82),
               size: 28,
             ),
           ),
