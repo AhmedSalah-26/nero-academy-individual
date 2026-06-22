@@ -53,6 +53,7 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
     enrolled_at,
     last_accessed_at,
     completed_at,
+    access_expires_at,
     courses!inner (
       title_ar,
       title_en,
@@ -77,7 +78,8 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       var query = _client
           .from('enrollments')
           .select(_enrollmentSelect)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .or('access_expires_at.is.null,access_expires_at.gt.${DateTime.now().toUtc().toIso8601String()}');
 
       if (status != null) {
         query = query.eq('status', status.name);
@@ -122,6 +124,7 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
           .select(_enrollmentSelect)
           .eq('user_id', userId)
           .eq('status', 'active')
+          .or('access_expires_at.is.null,access_expires_at.gt.${DateTime.now().toUtc().toIso8601String()}')
           .gt('progress_percentage', 0)
           .order('last_accessed_at', ascending: false)
           .limit(1)

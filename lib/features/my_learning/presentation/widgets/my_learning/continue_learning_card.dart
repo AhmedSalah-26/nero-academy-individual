@@ -101,6 +101,10 @@ class ContinueLearningCard extends StatelessWidget {
                                 isDark ? AppColors.grey400 : AppColors.grey500,
                           ),
                         ),
+                      if (enrollment.accessExpiresAt != null) ...[
+                        const SizedBox(height: 12),
+                        _buildExpirationBadge(enrollment.accessExpiresAt!, locale, isDark),
+                      ],
                       const SizedBox(height: 16),
                       _buildProgressSection(progress, remaining, isDark),
                       const SizedBox(height: 16),
@@ -258,6 +262,39 @@ class ContinueLearningCard extends StatelessWidget {
           ),
           elevation: 0,
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpirationBadge(DateTime expiresAt, String locale, bool isDark) {
+    final daysLeft = expiresAt.difference(DateTime.now()).inDays;
+    final isArabic = locale == 'ar';
+    final text = daysLeft > 0 
+        ? (isArabic ? 'ينتهي الاشتراك خلال $daysLeft يوم' : 'Subscription expires in $daysLeft days')
+        : (isArabic ? 'ينتهي الاشتراك اليوم' : 'Subscription expires today');
+    final color = daysLeft <= 3 ? AppColors.error : AppColors.warning;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
