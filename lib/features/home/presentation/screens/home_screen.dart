@@ -266,7 +266,7 @@ class _EmptyCoursesState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Center(
         child: Text(
-          'لا يوجد كورسات متاحة حاليا',
+          'home.no_courses_available'.tr(),
           style: TextStyle(
             color: isDark
                 ? AppColors.textMutedDark

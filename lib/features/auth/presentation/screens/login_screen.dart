@@ -163,8 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   _submitBtn(),
                                                   const SizedBox(height: 16),
                                                   _googleAuthSection(),
-                                                  const SizedBox(height: 16),
-                                                  _parentLoginBtn(isDark),
                                                   const SizedBox(height: 32),
                                                   _terms(),
                                                 ],
@@ -416,40 +414,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         },
       );
-
-  Widget _parentLoginBtn(bool isDark) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed: () => context.push('/parent_entrance'),
-        icon: Icon(
-          Icons.family_restroom_rounded,
-          size: 20,
-          color: isDark ? AppColors.white : AppColors.primary,
-        ),
-        label: Text(
-          context.locale.languageCode == 'ar'
-              ? 'دخول كولي أمر'
-              : 'Login as Parent',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.white : AppColors.primary,
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: isDark ? AppColors.grey700 : AppColors.primary,
-            width: 1.5,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _terms() => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),

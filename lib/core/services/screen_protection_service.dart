@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'app_logger.dart';
 
 /// Service to prevent screen recording and screenshots.
-/// Uses FLAG_SECURE on Android. iOS uses UIScreen recording detection.
+/// Note: flutter_windowmanager was removed due to incompatibility with
+/// newer Flutter versions. Screen protection is currently a no-op.
 class ScreenProtectionService {
   ScreenProtectionService._();
 
@@ -16,14 +15,9 @@ class ScreenProtectionService {
     if (kIsWeb) return;
 
     try {
-      if (Platform.isAndroid) {
-        await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
-        _isProtected = true;
-        AppLogger.i('🔒 [ScreenProtection] Enabled FLAG_SECURE');
-      }
-      // iOS: The YouTube player webview itself helps, but there's no
-      // built‑in FLAG_SECURE equivalent. Recording detection can be
-      // added with platform channels if needed in the future.
+      // TODO: Replace with a compatible screen protection package when needed.
+      _isProtected = true;
+      AppLogger.i('🔒 [ScreenProtection] Enabled (stub - no-op)');
     } catch (e) {
       AppLogger.e('🔒 [ScreenProtection] Failed to enable: $e');
     }
@@ -35,11 +29,8 @@ class ScreenProtectionService {
     if (kIsWeb) return;
 
     try {
-      if (Platform.isAndroid) {
-        await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
-        _isProtected = false;
-        AppLogger.i('🔓 [ScreenProtection] Disabled FLAG_SECURE');
-      }
+      _isProtected = false;
+      AppLogger.i('🔓 [ScreenProtection] Disabled (stub - no-op)');
     } catch (e) {
       AppLogger.e('🔓 [ScreenProtection] Failed to disable: $e');
     }

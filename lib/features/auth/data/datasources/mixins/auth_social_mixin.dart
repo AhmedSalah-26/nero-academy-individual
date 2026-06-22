@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart' as google_sign_in;
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
@@ -24,21 +25,43 @@ mixin AuthSocialMixin {
         return profile;
       }
 
-      await supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: _oauthRedirectUrl,
-      );
-
-      // Web redirects the browser to Google. Supabase restores the session when
-      // the user returns to the app, so there is no synchronous user to return.
-      if (kIsWeb) {
+      if (AppConstants.googleWebClientId.isEmpty) {
         throw const app_exceptions.AuthException(
-          'جاري تحويلك إلى Google لإكمال تسجيل الدخول...',
-          code: 'oauth_redirect_started',
+          'معرف عميل جوجل مفقود، يرجى تحديث الإعدادات.',
+          code: 'missing_client_id',
         );
       }
 
-      final user = await _waitForOAuthUser();
+      await google_sign_in.GoogleSignIn.instance.initialize(
+        serverClientId: AppConstants.googleWebClientId,
+      );
+
+      final google_sign_in.GoogleSignInAccount googleUser =
+          await google_sign_in.GoogleSignIn.instance.authenticate();
+
+      // In v7, .authentication is a sync getter (not a Future)
+      final idToken = googleUser.authentication.idToken;
+      if (idToken == null) {
+        throw const app_exceptions.AuthException(
+          'لم يتم استلام idToken من جوجل.',
+          code: 'missing_id_token',
+        );
+      }
+
+      await supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+      );
+
+      // Web does not redirect out, so we can await and get the current user.
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        throw const app_exceptions.AuthException(
+          'فشل تسجيل الدخول بجوجل',
+          code: 'oauth_failed',
+        );
+      }
+
       final profile = await getOrCreateProfile(user);
       checkUserAccess(profile);
       return profile;

@@ -38,9 +38,7 @@ class AuthState extends Equatable {
 
   AuthState.authenticated(UserEntity user)
       : this(
-          status: user.isStudent && user.interests.isEmpty
-              ? AuthStatus.needsInterests
-              : AuthStatus.authenticated,
+          status: AuthStatus.authenticated,
           user: user,
         );
 
