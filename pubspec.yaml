@@ -27,6 +27,9 @@ dependencies:
   # Supabase & State Management
   supabase_flutter: ^2.8.0
   flutter_bloc: ^8.1.6
+  firebase_core: ^3.1.1
+  firebase_messaging: ^15.0.3
+  onesignal_flutter: ^5.2.4
   # Utilities
   dartz: ^0.10.1
   equatable: ^2.0.5

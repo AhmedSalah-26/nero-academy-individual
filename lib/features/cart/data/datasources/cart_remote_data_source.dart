@@ -288,6 +288,29 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             '🛒 [Checkout] Removed ${toRemove.length} already-enrolled course(s) from cart');
       }
 
+      // ✅ CHECK: منع إرسال طلب جديد لو في طلب pending على نفس الكورسات
+      final cartCourseIds = filteredCartItems
+          .map((item) => item['course_id'] as String)
+          .toList();
+
+      final pendingEnrollments = await supabase
+          .from('enrollments')
+          .select('course_id')
+          .eq('user_id', userId)
+          .eq('status', 'pending')
+          .inFilter('course_id', cartCourseIds);
+
+      if ((pendingEnrollments as List).isNotEmpty) {
+        final pendingCourseIds = pendingEnrollments
+            .map((e) => e['course_id'] as String)
+            .toList();
+        AppLogger.w(
+            '🛒 [Checkout] User already has pending orders for: $pendingCourseIds');
+        throw const ValidationException(
+            'You already have a pending purchase request for one or more of these courses. '
+            'Please wait for admin review before submitting again.');
+      }
+
       // Calculate total using current effective prices (considering flash sales)
       double total = 0;
       final List<Map<String, dynamic>> processedItems = [];

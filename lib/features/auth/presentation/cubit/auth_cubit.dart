@@ -14,6 +14,7 @@ import '../../domain/usecases/send_phone_otp_usecase.dart';
 import '../../domain/usecases/update_interests_usecase.dart';
 import '../../domain/usecases/verify_phone_otp_usecase.dart';
 import 'auth_state.dart';
+import '../../../../core/services/push_notification_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase _loginUseCase;
@@ -408,6 +409,18 @@ class AuthCubit extends Cubit<AuthState> {
             : AuthStatus.unauthenticated,
         errorMessage: null,
       ));
+    }
+  }
+
+  @override
+  void onChange(Change<AuthState> change) {
+    super.onChange(change);
+    final user = change.nextState.user;
+    if (user != null && change.nextState.isLoggedIn && !change.currentState.isLoggedIn) {
+      // تمرير دور المستخدم لـ OneSignal لاستهداف الأدمن بإشعارات طلبات الشراء
+      PushNotificationService.login(user.id, role: user.role.name);
+    } else if (change.nextState.status == AuthStatus.unauthenticated && change.currentState.status != AuthStatus.unauthenticated) {
+      PushNotificationService.logout();
     }
   }
 }

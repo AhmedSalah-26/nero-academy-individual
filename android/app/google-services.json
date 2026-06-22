@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676270746216",
+    "project_id": "nero-sehap",
+    "storage_bucket": "nero-sehap.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676270746216:android:28aa30dea7ffd14e5f29dd",
+        "android_client_info": {
+          "package_name": "com.neroacademy.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2xWyeBX4RiBWQNyW7ML7ruo_0kW--eEM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

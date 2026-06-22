@@ -5,14 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'core/core.dart';
 import 'core/di/injection_container.dart';
 import 'core/routing/app_router.dart';
 import 'core/services/dev_http_overrides.dart';
 import 'core/services/theme_service.dart';
 
+import 'core/services/push_notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('⚠️ [Main] Failed to initialize Firebase: $e');
+  }
+
+  // Initialize OneSignal
+  await PushNotificationService.initialize();
 
   // DEVELOPMENT ONLY: Allow self-signed certificates
   // Remove this in production!
