@@ -118,7 +118,7 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (dialogContext, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'إضافة درس جديد' : 'Add New Lesson'),
@@ -347,8 +347,7 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           order: 0,
                           isFree: isFree,
                           isPublished: isPublished,
-                          availableFrom:
-                              useScheduledPublish ? publishAt : null,
+                          availableFrom: useScheduledPublish ? publishAt : null,
                           availableUntil:
                               useScheduledPublish ? unpublishAt : null,
                           videoUrl: lessonType == 'video'
@@ -400,7 +399,7 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (dialogContext, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'تعديل الدرس' : 'Edit Lesson'),
@@ -630,8 +629,7 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           type: lessonType,
                           isFree: isFree,
                           isPublished: isPublished,
-                          availableFrom:
-                              useScheduledPublish ? publishAt : null,
+                          availableFrom: useScheduledPublish ? publishAt : null,
                           clearAvailableFrom: !useScheduledPublish,
                           availableUntil:
                               useScheduledPublish ? unpublishAt : null,
@@ -667,7 +665,7 @@ void confirmDeleteLesson(BuildContext context, CourseEditorCubit cubit,
     int sectionIndex, int lessonIndex, bool isArabic) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'حذف الدرس' : 'Delete Lesson',
       content: isArabic

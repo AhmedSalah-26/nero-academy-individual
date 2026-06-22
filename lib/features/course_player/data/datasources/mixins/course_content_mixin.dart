@@ -16,6 +16,17 @@ mixin CoursePlayerContentMixin {
     try {
       AppLogger.i('📚 [DataSource] Loading course content for: $courseId');
 
+      final course = await client
+          .from('courses')
+          .select('available_from, available_until, is_published')
+          .eq('id', courseId)
+          .maybeSingle();
+      if (course == null ||
+          course['is_published'] != true ||
+          !AvailabilityWindow.isJsonActive(course)) {
+        throw const ServerException('Course is not available');
+      }
+
       final response = await client
           .from('sections')
           .select('''
@@ -27,6 +38,8 @@ mixin CoursePlayerContentMixin {
             description_en,
             sort_order,
             is_published,
+            available_from,
+            available_until,
             created_at,
             lessons!inner(
               id,
@@ -71,6 +84,9 @@ mixin CoursePlayerContentMixin {
       final sections = (response as List)
           .map((e) {
             final json = e as Map<String, dynamic>;
+            if (!AvailabilityWindow.isJsonActive(json)) {
+              return null;
+            }
             AppLogger.i('📚 [DataSource] Parsing section: ${json['title_en']}');
             AppLogger.i('📚 [DataSource] Lessons in JSON: ${json['lessons']}');
 
@@ -87,6 +103,7 @@ mixin CoursePlayerContentMixin {
                 '📚 [DataSource] Section "${section.titleEn}" has ${section.lessons.length} lessons after parsing');
             return section;
           })
+          .whereType<SectionModel>()
           .where((section) => section.lessons.isNotEmpty)
           .toList();
 

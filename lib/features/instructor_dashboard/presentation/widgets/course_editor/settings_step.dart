@@ -48,7 +48,8 @@ class SettingsStep extends StatelessWidget {
               const SizedBox(height: 24),
               _buildCourseSummary(state, isArabic, isDark),
               const SizedBox(height: 24),
-              _buildAvailabilitySchedule(context, state, cubit, isArabic, isDark),
+              _buildAvailabilitySchedule(
+                  context, state, cubit, isArabic, isDark),
               const SizedBox(height: 32),
               if (!state.isEditing)
                 Wrap(
@@ -323,8 +324,12 @@ class SettingsStep extends StatelessWidget {
     );
   }
 
-  Widget _buildAvailabilitySchedule(BuildContext context,
-      CourseEditorState state, CourseEditorCubit cubit, bool isArabic, bool isDark) {
+  Widget _buildAvailabilitySchedule(
+      BuildContext context,
+      CourseEditorState state,
+      CourseEditorCubit cubit,
+      bool isArabic,
+      bool isDark) {
     final hasInvalidWindow = state.availableFrom != null &&
         state.availableUntil != null &&
         !state.availableUntil!.isAfter(state.availableFrom!);
@@ -365,7 +370,8 @@ class SettingsStep extends StatelessWidget {
                 ? 'حدد مدة ظهور الكورس للطلاب. اتركها فارغة ليظل متاحا دائما.'
                 : 'Set when students can see this course. Leave empty to keep it always available.',
             style: TextStyle(
-              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
           const SizedBox(height: 16),

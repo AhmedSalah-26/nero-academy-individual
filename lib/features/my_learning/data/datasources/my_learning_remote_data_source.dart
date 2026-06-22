@@ -62,6 +62,8 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       total_duration,
       rating,
       rating_count,
+      available_from,
+      available_until,
       instructor_id,
       profiles!courses_instructor_id_fkey (id, name, avatar_url)
     )

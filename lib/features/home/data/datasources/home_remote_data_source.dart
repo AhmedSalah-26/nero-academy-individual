@@ -33,8 +33,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     profiles:instructor_id(name, avatar_url)
   ''';
 
-  List<CourseModel> _mapAvailableCourses(List<dynamic> response,
-      {int? limit}) {
+  List<CourseModel> _mapAvailableCourses(List<dynamic> response, {int? limit}) {
     final courses = response
         .cast<Map<String, dynamic>>()
         .where(AvailabilityWindow.isJsonActive)

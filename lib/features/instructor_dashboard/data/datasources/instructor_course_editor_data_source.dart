@@ -213,8 +213,7 @@ class InstructorCourseEditorDataSource {
             'is_preview': lesson.isFree,
             'is_published': lesson.isPublished,
             'available_from': lesson.availableFrom?.toUtc().toIso8601String(),
-            'available_until':
-                lesson.availableUntil?.toUtc().toIso8601String(),
+            'available_until': lesson.availableUntil?.toUtc().toIso8601String(),
             'video_url': lesson.videoUrl,
             'article_content_ar': lesson.articleContent,
             'file_url': lesson.fileUrl,

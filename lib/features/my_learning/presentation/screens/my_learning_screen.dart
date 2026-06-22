@@ -316,6 +316,10 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
     }
 
     final enrollment = enrollments.first;
+    if (!enrollment.isCurrentlyAvailable) {
+      _showInactiveCourseMessage();
+      return;
+    }
     // Navigate and refresh when returning
     Navigator.of(context)
         .push(
@@ -350,6 +354,10 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
     }
 
     final enrollment = enrollments.first;
+    if (!enrollment.isCurrentlyAvailable) {
+      _showInactiveCourseMessage();
+      return;
+    }
     // Navigate and refresh when returning
     Navigator.of(context)
         .push(
@@ -402,5 +410,19 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
 
   void _onSeeAllRecommended() {
     AppRouter.goToSearch(context);
+  }
+
+  void _showInactiveCourseMessage() {
+    final isArabic = context.locale.languageCode == 'ar';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isArabic
+              ? 'الكورس غير مفعل حاليا وسيكون متاحا في معاده المحدد'
+              : 'This course is inactive now and will be available on schedule',
+        ),
+        backgroundColor: AppColors.warning,
+      ),
+    );
   }
 }

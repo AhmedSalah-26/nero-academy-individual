@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/availability_window.dart';
 
 /// Enrollment Status
 enum EnrollmentStatus { active, completed, expired }
@@ -24,6 +25,8 @@ class EnrollmentEntity extends Equatable {
   final DateTime? lastAccessedAt;
   final DateTime? completedAt;
   final DateTime? accessExpiresAt;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final double rating;
   final int ratingCount;
 
@@ -47,6 +50,8 @@ class EnrollmentEntity extends Equatable {
     this.lastAccessedAt,
     this.completedAt,
     this.accessExpiresAt,
+    this.availableFrom,
+    this.availableUntil,
     this.rating = 0,
     this.ratingCount = 0,
   });
@@ -61,6 +66,11 @@ class EnrollmentEntity extends Equatable {
   /// Check if course is in progress
   bool get isInProgress =>
       status == EnrollmentStatus.active && progressPercentage > 0;
+
+  bool get isCurrentlyAvailable => AvailabilityWindow.isActive(
+        availableFrom: availableFrom,
+        availableUntil: availableUntil,
+      );
 
   /// Get progress color based on percentage
   String get progressColorHex {
@@ -79,5 +89,7 @@ class EnrollmentEntity extends Equatable {
         completedLessons,
         lastAccessedAt,
         accessExpiresAt,
+        availableFrom,
+        availableUntil,
       ];
 }

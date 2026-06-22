@@ -148,142 +148,150 @@ class LessonTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Material(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
-          ),
-        ),
-        child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag Handle
-            ReorderableDragStartListener(
-              index: lessonIndex,
-              child: Icon(
-                Icons.drag_handle,
-                size: 20,
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-              ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Material(
+          color: isDark ? AppColors.cardDark : AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
             ),
-            const SizedBox(width: 8),
-            // Lesson Number
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: Text(
-                  '$lessonNumber',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: AppColors.primary,
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            leading: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag Handle
+                ReorderableDragStartListener(
+                  index: lessonIndex,
+                  child: Icon(
+                    Icons.drag_handle,
+                    size: 20,
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                // Lesson Number
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$lessonNumber',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Lesson Type Icon
+                Icon(
+                  _getLessonIcon(lesson.type),
+                  size: 20,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            // Lesson Type Icon
-            Icon(
-              _getLessonIcon(lesson.type),
-              size: 20,
-              color:
-                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-            ),
-          ],
-        ),
-        title: Text(
-          isArabic ? lesson.titleAr : lesson.titleEn,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
-          ),
-        ),
-        subtitle: Row(
-          children: [
-            Text(
-              _getLessonTypeLabel(lesson.type, isArabic),
+            title: Text(
+              isArabic ? lesson.titleAr : lesson.titleEn,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
                 color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
               ),
             ),
-            if (lesson.isFree) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  isArabic ? 'مجاني' : 'Free',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.success,
+            subtitle: Row(
+              children: [
+                Text(
+                  _getLessonTypeLabel(lesson.type, isArabic),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
                   ),
                 ),
-              ),
-            ],
-            if (lesson.availableFrom != null || lesson.availableUntil != null) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  isArabic ? 'مجدول' : 'Scheduled',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                if (lesson.isFree) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      isArabic ? 'مجاني' : 'Free',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.success,
+                      ),
+                    ),
                   ),
+                ],
+                if (lesson.availableFrom != null ||
+                    lesson.availableUntil != null) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      isArabic ? 'مجدول' : 'Scheduled',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 20,
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                  onPressed: onEdit,
+                  tooltip: isArabic ? 'تعديل' : 'Edit',
                 ),
-              ),
-            ],
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.edit_outlined,
-                size: 20,
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-              ),
-              onPressed: onEdit,
-              tooltip: isArabic ? 'تعديل' : 'Edit',
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: AppColors.error,
+                  ),
+                  onPressed: onDelete,
+                  tooltip: isArabic ? 'حذف' : 'Delete',
+                ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(
-                Icons.delete_outline,
-                size: 20,
-                color: AppColors.error,
-              ),
-              onPressed: onDelete,
-              tooltip: isArabic ? 'حذف' : 'Delete',
-            ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        ));
   }
 
   IconData _getLessonIcon(String type) {

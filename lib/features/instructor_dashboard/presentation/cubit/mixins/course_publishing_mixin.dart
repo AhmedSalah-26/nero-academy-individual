@@ -16,6 +16,14 @@ mixin CoursePublishingMixin
         '[CoursePublishingMixin] isEditing=${state.isEditing}, courseId=${state.courseId}');
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (!state.hasValidAvailabilityWindow) {
+        throw Exception('Invalid availability window');
+      }
+      if (state.sections
+          .expand((section) => section.lessons)
+          .any((lesson) => !lesson.hasValidAvailabilityWindow)) {
+        throw Exception('Invalid lesson availability window');
+      }
       String courseId;
 
       // Flash sale uses discount value as timed sale price.
@@ -196,6 +204,9 @@ mixin CoursePublishingMixin
     if (!state.isEditing || state.courseId == null) return false;
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (!state.hasValidAvailabilityWindow) {
+        throw Exception('Invalid availability window');
+      }
       await repository.updateCourse(
         state.courseId!,
         CourseUpdateDto(
@@ -229,6 +240,11 @@ mixin CoursePublishingMixin
     if (!state.isEditing || state.courseId == null) return false;
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (state.sections
+          .expand((section) => section.lessons)
+          .any((lesson) => !lesson.hasValidAvailabilityWindow)) {
+        throw Exception('Invalid lesson availability window');
+      }
       final sections = state.sections.map((s) {
         return SectionDto(
           id: s.id,
@@ -319,6 +335,10 @@ mixin CoursePublishingMixin
         CourseUpdateDto(
           badge: state.badge,
           clearBadge: state.badge == null || state.badge!.trim().isEmpty,
+          availableFrom: state.availableFrom?.toUtc(),
+          availableUntil: state.availableUntil?.toUtc(),
+          clearAvailabilityWindow:
+              state.availableFrom == null && state.availableUntil == null,
         ),
       );
       emit(state.copyWith(status: CourseEditorStatus.success));

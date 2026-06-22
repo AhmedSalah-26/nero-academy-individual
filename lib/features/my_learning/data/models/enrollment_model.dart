@@ -22,6 +22,8 @@ class EnrollmentModel extends EnrollmentEntity {
     super.lastAccessedAt,
     super.completedAt,
     super.accessExpiresAt,
+    super.availableFrom,
+    super.availableUntil,
     super.rating,
     super.ratingCount,
   });
@@ -84,6 +86,12 @@ class EnrollmentModel extends EnrollmentEntity {
       accessExpiresAt: json['access_expires_at'] != null
           ? DateTime.parse(json['access_expires_at'] as String)
           : null,
+      availableFrom: course?['available_from'] != null
+          ? DateTime.parse(course!['available_from'] as String)
+          : null,
+      availableUntil: course?['available_until'] != null
+          ? DateTime.parse(course!['available_until'] as String)
+          : null,
       rating: (course?['rating'] as num?)?.toDouble() ?? 0,
       ratingCount: course?['rating_count'] as int? ?? 0,
     );
@@ -101,6 +109,8 @@ class EnrollmentModel extends EnrollmentEntity {
       'last_accessed_at': lastAccessedAt?.toIso8601String(),
       'completed_at': completedAt?.toIso8601String(),
       'access_expires_at': accessExpiresAt?.toIso8601String(),
+      'available_from': availableFrom?.toIso8601String(),
+      'available_until': availableUntil?.toIso8601String(),
     };
   }
 
@@ -129,6 +139,8 @@ class EnrollmentModel extends EnrollmentEntity {
       lastAccessedAt: lastAccessedAt,
       completedAt: completedAt,
       accessExpiresAt: accessExpiresAt,
+      availableFrom: availableFrom,
+      availableUntil: availableUntil,
       rating: rating,
       ratingCount: ratingCount,
     );

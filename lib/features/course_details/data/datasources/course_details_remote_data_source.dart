@@ -366,6 +366,7 @@ class CourseDetailsRemoteDataSourceImpl
 
       final sectionPublished = sectionRaw['is_published'];
       if (sectionPublished is bool && !sectionPublished) continue;
+      if (!AvailabilityWindow.isJsonActive(sectionRaw)) continue;
 
       final rawLessons =
           (sectionRaw['lessons'] as List?)?.cast<dynamic>() ?? [];

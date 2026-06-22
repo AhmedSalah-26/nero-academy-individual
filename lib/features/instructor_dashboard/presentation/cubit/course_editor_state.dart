@@ -101,7 +101,9 @@ class CourseEditorState extends Equatable {
       categoryId != null &&
       hasValidAvailabilityWindow &&
       sections.isNotEmpty &&
-      sections.every((s) => s.lessons.isNotEmpty);
+      sections.every((s) => s.lessons.isNotEmpty) &&
+      sections
+          .every((s) => s.lessons.every((l) => l.hasValidAvailabilityWindow));
 
   CourseEditorState copyWith({
     CourseEditorStatus? status,
@@ -172,9 +174,8 @@ class CourseEditorState extends Equatable {
           clearFlashSaleEnd ? null : (flashSaleEnd ?? this.flashSaleEnd),
       availableFrom:
           clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
-      availableUntil: clearAvailableUntil
-          ? null
-          : (availableUntil ?? this.availableUntil),
+      availableUntil:
+          clearAvailableUntil ? null : (availableUntil ?? this.availableUntil),
       requirementsAr: requirementsAr ?? this.requirementsAr,
       requirementsEn: requirementsEn ?? this.requirementsEn,
       objectivesAr: objectivesAr ?? this.objectivesAr,
@@ -304,6 +305,11 @@ class LessonData extends Equatable {
     this.quizId,
   });
 
+  bool get hasValidAvailabilityWindow =>
+      availableFrom == null ||
+      availableUntil == null ||
+      availableUntil!.isAfter(availableFrom!);
+
   LessonData copyWith({
     String? id,
     String? titleAr,
@@ -336,9 +342,8 @@ class LessonData extends Equatable {
       isPublished: isPublished ?? this.isPublished,
       availableFrom:
           clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
-      availableUntil: clearAvailableUntil
-          ? null
-          : (availableUntil ?? this.availableUntil),
+      availableUntil:
+          clearAvailableUntil ? null : (availableUntil ?? this.availableUntil),
       videoUrl: videoUrl ?? this.videoUrl,
       articleContent: articleContent ?? this.articleContent,
       fileUrl: fileUrl ?? this.fileUrl,

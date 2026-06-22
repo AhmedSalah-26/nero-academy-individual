@@ -105,9 +105,13 @@ class EnrolledCourseCard extends StatelessWidget {
                           color: isDark ? AppColors.grey400 : AppColors.grey500,
                         ),
                       ),
-                      if (enrollment.accessExpiresAt != null) ...[
+                      if (!enrollment.isCurrentlyAvailable) ...[
                         const Spacer(),
-                        _buildExpirationBadge(enrollment.accessExpiresAt!, locale, isDark),
+                        _buildInactiveBadge(locale),
+                      ] else if (enrollment.accessExpiresAt != null) ...[
+                        const Spacer(),
+                        _buildExpirationBadge(
+                            enrollment.accessExpiresAt!, locale, isDark),
                       ] else if (enrollment.isCompleted) ...[
                         const Spacer(),
                         _buildCompletedBadge(),
@@ -119,6 +123,36 @@ class EnrolledCourseCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInactiveBadge(String locale) {
+    final isArabic = locale == 'ar';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.lock_clock_outlined,
+            size: 12,
+            color: AppColors.warning,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            isArabic ? 'غير مفعل حاليا' : 'Inactive now',
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppColors.warning,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -181,10 +215,12 @@ class EnrolledCourseCard extends StatelessWidget {
   Widget _buildExpirationBadge(DateTime expiresAt, String locale, bool isDark) {
     final daysLeft = expiresAt.difference(DateTime.now()).inDays;
     final isArabic = locale == 'ar';
-    final text = daysLeft > 0 
+    final text = daysLeft > 0
         ? (isArabic ? 'باقي $daysLeft يوم' : '$daysLeft days left')
         : (isArabic ? 'ينتهي اليوم' : 'Expires today');
-    final color = daysLeft <= 3 ? AppColors.error : (isDark ? AppColors.grey400 : AppColors.grey600);
+    final color = daysLeft <= 3
+        ? AppColors.error
+        : (isDark ? AppColors.grey400 : AppColors.grey600);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

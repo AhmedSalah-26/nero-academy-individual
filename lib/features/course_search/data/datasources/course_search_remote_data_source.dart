@@ -116,64 +116,72 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
           .order(sortColumn, ascending: ascending)
           .range(offset, offset + (filter.pageSize * 3) - 1);
 
-      final courses = response.where(AvailabilityWindow.isJsonActive).map((json) {
-        final courseJson = Map<String, dynamic>.from(json);
-        final now = DateTime.now();
-        final flashSaleStart = _parseDateTime(courseJson['flash_sale_start']);
-        final flashSaleEnd = _parseDateTime(courseJson['flash_sale_end']);
-        final isFlashSaleActive = courseJson['is_flash_sale'] == true &&
-            (flashSaleStart == null || !now.isBefore(flashSaleStart)) &&
-            (flashSaleEnd == null || !now.isAfter(flashSaleEnd));
+      final courses = response
+          .where(AvailabilityWindow.isJsonActive)
+          .map((json) {
+            final courseJson = Map<String, dynamic>.from(json);
+            final now = DateTime.now();
+            final flashSaleStart =
+                _parseDateTime(courseJson['flash_sale_start']);
+            final flashSaleEnd = _parseDateTime(courseJson['flash_sale_end']);
+            final isFlashSaleActive = courseJson['is_flash_sale'] == true &&
+                (flashSaleStart == null || !now.isBefore(flashSaleStart)) &&
+                (flashSaleEnd == null || !now.isAfter(flashSaleEnd));
 
-        // Flatten nested data
-        if (courseJson['profiles'] != null) {
-          courseJson['instructor_name'] = courseJson['profiles']['name'] ?? '';
-          courseJson['instructor_avatar'] =
-              courseJson['profiles']['avatar_url'];
-        }
-        if (courseJson['categories'] != null) {
-          courseJson['category_name'] =
-              courseJson['categories']['name_ar'] ?? '';
-        }
-        // Map fields to model expected names
-        courseJson['title'] = courseJson['title_ar'] ?? courseJson['title_en'];
-        courseJson['review_count'] = courseJson['rating_count'] ?? 0;
-        final originalPrice = (courseJson['price'] as num?)?.toDouble() ?? 0;
-        final discountPrice =
-            (courseJson['discount_price'] as num?)?.toDouble();
-        final isFlashSaleCourse = courseJson['is_flash_sale'] == true;
+            // Flatten nested data
+            if (courseJson['profiles'] != null) {
+              courseJson['instructor_name'] =
+                  courseJson['profiles']['name'] ?? '';
+              courseJson['instructor_avatar'] =
+                  courseJson['profiles']['avatar_url'];
+            }
+            if (courseJson['categories'] != null) {
+              courseJson['category_name'] =
+                  courseJson['categories']['name_ar'] ?? '';
+            }
+            // Map fields to model expected names
+            courseJson['title'] =
+                courseJson['title_ar'] ?? courseJson['title_en'];
+            courseJson['review_count'] = courseJson['rating_count'] ?? 0;
+            final originalPrice =
+                (courseJson['price'] as num?)?.toDouble() ?? 0;
+            final discountPrice =
+                (courseJson['discount_price'] as num?)?.toDouble();
+            final isFlashSaleCourse = courseJson['is_flash_sale'] == true;
 
-        // Discount applies if: permanent (no flash sale) OR flash sale is active
-        final showDiscount = discountPrice != null &&
-            discountPrice < originalPrice &&
-            (!isFlashSaleCourse || isFlashSaleActive);
+            // Discount applies if: permanent (no flash sale) OR flash sale is active
+            final showDiscount = discountPrice != null &&
+                discountPrice < originalPrice &&
+                (!isFlashSaleCourse || isFlashSaleActive);
 
-        if (showDiscount) {
-          courseJson['original_price'] = originalPrice;
-          courseJson['price'] = discountPrice;
-        } else {
-          courseJson['original_price'] = null;
-          courseJson['price'] = originalPrice;
-        }
+            if (showDiscount) {
+              courseJson['original_price'] = originalPrice;
+              courseJson['price'] = discountPrice;
+            } else {
+              courseJson['original_price'] = null;
+              courseJson['price'] = originalPrice;
+            }
 
-        courseJson['duration_minutes'] = courseJson['total_duration'];
-        courseJson['lecture_count'] = courseJson['total_lessons'];
-        // Set badge
-        final storedBadge = (courseJson['badge'] as String?)?.trim();
-        if (storedBadge != null && storedBadge.isNotEmpty) {
-          // If flash sale badge but sale not active, skip it
-          if (isFlashSaleCourse && !isFlashSaleActive) {
-            courseJson['badge'] = null;
-          } else {
-            courseJson['badge'] = storedBadge;
-          }
-        } else if (courseJson['is_featured'] == true) {
-          courseJson['badge'] = 'premium';
-        } else if (isFlashSaleActive) {
-          courseJson['badge'] = 'hot';
-        }
-        return CourseModel.fromJson(courseJson);
-      }).take(filter.pageSize).toList();
+            courseJson['duration_minutes'] = courseJson['total_duration'];
+            courseJson['lecture_count'] = courseJson['total_lessons'];
+            // Set badge
+            final storedBadge = (courseJson['badge'] as String?)?.trim();
+            if (storedBadge != null && storedBadge.isNotEmpty) {
+              // If flash sale badge but sale not active, skip it
+              if (isFlashSaleCourse && !isFlashSaleActive) {
+                courseJson['badge'] = null;
+              } else {
+                courseJson['badge'] = storedBadge;
+              }
+            } else if (courseJson['is_featured'] == true) {
+              courseJson['badge'] = 'premium';
+            } else if (isFlashSaleActive) {
+              courseJson['badge'] = 'hot';
+            }
+            return CourseModel.fromJson(courseJson);
+          })
+          .take(filter.pageSize)
+          .toList();
 
       return CourseSearchRemoteResult(
         courses: courses,
