@@ -70,6 +70,12 @@ class InstructorCourseEditorDataSource {
             durationMinutes: ((l['video_duration'] as int? ?? 0) / 60).round(),
             isFree: l['is_preview'] as bool? ?? false,
             isPublished: l['is_published'] as bool? ?? true,
+            availableFrom: l['available_from'] != null
+                ? DateTime.parse(l['available_from'] as String)
+                : null,
+            availableUntil: l['available_until'] != null
+                ? DateTime.parse(l['available_until'] as String)
+                : null,
             videoUrl: l['video_url'] as String?,
             articleContent: l['article_content_ar'] as String?,
             fileUrl: l['file_url'] as String?,
@@ -114,6 +120,12 @@ class InstructorCourseEditorDataSource {
             : null,
         flashSaleEnd: courseResponse['flash_sale_end'] != null
             ? DateTime.parse(courseResponse['flash_sale_end'] as String)
+            : null,
+        availableFrom: courseResponse['available_from'] != null
+            ? DateTime.parse(courseResponse['available_from'] as String)
+            : null,
+        availableUntil: courseResponse['available_until'] != null
+            ? DateTime.parse(courseResponse['available_until'] as String)
             : null,
         sections: sections,
       );
@@ -200,6 +212,9 @@ class InstructorCourseEditorDataSource {
             'video_duration': (lesson.durationMinutes * 60),
             'is_preview': lesson.isFree,
             'is_published': lesson.isPublished,
+            'available_from': lesson.availableFrom?.toUtc().toIso8601String(),
+            'available_until':
+                lesson.availableUntil?.toUtc().toIso8601String(),
             'video_url': lesson.videoUrl,
             'article_content_ar': lesson.articleContent,
             'file_url': lesson.fileUrl,
@@ -527,17 +542,10 @@ class InstructorCourseEditorDataSource {
   }) async {
     AppLogger.d('[$_tag] scheduleSectionPublish: sectionId=$sectionId');
     try {
-      final response = await _client.rpc('schedule_section_publish', params: {
-        'p_section_id': sectionId,
-        'p_instructor_id': _userId,
-        'p_publish_at': publishAt?.toIso8601String(),
-        'p_unpublish_at': unpublishAt?.toIso8601String(),
-      });
-
-      final result = response as Map<String, dynamic>;
-      if (result['success'] != true) {
-        throw Exception(result['error'] ?? 'Failed to schedule section');
-      }
+      await _client.from('sections').update({
+        'available_from': publishAt?.toUtc().toIso8601String(),
+        'available_until': unpublishAt?.toUtc().toIso8601String(),
+      }).eq('id', sectionId);
       AppLogger.success('[$_tag] scheduleSectionPublish success');
     } catch (e, s) {
       AppLogger.e('[$_tag] scheduleSectionPublish error', e, s);
@@ -576,17 +584,10 @@ class InstructorCourseEditorDataSource {
   }) async {
     AppLogger.d('[$_tag] scheduleLessonPublish: lessonId=$lessonId');
     try {
-      final response = await _client.rpc('schedule_lesson_publish', params: {
-        'p_lesson_id': lessonId,
-        'p_instructor_id': _userId,
-        'p_publish_at': publishAt?.toIso8601String(),
-        'p_unpublish_at': unpublishAt?.toIso8601String(),
-      });
-
-      final result = response as Map<String, dynamic>;
-      if (result['success'] != true) {
-        throw Exception(result['error'] ?? 'Failed to schedule lesson');
-      }
+      await _client.from('lessons').update({
+        'available_from': publishAt?.toUtc().toIso8601String(),
+        'available_until': unpublishAt?.toUtc().toIso8601String(),
+      }).eq('id', lessonId);
       AppLogger.success('[$_tag] scheduleLessonPublish success');
     } catch (e, s) {
       AppLogger.e('[$_tag] scheduleLessonPublish error', e, s);
@@ -601,8 +602,8 @@ class InstructorCourseEditorDataSource {
     try {
       await _client.from('sections').update({
         'is_published': isPublished,
-        'publish_at': null,
-        'unpublish_at': null,
+        'available_from': null,
+        'available_until': null,
       }).eq('id', sectionId);
       AppLogger.success('[$_tag] setSectionPublished success');
     } catch (e, s) {
@@ -618,8 +619,8 @@ class InstructorCourseEditorDataSource {
     try {
       await _client.from('lessons').update({
         'is_published': isPublished,
-        'publish_at': null,
-        'unpublish_at': null,
+        'available_from': null,
+        'available_until': null,
       }).eq('id', lessonId);
       AppLogger.success('[$_tag] setLessonPublished success');
     } catch (e, s) {

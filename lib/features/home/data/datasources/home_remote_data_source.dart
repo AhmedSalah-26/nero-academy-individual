@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/utils/availability_window.dart';
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/course_model.dart';
@@ -28,8 +29,19 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     badge,
     rating, rating_count, enrolled_count, total_duration, total_lessons,
     is_featured, is_published, published_at, created_at,
+    available_from, available_until,
     profiles:instructor_id(name, avatar_url)
   ''';
+
+  List<CourseModel> _mapAvailableCourses(List<dynamic> response,
+      {int? limit}) {
+    final courses = response
+        .cast<Map<String, dynamic>>()
+        .where(AvailabilityWindow.isJsonActive)
+        .map((json) => CourseModel.fromJson(json))
+        .toList();
+    return limit == null ? courses : courses.take(limit).toList();
+  }
 
   @override
   Future<List<BannerModel>> getBanners() async {
@@ -74,11 +86,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .eq('is_published', true)
           .eq('is_featured', true)
           .order('published_at', ascending: false)
-          .limit(limit);
+          .limit(limit * 3);
 
-      return (response as List)
-          .map((json) => CourseModel.fromJson(json))
-          .toList();
+      return _mapAvailableCourses(response as List, limit: limit);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     }
@@ -92,11 +102,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .select(_courseSelect)
           .eq('is_published', true)
           .order('enrolled_count', ascending: false)
-          .limit(limit);
+          .limit(limit * 3);
 
-      return (response as List)
-          .map((json) => CourseModel.fromJson(json))
-          .toList();
+      return _mapAvailableCourses(response as List, limit: limit);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     }
@@ -110,11 +118,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .select(_courseSelect)
           .eq('is_published', true)
           .order('published_at', ascending: false)
-          .limit(limit);
+          .limit(limit * 3);
 
-      return (response as List)
-          .map((json) => CourseModel.fromJson(json))
-          .toList();
+      return _mapAvailableCourses(response as List, limit: limit);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     }
@@ -132,11 +138,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .lte('flash_sale_start', now)
           .gte('flash_sale_end', now)
           .order('flash_sale_end', ascending: true)
-          .limit(limit);
+          .limit(limit * 3);
 
-      return (response as List)
-          .map((json) => CourseModel.fromJson(json))
-          .toList();
+      return _mapAvailableCourses(response as List, limit: limit);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     }
@@ -152,11 +156,9 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
           .eq('is_published', true)
           .eq('category_id', categoryId)
           .order('enrolled_count', ascending: false)
-          .limit(limit);
+          .limit(limit * 3);
 
-      return (response as List)
-          .map((json) => CourseModel.fromJson(json))
-          .toList();
+      return _mapAvailableCourses(response as List, limit: limit);
     } on PostgrestException catch (e) {
       throw ServerException(e.message, code: e.code);
     }

@@ -55,6 +55,8 @@ mixin CoursePublishingMixin
         isFlashSale: isFlashSale,
         flashSaleStart: normalizedFlashSaleStart,
         flashSaleEnd: normalizedFlashSaleEnd,
+        availableFrom: state.availableFrom?.toUtc(),
+        availableUntil: state.availableUntil?.toUtc(),
       );
 
       if (state.isEditing && state.courseId != null) {
@@ -84,6 +86,10 @@ mixin CoursePublishingMixin
             flashSaleStart: dto.flashSaleStart,
             flashSaleEnd: dto.flashSaleEnd,
             clearFlashSaleData: !dto.isFlashSale,
+            availableFrom: dto.availableFrom,
+            availableUntil: dto.availableUntil,
+            clearAvailabilityWindow:
+                dto.availableFrom == null && dto.availableUntil == null,
           ),
         );
         courseId = state.courseId!;
@@ -113,6 +119,8 @@ mixin CoursePublishingMixin
               durationMinutes: l.durationMinutes,
               isFree: l.isFree,
               isPublished: l.isPublished,
+              availableFrom: l.availableFrom?.toUtc(),
+              availableUntil: l.availableUntil?.toUtc(),
               videoUrl: l.videoUrl,
               articleContent: l.articleContent,
               fileUrl: l.fileUrl,
@@ -238,6 +246,8 @@ mixin CoursePublishingMixin
               durationMinutes: l.durationMinutes,
               isFree: l.isFree,
               isPublished: l.isPublished,
+              availableFrom: l.availableFrom?.toUtc(),
+              availableUntil: l.availableUntil?.toUtc(),
               videoUrl: l.videoUrl,
               articleContent: l.articleContent,
               fileUrl: l.fileUrl,

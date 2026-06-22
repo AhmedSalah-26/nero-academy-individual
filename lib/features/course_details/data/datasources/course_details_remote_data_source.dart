@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/utils/availability_window.dart';
 import '../../domain/entities/course_details_entity.dart';
 import '../models/course_details_model.dart';
 import '../models/section_model.dart';
@@ -42,7 +43,8 @@ class CourseDetailsRemoteDataSourceImpl
           id, course_id, title_ar, title_en, sort_order, is_published,
           lessons(
             id, section_id, title_ar, title_en, type, video_url, video_provider,
-            video_duration, is_preview, is_mandatory, is_published, sort_order
+            video_duration, is_preview, is_mandatory, is_published, sort_order,
+            available_from, available_until
           )
         ),
         quizzes!quizzes_course_id_fkey(count)
@@ -62,6 +64,9 @@ class CourseDetailsRemoteDataSourceImpl
 
       // Allow non-published course access only for owner instructor.
       if (!isPublished && !isOwnerInstructor) {
+        throw const ServerException('Course not found');
+      }
+      if (!isOwnerInstructor && !AvailabilityWindow.isJsonActive(data)) {
         throw const ServerException('Course not found');
       }
 
@@ -261,6 +266,8 @@ class CourseDetailsRemoteDataSourceImpl
             'is_mandatory': true,
             'is_published': true,
             'sort_order': lessonIndex,
+            'available_from': lessonRaw['available_from'],
+            'available_until': lessonRaw['available_until'],
           });
         }
 
@@ -368,6 +375,7 @@ class CourseDetailsRemoteDataSourceImpl
         if (lessonRaw is! Map<String, dynamic>) continue;
         final lessonPublished = lessonRaw['is_published'];
         if (lessonPublished is bool && !lessonPublished) continue;
+        if (!AvailabilityWindow.isJsonActive(lessonRaw)) continue;
         filteredLessons.add(Map<String, dynamic>.from(lessonRaw));
       }
 
@@ -387,7 +395,8 @@ class CourseDetailsRemoteDataSourceImpl
     try {
       String lessonSelect = '''
         id, section_id, title_ar, title_en, type, video_url, video_provider,
-        video_duration, is_preview, is_mandatory, is_published, sort_order
+        video_duration, is_preview, is_mandatory, is_published, sort_order,
+        available_from, available_until
       ''';
 
       // Add lesson progress if user is logged in

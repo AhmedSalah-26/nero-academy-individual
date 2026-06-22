@@ -23,6 +23,8 @@ class LessonModel extends LessonEntity {
     super.isMandatory,
     super.isPublished,
     super.sortOrder,
+    super.availableFrom,
+    super.availableUntil,
     super.isCompleted,
     super.lastPosition,
   });
@@ -54,6 +56,12 @@ class LessonModel extends LessonEntity {
       isMandatory: json['is_mandatory'] as bool? ?? true,
       isPublished: json['is_published'] as bool? ?? true,
       sortOrder: json['sort_order'] as int? ?? 0,
+      availableFrom: json['available_from'] != null
+          ? DateTime.parse(json['available_from'] as String)
+          : null,
+      availableUntil: json['available_until'] != null
+          ? DateTime.parse(json['available_until'] as String)
+          : null,
       isCompleted: progressData?['is_completed'] as bool? ?? false,
       lastPosition: progressData?['last_position'] as int?,
     );
@@ -81,6 +89,8 @@ class LessonModel extends LessonEntity {
       'is_mandatory': isMandatory,
       'is_published': isPublished,
       'sort_order': sortOrder,
+      'available_from': availableFrom?.toIso8601String(),
+      'available_until': availableUntil?.toIso8601String(),
     };
   }
 }

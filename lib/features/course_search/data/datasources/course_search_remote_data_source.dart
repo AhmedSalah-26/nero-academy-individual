@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/utils/availability_window.dart';
 import '../../domain/entities/search_filter_entity.dart';
 import '../models/course_model.dart';
 import '../models/search_filter_model.dart';
@@ -51,6 +52,8 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
         is_featured,
         is_flash_sale,
         badge,
+        available_from,
+        available_until,
         created_at,
         category_id,
         categories(name_ar, name_en),
@@ -111,9 +114,9 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
 
       final response = await filteredQuery
           .order(sortColumn, ascending: ascending)
-          .range(offset, offset + filter.pageSize - 1);
+          .range(offset, offset + (filter.pageSize * 3) - 1);
 
-      final courses = response.map((json) {
+      final courses = response.where(AvailabilityWindow.isJsonActive).map((json) {
         final courseJson = Map<String, dynamic>.from(json);
         final now = DateTime.now();
         final flashSaleStart = _parseDateTime(courseJson['flash_sale_start']);
@@ -170,7 +173,7 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
           courseJson['badge'] = 'hot';
         }
         return CourseModel.fromJson(courseJson);
-      }).toList();
+      }).take(filter.pageSize).toList();
 
       return CourseSearchRemoteResult(
         courses: courses,

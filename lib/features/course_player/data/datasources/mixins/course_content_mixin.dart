@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../../core/errors/exceptions.dart';
 import '../../../../../../core/services/app_logger.dart';
+import '../../../../../../core/utils/availability_window.dart';
 import '../../models/section_model.dart';
 import '../../models/lesson_model.dart';
 import '../../models/attachment_model.dart';
@@ -49,6 +50,8 @@ mixin CoursePlayerContentMixin {
               is_mandatory,
               sort_order,
               is_published,
+              available_from,
+              available_until,
               created_at
             )
           ''')
@@ -70,6 +73,14 @@ mixin CoursePlayerContentMixin {
             final json = e as Map<String, dynamic>;
             AppLogger.i('📚 [DataSource] Parsing section: ${json['title_en']}');
             AppLogger.i('📚 [DataSource] Lessons in JSON: ${json['lessons']}');
+
+            final rawLessons =
+                (json['lessons'] as List?)?.cast<dynamic>() ?? [];
+            json['lessons'] = rawLessons
+                .where((lesson) =>
+                    lesson is Map<String, dynamic> &&
+                    AvailabilityWindow.isJsonActive(lesson))
+                .toList();
 
             final section = SectionModel.fromJson(json);
             AppLogger.i(
@@ -96,6 +107,9 @@ mixin CoursePlayerContentMixin {
           .eq('id', lessonId)
           .eq('is_published', true)
           .single();
+      if (!AvailabilityWindow.isJsonActive(response)) {
+        throw const ServerException('Lesson is not available');
+      }
       return LessonModel.fromJson(response);
     } catch (e) {
       throw ServerException(e.toString());

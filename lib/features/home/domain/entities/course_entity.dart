@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/availability_window.dart';
 
 /// Course Entity - Pure Dart Object for Course Cards
 class CourseEntity extends Equatable {
@@ -30,6 +31,8 @@ class CourseEntity extends Equatable {
   final bool isFeatured;
   final bool isPublished;
   final DateTime? publishedAt;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final DateTime createdAt;
   final String? badge;
 
@@ -62,6 +65,8 @@ class CourseEntity extends Equatable {
     this.isFeatured = false,
     this.isPublished = false,
     this.publishedAt,
+    this.availableFrom,
+    this.availableUntil,
     required this.createdAt,
     this.badge,
   });
@@ -93,6 +98,11 @@ class CourseEntity extends Equatable {
     if (flashSaleEnd != null && now.isAfter(flashSaleEnd!)) return false;
     return true;
   }
+
+  bool get isCurrentlyAvailable => AvailabilityWindow.isActive(
+        availableFrom: availableFrom,
+        availableUntil: availableUntil,
+      );
 
   /// Get discount percentage
   int? get discountPercentage {
@@ -148,6 +158,8 @@ class CourseEntity extends Equatable {
         isFeatured,
         isPublished,
         publishedAt,
+        availableFrom,
+        availableUntil,
         createdAt,
         badge,
       ];

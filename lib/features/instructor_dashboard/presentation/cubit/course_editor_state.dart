@@ -34,6 +34,8 @@ class CourseEditorState extends Equatable {
   final bool isFlashSale;
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
 
   // Settings
   final List<String> requirementsAr;
@@ -73,6 +75,8 @@ class CourseEditorState extends Equatable {
     this.isFlashSale = false,
     this.flashSaleStart,
     this.flashSaleEnd,
+    this.availableFrom,
+    this.availableUntil,
     this.requirementsAr = const [],
     this.requirementsEn = const [],
     this.objectivesAr = const [],
@@ -84,12 +88,18 @@ class CourseEditorState extends Equatable {
 
   bool get isLoading => status == CourseEditorStatus.loading;
 
+  bool get hasValidAvailabilityWindow =>
+      availableFrom == null ||
+      availableUntil == null ||
+      availableUntil!.isAfter(availableFrom!);
+
   bool get canPublish =>
       titleAr.isNotEmpty &&
       titleEn.isNotEmpty &&
       descriptionAr.isNotEmpty &&
       descriptionEn.isNotEmpty &&
       categoryId != null &&
+      hasValidAvailabilityWindow &&
       sections.isNotEmpty &&
       sections.every((s) => s.lessons.isNotEmpty);
 
@@ -121,6 +131,10 @@ class CourseEditorState extends Equatable {
     bool clearFlashSaleStart = false,
     DateTime? flashSaleEnd,
     bool clearFlashSaleEnd = false,
+    DateTime? availableFrom,
+    bool clearAvailableFrom = false,
+    DateTime? availableUntil,
+    bool clearAvailableUntil = false,
     List<String>? requirementsAr,
     List<String>? requirementsEn,
     List<String>? objectivesAr,
@@ -156,6 +170,11 @@ class CourseEditorState extends Equatable {
           clearFlashSaleStart ? null : (flashSaleStart ?? this.flashSaleStart),
       flashSaleEnd:
           clearFlashSaleEnd ? null : (flashSaleEnd ?? this.flashSaleEnd),
+      availableFrom:
+          clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
+      availableUntil: clearAvailableUntil
+          ? null
+          : (availableUntil ?? this.availableUntil),
       requirementsAr: requirementsAr ?? this.requirementsAr,
       requirementsEn: requirementsEn ?? this.requirementsEn,
       objectivesAr: objectivesAr ?? this.objectivesAr,
@@ -192,6 +211,8 @@ class CourseEditorState extends Equatable {
         isFlashSale,
         flashSaleStart,
         flashSaleEnd,
+        availableFrom,
+        availableUntil,
         requirementsAr,
         requirementsEn,
         objectivesAr,
@@ -253,6 +274,8 @@ class LessonData extends Equatable {
   final int durationMinutes;
   final bool isFree;
   final bool isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final String? videoUrl;
   final String? articleContent;
   final String? fileUrl;
@@ -270,6 +293,8 @@ class LessonData extends Equatable {
     this.durationMinutes = 0,
     this.isFree = false,
     this.isPublished = true,
+    this.availableFrom,
+    this.availableUntil,
     this.videoUrl,
     this.articleContent,
     this.fileUrl,
@@ -288,6 +313,10 @@ class LessonData extends Equatable {
     int? durationMinutes,
     bool? isFree,
     bool? isPublished,
+    DateTime? availableFrom,
+    bool clearAvailableFrom = false,
+    DateTime? availableUntil,
+    bool clearAvailableUntil = false,
     String? videoUrl,
     String? articleContent,
     String? fileUrl,
@@ -305,6 +334,11 @@ class LessonData extends Equatable {
       durationMinutes: durationMinutes ?? this.durationMinutes,
       isFree: isFree ?? this.isFree,
       isPublished: isPublished ?? this.isPublished,
+      availableFrom:
+          clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
+      availableUntil: clearAvailableUntil
+          ? null
+          : (availableUntil ?? this.availableUntil),
       videoUrl: videoUrl ?? this.videoUrl,
       articleContent: articleContent ?? this.articleContent,
       fileUrl: fileUrl ?? this.fileUrl,
@@ -325,6 +359,8 @@ class LessonData extends Equatable {
         durationMinutes,
         isFree,
         isPublished,
+        availableFrom,
+        availableUntil,
         videoUrl,
         articleContent,
         fileUrl,

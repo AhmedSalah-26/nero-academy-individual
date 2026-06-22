@@ -101,6 +101,8 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
           fileName: l.fileName,
           fileSize: l.fileSize,
           fileType: l.fileType,
+          availableFrom: l.availableFrom,
+          availableUntil: l.availableUntil,
         );
       }).toList();
 
@@ -152,6 +154,8 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       isFlashSale: course.isFlashSale,
       flashSaleStart: course.flashSaleStart,
       flashSaleEnd: course.flashSaleEnd,
+      availableFrom: course.availableFrom,
+      availableUntil: course.availableUntil,
     ));
   }
 
@@ -213,6 +217,20 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       clearFlashSaleStart: clearFlashSaleStart,
       flashSaleEnd: flashSaleEnd,
       clearFlashSaleEnd: clearFlashSaleEnd,
+    ));
+  }
+
+  void updateAvailabilitySchedule({
+    DateTime? availableFrom,
+    bool clearAvailableFrom = false,
+    DateTime? availableUntil,
+    bool clearAvailableUntil = false,
+  }) {
+    emit(state.copyWith(
+      availableFrom: availableFrom,
+      clearAvailableFrom: clearAvailableFrom,
+      availableUntil: availableUntil,
+      clearAvailableUntil: clearAvailableUntil,
     ));
   }
 }

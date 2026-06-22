@@ -238,6 +238,24 @@ class LessonTile extends StatelessWidget {
                 ),
               ),
             ],
+            if (lesson.availableFrom != null || lesson.availableUntil != null) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  isArabic ? 'مجدول' : 'Scheduled',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
         trailing: Row(

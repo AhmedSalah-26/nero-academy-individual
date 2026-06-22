@@ -31,6 +31,8 @@ class CourseModel extends CourseEntity {
     super.isFeatured,
     super.isPublished,
     super.publishedAt,
+    super.availableFrom,
+    super.availableUntil,
     required super.createdAt,
     super.badge,
   });
@@ -74,6 +76,12 @@ class CourseModel extends CourseEntity {
       publishedAt: json['published_at'] != null
           ? DateTime.parse(json['published_at'] as String)
           : null,
+      availableFrom: json['available_from'] != null
+          ? DateTime.parse(json['available_from'] as String)
+          : null,
+      availableUntil: json['available_until'] != null
+          ? DateTime.parse(json['available_until'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       badge: json['badge'] as String?,
     );
@@ -107,6 +115,8 @@ class CourseModel extends CourseEntity {
       'is_featured': isFeatured,
       'is_published': isPublished,
       'published_at': publishedAt?.toIso8601String(),
+      'available_from': availableFrom?.toIso8601String(),
+      'available_until': availableUntil?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'badge': badge,
     };
