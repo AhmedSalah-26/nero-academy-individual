@@ -14,7 +14,7 @@ class PaymentsHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final authState = context.read<AuthCubit>().state;
+        final authState = sl<AuthCubit>().state;
         final userId = authState.user?.id ?? '';
         return sl<PaymentsHistoryCubit>()..loadPayments(userId);
       },
@@ -73,7 +73,7 @@ class _PaymentsHistoryView extends StatelessWidget {
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () {
-                      final authState = context.read<AuthCubit>().state;
+                      final authState = sl<AuthCubit>().state;
                       final userId = authState.user?.id ?? '';
                       context.read<PaymentsHistoryCubit>().loadPayments(userId);
                     },
