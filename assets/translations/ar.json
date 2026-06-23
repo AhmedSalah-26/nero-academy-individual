@@ -968,6 +968,8 @@
   "course_editor": {
     "next_settings": "التالي (الإعدادات)",
     "publish_course": "نشر الكورس",
+    "publish": "نشر",
+    "save_draft": "حفظ مسودة",
     "publish_missing_title": "بيانات ناقصة قبل النشر",
     "publish_missing_message": "أكمل البيانات التالية ثم حاول النشر مرة أخرى:",
     "publish_confirm_title": "نشر الكورس",

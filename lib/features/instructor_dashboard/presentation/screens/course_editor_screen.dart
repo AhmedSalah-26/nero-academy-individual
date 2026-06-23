@@ -99,7 +99,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
           onPressed: state.isLoading
               ? null
               : () => showSaveDraftDialog(context, isArabic),
-          child: Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
+          child: Text('course_editor.save_draft'.tr()),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
@@ -110,7 +110,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
           ),
-          child: Text(isArabic ? 'نشر' : 'Publish'),
+          child: Text('course_editor.publish'.tr()),
         ),
         const SizedBox(width: 16),
       ];
@@ -134,7 +134,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.save_outlined, size: 20),
                 const SizedBox(width: 12),
-                Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
+                Text('course_editor.save_draft'.tr()),
               ],
             ),
           ),
@@ -145,7 +145,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.publish, size: 20),
                 const SizedBox(width: 12),
-                Text(isArabic ? 'نشر' : 'Publish'),
+                Text('course_editor.publish'.tr()),
               ],
             ),
           ),

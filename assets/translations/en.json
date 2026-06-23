@@ -935,6 +935,8 @@
   "course_editor": {
     "next_settings": "Next (Settings)",
     "publish_course": "Publish Course",
+    "publish": "Publish",
+    "save_draft": "Save Draft",
     "publish_missing_title": "Missing items",
     "publish_missing_message": "Complete the following items, then try publishing again:",
     "publish_confirm_title": "Publish Course",
