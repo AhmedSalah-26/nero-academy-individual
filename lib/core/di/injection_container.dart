@@ -52,6 +52,7 @@ import '../../features/course_details/data/repositories/course_details_repositor
 import '../../features/course_details/domain/repositories/course_details_repository.dart';
 import '../../features/course_details/domain/usecases/get_course_details_usecase.dart';
 import '../../features/course_details/domain/usecases/get_course_reviews_usecase.dart';
+import '../../features/course_details/domain/usecases/enroll_free_course_usecase.dart';
 import '../../features/course_details/presentation/cubit/course_details_cubit.dart';
 // Cart Feature
 import '../../features/cart/data/datasources/cart_remote_data_source.dart';
@@ -306,12 +307,14 @@ void _initCourseDetails() {
   sl.registerFactory(() => CourseDetailsCubit(
         getCourseDetailsUseCase: sl(),
         getCourseReviewsUseCase: sl(),
+        enrollFreeCourseUseCase: sl(),
         wishlistCubit: sl(),
       ));
 
   // Use Cases
   sl.registerLazySingleton(() => GetCourseDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCourseReviewsUseCase(sl()));
+  sl.registerLazySingleton(() => EnrollFreeCourseUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<CourseDetailsRepository>(

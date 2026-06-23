@@ -231,7 +231,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             child: BottomPriceBar(
               course: course,
               isLoading: _isAddingToCart,
-              onEnroll: () => _handleAddToCart(course),
+              onEnroll: () => _handleEnrollFree(course),
               onAddToCart: () => _handleAddToCart(course),
               onGoToCart: _navigateToCart,
               onStartLearning: () => _navigateToCoursePlayer(course.id),
@@ -512,6 +512,35 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         instructorName: course.instructor?.displayName,
         instructorAvatar: course.instructor?.avatarUrl,
       );
+    }
+  }
+
+  Future<void> _handleEnrollFree(CourseDetailsEntity course) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null) {
+      _showErrorSnackBar('auth.login_required'.tr());
+      return;
+    }
+
+    setState(() => _isAddingToCart = true);
+
+    try {
+      final success = await context.read<CourseDetailsCubit>().enrollFreeCourse(userId);
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+        if (success) {
+          _showSuccessSnackBar('course_details.enrolled_successfully'.tr());
+          // Navigate to course player directly or let it reload and stay
+        } else {
+          _showErrorSnackBar('errors.unknown'.tr());
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+        _showErrorSnackBar('errors.unknown'.tr());
+      }
     }
   }
 

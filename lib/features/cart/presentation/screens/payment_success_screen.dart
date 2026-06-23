@@ -32,10 +32,36 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
   Future<String> _loadAdminWhatsappNumber() async {
     try {
+      // 1. Get the instructor_id from the first enrollment of this order
+      final enrollment = await Supabase.instance.client
+          .from('enrollments')
+          .select('instructor_id')
+          .eq('parent_enrollment_id', widget.orderId)
+          .limit(1)
+          .maybeSingle();
+
+      if (enrollment != null && enrollment['instructor_id'] != null) {
+        // 2. Get the phone number from profiles for this instructor
+        final instructor = await Supabase.instance.client
+            .from('profiles')
+            .select('phone')
+            .eq('id', enrollment['instructor_id'])
+            .maybeSingle();
+
+        if (instructor != null && instructor['phone'] != null) {
+          final phone = instructor['phone'] as String?;
+          if (phone != null && phone.isNotEmpty) {
+            return _normalizeWhatsappNumber(phone) ??
+                PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+          }
+        }
+      }
+
+      // Fallback: get admin's phone number if instructor's is not found
       final admin = await Supabase.instance.client
           .from('profiles')
           .select('phone')
-          .eq('role', 'admin')
+          .inFilter('role', ['admin', 'instructor'])
           .not('phone', 'is', null)
           .limit(1)
           .maybeSingle();

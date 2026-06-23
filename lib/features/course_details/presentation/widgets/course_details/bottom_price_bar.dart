@@ -141,12 +141,15 @@ class BottomPriceBar extends StatelessWidget {
           : 'course_details.start_learning'.tr();
       onPressed = onStartLearning;
       buttonColor = AppColors.success;
+    } else if (course.isFree || course.currentPrice == 0) {
+      buttonText = 'course_details.get_for_free'.tr();
+      onPressed = onEnroll;
     } else if (course.isInCart) {
       buttonText = 'course_details.go_to_cart'.tr();
       onPressed = onGoToCart;
     } else {
       buttonText = 'cart.add_to_cart'.tr();
-      onPressed = onEnroll;
+      onPressed = onAddToCart;
     }
 
     return ScaleIn(

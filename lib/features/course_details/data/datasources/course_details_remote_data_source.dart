@@ -19,6 +19,7 @@ abstract class CourseDetailsRemoteDataSource {
   Future<bool> toggleWishlist(String courseId, String userId);
   Future<bool> isInWishlist(String courseId, String userId);
   Future<bool> isInCart(String courseId, String userId);
+  Future<void> enrollFreeCourse(String courseId, String userId);
 }
 
 class CourseDetailsRemoteDataSourceImpl
@@ -561,6 +562,61 @@ class CourseDetailsRemoteDataSourceImpl
       return result != null;
     } catch (e) {
       return false;
+    }
+  }
+
+  @override
+  Future<void> enrollFreeCourse(String courseId, String userId) async {
+    try {
+      final courseData = await supabaseClient
+          .from('courses')
+          .select('instructor_id, price, discount_price, is_free')
+          .eq('id', courseId)
+          .single();
+
+      final isFree = courseData['is_free'] == true;
+      final price = (courseData['discount_price'] as num?)?.toDouble() ??
+          (courseData['price'] as num?)?.toDouble() ??
+          0;
+
+      if (!isFree && price > 0) {
+        throw const ServerException('Course is not free');
+      }
+
+      final parentEnrollmentResponse = await supabaseClient
+          .from('parent_enrollments')
+          .insert({
+            'user_id': userId,
+            'total': 0,
+            'subtotal': 0,
+            'discount': 0,
+            'coupon_discount': 0,
+            'payment_method': 'free',
+            'payment_status': 'paid',
+            'paid_at': DateTime.now().toIso8601String(),
+          })
+          .select('id')
+          .single();
+
+      final parentEnrollmentId = parentEnrollmentResponse['id'] as String;
+
+      await supabaseClient.from('enrollments').insert({
+        'user_id': userId,
+        'course_id': courseId,
+        'instructor_id': courseData['instructor_id'],
+        'parent_enrollment_id': parentEnrollmentId,
+        'status': 'active',
+        'progress_percentage': 0,
+        'completed_lessons': 0,
+        'price': 0,
+        'discount': 0,
+        'total_watch_time': 0,
+        'enrolled_at': DateTime.now().toIso8601String(),
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }
