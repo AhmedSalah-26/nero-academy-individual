@@ -10,16 +10,15 @@ class CourseEditMenu extends StatelessWidget {
   const CourseEditMenu({
     super.key,
     required this.state,
-    required this.isArabic,
     required this.isDark,
   });
 
   final CourseEditorState state;
-  final bool isArabic;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -88,6 +87,7 @@ class CourseEditMenu extends StatelessWidget {
   }
 
   Widget _buildCourseHeader(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

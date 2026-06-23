@@ -8,16 +8,15 @@ class CourseEditorStepperHeader extends StatelessWidget {
   const CourseEditorStepperHeader({
     super.key,
     required this.state,
-    required this.isArabic,
     required this.isDark,
   });
 
   final CourseEditorState state;
-  final bool isArabic;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final steps = [
       isArabic ? 'المعلومات الأساسية' : 'Basic Info',
       isArabic ? 'المحتوى' : 'Curriculum',

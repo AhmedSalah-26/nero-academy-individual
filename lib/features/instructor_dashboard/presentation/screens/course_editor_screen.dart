@@ -44,7 +44,6 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocBuilder<CourseEditorCubit, CourseEditorState>(
@@ -61,21 +60,19 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               icon: const Icon(Icons.close),
               onPressed: () => context.pop(),
             ),
-            actions: _buildAppBarActions(context, state, isArabic),
+            actions: _buildAppBarActions(context, state),
           ),
           body: state.isLoading && state.currentStep == 0
               ? const Center(child: CircularProgressIndicator())
               : widget.courseId != null
                   ? CourseEditMenu(
                       state: state,
-                      isArabic: isArabic,
                       isDark: isDark,
                     )
                   : Column(
                       children: [
                         CourseEditorStepperHeader(
                           state: state,
-                          isArabic: isArabic,
                           isDark: isDark,
                         ),
                         Expanded(
@@ -91,26 +88,25 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
   List<Widget> _buildAppBarActions(
     BuildContext context,
     CourseEditorState state,
-    bool isArabic,
   ) {
     if (MediaQuery.of(context).size.width > 600) {
       return [
         TextButton(
           onPressed: state.isLoading
               ? null
-              : () => showSaveDraftDialog(context, isArabic),
-          child: Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
+              : () => showSaveDraftDialog(context),
+          child: Text('course_editor.save_draft'.tr()),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
           onPressed: state.isLoading
               ? null
-              : () => showPublishDialog(context, isArabic),
+              : () => showPublishDialog(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
           ),
-          child: Text(isArabic ? 'نشر' : 'Publish'),
+          child: Text('course_editor.publish'.tr()),
         ),
         const SizedBox(width: 16),
       ];
@@ -121,9 +117,9 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
         icon: const Icon(Icons.more_vert),
         onSelected: (value) {
           if (value == 'draft') {
-            showSaveDraftDialog(context, isArabic);
+            showSaveDraftDialog(context);
           } else if (value == 'publish') {
-            showPublishDialog(context, isArabic);
+            showPublishDialog(context);
           }
         },
         itemBuilder: (context) => [
@@ -134,7 +130,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.save_outlined, size: 20),
                 const SizedBox(width: 12),
-                Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
+                Text('course_editor.save_draft'.tr()),
               ],
             ),
           ),
@@ -145,7 +141,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.publish, size: 20),
                 const SizedBox(width: 12),
-                Text(isArabic ? 'نشر' : 'Publish'),
+                Text('course_editor.publish'.tr()),
               ],
             ),
           ),

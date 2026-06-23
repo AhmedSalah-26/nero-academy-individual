@@ -10,8 +10,8 @@ import '../../cubit/course_editor_cubit.dart';
 /// Saves the current course as a draft, showing a loading dialog while doing so.
 Future<void> showSaveDraftDialog(
   BuildContext context,
-  bool isArabic,
 ) async {
+  final isArabic = Localizations.localeOf(context).languageCode == 'ar';
   showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.7),
@@ -47,15 +47,15 @@ Future<void> showSaveDraftDialog(
 /// loading / success / error dialogs throughout.
 Future<void> showPublishDialog(
   BuildContext context,
-  bool isArabic,
 ) async {
+  final isArabic = Localizations.localeOf(context).languageCode == 'ar';
   final missingItems = context
       .read<CourseEditorCubit>()
       .state
       .publishValidationMessages(isArabic: isArabic);
 
   if (missingItems.isNotEmpty) {
-    await showPublishValidationDialog(context, isArabic, missingItems);
+    await showPublishValidationDialog(context, missingItems);
     return;
   }
 
@@ -164,9 +164,9 @@ Future<void> showPublishDialog(
 /// Shows a dialog listing the checklist items still missing before publishing.
 Future<void> showPublishValidationDialog(
   BuildContext context,
-  bool isArabic,
   List<String> missingItems,
 ) {
+  final isArabic = Localizations.localeOf(context).languageCode == 'ar';
   return showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
