@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/app_logger.dart';
@@ -53,8 +52,8 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
           appBar: AppBar(
             title: Text(
               widget.courseId != null
-                  ? (isArabic ? 'تعديل الكورس' : 'Edit Course')
-                  : (isArabic ? 'كورس جديد' : 'New Course'),
+                  ? 'dashboard.instructor.edit_course'.tr()
+                  : 'dashboard.instructor.create_course'.tr(),
               style: const TextStyle(fontSize: 16),
             ),
             leading: IconButton(
@@ -99,7 +98,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
           onPressed: state.isLoading
               ? null
               : () => showSaveDraftDialog(context, isArabic),
-          child: Text('course_editor.save_draft'.tr()),
+          child: Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
@@ -110,7 +109,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
           ),
-          child: Text('course_editor.publish'.tr()),
+          child: Text(isArabic ? 'نشر' : 'Publish'),
         ),
         const SizedBox(width: 16),
       ];
@@ -134,7 +133,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.save_outlined, size: 20),
                 const SizedBox(width: 12),
-                Text('course_editor.save_draft'.tr()),
+                Text(isArabic ? 'حفظ مسودة' : 'Save Draft'),
               ],
             ),
           ),
@@ -145,7 +144,7 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
               children: [
                 const Icon(Icons.publish, size: 20),
                 const SizedBox(width: 12),
-                Text('course_editor.publish'.tr()),
+                Text(isArabic ? 'نشر' : 'Publish'),
               ],
             ),
           ),
