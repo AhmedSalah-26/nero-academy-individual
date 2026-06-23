@@ -14,28 +14,31 @@ class ManualPurchaseRequestsScreen extends StatefulWidget {
 }
 
 class _ManualPurchaseRequestsScreenState
-    extends State<ManualPurchaseRequestsScreen> {
-  static const _allStatus = 'all';
+    extends State<ManualPurchaseRequestsScreen>
+    with SingleTickerProviderStateMixin {
   static const _pendingStatus = 'pending_manual_payment';
   static const _paidStatus = 'paid';
   static const _cancelledStatus = 'cancelled';
-  static const _manualStatuses = [
-    _pendingStatus,
-    _paidStatus,
-    _cancelledStatus
-  ];
+  static const _manualStatuses = [_pendingStatus, _paidStatus, _cancelledStatus];
 
+  late final TabController _tabController;
   final _client = Supabase.instance.client;
   var _isLoading = true;
   var _actionOrderId = '';
-  var _selectedStatus = _pendingStatus;
   String? _error;
   List<_ManualPurchaseRequest> _requests = const [];
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _loadRequests();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRequests() async {
@@ -61,8 +64,7 @@ class _ManualPurchaseRequestsScreenState
           .order('created_at', ascending: false);
 
       final requests = (response as List)
-          .map((item) =>
-              _ManualPurchaseRequest.fromJson(item as Map<String, dynamic>))
+          .map((item) => _ManualPurchaseRequest.fromJson(item as Map<String, dynamic>))
           .toList();
 
       if (!mounted) return;
@@ -79,27 +81,18 @@ class _ManualPurchaseRequestsScreenState
     }
   }
 
-  List<_ManualPurchaseRequest> get _visibleRequests {
-    if (_selectedStatus == _allStatus) return _requests;
-    return _requests
-        .where((request) => request.paymentStatus == _selectedStatus)
-        .toList();
-  }
+  List<_ManualPurchaseRequest> _requestsFor(String status) =>
+      _requests.where((r) => r.paymentStatus == status).toList();
 
-  int _count(String status) {
-    if (status == _allStatus) return _requests.length;
-    return _requests.where((request) => request.paymentStatus == status).length;
-  }
+  int _count(String status) =>
+      _requests.where((r) => r.paymentStatus == status).length;
 
   Future<void> _approve(String orderId, int days) async {
     await _runAction(
       orderId,
       () => _client.rpc(
         'approve_manual_purchase_request',
-        params: {
-          'p_parent_enrollment_id': orderId,
-          'p_access_days': days,
-        },
+        params: {'p_parent_enrollment_id': orderId, 'p_access_days': days},
       ),
     );
   }
@@ -114,19 +107,14 @@ class _ManualPurchaseRequestsScreenState
     );
   }
 
-  Future<void> _runAction(
-    String orderId,
-    Future<dynamic> Function() action,
-  ) async {
+  Future<void> _runAction(String orderId, Future<dynamic> Function() action) async {
     setState(() => _actionOrderId = orderId);
     try {
       await action();
       if (!mounted) return;
       AnimatedSnackbar.showSuccess(
         context: context,
-        message: context.locale.languageCode == 'ar'
-            ? 'تم تحديث الطلب'
-            : 'Request updated',
+        message: context.locale.languageCode == 'ar' ? 'تم تحديث الطلب' : 'Request updated',
       );
       await _loadRequests();
     } catch (_) {
@@ -159,144 +147,170 @@ class _ManualPurchaseRequestsScreenState
       );
     }
 
-    final visibleRequests = _visibleRequests;
-
-    return RefreshIndicator(
-      onRefresh: _loadRequests,
-      color: AppColors.primary,
-      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _StatusFilters(
-            selectedStatus: _selectedStatus,
-            countFor: _count,
-            isDark: isDark,
-            onChanged: (status) => setState(() => _selectedStatus = status),
-          ),
-          const SizedBox(height: 14),
-          if (visibleRequests.isEmpty)
-            _RequestsEmptyState(
-              status: _selectedStatus,
-              isDark: isDark,
-              isArabic: isArabic,
-            )
-          else
-            ...visibleRequests.map(
-              (request) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _RequestCard(
-                  request: request,
-                  isDark: isDark,
-                  isBusy: _actionOrderId == request.id,
-                  onApprove: (days) => _approve(request.id, days),
-                  onCancel: () => _cancel(request.id),
-                ),
+    return Column(
+      children: [
+        // ── Tab Bar ──────────────────────────────────────────────────────
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.cardDark : AppColors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
               ),
             ),
-        ],
-      ),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            labelColor: AppColors.primary,
+            unselectedLabelColor:
+                isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 2.5,
+            labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+            tabs: [
+              _buildTab(
+                label: isArabic ? 'قيد المراجعة' : 'Pending',
+                count: _count(_pendingStatus),
+                color: AppColors.warning,
+              ),
+              _buildTab(
+                label: isArabic ? 'مقبول' : 'Approved',
+                count: _count(_paidStatus),
+                color: AppColors.success,
+              ),
+              _buildTab(
+                label: isArabic ? 'ملغي' : 'Cancelled',
+                count: _count(_cancelledStatus),
+                color: AppColors.error,
+              ),
+            ],
+          ),
+        ),
+        // ── Tab Views ────────────────────────────────────────────────────
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _RequestsList(
+                requests: _requestsFor(_pendingStatus),
+                isDark: isDark,
+                isArabic: isArabic,
+                status: _pendingStatus,
+                actionOrderId: _actionOrderId,
+                onApprove: _approve,
+                onCancel: _cancel,
+                onRefresh: _loadRequests,
+              ),
+              _RequestsList(
+                requests: _requestsFor(_paidStatus),
+                isDark: isDark,
+                isArabic: isArabic,
+                status: _paidStatus,
+                actionOrderId: _actionOrderId,
+                onApprove: _approve,
+                onCancel: _cancel,
+                onRefresh: _loadRequests,
+              ),
+              _RequestsList(
+                requests: _requestsFor(_cancelledStatus),
+                isDark: isDark,
+                isArabic: isArabic,
+                status: _cancelledStatus,
+                actionOrderId: _actionOrderId,
+                onApprove: _approve,
+                onCancel: _cancel,
+                onRefresh: _loadRequests,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
-}
 
-class _StatusFilters extends StatelessWidget {
-  const _StatusFilters({
-    required this.selectedStatus,
-    required this.countFor,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  final String selectedStatus;
-  final int Function(String status) countFor;
-  final bool isDark;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final isArabic = context.locale.languageCode == 'ar';
-    final filters = [
-      _StatusFilterData(
-        status: _ManualPurchaseRequestsScreenState._pendingStatus,
-        label: isArabic ? 'قيد المراجعة' : 'Pending',
-        color: AppColors.warning,
-      ),
-      _StatusFilterData(
-        status: _ManualPurchaseRequestsScreenState._paidStatus,
-        label: isArabic ? 'مقبول' : 'Approved',
-        color: AppColors.success,
-      ),
-      _StatusFilterData(
-        status: _ManualPurchaseRequestsScreenState._cancelledStatus,
-        label: isArabic ? 'ملغي' : 'Cancelled',
-        color: AppColors.error,
-      ),
-      _StatusFilterData(
-        status: _ManualPurchaseRequestsScreenState._allStatus,
-        label: isArabic ? 'الكل' : 'All',
-        color: AppColors.primary,
-      ),
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+  Tab _buildTab({required String label, required int count, required Color color}) {
+    return Tab(
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          for (final filter in filters) ...[
-            _StatusFilterChip(
-              label: '${filter.label} (${countFor(filter.status)})',
-              color: filter.color,
-              isSelected: selectedStatus == filter.status,
-              onTap: () => onChanged(filter.status),
+          Text(label),
+          const SizedBox(width: 6),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 8),
-          ],
+            child: Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: color,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _StatusFilterChip extends StatelessWidget {
-  const _StatusFilterChip({
-    required this.label,
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
+// ── Requests List ──────────────────────────────────────────────────────────────
+
+class _RequestsList extends StatelessWidget {
+  const _RequestsList({
+    required this.requests,
+    required this.isDark,
+    required this.isArabic,
+    required this.status,
+    required this.actionOrderId,
+    required this.onApprove,
+    required this.onCancel,
+    required this.onRefresh,
   });
 
-  final String label;
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
+  final List<_ManualPurchaseRequest> requests;
+  final bool isDark;
+  final bool isArabic;
+  final String status;
+  final String actionOrderId;
+  final Future<void> Function(String, int) onApprove;
+  final Future<void> Function(String) onCancel;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.28),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? AppColors.white : color,
-          ),
+    if (requests.isEmpty) {
+      return _RequestsEmptyState(status: status, isDark: isDark, isArabic: isArabic);
+    }
+
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: AppColors.primary,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: requests.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, i) => _RequestCard(
+          request: requests[i],
+          isDark: isDark,
+          isBusy: actionOrderId == requests[i].id,
+          onApprove: (days) => onApprove(requests[i].id, days),
+          onCancel: () => onCancel(requests[i].id),
         ),
       ),
     );
   }
 }
+
+// ── Request Card ───────────────────────────────────────────────────────────────
 
 class _RequestCard extends StatelessWidget {
   const _RequestCard({
@@ -316,8 +330,7 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.locale.languageCode == 'ar';
-    final dateFormat =
-        DateFormat('dd MMM yyyy - hh:mm a', isArabic ? 'ar' : 'en');
+    final dateFormat = DateFormat('dd MMM yyyy - hh:mm a', isArabic ? 'ar' : 'en');
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -343,9 +356,7 @@ class _RequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        color: isDark
-                            ? AppColors.textMainDark
-                            : AppColors.textMainLight,
+                        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -353,9 +364,7 @@ class _RequestCard extends StatelessWidget {
                       dateFormat.format(request.createdAt),
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
+                        color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
                       ),
                     ),
                   ],
@@ -368,8 +377,7 @@ class _RequestCard extends StatelessWidget {
           const SizedBox(height: 12),
           _InfoRow(
             icon: Icons.confirmation_number_rounded,
-            text:
-                '${isArabic ? 'رقم العملية' : 'Operation'}: ${request.shortId}',
+            text: '${isArabic ? 'رقم العملية' : 'Operation'}: ${request.shortId}',
             isDark: isDark,
           ),
           if (request.phone.isNotEmpty || request.email.isNotEmpty) ...[
@@ -377,7 +385,7 @@ class _RequestCard extends StatelessWidget {
             _InfoRow(
               icon: Icons.person_outline_rounded,
               text: [request.phone, request.email]
-                  .where((value) => value.isNotEmpty)
+                  .where((v) => v.isNotEmpty)
                   .join(' • '),
               isDark: isDark,
             ),
@@ -388,11 +396,7 @@ class _RequestCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.school_rounded,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
+                  const Icon(Icons.school_rounded, size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -400,9 +404,7 @@ class _RequestCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: isDark
-                            ? AppColors.textMainDark
-                            : AppColors.textMainLight,
+                        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
                       ),
                     ),
                   ),
@@ -422,9 +424,7 @@ class _RequestCard extends StatelessWidget {
               Text(
                 isArabic ? 'الإجمالي' : 'Total',
                 style: TextStyle(
-                  color: isDark
-                      ? AppColors.textMutedDark
-                      : AppColors.textMutedLight,
+                  color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -452,9 +452,7 @@ class _RequestCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: () => onApprove(days),
                       icon: const Icon(Icons.check_rounded, size: 18),
-                      label: Text(
-                        isArabic ? 'قبول $days يوم' : 'Approve $days days',
-                      ),
+                      label: Text(isArabic ? 'قبول $days يوم' : 'Approve $days days'),
                     ),
                   OutlinedButton.icon(
                     onPressed: onCancel,
@@ -474,12 +472,10 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
+// ── Supporting widgets ─────────────────────────────────────────────────────────
+
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.icon,
-    required this.text,
-    required this.isDark,
-  });
+  const _InfoRow({required this.icon, required this.text, required this.isDark});
 
   final IconData icon;
   final String text;
@@ -489,19 +485,15 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-        ),
+        Icon(icon, size: 16,
+            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
             style: TextStyle(
               fontSize: 12,
-              color:
-                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
         ),
@@ -511,10 +503,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _StatusHint extends StatelessWidget {
-  const _StatusHint({
-    required this.request,
-    required this.isDark,
-  });
+  const _StatusHint({required this.request, required this.isDark});
 
   final _ManualPurchaseRequest request;
   final bool isDark;
@@ -538,7 +527,7 @@ class _StatusHint extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: (isDark ? AppColors.surfaceDark : AppColors.grey50),
+        color: isDark ? AppColors.surfaceDark : AppColors.grey50,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -576,11 +565,7 @@ class _RequestStatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -603,11 +588,8 @@ class _RequestsEmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 96, horizontal: 12),
       child: Column(
         children: [
-          Icon(
-            Icons.inbox_rounded,
-            size: 54,
-            color: isDark ? AppColors.grey500 : AppColors.grey400,
-          ),
+          Icon(Icons.inbox_rounded,
+              size: 54, color: isDark ? AppColors.grey500 : AppColors.grey400),
           const SizedBox(height: 12),
           Text(
             isArabic
@@ -645,22 +627,15 @@ class _RequestsErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 42,
-              color: AppColors.error,
-            ),
+            const Icon(Icons.error_outline_rounded, size: 42, color: AppColors.error),
             const SizedBox(height: 12),
             Text(
-              isArabic
-                  ? 'تعذر تحميل طلبات الشراء'
-                  : 'Could not load purchase requests',
+              isArabic ? 'تعذر تحميل طلبات الشراء' : 'Could not load purchase requests',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
-                color:
-                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
               ),
             ),
             const SizedBox(height: 12),
@@ -676,17 +651,7 @@ class _RequestsErrorState extends StatelessWidget {
   }
 }
 
-class _StatusFilterData {
-  final String status;
-  final String label;
-  final Color color;
-
-  const _StatusFilterData({
-    required this.status,
-    required this.label,
-    required this.color,
-  });
-}
+// ── Data Models ────────────────────────────────────────────────────────────────
 
 class _ManualPurchaseRequest {
   final String id;
@@ -726,8 +691,7 @@ class _ManualPurchaseRequest {
       total: (json['total'] as num?)?.toDouble() ?? 0,
       paymentStatus: json['payment_status'] as String? ??
           _ManualPurchaseRequestsScreenState._pendingStatus,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
-          DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       studentName: profile?['name'] as String? ?? 'Student',
       email: profile?['email'] as String? ?? '',
       phone: profile?['phone'] as String? ?? '',
@@ -760,10 +724,10 @@ class _RequestCourse {
   }
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
 String _statusLabel(String status, bool isArabic) {
   switch (status) {
-    case _ManualPurchaseRequestsScreenState._allStatus:
-      return isArabic ? 'كل الطلبات' : 'All';
     case _ManualPurchaseRequestsScreenState._paidStatus:
       return isArabic ? 'طلبات مقبولة' : 'Approved';
     case _ManualPurchaseRequestsScreenState._cancelledStatus:
