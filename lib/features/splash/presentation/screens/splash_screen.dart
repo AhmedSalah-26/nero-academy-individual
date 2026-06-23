@@ -161,39 +161,19 @@ class _LogoMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      height: 140,
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 32,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Image.asset(
-            'assets/logo2.png',
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const ColoredBox(
-              color: Colors.transparent,
-              child: Center(
-                child: Text(
-                  'ش',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 54,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
+    return SizedBox(
+      width: 190,
+      height: 190,
+      child: Image.asset(
+        'assets/logo2.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Text(
+            'ش',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 72,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ),
@@ -201,6 +181,7 @@ class _LogoMark extends StatelessWidget {
     );
   }
 }
+
 
 class _SoftCircle extends StatelessWidget {
   const _SoftCircle({required this.size});
