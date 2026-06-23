@@ -396,12 +396,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() => _isResetting = true);
     try {
+      // Step 1: verify the OTP sent via signInWithOtp (type = email)
       await Supabase.instance.client.auth.verifyOTP(
-        type: OtpType.recovery,
+        type: OtpType.email,
         email: _emailController.text.trim(),
         token: _otpController.text.trim(),
       );
 
+      // Step 2: update password now that user is authenticated via OTP
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(password: _passwordController.text.trim()),
       );
@@ -419,6 +421,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) setState(() => _isResetting = false);
     }
   }
+
 }
 
 class _PrimaryActionButton extends StatelessWidget {

@@ -1,10 +1,10 @@
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
 import '../../models/user_model.dart';
 // import 'auth_helpers_mixin.dart';
+
 
 mixin AuthProfileMixin {
   // Dependencies
@@ -15,14 +15,17 @@ mixin AuthProfileMixin {
 
   Future<void> forgotPassword(String email) async {
     try {
-      await supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo: AppConstants.passwordResetRedirectUrl,
+      // Use signInWithOtp to send a 6-digit OTP code to the user's email.
+      // resetPasswordForEmail sends a magic link, not an OTP code.
+      await supabase.auth.signInWithOtp(
+        email: email,
+        shouldCreateUser: false,
       );
     } on AuthApiException catch (e) {
       throw handleAuthError(e);
     }
   }
+
 
   Future<void> resetPassword(
       {required String token, required String newPassword}) async {
