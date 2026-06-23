@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/app_logger.dart';

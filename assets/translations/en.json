@@ -40,7 +40,8 @@
     "months_ago": "months ago",
     "learn_more": "Learn More",
     "read_more": "Read More",
-    "select_country": "Select Country"
+    "select_country": "Select Country",
+    "copy": "Copy"
   },
   "errors": {
     "network": "No internet connection",
@@ -184,7 +185,26 @@
     "add_photo": "Add Your Photo",
     "photo_subtitle": "Help others recognize you",
     "instructor_info": "Instructor Information",
-    "instructor_subtitle": "Tell us more about your expertise"
+    "instructor_subtitle": "Tell us more about your expertise",
+    "reset_password_done_title": "Password changed successfully",
+    "reset_password_done_subtitle": "You can now sign in with your new password.",
+    "reset_password_new_title": "Set a new password",
+    "reset_password_new_subtitle": "Enter the new password for your account.",
+    "new_password": "New password",
+    "change_password": "Change password",
+    "reset_link_invalid": "Invalid or expired reset link.",
+    "reset_password_failed": "Could not change password. Please request a new link.",
+    "password_min_8": "Password must be at least 8 characters",
+    "reset_otp_subtitle": "Enter your email and we will send you a verification code.",
+    "reset_otp_sent": "Verification code has been sent to your email",
+    "enter_reset_code": "Enter the verification code and your new password.",
+    "otp_code": "Verification code",
+    "otp_code_hint": "6-digit code",
+    "otp_required": "Verification code is required",
+    "verify_and_change_password": "Verify and change password",
+    "reset_success": "Password changed successfully",
+    "resend_code": "Resend code",
+    "send_reset_code": "Send Code"
   },
   "home": {
     "hello": "Hello",
@@ -297,7 +317,14 @@
     "order_id": "Order ID:",
     "start_learning": "Start Learning",
     "back_to_home": "Back to Home",
-    "pending_confirmation": "Payment is still being confirmed. Your subscription will activate after the bank confirms the payment."
+    "pending_confirmation": "Payment is still being confirmed. Your subscription will activate after the bank confirms the payment.",
+    "request_submitted": "Request submitted",
+    "manual_request_subtitle": "Contact admin on WhatsApp and send the operation ID to complete payment and activate your course.",
+    "operation_id": "Operation ID",
+    "admin_whatsapp": "Admin WhatsApp",
+    "contact_whatsapp": "Contact on WhatsApp",
+    "whatsapp_message": "Hello, I want to complete my Shehab Academy payment. Operation ID: {orderId}",
+    "copied": "Copied"
   },
   "my_learning": {
     "title": "My Learning",
@@ -904,5 +931,28 @@
       "no_violation": "We did not find a policy violation in this content.",
       "duplicate_report": "This has already been reported and action has been taken."
     }
+  },
+  "course_editor": {
+    "next_settings": "Next (Settings)",
+    "publish_course": "Publish Course",
+    "publish_missing_title": "Missing items",
+    "publish_missing_message": "Complete the following items, then try publishing again:",
+    "publish_confirm_title": "Publish Course",
+    "publish_confirm_message": "Are you sure you want to publish this course?",
+    "publish_success": "Course published successfully",
+    "publish_failed": "Failed to publish course",
+    "published_available": "Your course is now live and available to students",
+    "publishing": "Publishing course...",
+    "validation_title_ar": "Arabic title",
+    "validation_title_en": "English title",
+    "validation_description_ar": "Arabic description",
+    "validation_description_en": "English description",
+    "validation_category": "Category",
+    "validation_course_availability": "Course availability window must be valid",
+    "validation_section_required": "Add at least one section",
+    "validation_section_fallback": "Section {number}",
+    "validation_lesson_fallback": "Lesson {number}",
+    "validation_section_empty": "{section} has no lessons",
+    "validation_lesson_availability": "{lesson} availability in {section} is invalid"
   }
 }

@@ -167,6 +167,10 @@ mixin CoursePublishingMixin
 
     if (!state.canPublish) {
       AppLogger.w('[CoursePublishingMixin] Cannot publish - validation failed');
+      emit(state.copyWith(
+        status: CourseEditorStatus.error,
+        errorMessage: 'Course publish validation failed',
+      ));
       return false;
     }
 

@@ -105,6 +105,69 @@ class CourseEditorState extends Equatable {
       sections
           .every((s) => s.lessons.every((l) => l.hasValidAvailabilityWindow));
 
+  List<String> publishValidationMessages({required bool isArabic}) {
+    final messages = <String>[];
+
+    if (titleAr.trim().isEmpty) {
+      messages.add('course_editor.validation_title_ar'.tr());
+    }
+    if (titleEn.trim().isEmpty) {
+      messages.add('course_editor.validation_title_en'.tr());
+    }
+    if (descriptionAr.trim().isEmpty) {
+      messages.add('course_editor.validation_description_ar'.tr());
+    }
+    if (descriptionEn.trim().isEmpty) {
+      messages.add('course_editor.validation_description_en'.tr());
+    }
+    if (categoryId == null) {
+      messages.add('course_editor.validation_category'.tr());
+    }
+    if (!hasValidAvailabilityWindow) {
+      messages.add('course_editor.validation_course_availability'.tr());
+    }
+    if (sections.isEmpty) {
+      messages.add('course_editor.validation_section_required'.tr());
+    }
+
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      final sectionName = isArabic
+          ? (section.titleAr.trim().isNotEmpty
+              ? section.titleAr.trim()
+              : 'course_editor.validation_section_fallback'
+                  .tr(namedArgs: {'number': '${i + 1}'}))
+          : (section.titleEn.trim().isNotEmpty
+              ? section.titleEn.trim()
+              : 'course_editor.validation_section_fallback'
+                  .tr(namedArgs: {'number': '${i + 1}'}));
+
+      if (section.lessons.isEmpty) {
+        messages.add('course_editor.validation_section_empty'
+            .tr(namedArgs: {'section': sectionName}));
+      }
+
+      for (var j = 0; j < section.lessons.length; j++) {
+        final lesson = section.lessons[j];
+        if (!lesson.hasValidAvailabilityWindow) {
+          final lessonName = isArabic
+              ? (lesson.titleAr.trim().isNotEmpty
+                  ? lesson.titleAr.trim()
+                  : 'course_editor.validation_lesson_fallback'
+                      .tr(namedArgs: {'number': '${j + 1}'}))
+              : (lesson.titleEn.trim().isNotEmpty
+                  ? lesson.titleEn.trim()
+                  : 'course_editor.validation_lesson_fallback'
+                      .tr(namedArgs: {'number': '${j + 1}'}));
+          messages.add('course_editor.validation_lesson_availability'
+              .tr(namedArgs: {'lesson': lessonName, 'section': sectionName}));
+        }
+      }
+    }
+
+    return messages;
+  }
+
   CourseEditorState copyWith({
     CourseEditorStatus? status,
     String? courseId,

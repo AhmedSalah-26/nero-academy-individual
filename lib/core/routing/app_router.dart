@@ -24,6 +24,7 @@ import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/cubit/interests_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/interests_selection_screen.dart';
 // Main
 import '../../features/main/presentation/screens/main_screen.dart';
@@ -149,6 +150,11 @@ class AppRouter {
           value: sl<AuthCubit>(),
           child: const ForgotPasswordScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
       ),
       GoRoute(
         path: '/interests',
@@ -1136,7 +1142,8 @@ class AppRouter {
 
   static void goToHistory(BuildContext context) => context.pushNamed('history');
 
-  static void goToOrdersStatus(BuildContext context) => context.pushNamed('orders-status');
+  static void goToOrdersStatus(BuildContext context) =>
+      context.pushNamed('orders-status');
 
   static void goToSettings(BuildContext context) =>
       context.pushNamed('settings');

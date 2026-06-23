@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/routing/app_router.dart';
@@ -8,8 +9,8 @@ import '../../../../core/shared_widgets/app_button.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Manual order confirmation screen.
-class PaymentSuccessScreen extends StatelessWidget {
-  static const String adminWhatsappNumber = '201000000000';
+class PaymentSuccessScreen extends StatefulWidget {
+  static const String fallbackAdminWhatsappNumber = '201000000000';
 
   final String orderId;
 
@@ -18,14 +19,45 @@ class PaymentSuccessScreen extends StatelessWidget {
     required this.orderId,
   });
 
-  String get shortOrderId => orderId.length <= 8
-      ? orderId.toUpperCase()
-      : orderId.substring(0, 8).toUpperCase();
+  @override
+  State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
+}
+
+class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
+  late final Future<String> _adminWhatsappFuture = _loadAdminWhatsappNumber();
+
+  String get shortOrderId => widget.orderId.length <= 8
+      ? widget.orderId.toUpperCase()
+      : widget.orderId.substring(0, 8).toUpperCase();
+
+  Future<String> _loadAdminWhatsappNumber() async {
+    try {
+      final admin = await Supabase.instance.client
+          .from('profiles')
+          .select('phone')
+          .eq('role', 'admin')
+          .not('phone', 'is', null)
+          .limit(1)
+          .maybeSingle();
+
+      return _normalizeWhatsappNumber(admin?['phone'] as String?) ??
+          PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+    } catch (_) {
+      return PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+    }
+  }
+
+  String? _normalizeWhatsappNumber(String? value) {
+    final digits = value?.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits == null || digits.isEmpty) return null;
+    if (digits.startsWith('00')) return digits.substring(2);
+    if (digits.startsWith('0')) return '20${digits.substring(1)}';
+    return digits;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isArabic = context.locale.languageCode == 'ar';
 
     return Scaffold(
       backgroundColor:
@@ -54,7 +86,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               Text(
-                isArabic ? 'تم تقديم الطلب' : 'Request submitted',
+                'payment.request_submitted'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
@@ -64,9 +96,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                isArabic
-                    ? 'تواصل مع الإدارة على واتساب وأرسل رقم العملية لإتمام الدفع وتفعيل الكورس.'
-                    : 'Contact admin on WhatsApp and send the operation ID to complete payment and activate your course.',
+                'payment.manual_request_subtitle'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -79,23 +109,30 @@ class PaymentSuccessScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _InfoTile(
                 icon: Icons.confirmation_number_rounded,
-                label: isArabic ? 'رقم العملية' : 'Operation ID',
+                label: 'payment.operation_id'.tr(),
                 value: shortOrderId,
                 isDark: isDark,
-                onCopy: () => _copy(context, orderId),
+                onCopy: () => _copy(context, widget.orderId),
               ),
               const SizedBox(height: 12),
-              _InfoTile(
-                icon: Icons.chat_rounded,
-                label: isArabic ? 'واتساب الإدارة' : 'Admin WhatsApp',
-                value: '+$adminWhatsappNumber',
-                isDark: isDark,
-                onCopy: () => _copy(context, '+$adminWhatsappNumber'),
+              FutureBuilder<String>(
+                future: _adminWhatsappFuture,
+                builder: (context, snapshot) {
+                  final adminWhatsappNumber = snapshot.data ??
+                      PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+                  return _InfoTile(
+                    icon: Icons.chat_rounded,
+                    label: 'payment.admin_whatsapp'.tr(),
+                    value: '+$adminWhatsappNumber',
+                    isDark: isDark,
+                    onCopy: () => _copy(context, '+$adminWhatsappNumber'),
+                  );
+                },
               ),
               const Spacer(),
               AppButton(
-                text: isArabic ? 'تواصل على واتساب' : 'Contact on WhatsApp',
-                onPressed: () => _openWhatsapp(context, isArabic),
+                text: 'payment.contact_whatsapp'.tr(),
+                onPressed: () => _openWhatsapp(context),
                 variant: AppButtonVariant.primary,
                 size: AppButtonSize.large,
                 icon: Icons.chat_rounded,
@@ -105,7 +142,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               TextButton(
                 onPressed: () => AppRouter.goToHome(context),
                 child: Text(
-                  isArabic ? 'العودة للرئيسية' : 'Back to home',
+                  'payment.back_to_home'.tr(),
                   style: const TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
@@ -119,11 +156,10 @@ class PaymentSuccessScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _openWhatsapp(BuildContext context, bool isArabic) async {
+  Future<void> _openWhatsapp(BuildContext context) async {
+    final adminWhatsappNumber = await _adminWhatsappFuture;
     final text = Uri.encodeComponent(
-      isArabic
-          ? 'مرحباً، أريد إتمام دفع طلب شهاب اكاديمى. رقم العملية: $orderId'
-          : 'Hello, I want to complete my Shehab Academy payment. Operation ID: $orderId',
+      'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
     );
     final uri = Uri.parse('https://wa.me/$adminWhatsappNumber?text=$text');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
@@ -137,7 +173,7 @@ class PaymentSuccessScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          context.locale.languageCode == 'ar' ? 'تم النسخ' : 'Copied',
+          'payment.copied'.tr(),
         ),
       ),
     );
@@ -202,7 +238,7 @@ class _InfoTile extends StatelessWidget {
           IconButton(
             onPressed: onCopy,
             icon: const Icon(Icons.copy_rounded),
-            tooltip: context.locale.languageCode == 'ar' ? 'نسخ' : 'Copy',
+            tooltip: 'common.copy'.tr(),
           ),
         ],
       ),

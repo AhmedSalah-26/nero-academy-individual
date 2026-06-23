@@ -40,7 +40,8 @@
     "months_ago": "أشهر",
     "learn_more": "معرفة المزيد",
     "read_more": "اقرأ المزيد",
-    "select_country": "اختر الدولة"
+    "select_country": "اختر الدولة",
+    "copy": "نسخ"
   },
   "errors": {
     "network": "لا يوجد اتصال بالإنترنت",
@@ -184,7 +185,26 @@
     "add_photo": "أضف صورتك",
     "photo_subtitle": "ساعد الآخرين على التعرف عليك",
     "instructor_info": "معلومات المدرس",
-    "instructor_subtitle": "أخبرنا المزيد عن خبرتك"
+    "instructor_subtitle": "أخبرنا المزيد عن خبرتك",
+    "reset_password_done_title": "تم تغيير كلمة السر بنجاح",
+    "reset_password_done_subtitle": "يمكنك الآن تسجيل الدخول بكلمة السر الجديدة.",
+    "reset_password_new_title": "تعيين كلمة سر جديدة",
+    "reset_password_new_subtitle": "اكتب كلمة السر الجديدة لحسابك.",
+    "new_password": "كلمة السر الجديدة",
+    "change_password": "تغيير كلمة السر",
+    "reset_link_invalid": "رابط إعادة التعيين غير صالح أو منتهي.",
+    "reset_password_failed": "تعذر تغيير كلمة السر. اطلب رابطا جديدا.",
+    "password_min_8": "كلمة السر يجب أن تكون 8 أحرف على الأقل",
+    "reset_otp_subtitle": "أدخل بريدك الإلكتروني وسنرسل لك كود تحقق.",
+    "reset_otp_sent": "تم إرسال كود التحقق إلى بريدك الإلكتروني",
+    "enter_reset_code": "أدخل كود التحقق وكلمة السر الجديدة.",
+    "otp_code": "كود التحقق",
+    "otp_code_hint": "كود من 6 أرقام",
+    "otp_required": "كود التحقق مطلوب",
+    "verify_and_change_password": "تأكيد وتغيير كلمة السر",
+    "reset_success": "تم تغيير كلمة السر بنجاح",
+    "resend_code": "إعادة إرسال الكود",
+    "send_reset_code": "إرسال الكود"
   },
   "home": {
     "hello": "مرحباً",
@@ -297,7 +317,14 @@
     "order_id": "رقم الطلب:",
     "start_learning": "ابدأ التعلم",
     "back_to_home": "العودة للرئيسية",
-    "pending_confirmation": "الدفع قيد التأكيد. سيتم تفعيل الاشتراك بعد تأكيد البنك."
+    "pending_confirmation": "الدفع قيد التأكيد. سيتم تفعيل الاشتراك بعد تأكيد البنك.",
+    "request_submitted": "تم تقديم الطلب",
+    "manual_request_subtitle": "تواصل مع الإدارة على واتساب وأرسل رقم العملية لإتمام الدفع وتفعيل الكورس.",
+    "operation_id": "رقم العملية",
+    "admin_whatsapp": "واتساب الإدارة",
+    "contact_whatsapp": "تواصل على واتساب",
+    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب اكاديمي. رقم العملية: {orderId}",
+    "copied": "تم النسخ"
   },
   "my_learning": {
     "title": "دوراتي",
@@ -937,5 +964,28 @@
       "no_violation": "لم نجد انتهاكاً لسياسات المنصة في هذا المحتوى.",
       "duplicate_report": "تم الإبلاغ بالفعل واتخاذ الإجراء."
     }
+  },
+  "course_editor": {
+    "next_settings": "التالي (الإعدادات)",
+    "publish_course": "نشر الكورس",
+    "publish_missing_title": "بيانات ناقصة قبل النشر",
+    "publish_missing_message": "أكمل البيانات التالية ثم حاول النشر مرة أخرى:",
+    "publish_confirm_title": "نشر الكورس",
+    "publish_confirm_message": "هل أنت متأكد من نشر هذا الكورس؟",
+    "publish_success": "تم نشر الكورس بنجاح",
+    "publish_failed": "فشل في نشر الكورس",
+    "published_available": "تم نشر الكورس وأصبح متاحا للطلاب الآن",
+    "publishing": "جاري نشر الكورس...",
+    "validation_title_ar": "العنوان العربي",
+    "validation_title_en": "العنوان الإنجليزي",
+    "validation_description_ar": "الوصف العربي",
+    "validation_description_en": "الوصف الإنجليزي",
+    "validation_category": "التصنيف",
+    "validation_course_availability": "وقت إتاحة الكورس يجب أن يكون صحيحا",
+    "validation_section_required": "أضف قسما واحدا على الأقل",
+    "validation_section_fallback": "القسم {number}",
+    "validation_lesson_fallback": "الدرس {number}",
+    "validation_section_empty": "{section} لا يحتوي على دروس",
+    "validation_lesson_availability": "وقت إتاحة {lesson} داخل {section} غير صحيح"
   }
 }

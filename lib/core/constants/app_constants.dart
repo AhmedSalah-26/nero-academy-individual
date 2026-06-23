@@ -62,6 +62,32 @@ class AppConstants {
   }
 
   // Password Reset Web Page
-  static String get passwordResetRedirectUrl => authRedirectUrl;
-}
+  static String get passwordResetRedirectUrl {
+    if (kIsWeb) {
+      try {
+        final uri = Uri.base;
+        final baseSegments = <String>[];
 
+        // GitHub Pages project sites are hosted under /repo-name/.
+        // Keep that first segment so /reset-password resolves inside the app.
+        if (uri.host.endsWith('github.io') && uri.pathSegments.isNotEmpty) {
+          final first = uri.pathSegments.first;
+          if (first.isNotEmpty) {
+            baseSegments.add(first);
+          }
+        }
+
+        return Uri(
+          scheme: uri.scheme,
+          host: uri.host,
+          port: uri.hasPort ? uri.port : null,
+          pathSegments: [...baseSegments, 'reset-password'],
+        ).toString();
+      } catch (_) {
+        return 'https://ahmedsalah-26.github.io/nero-academy-individual-web-app/reset-password';
+      }
+    }
+
+    return 'https://ahmedsalah-26.github.io/nero-academy-individual-web-app/reset-password';
+  }
+}
