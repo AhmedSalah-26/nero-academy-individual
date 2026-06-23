@@ -114,11 +114,13 @@ import '../../features/instructor/presentation/screens/instructor_profile_screen
 /// App Router - Centralized routing configuration
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     debugLogDiagnostics: true,
+    observers: [routeObserver],
     routes: [
       GoRoute(
         path: '/',

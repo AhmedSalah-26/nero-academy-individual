@@ -8,6 +8,8 @@ import 'package:chewie/chewie.dart';
 
 import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/di/injection_container.dart';
+import '../../../../../core/services/video_player_notifier_service.dart';
 import '../../../data/services/youtube_stream_service.dart';
 import '../../cubit/course_player_cubit.dart';
 import '../../screens/fullscreen_player_screen.dart';
@@ -111,8 +113,16 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
     _videoController?.removeListener(_onVideoChanged);
     _chewieController?.dispose();
     _chewieController = null;
-    _videoController?.dispose();
-    _videoController = null;
+    
+    if (_videoController != null) {
+      final service = sl<VideoPlayerNotifierService>();
+      if (service.controller == _videoController) {
+        _videoController = null;
+      } else {
+        _videoController!.dispose();
+        _videoController = null;
+      }
+    }
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -139,19 +149,43 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
 
       if (!mounted) return;
 
-      // 2) Create native VideoPlayerController from the direct URL
-      _videoController = VideoPlayerController.networkUrl(
-        result.streamUrl,
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
+      final service = sl<VideoPlayerNotifierService>();
+      final isExisting = service.videoUrl == widget.videoUrl && service.controller != null && service.controller!.value.isInitialized;
 
-      await _videoController!.initialize();
+      if (isExisting) {
+        _videoController = service.controller;
+        AppLogger.i('[YouTubePlayer] Reusing existing video player controller');
+      } else {
+        // 2) Create native VideoPlayerController from the direct URL
+        _videoController = VideoPlayerController.networkUrl(
+          result.streamUrl,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
+
+        await _videoController!.initialize();
+
+        if (!mounted) return;
+
+        // Register the new controller
+        service.registerPlayer(
+          _videoController!,
+          widget.videoUrl,
+          courseId: context.read<CoursePlayerCubit>().state.courseId ?? '',
+          enrollmentId: context.read<CoursePlayerCubit>().state.enrollmentId ?? '',
+          courseTitle: widget.courseTitle ?? '',
+          lessonId: context.read<CoursePlayerCubit>().state.currentLesson?.id ?? '',
+          lessonTitle: widget.lessonTitle ?? '',
+          instructorId: context.read<CoursePlayerCubit>().state.instructorId,
+          instructorName: context.read<CoursePlayerCubit>().state.instructorName,
+          instructorAvatar: context.read<CoursePlayerCubit>().state.instructorAvatar,
+        );
+      }
 
       if (!mounted) return;
 
       // 3) Seek to saved position if resuming
       final initialPos = widget.initialPosition ?? 0;
-      if (initialPos > 0) {
+      if (!isExisting && initialPos > 0) {
         await _videoController!.seekTo(Duration(seconds: initialPos));
       }
 

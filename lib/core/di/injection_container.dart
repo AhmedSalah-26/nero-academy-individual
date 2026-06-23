@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../network/network_info.dart';
 import '../services/lesson_history_service.dart';
 import '../services/supabase_service.dart';
+import '../services/video_player_notifier_service.dart';
 // Auth Feature
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -152,6 +153,7 @@ Future<void> initDependencies() async {
   // ============ Core ============
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
   sl.registerLazySingleton(() => LessonHistoryService(sl()));
+  sl.registerLazySingleton(() => VideoPlayerNotifierService());
 
   // ============ Auth Feature ============
   _initAuth();

@@ -10,6 +10,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/services/screen_protection_service.dart';
+import '../../../../core/services/video_player_notifier_service.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../quizzes/domain/entities/quiz_entity.dart';
 import '../../../quizzes/domain/repositories/quizzes_repository.dart';
@@ -57,7 +59,7 @@ class CoursePlayerScreen extends StatefulWidget {
 }
 
 class _CoursePlayerScreenState extends State<CoursePlayerScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   bool _isPlaying = false;
   int _currentPosition = 0;
   final int _totalDuration = 765;
@@ -76,10 +78,33 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     });
     _startProgressTimer();
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<void>) {
+      AppRouter.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPushNext() {
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
+    super.didPushNext();
+  }
+
+  @override
+  void didPopNext() {
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+    super.didPopNext();
   }
 
   @override
   void dispose() {
+    AppRouter.routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
     _progressTimer = null;
@@ -87,6 +112,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     _saveProgress();
     // Re-allow screen recording when leaving player
     ScreenProtectionService.disable();
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
     super.dispose();
   }
 
