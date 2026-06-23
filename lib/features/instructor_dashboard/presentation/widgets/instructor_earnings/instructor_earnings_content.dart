@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -93,6 +94,7 @@ class _InstructorEarningsContentState
                         color: AppColors.success,
                         isDark: isDark,
                         isLoading: state.isLoading,
+                        isArabic: isArabic,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -106,6 +108,7 @@ class _InstructorEarningsContentState
                         color: AppColors.primary,
                         isDark: isDark,
                         isLoading: state.isLoading,
+                        isArabic: isArabic,
                       ),
                     ),
                   ],
@@ -230,6 +233,7 @@ class _StatCard extends StatelessWidget {
   final Color color;
   final bool isDark;
   final bool isLoading;
+  final bool isArabic;
 
   const _StatCard({
     required this.icon,
@@ -238,6 +242,7 @@ class _StatCard extends StatelessWidget {
     required this.color,
     required this.isDark,
     required this.isLoading,
+    required this.isArabic,
   });
 
   @override
@@ -280,12 +285,15 @@ class _StatCard extends StatelessWidget {
               ),
             )
           else
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+            Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                isArabic && value.contains('ج.م') ? '${value.replaceAll('ج.م', '').trim()} ج.م' : value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                ),
               ),
             ),
           const SizedBox(height: 4),
@@ -402,12 +410,42 @@ class _TransactionsList extends StatelessWidget {
               ),
             ),
           )
-        else
-          ...earnings.map((e) => _TransactionItem(
-                earning: e,
+        else ...() {
+          final Map<String, _GroupedTransaction> grouped = {};
+          for (final e in earnings) {
+            final key = e.courseId ?? e.courseName;
+            if (grouped.containsKey(key)) {
+              final existing = grouped[key]!;
+              grouped[key] = _GroupedTransaction(
+                courseId: key,
+                courseName: e.courseName,
+                count: existing.count + 1,
+                totalAmount: existing.totalAmount + e.netAmount,
+                latestDate: e.createdAt.isAfter(existing.latestDate)
+                    ? e.createdAt
+                    : existing.latestDate,
+                sourceType: e.sourceType,
+              );
+            } else {
+              grouped[key] = _GroupedTransaction(
+                courseId: key,
+                courseName: e.courseName,
+                count: 1,
+                totalAmount: e.netAmount,
+                latestDate: e.createdAt,
+                sourceType: e.sourceType,
+              );
+            }
+          }
+          final groupedList = grouped.values.toList()
+            ..sort((a, b) => b.latestDate.compareTo(a.latestDate));
+
+          return groupedList.map((g) => _TransactionItem(
+                earning: g,
                 isArabic: isArabic,
                 isDark: isDark,
-              )),
+              ));
+        }(),
       ],
     );
   }
@@ -416,8 +454,26 @@ class _TransactionsList extends StatelessWidget {
 // ──────────────────────────────────────────────
 // Transaction Item
 // ──────────────────────────────────────────────
+class _GroupedTransaction {
+  final String courseId;
+  final String courseName;
+  final int count;
+  final double totalAmount;
+  final DateTime latestDate;
+  final EarningSourceType sourceType;
+
+  _GroupedTransaction({
+    required this.courseId,
+    required this.courseName,
+    required this.count,
+    required this.totalAmount,
+    required this.latestDate,
+    required this.sourceType,
+  });
+}
+
 class _TransactionItem extends StatelessWidget {
-  final EarningsTransactionModel earning;
+  final _GroupedTransaction earning;
   final bool isArabic;
   final bool isDark;
 
@@ -477,20 +533,42 @@ class _TransactionItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  DateFormat('dd/MM/yyyy').format(earning.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      DateFormat('dd/MM/yyyy').format(earning.latestDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                    ),
+                    if (earning.count > 1) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          isArabic ? '${earning.count} مرات' : '${earning.count}x',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
           Text(
-            '$prefix${earning.netAmount.abs().toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
+            '$prefix${earning.totalAmount.abs().toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,

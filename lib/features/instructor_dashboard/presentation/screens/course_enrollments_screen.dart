@@ -116,7 +116,7 @@ class _InstructorCourseEnrollmentsScreenState
         ),
         backgroundColor: isDark ? AppColors.surfaceDark : AppColors.white,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: const AppBackButton(fallbackLocation: '/instructor'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

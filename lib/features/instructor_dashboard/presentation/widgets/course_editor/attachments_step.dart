@@ -47,14 +47,14 @@ class AttachmentsStep extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             isArabic
-                ? 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ø±ÙÙ‚Ø§Øª Ø¨Ø¹Ø¯'
+                ? 'لا توجد مرفقات بعد'
                 : 'No attachments yet',
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             isArabic
-                ? 'Ø§Ø±ÙØ¹ Ù…Ù„ÙØ§Øª PDF Ø£Ùˆ ØµÙˆØ± Ø£Ùˆ Ù…Ø³ØªÙ†Ø¯Ø§Øª Ù„Ù„ÙƒÙˆØ±Ø³'
+                ? 'ارفع ملفات PDF أو صور أو مستندات للكورس'
                 : 'Upload PDF files, images, or documents for the course',
             style: TextStyle(color: Colors.grey[500]),
             textAlign: TextAlign.center,
@@ -65,11 +65,11 @@ class AttachmentsStep extends StatelessWidget {
                 ? null
                 : () {
                     AppLogger.i(
-                        'ðŸ“Ž [AttachmentsStep] Upload button clicked (empty state)');
+                        '📎 [AttachmentsStep] Upload button clicked (empty state)');
                     _pickAndUploadFile(context, cubit, isArabic);
                   },
             icon: const Icon(Icons.upload_file),
-            label: Text(isArabic ? 'Ø±ÙØ¹ Ù…Ù„Ù' : 'Upload File'),
+            label: Text(isArabic ? 'رفع ملف' : 'Upload File'),
           ),
         ],
       ),
@@ -95,7 +95,7 @@ class AttachmentsStep extends StatelessWidget {
             children: [
               Text(
                 isArabic
-                    ? 'Ù…Ø±ÙÙ‚Ø§Øª Ø§Ù„ÙƒÙˆØ±Ø³ (${state.attachments.length})'
+                    ? 'مرفقات الكورس (${state.attachments.length})'
                     : 'Course Attachments (${state.attachments.length})',
                 style: TextStyle(
                   fontSize: 16,
@@ -108,7 +108,7 @@ class AttachmentsStep extends StatelessWidget {
                     ? null
                     : () {
                         AppLogger.i(
-                            'ðŸ“Ž [AttachmentsStep] Upload button clicked (list view)');
+                            '📎 [AttachmentsStep] Upload button clicked (list view)');
                         _pickAndUploadFile(context, cubit, isArabic);
                       },
                 icon: state.isLoading
@@ -121,7 +121,7 @@ class AttachmentsStep extends StatelessWidget {
                         ),
                       )
                     : const Icon(Icons.upload_file, size: 18),
-                label: Text(isArabic ? 'Ø±ÙØ¹ Ù…Ù„Ù' : 'Upload File'),
+                label: Text(isArabic ? 'رفع ملف' : 'Upload File'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -177,15 +177,18 @@ class AttachmentsStep extends StatelessWidget {
         spacing: 12,
         runSpacing: 12,
         alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           OutlinedButton.icon(
             onPressed: () => cubit.setStep(2),
             icon: Icon(isArabic ? Icons.arrow_forward : Icons.arrow_back),
-            label: Text(isArabic ? 'Ø§Ù„Ø³Ø§Ø¨Ù‚' : 'Previous'),
+            label: Text(isArabic ? 'السابق' : 'Previous'),
           ),
           Wrap(
             spacing: 12,
             runSpacing: 12,
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               OutlinedButton(
                 onPressed: () async {
@@ -195,10 +198,10 @@ class AttachmentsStep extends StatelessWidget {
                       SnackBar(
                         content: Text(success
                             ? (isArabic
-                                ? 'ØªÙ… Ø­ÙØ¸ Ø§Ù„Ù…Ø³ÙˆØ¯Ø©'
+                                ? 'تم حفظ المسودة'
                                 : 'Draft saved')
                             : (isArabic
-                                ? 'ÙØ´Ù„ ÙÙŠ Ø§Ù„Ø­ÙØ¸'
+                                ? 'فشل في الحفظ'
                                 : 'Failed to save')),
                         backgroundColor:
                             success ? AppColors.success : AppColors.error,
@@ -206,7 +209,7 @@ class AttachmentsStep extends StatelessWidget {
                     );
                   }
                 },
-                child: Text(isArabic ? 'Ø­ÙØ¸ ÙƒÙ…Ø³ÙˆØ¯Ø©' : 'Save as Draft'),
+                child: Text(isArabic ? 'حفظ كمسودة' : 'Save as Draft'),
               ),
               ElevatedButton.icon(
                 onPressed: () => cubit.setStep(4),
@@ -227,7 +230,7 @@ class AttachmentsStep extends StatelessWidget {
   Future<void> _pickAndUploadFile(
       BuildContext context, CourseEditorCubit cubit, bool isArabic) async {
     try {
-      AppLogger.i('ðŸ“Ž [AttachmentsStep] Starting file picker...');
+      AppLogger.i('📎 [AttachmentsStep] Starting file picker...');
 
       // Use our custom file picker service
       final filePickerService = FilePickerService();
@@ -236,12 +239,12 @@ class AttachmentsStep extends StatelessWidget {
       );
 
       if (pickedFile == null) {
-        AppLogger.i('ðŸ“Ž [AttachmentsStep] No file selected');
+        AppLogger.i('📎 [AttachmentsStep] No file selected');
         return;
       }
 
       AppLogger.i(
-          'ðŸ“Ž [AttachmentsStep] Selected file: ${pickedFile.name}, size: ${pickedFile.sizeKB.toStringAsFixed(1)} KB');
+          '📎 [AttachmentsStep] Selected file: ${pickedFile.name}, size: ${pickedFile.sizeKB.toStringAsFixed(1)} KB');
 
       // Show loading
       if (context.mounted) {
@@ -259,7 +262,7 @@ class AttachmentsStep extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Text(isArabic
-                    ? 'Ø¬Ø§Ø±ÙŠ Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù...'
+                    ? 'جاري رفع الملف...'
                     : 'Uploading file...'),
               ],
             ),
@@ -305,20 +308,20 @@ class AttachmentsStep extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isArabic
-                ? 'ØªÙ… Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù Ø¨Ù†Ø¬Ø§Ø­'
+                ? 'تم رفع الملف بنجاح'
                 : 'File uploaded successfully'),
             backgroundColor: AppColors.success,
           ),
         );
       }
     } catch (e) {
-      AppLogger.e('ðŸ“Ž [AttachmentsStep] Upload error: $e');
+      AppLogger.e('📎 [AttachmentsStep] Upload error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isArabic
-                ? 'ÙØ´Ù„ ÙÙŠ Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù: $e'
+                ? 'فشل في رفع الملف: $e'
                 : 'Failed to upload file: $e'),
             backgroundColor: AppColors.error,
           ),
@@ -371,7 +374,7 @@ class AttachmentsStep extends StatelessWidget {
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.7),
       builder: (ctx) => AlertDialog(
-        title: Text(isArabic ? 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø±ÙÙ‚' : 'Edit Attachment'),
+        title: Text(isArabic ? 'تعديل المرفق' : 'Edit Attachment'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -380,7 +383,7 @@ class AttachmentsStep extends StatelessWidget {
                 controller: fileNameController,
                 decoration: InputDecoration(
                   labelText: isArabic
-                      ? 'Ø§Ø³Ù… Ø§Ù„Ù…Ù„Ù (Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠ)'
+                      ? 'اسم الملف (إنجليزي)'
                       : 'File Name (English)',
                 ),
               ),
@@ -390,7 +393,7 @@ class AttachmentsStep extends StatelessWidget {
                 textDirection: ui.TextDirection.rtl,
                 decoration: InputDecoration(
                   labelText: isArabic
-                      ? 'Ø§Ø³Ù… Ø§Ù„Ù…Ù„Ù (Ø¹Ø±Ø¨ÙŠ)'
+                      ? 'اسم الملف (عربي)'
                       : 'File Name (Arabic)',
                 ),
               ),
@@ -400,7 +403,7 @@ class AttachmentsStep extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(isArabic ? 'Ø¥Ù„ØºØ§Ø¡' : 'Cancel'),
+            child: Text(isArabic ? 'إلغاء' : 'Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -419,7 +422,7 @@ class AttachmentsStep extends StatelessWidget {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
-            child: Text(isArabic ? 'Ø­ÙØ¸' : 'Save'),
+            child: Text(isArabic ? 'حفظ' : 'Save'),
           ),
         ],
       ),
@@ -483,7 +486,7 @@ class _AttachmentCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${attachment.fileType.toUpperCase()} â€¢ ${_formatFileSize(attachment.fileSize)}',
+          '${attachment.fileType.toUpperCase()} • ${_formatFileSize(attachment.fileSize)}',
           style: TextStyle(
             fontSize: 12,
             color: isDark ? AppColors.grey400 : AppColors.grey600,
@@ -495,12 +498,12 @@ class _AttachmentCard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.edit, color: AppColors.primary),
               onPressed: onEdit,
-              tooltip: isArabic ? 'ØªØ¹Ø¯ÙŠÙ„' : 'Edit',
+              tooltip: isArabic ? 'تعديل' : 'Edit',
             ),
             IconButton(
               icon: const Icon(Icons.delete, color: AppColors.error),
               onPressed: onDelete,
-              tooltip: isArabic ? 'Ø­Ø°Ù' : 'Delete',
+              tooltip: isArabic ? 'حذف' : 'Delete',
             ),
             ReorderableDragStartListener(
               index: index,

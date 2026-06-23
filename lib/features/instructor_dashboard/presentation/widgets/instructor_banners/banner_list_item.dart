@@ -86,54 +86,6 @@ class BannerListItem extends StatelessWidget {
                   ),
                 ),
               ),
-              // Drag handle + Order number on top of image
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Row(
-                  children: [
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.drag_indicator_rounded,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        '#${index + 1}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Status badge
-              Positioned(
-                top: 8,
-                right: isArabic ? null : 8,
-                left: isArabic ? 8 : null,
-                child: _buildStatusBadge(isArabic),
-              ),
             ],
           ),
           // Banner info
@@ -165,15 +117,24 @@ class BannerListItem extends StatelessWidget {
   Widget _buildTitleRow(BuildContext context, bool isArabic) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Text(
-      isArabic ? banner.titleAr : (banner.titleEn ?? banner.titleAr),
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            isArabic ? banner.titleAr : (banner.titleEn ?? banner.titleAr),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        _buildStatusBadge(isArabic),
+      ],
     );
   }
 
