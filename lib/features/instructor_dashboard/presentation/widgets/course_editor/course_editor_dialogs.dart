@@ -166,7 +166,6 @@ Future<void> showPublishValidationDialog(
   BuildContext context,
   List<String> missingItems,
 ) {
-  final isArabic = Localizations.localeOf(context).languageCode == 'ar';
   return showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
