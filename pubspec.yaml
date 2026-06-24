@@ -143,5 +143,11 @@ flutter_launcher_icons:
 # ── Native Splash ───────────────────────────────────────────────────────────────
 flutter_native_splash:
   color: "#0a2fa8"
+  image: "assets/logo2.png"
+  color_dark: "#0a2fa8"
+  image_dark: "assets/logo2.png"
   android_12:
     color: "#0a2fa8"
+    image: "assets/logo2.png"
+    color_dark: "#0a2fa8"
+    image_dark: "assets/logo2.png"
