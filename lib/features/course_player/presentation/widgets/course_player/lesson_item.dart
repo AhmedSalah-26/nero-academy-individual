@@ -11,6 +11,7 @@ class LessonItem extends StatelessWidget {
   final bool isCurrentLesson;
   final bool isCompleted;
   final bool isLocked;
+  final bool hasQuiz;
   final bool isDark;
   final VoidCallback onTap;
   final VoidCallback? onDownloadTap;
@@ -22,6 +23,7 @@ class LessonItem extends StatelessWidget {
     required this.isCurrentLesson,
     required this.isCompleted,
     required this.isLocked,
+    this.hasQuiz = false,
     required this.isDark,
     required this.onTap,
     this.onDownloadTap,
@@ -93,6 +95,7 @@ class LessonItem extends StatelessWidget {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             if (isCurrentLesson) _buildPlayingBadge(),
+                            if (hasQuiz) _buildQuizBadge(),
                             Text(
                               isCurrentLesson
                                   ? 'تمت المشاهدة 35%'
@@ -204,6 +207,28 @@ class LessonItem extends StatelessWidget {
         'قيد التشغيل',
         style: TextStyle(
           color: Colors.white,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+          height: 1.1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuizBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.warning.withValues(alpha: 0.28),
+        ),
+      ),
+      child: const Text(
+        'اختبار',
+        style: TextStyle(
+          color: AppColors.warning,
           fontSize: 10.5,
           fontWeight: FontWeight.w800,
           height: 1.1,

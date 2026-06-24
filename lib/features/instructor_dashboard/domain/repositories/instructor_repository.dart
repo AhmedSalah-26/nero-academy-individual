@@ -470,6 +470,7 @@ class LessonDto {
   final String? fileName;
   final int? fileSize;
   final String? fileType;
+  final String? quizId;
 
   const LessonDto({
     this.id,
@@ -488,6 +489,7 @@ class LessonDto {
     this.fileName,
     this.fileSize,
     this.fileType,
+    this.quizId,
   });
 }
 

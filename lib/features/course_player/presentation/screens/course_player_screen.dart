@@ -64,11 +64,13 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   final int _totalDuration = 765;
   Timer? _progressTimer;
   late final PageController _tabPageController;
+  late final Future<List<QuizEntity>> _courseQuizzesFuture;
 
   @override
   void initState() {
     super.initState();
     _tabPageController = PageController();
+    _courseQuizzesFuture = _fetchCourseQuizzes();
     WidgetsBinding.instance.addObserver(this);
     // Prevent screen recording while watching videos
     ScreenProtectionService.enable();
@@ -80,6 +82,20 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     });
     _startProgressTimer();
     di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+  }
+
+  Future<List<QuizEntity>> _fetchCourseQuizzes() async {
+    final result = await di.sl<QuizzesRepository>().getCourseQuizzes(
+          courseId: widget.courseId,
+        );
+    return result.fold(
+      (failure) {
+        AppLogger.e(
+            '[Screen] Failed to load course quizzes: ${failure.message}');
+        return <QuizEntity>[];
+      },
+      (quizzes) => quizzes,
+    );
   }
 
   @override
@@ -442,17 +458,23 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
             context.read<CoursePlayerCubit>().changeTab(index),
         children: [
           // Tab 0: Curriculum
-          CurriculumList(
-            sections: state.sections,
-            currentLesson: state.currentLesson,
-            completedLessons: const {},
-            isDark: isDark,
-            onLessonTap: (lesson) {
-              HapticFeedback.lightImpact();
-              context.read<CoursePlayerCubit>().selectLesson(lesson);
+          FutureBuilder<List<QuizEntity>>(
+            future: _courseQuizzesFuture,
+            builder: (context, snapshot) {
+              return CurriculumList(
+                sections: state.sections,
+                currentLesson: state.currentLesson,
+                completedLessons: const {},
+                quizzes: snapshot.data ?? const [],
+                isDark: isDark,
+                onLessonTap: (lesson) {
+                  HapticFeedback.lightImpact();
+                  context.read<CoursePlayerCubit>().selectLesson(lesson);
+                },
+                isLessonCompleted: state.isLessonCompleted,
+                getSectionCompletedCount: state.getSectionCompletedCount,
+              );
             },
-            isLessonCompleted: state.isLessonCompleted,
-            getSectionCompletedCount: state.getSectionCompletedCount,
           ),
           // Tab 1: More
           MoreTab(
@@ -478,6 +500,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
             QuizzesSection(
               isDark: isDark,
               courseId: state.courseId!,
+              sections: state.sections,
               repository: di.sl<QuizzesRepository>(),
               onQuizTap: (quiz) {
                 AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');

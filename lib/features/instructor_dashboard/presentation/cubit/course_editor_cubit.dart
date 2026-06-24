@@ -102,6 +102,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
           fileName: l.fileName,
           fileSize: l.fileSize,
           fileType: l.fileType,
+          quizId: l.quizId,
           availableFrom: l.availableFrom,
           availableUntil: l.availableUntil,
         );

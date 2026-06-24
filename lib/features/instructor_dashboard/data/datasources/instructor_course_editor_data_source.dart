@@ -58,11 +58,24 @@ class InstructorCourseEditorDataSource {
           .select('*, lessons(*)')
           .eq('course_id', courseId)
           .order('sort_order');
+      final quizzesResponse = await _client
+          .from('quizzes')
+          .select('id, lesson_id')
+          .eq('course_id', courseId)
+          .not('lesson_id', 'is', null);
+      final quizIdsByLessonId = <String, String>{};
+      for (final quiz in quizzesResponse as List) {
+        final lessonId = quiz['lesson_id'] as String?;
+        final quizId = quiz['id'] as String?;
+        if (lessonId == null || quizId == null) continue;
+        quizIdsByLessonId.putIfAbsent(lessonId, () => quizId);
+      }
 
       final sections = (sectionsResponse as List).map((s) {
         final lessons = (s['lessons'] as List? ?? []).map((l) {
+          final lessonId = l['id'] as String?;
           return LessonDto(
-            id: l['id'] as String?,
+            id: lessonId,
             titleAr: l['title_ar'] as String? ?? '',
             titleEn: l['title_en'] as String? ?? '',
             type: l['type'] as String? ?? 'video',
@@ -82,6 +95,7 @@ class InstructorCourseEditorDataSource {
             fileName: l['file_name'] as String?,
             fileSize: l['file_size'] as int?,
             fileType: l['file_type'] as String?,
+            quizId: lessonId == null ? null : quizIdsByLessonId[lessonId],
           );
         }).toList();
 

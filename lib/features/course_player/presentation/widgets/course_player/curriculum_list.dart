@@ -3,6 +3,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/shared_widgets/empty_state.dart';
 import '../../../domain/entities/section_entity.dart';
 import '../../../domain/entities/lesson_entity.dart';
+import '../../../../quizzes/domain/entities/quiz_entity.dart';
 import 'section_header.dart';
 import 'lesson_item.dart';
 
@@ -11,6 +12,7 @@ class CurriculumList extends StatelessWidget {
   final List<SectionEntity> sections;
   final LessonEntity? currentLesson;
   final Map<String, bool> completedLessons;
+  final List<QuizEntity> quizzes;
   final bool isDark;
   final ValueChanged<LessonEntity> onLessonTap;
   final bool Function(String lessonId) isLessonCompleted;
@@ -21,6 +23,7 @@ class CurriculumList extends StatelessWidget {
     required this.sections,
     this.currentLesson,
     required this.completedLessons,
+    this.quizzes = const [],
     required this.isDark,
     required this.onLessonTap,
     required this.isLessonCompleted,
@@ -83,6 +86,14 @@ class CurriculumList extends StatelessWidget {
     );
   }
 
+  Set<String> _lessonIdsWithQuizzes() {
+    return quizzes
+        .map((quiz) => quiz.lessonId)
+        .whereType<String>()
+        .where((lessonId) => lessonId.trim().isNotEmpty)
+        .toSet();
+  }
+
   int? _currentLessonNumber() {
     if (currentLesson == null) return null;
 
@@ -110,6 +121,7 @@ class CurriculumList extends StatelessWidget {
     int currentIndex = 0;
     int globalLessonNumber = 0;
     final lessonProgressLabel = _lessonProgressLabel(totalLessons);
+    final lessonIdsWithQuizzes = _lessonIdsWithQuizzes();
 
     // First, calculate the global lesson number up to this index
     for (int sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
@@ -149,6 +161,7 @@ class CurriculumList extends StatelessWidget {
             isCompleted: isCompleted,
             isLocked: isLocked,
             isDark: isDark,
+            hasQuiz: lessonIdsWithQuizzes.contains(lesson.id),
             onTap: () => onLessonTap(lesson),
           );
         }

@@ -263,6 +263,25 @@ class LessonTile extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (lesson.quizId != null && lesson.quizId!.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      isArabic ? 'به اختبار' : 'Has quiz',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.warning,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
             trailing: Row(
