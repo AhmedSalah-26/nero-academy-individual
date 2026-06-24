@@ -264,7 +264,9 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ),
             const SizedBox(width: 4),
             Text(
-              '${quiz.timeLimit ?? 0} ${'course_player.minutes'.tr()}',
+              quiz.hasTimeLimit
+                  ? '${quiz.timeLimit} ${'course_player.minutes'.tr()}'
+                  : 'quiz.no_limit'.tr(),
               style: TextStyle(
                 color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                 fontSize: 12,
@@ -285,7 +287,12 @@ class _QuizzesSectionState extends State<QuizzesSection> {
   }
 
   Widget _buildQuizStatus(QuizEntity quiz) {
-    // TODO: Check if quiz is completed from attempts
+    if (quiz.isScheduled) {
+      return const Icon(Icons.schedule_rounded, color: AppColors.warning);
+    }
+    if (quiz.isExpired) {
+      return const Icon(Icons.lock_clock_rounded, color: AppColors.error);
+    }
     return Icon(
       Icons.chevron_right,
       color: widget.isDark ? AppColors.grey400 : AppColors.grey600,

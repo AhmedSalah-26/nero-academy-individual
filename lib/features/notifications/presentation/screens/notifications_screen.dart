@@ -122,23 +122,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           BlocBuilder<NotificationsCubit, NotificationsState>(
             builder: (context, state) {
               if (state is NotificationsLoaded && state.unreadCount > 0) {
-                return GestureDetector(
-                  onTap: () =>
-                      context.read<NotificationsCubit>().markAllAsRead(),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                return Tooltip(
+                  message: 'notifications.mark_all_read'.tr(),
+                  child: IconButton.filledTonal(
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          AppColors.primary.withValues(alpha: 0.12),
+                      foregroundColor: AppColors.primary,
                     ),
-                    child: Text(
-                      'notifications.mark_all_read'.tr(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                    onPressed: () {
+                      context.read<NotificationsCubit>().markAllAsRead();
+                    },
+                    icon: const Icon(
+                      Icons.done_all_rounded,
+                      size: 20,
                     ),
                   ),
                 );

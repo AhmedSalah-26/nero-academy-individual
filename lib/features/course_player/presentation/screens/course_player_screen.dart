@@ -194,7 +194,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
               isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 64,
+          toolbarHeight: 78,
           leading: AppBackButton(
             onPressed: _handleBack,
           ),
@@ -203,6 +203,9 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
               final isArabic =
                   Localizations.localeOf(context).languageCode == 'ar';
               String subtitle = '';
+              final lessonTitle = state.currentLesson?.getTitle(
+                isArabic ? 'ar' : 'en',
+              );
               if (state.currentLesson != null) {
                 for (final section in state.sections) {
                   if (section.lessons
@@ -241,6 +244,22 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                         color: isDark
                             ? AppColors.textMutedDark
                             : AppColors.textMutedLight,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (lessonTitle != null && lessonTitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      lessonTitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? AppColors.primaryOnDark
+                            : AppColors.primary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

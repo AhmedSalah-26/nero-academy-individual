@@ -20,6 +20,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   bool _isLoading = false;
   bool _isDone = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? _errorMessage;
 
   @override
@@ -213,10 +215,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           const SizedBox(height: 20),
           TextFormField(
             controller: _passwordController,
-            obscureText: true,
+            obscureText: _obscurePassword,
             decoration: InputDecoration(
               labelText: 'auth.new_password'.tr(),
               prefixIcon: const Icon(Icons.lock_outline_rounded),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                onPressed: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+              ),
             ),
             validator: (value) {
               if (value == null || value.trim().length < 8) {
@@ -228,10 +240,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           const SizedBox(height: 14),
           TextFormField(
             controller: _confirmPasswordController,
-            obscureText: true,
+            obscureText: _obscureConfirmPassword,
             decoration: InputDecoration(
               labelText: 'auth.confirm_password'.tr(),
               prefixIcon: const Icon(Icons.lock_outline_rounded),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                onPressed: () {
+                  setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword);
+                },
+              ),
             ),
             validator: (value) {
               if (value != _passwordController.text) {

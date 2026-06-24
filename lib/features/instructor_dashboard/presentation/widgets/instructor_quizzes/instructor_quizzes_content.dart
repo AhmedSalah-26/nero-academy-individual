@@ -174,6 +174,10 @@ class _InstructorQuizzesContentState extends State<InstructorQuizzesContent> {
               shuffleQuestions: data['shuffle_questions'],
               shuffleAnswers: data['shuffle_answers'],
               showCorrectAnswers: data['show_correct_answers'],
+              availableFrom: data['available_from'] as DateTime?,
+              availableUntil: data['available_until'] as DateTime?,
+              clearAvailableFrom: data['clear_available_from'] == true,
+              clearAvailableUntil: data['clear_available_until'] == true,
             );
       },
     );

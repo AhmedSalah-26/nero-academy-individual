@@ -16,6 +16,8 @@ class QuizEntity extends Equatable {
   final bool showCorrectAnswers;
   final bool isMandatory;
   final int totalQuestions;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final DateTime? createdAt;
 
   const QuizEntity({
@@ -33,6 +35,8 @@ class QuizEntity extends Equatable {
     this.showCorrectAnswers = true,
     this.isMandatory = false,
     this.totalQuestions = 0,
+    this.availableFrom,
+    this.availableUntil,
     this.createdAt,
   });
 
@@ -61,6 +65,14 @@ class QuizEntity extends Equatable {
   /// Check if quiz has attempt limit
   bool get hasAttemptLimit => maxAttempts != null && maxAttempts! > 0;
 
+  bool get isScheduled =>
+      availableFrom != null && DateTime.now().isBefore(availableFrom!);
+
+  bool get isExpired =>
+      availableUntil != null && !DateTime.now().isBefore(availableUntil!);
+
+  bool get isAvailableNow => !isScheduled && !isExpired;
+
   /// Format time limit as string
   String get formattedTimeLimit {
     if (!hasTimeLimit) return '';
@@ -83,5 +95,7 @@ class QuizEntity extends Equatable {
         timeLimit,
         maxAttempts,
         totalQuestions,
+        availableFrom,
+        availableUntil,
       ];
 }

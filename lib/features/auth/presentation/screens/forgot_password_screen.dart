@@ -27,6 +27,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   bool _codeSent = false;
   bool _isResetting = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -239,7 +241,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       label: 'auth.new_password'.tr(),
       child: TextFormField(
         controller: _passwordController,
-        obscureText: true,
+        obscureText: _obscurePassword,
         validator: (value) {
           if (value == null || value.trim().length < 8) {
             return 'auth.password_min_8'.tr();
@@ -251,6 +253,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           isDark: isDark,
           hintText: 'auth.create_password_placeholder'.tr(),
           icon: Icons.lock_outline_rounded,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+            ),
+            onPressed: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
         ),
       ),
     );
@@ -262,7 +274,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       label: 'auth.confirm_password'.tr(),
       child: TextFormField(
         controller: _confirmPasswordController,
-        obscureText: true,
+        obscureText: _obscureConfirmPassword,
         validator: (value) {
           if (value != _passwordController.text) {
             return 'auth.passwords_dont_match'.tr();
@@ -274,6 +286,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           isDark: isDark,
           hintText: 'auth.confirm_password_placeholder'.tr(),
           icon: Icons.lock_outline_rounded,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscureConfirmPassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+            ),
+            onPressed: () {
+              setState(
+                () => _obscureConfirmPassword = !_obscureConfirmPassword,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -312,6 +336,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     required bool isDark,
     required String hintText,
     required IconData icon,
+    Widget? suffixIcon,
   }) {
     return InputDecoration(
       hintText: hintText,
@@ -322,6 +347,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         icon,
         color: isDark ? AppColors.grey500 : AppColors.grey400,
       ),
+      suffixIcon: suffixIcon,
       filled: true,
       fillColor: isDark ? AppColors.cardDark : Colors.white,
       border: _fieldBorder(isDark),
@@ -421,7 +447,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) setState(() => _isResetting = false);
     }
   }
-
 }
 
 class _PrimaryActionButton extends StatelessWidget {

@@ -168,6 +168,11 @@ class QuizzesRemoteDataSourceImpl implements QuizzesRemoteDataSource {
         throw const ServerException('المستخدم غير مسجل الدخول');
       }
 
+      final quiz = await getQuiz(quizId: quizId);
+      if (!quiz.isAvailableNow) {
+        throw const ServerException('Quiz is not available now');
+      }
+
       final response = await supabaseClient.from('quiz_attempts').insert({
         'quiz_id': quizId,
         'enrollment_id': enrollmentId,

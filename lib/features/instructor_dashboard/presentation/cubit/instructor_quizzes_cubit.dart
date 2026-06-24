@@ -124,6 +124,8 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     required int passingScore,
     int? timeLimitMinutes,
     int? maxAttempts,
+    DateTime? availableFrom,
+    DateTime? availableUntil,
     bool shuffleQuestions = false,
     bool shuffleAnswers = false,
     bool showCorrectAnswers = true,
@@ -143,6 +145,8 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
             'passing_score': passingScore,
             'time_limit': timeLimitMinutes,
             'max_attempts': maxAttempts,
+            'available_from': availableFrom?.toUtc().toIso8601String(),
+            'available_until': availableUntil?.toUtc().toIso8601String(),
             'shuffle_questions': shuffleQuestions,
             'shuffle_answers': shuffleAnswers,
             'show_correct_answers': showCorrectAnswers,
@@ -170,6 +174,10 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     int? passingScore,
     int? timeLimitMinutes,
     int? maxAttempts,
+    DateTime? availableFrom,
+    DateTime? availableUntil,
+    bool clearAvailableFrom = false,
+    bool clearAvailableUntil = false,
     bool? shuffleQuestions,
     bool? shuffleAnswers,
     bool? showCorrectAnswers,
@@ -185,6 +193,16 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
       if (passingScore != null) updates['passing_score'] = passingScore;
       if (timeLimitMinutes != null) updates['time_limit'] = timeLimitMinutes;
       if (maxAttempts != null) updates['max_attempts'] = maxAttempts;
+      if (clearAvailableFrom) {
+        updates['available_from'] = null;
+      } else if (availableFrom != null) {
+        updates['available_from'] = availableFrom.toUtc().toIso8601String();
+      }
+      if (clearAvailableUntil) {
+        updates['available_until'] = null;
+      } else if (availableUntil != null) {
+        updates['available_until'] = availableUntil.toUtc().toIso8601String();
+      }
       if (shuffleQuestions != null) {
         updates['shuffle_questions'] = shuffleQuestions;
       }

@@ -17,6 +17,8 @@ class QuizModel extends QuizEntity {
     super.showCorrectAnswers,
     super.isMandatory,
     super.totalQuestions,
+    super.availableFrom,
+    super.availableUntil,
     super.createdAt,
   });
 
@@ -37,6 +39,12 @@ class QuizModel extends QuizEntity {
       showCorrectAnswers: json['show_correct_answers'] as bool? ?? true,
       isMandatory: json['is_mandatory'] as bool? ?? false,
       totalQuestions: json['total_questions'] as int? ?? 0,
+      availableFrom: json['available_from'] != null
+          ? DateTime.parse(json['available_from'] as String)
+          : null,
+      availableUntil: json['available_until'] != null
+          ? DateTime.parse(json['available_until'] as String)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -60,6 +68,8 @@ class QuizModel extends QuizEntity {
       'show_correct_answers': showCorrectAnswers,
       'is_mandatory': isMandatory,
       'total_questions': totalQuestions,
+      'available_from': availableFrom?.toUtc().toIso8601String(),
+      'available_until': availableUntil?.toUtc().toIso8601String(),
       'created_at': createdAt?.toIso8601String(),
     };
   }
