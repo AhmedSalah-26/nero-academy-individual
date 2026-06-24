@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/error_handler.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/section_entity.dart';
 import '../../domain/entities/lesson_entity.dart';
@@ -370,6 +371,20 @@ class CoursePlayerRepositoryImpl implements CoursePlayerRepository {
   }) async {
     try {
       final result = await remoteDataSource.getCourseAttachments(
+        courseId: courseId,
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(ErrorHandler.handle(e).failure);
+    }
+  }
+
+  @override
+  Future<Either<Failure, CourseGroupLinks>> getCourseGroupLinks({
+    required String courseId,
+  }) async {
+    try {
+      final result = await remoteDataSource.getCourseGroupLinks(
         courseId: courseId,
       );
       return Right(result);

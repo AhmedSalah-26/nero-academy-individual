@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../entities/section_entity.dart';
 import '../entities/lesson_entity.dart';
 import '../entities/lesson_progress_entity.dart';
@@ -141,6 +142,10 @@ abstract class CoursePlayerRepository {
 
   /// Get course-level attachments
   Future<Either<Failure, List<AttachmentEntity>>> getCourseAttachments({
+    required String courseId,
+  });
+
+  Future<Either<Failure, CourseGroupLinks>> getCourseGroupLinks({
     required String courseId,
   });
 }

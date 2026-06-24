@@ -3,6 +3,7 @@ import '../../../../core/errors/failures.dart';
 import '../entities/cart_entity.dart';
 import '../entities/cart_item_entity.dart';
 import '../entities/coupon_entity.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../entities/order_entity.dart';
 import '../entities/payment_method_entity.dart';
 
@@ -15,6 +16,7 @@ abstract class CartRepository {
   Future<Either<Failure, CartItemEntity>> addToCart({
     required String userId,
     required String courseId,
+    CoursePricingOption? pricingOption,
   });
 
   /// Remove item from cart

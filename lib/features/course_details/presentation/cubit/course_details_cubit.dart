@@ -124,7 +124,7 @@ class CourseDetailsCubit extends Cubit<CourseDetailsState> {
     // Ideally set a loading state specifically for enrollment if needed
     // but here we just return a bool to show loading in the UI button
     final result = await enrollFreeCourseUseCase(_currentCourseId!, userId);
-    
+
     return result.fold(
       (failure) => false,
       (_) {
@@ -162,6 +162,8 @@ class CourseDetailsCubit extends Cubit<CourseDetailsState> {
       flashSaleStart: course.flashSaleStart,
       flashSaleEnd: course.flashSaleEnd,
       badge: course.badge,
+      pricingOptions: course.pricingOptions,
+      groupLinks: course.groupLinks,
       rating: course.rating,
       ratingCount: course.ratingCount,
       enrolledCount: course.enrolledCount,

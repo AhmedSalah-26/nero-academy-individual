@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/network/network_info.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -58,12 +59,17 @@ class CartRepositoryImpl implements CartRepository {
   Future<Either<Failure, CartItemEntity>> addToCart({
     required String userId,
     required String courseId,
+    CoursePricingOption? pricingOption,
   }) async {
     AppLogger.i(
         '🛒 [CartRepo] Adding to cart - User: $userId, Course: $courseId');
 
     try {
-      final item = await remoteDataSource.addToCart(userId, courseId);
+      final item = await remoteDataSource.addToCart(
+        userId,
+        courseId,
+        pricingOption: pricingOption,
+      );
       AppLogger.success('[CartRepo] Added to cart: ${item.id}');
       return Right(item);
     } on ValidationException catch (e) {

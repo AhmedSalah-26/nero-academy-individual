@@ -22,6 +22,7 @@ class CourseEditorState extends Equatable {
   final String? previewVideoUrl;
   final String? categoryId;
   final String level;
+  final CourseGroupLinks groupLinks;
 
   // Curriculum
   final List<SectionData> sections;
@@ -36,6 +37,7 @@ class CourseEditorState extends Equatable {
   final DateTime? flashSaleEnd;
   final DateTime? availableFrom;
   final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
 
   // Settings
   final List<String> requirementsAr;
@@ -67,6 +69,7 @@ class CourseEditorState extends Equatable {
     this.previewVideoUrl,
     this.categoryId,
     this.level = 'beginner',
+    this.groupLinks = const CourseGroupLinks(),
     this.sections = const [],
     this.price = 0,
     this.discountPrice,
@@ -77,6 +80,7 @@ class CourseEditorState extends Equatable {
     this.flashSaleEnd,
     this.availableFrom,
     this.availableUntil,
+    this.pricingOptions = const [],
     this.requirementsAr = const [],
     this.requirementsEn = const [],
     this.objectivesAr = const [],
@@ -184,6 +188,7 @@ class CourseEditorState extends Equatable {
     String? previewVideoUrl,
     String? categoryId,
     String? level,
+    CourseGroupLinks? groupLinks,
     List<SectionData>? sections,
     double? price,
     double? discountPrice,
@@ -200,6 +205,7 @@ class CourseEditorState extends Equatable {
     bool clearAvailableFrom = false,
     DateTime? availableUntil,
     bool clearAvailableUntil = false,
+    List<CoursePricingOption>? pricingOptions,
     List<String>? requirementsAr,
     List<String>? requirementsEn,
     List<String>? objectivesAr,
@@ -224,6 +230,7 @@ class CourseEditorState extends Equatable {
       previewVideoUrl: previewVideoUrl ?? this.previewVideoUrl,
       categoryId: categoryId ?? this.categoryId,
       level: level ?? this.level,
+      groupLinks: groupLinks ?? this.groupLinks,
       sections: sections ?? this.sections,
       price: price ?? this.price,
       discountPrice:
@@ -239,6 +246,7 @@ class CourseEditorState extends Equatable {
           clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
       availableUntil:
           clearAvailableUntil ? null : (availableUntil ?? this.availableUntil),
+      pricingOptions: pricingOptions ?? this.pricingOptions,
       requirementsAr: requirementsAr ?? this.requirementsAr,
       requirementsEn: requirementsEn ?? this.requirementsEn,
       objectivesAr: objectivesAr ?? this.objectivesAr,
@@ -266,6 +274,7 @@ class CourseEditorState extends Equatable {
         previewVideoUrl,
         categoryId,
         level,
+        groupLinks,
         sections,
         price,
         discountPrice,
@@ -277,6 +286,7 @@ class CourseEditorState extends Equatable {
         flashSaleEnd,
         availableFrom,
         availableUntil,
+        pricingOptions,
         requirementsAr,
         requirementsEn,
         objectivesAr,

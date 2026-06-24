@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../models/section_model.dart';
 import '../models/lesson_model.dart';
 import '../models/lesson_progress_model.dart';
@@ -113,6 +114,8 @@ abstract class CoursePlayerRemoteDataSource {
   Future<List<AttachmentModel>> getCourseAttachments({
     required String courseId,
   });
+
+  Future<CourseGroupLinks> getCourseGroupLinks({required String courseId});
 }
 
 /// Implementation of CoursePlayerRemoteDataSource
@@ -128,4 +131,17 @@ class CoursePlayerRemoteDataSourceImpl
   final SupabaseClient client;
 
   CoursePlayerRemoteDataSourceImpl(this.client);
+
+  @override
+  Future<CourseGroupLinks> getCourseGroupLinks(
+      {required String courseId}) async {
+    final response = await client
+        .from('courses')
+        .select('group_links')
+        .eq('id', courseId)
+        .single();
+    return CourseGroupLinks.fromJson(
+      response['group_links'] as Map<String, dynamic>?,
+    );
+  }
 }

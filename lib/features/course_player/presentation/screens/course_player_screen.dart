@@ -357,6 +357,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                       ),
                     if (state.currentLesson != null)
                       _buildLessonHeader(state, isDark),
+                    if (state.groupLinks.hasAny)
+                      _buildCourseGroupLinks(state, isDark),
                   ],
                 ),
               ),
@@ -440,6 +442,57 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                 },
         );
       },
+    );
+  }
+
+  Widget _buildCourseGroupLinks(CoursePlayerState state, bool isDark) {
+    final links = <_GroupLinkAction>[
+      if (state.groupLinks.whatsapp != null)
+        _GroupLinkAction(
+          label: 'WhatsApp',
+          icon: Icons.chat_outlined,
+          color: const Color(0xFF25D366),
+          url: state.groupLinks.whatsapp!,
+        ),
+      if (state.groupLinks.telegram != null)
+        _GroupLinkAction(
+          label: 'Telegram',
+          icon: Icons.send_outlined,
+          color: const Color(0xFF229ED9),
+          url: state.groupLinks.telegram!,
+        ),
+      if (state.groupLinks.facebook != null)
+        _GroupLinkAction(
+          label: 'Facebook',
+          icon: Icons.groups_outlined,
+          color: const Color(0xFF1877F2),
+          url: state.groupLinks.facebook!,
+        ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+      color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: links.map((link) {
+          return OutlinedButton.icon(
+            onPressed: () => _openUrl(link.url),
+            icon: Icon(link.icon, size: 18, color: link.color),
+            label: Text(link.label),
+            style: OutlinedButton.styleFrom(
+              foregroundColor:
+                  isDark ? AppColors.textMainDark : AppColors.textMainLight,
+              side: BorderSide(color: link.color.withValues(alpha: 0.45)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -796,6 +849,20 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
 }
 
 // ── Sticky tab bar delegate (same pattern as home search bar) ─────────────────
+class _GroupLinkAction {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final String url;
+
+  const _GroupLinkAction({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.url,
+  });
+}
+
 class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   final bool isDark;

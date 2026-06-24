@@ -129,6 +129,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
         // Load course attachments
         await _loadCourseAttachments(courseId);
+        await _loadCourseGroupLinks(courseId);
 
         // Load lesson details if we have one
         if (initialLesson != null) {
@@ -152,6 +153,19 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
         AppLogger.success(
             '[CoursePlayer] Loaded ${attachments.length} course attachments');
         _safeEmit(state.copyWith(courseAttachments: attachments));
+      },
+    );
+  }
+
+  Future<void> _loadCourseGroupLinks(String courseId) async {
+    final result = await repository.getCourseGroupLinks(courseId: courseId);
+    result.fold(
+      (failure) {
+        AppLogger.e(
+            '[CoursePlayer] Failed to load group links: ${failure.message}');
+      },
+      (links) {
+        _safeEmit(state.copyWith(groupLinks: links));
       },
     );
   }

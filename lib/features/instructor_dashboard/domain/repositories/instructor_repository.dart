@@ -1,4 +1,5 @@
 import '../entities/instructor_entities.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../data/models/instructor_models.dart';
 import '../../data/models/instructor_balance_model.dart';
 
@@ -227,6 +228,8 @@ class CourseDetails {
   final DateTime? flashSaleEnd;
   final DateTime? availableFrom;
   final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
   final List<SectionDto> sections;
 
   const CourseDetails({
@@ -251,6 +254,8 @@ class CourseDetails {
     this.flashSaleEnd,
     this.availableFrom,
     this.availableUntil,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
     this.sections = const [],
   });
 }
@@ -277,6 +282,8 @@ class CourseCreateDto {
   final DateTime? flashSaleEnd;
   final DateTime? availableFrom;
   final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
 
   const CourseCreateDto({
     required this.titleAr,
@@ -299,6 +306,8 @@ class CourseCreateDto {
     this.flashSaleEnd,
     this.availableFrom,
     this.availableUntil,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
   });
 
   Map<String, dynamic> toJson() => {
@@ -324,6 +333,11 @@ class CourseCreateDto {
           'flash_sale_end': flashSaleEnd!.toIso8601String(),
         'available_from': availableFrom?.toIso8601String(),
         'available_until': availableUntil?.toIso8601String(),
+        'pricing_options': pricingOptions
+            .where((option) => option.isValid)
+            .map((option) => option.toJson())
+            .toList(),
+        'group_links': groupLinks.toJson(),
       };
 }
 
@@ -353,6 +367,10 @@ class CourseUpdateDto {
   final bool clearBadge;
   final bool clearFlashSaleData;
   final bool clearAvailabilityWindow;
+  final List<CoursePricingOption>? pricingOptions;
+  final CourseGroupLinks? groupLinks;
+  final bool clearPricingOptions;
+  final bool clearGroupLinks;
 
   const CourseUpdateDto({
     this.titleAr,
@@ -379,6 +397,10 @@ class CourseUpdateDto {
     this.clearBadge = false,
     this.clearFlashSaleData = false,
     this.clearAvailabilityWindow = false,
+    this.pricingOptions,
+    this.groupLinks,
+    this.clearPricingOptions = false,
+    this.clearGroupLinks = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -428,6 +450,19 @@ class CourseUpdateDto {
       if (availableUntil != null) {
         map['available_until'] = availableUntil!.toIso8601String();
       }
+    }
+    if (clearPricingOptions) {
+      map['pricing_options'] = <Map<String, dynamic>>[];
+    } else if (pricingOptions != null) {
+      map['pricing_options'] = pricingOptions!
+          .where((option) => option.isValid)
+          .map((option) => option.toJson())
+          .toList();
+    }
+    if (clearGroupLinks) {
+      map['group_links'] = <String, dynamic>{};
+    } else if (groupLinks != null) {
+      map['group_links'] = groupLinks!.toJson();
     }
     return map;
   }

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/base/base_state.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../domain/entities/cart_item_entity.dart';
@@ -82,7 +83,10 @@ class CartCubit extends Cubit<CartState> {
   }
 
   /// Add course to cart with optimistic update
-  Future<bool> addToCart(String courseId) async {
+  Future<bool> addToCart(
+    String courseId, {
+    CoursePricingOption? pricingOption,
+  }) async {
     AppLogger.i(
         '🛒 [CartCubit] Adding to cart - courseId: $courseId, userId: $_currentUserId');
 
@@ -100,7 +104,11 @@ class CartCubit extends Cubit<CartState> {
     emit(state.copyWith(isAddingToCart: true, clearAddToCartError: true));
 
     final result = await addToCartUseCase(
-      AddToCartParams(userId: _currentUserId!, courseId: courseId),
+      AddToCartParams(
+        userId: _currentUserId!,
+        courseId: courseId,
+        pricingOption: pricingOption,
+      ),
     );
 
     return result.fold(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../core/models/course_commerce_models.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../cubit/course_editor_cubit.dart';
 
@@ -20,6 +21,9 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
   late TextEditingController _descriptionEnController;
   late TextEditingController _thumbnailController;
   late TextEditingController _previewVideoController;
+  late TextEditingController _whatsappGroupController;
+  late TextEditingController _telegramGroupController;
+  late TextEditingController _facebookGroupController;
 
   @override
   void initState() {
@@ -35,6 +39,12 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
         TextEditingController(text: state.thumbnailUrl ?? '');
     _previewVideoController =
         TextEditingController(text: state.previewVideoUrl ?? '');
+    _whatsappGroupController =
+        TextEditingController(text: state.groupLinks.whatsapp ?? '');
+    _telegramGroupController =
+        TextEditingController(text: state.groupLinks.telegram ?? '');
+    _facebookGroupController =
+        TextEditingController(text: state.groupLinks.facebook ?? '');
   }
 
   @override
@@ -47,6 +57,9 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
     _descriptionEnController.dispose();
     _thumbnailController.dispose();
     _previewVideoController.dispose();
+    _whatsappGroupController.dispose();
+    _telegramGroupController.dispose();
+    _facebookGroupController.dispose();
     super.dispose();
   }
 
@@ -64,7 +77,17 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
           previewVideoUrl: _previewVideoController.text.isEmpty
               ? null
               : _previewVideoController.text,
+          groupLinks: CourseGroupLinks(
+            whatsapp: _emptyToNull(_whatsappGroupController.text),
+            telegram: _emptyToNull(_telegramGroupController.text),
+            facebook: _emptyToNull(_facebookGroupController.text),
+          ),
         );
+  }
+
+  String? _emptyToNull(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   @override
@@ -285,6 +308,43 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
                     );
                   }
                 },
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle(
+                  isArabic ? 'روابط جروبات الكورس' : 'Course Group Links',
+                  isDark,
+                  isArabic),
+              const SizedBox(height: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTextField(
+                    controller: _whatsappGroupController,
+                    label:
+                        isArabic ? 'رابط جروب واتساب' : 'WhatsApp Group Link',
+                    hint: 'https://chat.whatsapp.com/...',
+                    isDark: isDark,
+                    textDirection: TextDirection.ltr,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _telegramGroupController,
+                    label:
+                        isArabic ? 'رابط جروب تليجرام' : 'Telegram Group Link',
+                    hint: 'https://t.me/...',
+                    isDark: isDark,
+                    textDirection: TextDirection.ltr,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _facebookGroupController,
+                    label:
+                        isArabic ? 'رابط جروب فيسبوك' : 'Facebook Group Link',
+                    hint: 'https://facebook.com/groups/...',
+                    isDark: isDark,
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               _buildSectionTitle(

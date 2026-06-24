@@ -52,6 +52,7 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
                   'price': item.price,
                   'discount_price': item.discountPrice,
                   'price_at_add': item.priceAtAdd,
+                  'pricing_option': item.pricingOption?.toJson(),
                   'currency': item.currency,
                   'is_free': item.isFree,
                   'created_at': item.addedAt.toIso8601String(),

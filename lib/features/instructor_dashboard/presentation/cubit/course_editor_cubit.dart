@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../domain/repositories/instructor_repository.dart';
 
@@ -146,6 +147,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       previewVideoUrl: course.previewVideoUrl,
       categoryId: course.categoryId,
       level: course.level,
+      groupLinks: course.groupLinks,
       price: course.price,
       discountPrice: course.discountPrice,
       currency: course.currency,
@@ -158,6 +160,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       flashSaleEnd: course.flashSaleEnd,
       availableFrom: course.availableFrom,
       availableUntil: course.availableUntil,
+      pricingOptions: course.pricingOptions,
     ));
   }
 
@@ -178,6 +181,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
     String? previewVideoUrl,
     String? categoryId,
     String? level,
+    CourseGroupLinks? groupLinks,
   }) {
     emit(state.copyWith(
       titleAr: titleAr,
@@ -190,6 +194,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       previewVideoUrl: previewVideoUrl,
       categoryId: categoryId,
       level: level,
+      groupLinks: groupLinks,
     ));
   }
 
@@ -206,6 +211,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
     bool clearFlashSaleStart = false,
     DateTime? flashSaleEnd,
     bool clearFlashSaleEnd = false,
+    List<CoursePricingOption>? pricingOptions,
   }) {
     emit(state.copyWith(
       price: price,
@@ -219,6 +225,7 @@ class CourseEditorCubit extends Cubit<CourseEditorState>
       clearFlashSaleStart: clearFlashSaleStart,
       flashSaleEnd: flashSaleEnd,
       clearFlashSaleEnd: clearFlashSaleEnd,
+      pricingOptions: pricingOptions,
     ));
   }
 

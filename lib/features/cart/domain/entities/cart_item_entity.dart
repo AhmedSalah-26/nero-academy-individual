@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/course_commerce_models.dart';
 
 /// Cart Item Entity - Pure Dart Object
 class CartItemEntity extends Equatable {
@@ -15,6 +16,7 @@ class CartItemEntity extends Equatable {
   final double priceAtAdd;
   final String currency;
   final bool isFree;
+  final CoursePricingOption? pricingOption;
   final DateTime addedAt;
 
   const CartItemEntity({
@@ -31,6 +33,7 @@ class CartItemEntity extends Equatable {
     this.priceAtAdd = 0,
     this.currency = 'EGP',
     this.isFree = false,
+    this.pricingOption,
     required this.addedAt,
   });
 
@@ -41,6 +44,7 @@ class CartItemEntity extends Equatable {
   /// Get current effective price
   double get currentPrice {
     if (isFree) return 0;
+    if (pricingOption != null) return priceAtAdd.round().toDouble();
     final price = discountPrice ?? this.price;
     return price.round().toDouble();
   }
@@ -64,6 +68,7 @@ class CartItemEntity extends Equatable {
         price,
         discountPrice,
         priceAtAdd,
+        pricingOption,
         addedAt,
       ];
 }

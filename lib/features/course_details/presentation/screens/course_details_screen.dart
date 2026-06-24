@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
@@ -526,7 +527,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     setState(() => _isAddingToCart = true);
 
     try {
-      final success = await context.read<CourseDetailsCubit>().enrollFreeCourse(userId);
+      final success =
+          await context.read<CourseDetailsCubit>().enrollFreeCourse(userId);
       if (mounted) {
         setState(() => _isAddingToCart = false);
         if (success) {
@@ -584,7 +586,17 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       AppLogger.i(
           '🛒 [CourseDetails] Adding to cart - userId: $userId, courseId: ${course.id}');
 
-      final success = await cartCubit.addToCart(course.id);
+      final selectedOption = await _selectPricingOptionIfNeeded(course);
+      if (!mounted) return;
+      if (course.pricingOptions.isNotEmpty && selectedOption == null) {
+        setState(() => _isAddingToCart = false);
+        return;
+      }
+
+      final success = await cartCubit.addToCart(
+        course.id,
+        pricingOption: selectedOption,
+      );
 
       if (mounted) {
         setState(() => _isAddingToCart = false);
@@ -620,6 +632,79 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       type: SnackbarType.info,
       actionLabel: 'cart.cart'.tr(),
       onActionPressed: () => AppRouter.goToCart(context),
+    );
+  }
+
+  Future<CoursePricingOption?> _selectPricingOptionIfNeeded(
+    CourseDetailsEntity course,
+  ) async {
+    if (course.pricingOptions.isEmpty) return null;
+
+    final locale = context.locale.languageCode;
+    final isArabic = locale == 'ar';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isArabic ? 'اختر مدة الاشتراك' : 'Choose subscription option',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...course.pricingOptions.map((option) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
+                        ),
+                      ),
+                      title: Text(option.label),
+                      subtitle: option.durationDays == null
+                          ? null
+                          : Text(
+                              isArabic
+                                  ? '${option.durationDays} يوم'
+                                  : '${option.durationDays} days',
+                            ),
+                      trailing: Text(
+                        '${course.currency} ${option.price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(option),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

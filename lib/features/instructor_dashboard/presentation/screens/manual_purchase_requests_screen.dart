@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/animations/animations.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ManualPurchaseRequestsScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _ManualPurchaseRequestsScreenState
             payment_status, created_at, paid_at, updated_at,
             profiles:user_id (name, email, phone),
             enrollments (
-              id, course_id, status, price, access_expires_at,
+              id, course_id, status, price, pricing_option, access_expires_at,
               courses:course_id (title_ar, title_en, thumbnail_url)
             )
           ''')
@@ -393,25 +394,41 @@ class _RequestCard extends StatelessWidget {
           const SizedBox(height: 12),
           ...request.courses.map(
             (course) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.school_rounded, size: 16, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      isArabic ? course.titleAr : course.titleEn,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                  Row(
+                    children: [
+                      const Icon(Icons.school_rounded, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isArabic ? course.titleAr : course.titleEn,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${course.price.toStringAsFixed(0)} EGP',
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                  if (course.pricingOption != null) ...[
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 24),
+                      child: _PricingOptionChip(
+                        option: course.pricingOption!,
+                        isDark: isDark,
+                        isArabic: isArabic,
                       ),
                     ),
-                  ),
-                  Text(
-                    '${course.price.toStringAsFixed(0)} EGP',
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -571,6 +588,49 @@ class _RequestStatusBadge extends StatelessWidget {
   }
 }
 
+class _PricingOptionChip extends StatelessWidget {
+  const _PricingOptionChip({
+    required this.option,
+    required this.isDark,
+    required this.isArabic,
+  });
+
+  final CoursePricingOption option;
+  final bool isDark;
+  final bool isArabic;
+
+  @override
+  Widget build(BuildContext context) {
+    final durationDays = option.durationDays;
+    final parts = [
+      isArabic ? 'اختيار الطالب: ${option.label}' : 'Student selected: ${option.label}',
+      if (durationDays != null && durationDays > 0)
+        isArabic ? '$durationDays يوم' : '$durationDays days',
+      '${option.price.toStringAsFixed(0)} EGP',
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.22)),
+      ),
+      child: Text(
+        parts.join(' • '),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: AppColors.primary,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          height: 1.25,
+        ),
+      ),
+    );
+  }
+}
+
 class _RequestsEmptyState extends StatelessWidget {
   const _RequestsEmptyState({
     required this.status,
@@ -704,22 +764,30 @@ class _RequestCourse {
   final String titleAr;
   final String titleEn;
   final double price;
+  final CoursePricingOption? pricingOption;
 
   const _RequestCourse({
     required this.titleAr,
     required this.titleEn,
     required this.price,
+    required this.pricingOption,
   });
 
   factory _RequestCourse.fromJson(Map<String, dynamic> json) {
     final course = json['courses'] as Map<String, dynamic>?;
     final titleAr = course?['title_ar'] as String? ?? '';
     final titleEn = course?['title_en'] as String? ?? titleAr;
+    final pricingOption = json['pricing_option'] is Map<String, dynamic>
+        ? CoursePricingOption.fromJson(
+            json['pricing_option'] as Map<String, dynamic>,
+          )
+        : null;
 
     return _RequestCourse(
       titleAr: titleAr,
       titleEn: titleEn.isEmpty ? titleAr : titleEn,
       price: (json['price'] as num?)?.toDouble() ?? 0,
+      pricingOption: pricingOption,
     );
   }
 }

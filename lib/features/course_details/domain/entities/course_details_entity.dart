@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../home/domain/entities/course_entity.dart';
 import 'instructor_entity.dart';
 import 'section_entity.dart';
@@ -44,6 +45,8 @@ class CourseDetailsEntity extends Equatable {
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
   final String? badge;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
   final double rating;
   final int ratingCount;
   final int enrolledCount;
@@ -91,6 +94,8 @@ class CourseDetailsEntity extends Equatable {
     this.flashSaleStart,
     this.flashSaleEnd,
     this.badge,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
     this.rating = 0,
     this.ratingCount = 0,
     this.enrolledCount = 0,
@@ -129,6 +134,11 @@ class CourseDetailsEntity extends Equatable {
   /// Get current effective price
   double get currentPrice {
     if (isFree) return 0;
+    if (pricingOptions.isNotEmpty) {
+      final prices = pricingOptions.map((option) => option.price).toList()
+        ..sort();
+      return prices.first.round().toDouble();
+    }
     // Flash sale makes discount time-limited
     if (isFlashSale) {
       final price =
@@ -185,6 +195,8 @@ class CourseDetailsEntity extends Equatable {
         flashSaleStart,
         flashSaleEnd,
         badge,
+        pricingOptions,
+        groupLinks,
         rating,
         enrolledCount,
         enrollmentStatus,

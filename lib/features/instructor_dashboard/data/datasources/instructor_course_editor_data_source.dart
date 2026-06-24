@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../domain/repositories/instructor_repository.dart';
 
 /// Instructor Course Editor Data Source - Course editor methods
@@ -141,6 +142,11 @@ class InstructorCourseEditorDataSource {
         availableUntil: courseResponse['available_until'] != null
             ? DateTime.parse(courseResponse['available_until'] as String)
             : null,
+        pricingOptions:
+            parseCoursePricingOptions(courseResponse['pricing_options']),
+        groupLinks: CourseGroupLinks.fromJson(
+          courseResponse['group_links'] as Map<String, dynamic>?,
+        ),
         sections: sections,
       );
     } catch (e, s) {

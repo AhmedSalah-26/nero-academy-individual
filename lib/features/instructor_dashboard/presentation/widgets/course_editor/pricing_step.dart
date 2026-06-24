@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../core/models/course_commerce_models.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../cubit/course_editor_cubit.dart';
 
@@ -20,6 +21,7 @@ class _PricingStepState extends State<PricingStep> {
   bool _isFlashSaleEnabled = false;
   DateTime? _flashSaleStartDate;
   DateTime? _flashSaleEndDate;
+  final List<_PricingOptionControllers> _pricingOptionControllers = [];
 
   static const List<String> _badgeOptionsAr = [
     'عرض خاص',
@@ -53,12 +55,20 @@ class _PricingStepState extends State<PricingStep> {
     _isFlashSaleEnabled = state.isFlashSale;
     _flashSaleStartDate = state.flashSaleStart;
     _flashSaleEndDate = state.flashSaleEnd;
+    for (final option in state.pricingOptions) {
+      _pricingOptionControllers.add(
+        _PricingOptionControllers.fromOption(option),
+      );
+    }
   }
 
   @override
   void dispose() {
     _priceController.dispose();
     _discountPriceController.dispose();
+    for (final option in _pricingOptionControllers) {
+      option.dispose();
+    }
     super.dispose();
   }
 
@@ -83,6 +93,10 @@ class _PricingStepState extends State<PricingStep> {
 
     final flashSaleStart = _isFlashSaleEnabled ? _flashSaleStartDate : null;
     final flashSaleEnd = _isFlashSaleEnabled ? _flashSaleEndDate : null;
+    final pricingOptions = _pricingOptionControllers
+        .map((option) => option.toOption())
+        .where((option) => option.isValid)
+        .toList();
 
     context.read<CourseEditorCubit>().updatePricing(
           price: price,
@@ -95,6 +109,7 @@ class _PricingStepState extends State<PricingStep> {
           clearFlashSaleStart: !_isFlashSaleEnabled,
           flashSaleEnd: flashSaleEnd,
           clearFlashSaleEnd: !_isFlashSaleEnabled,
+          pricingOptions: pricingOptions,
         );
   }
 
@@ -136,244 +151,250 @@ class _PricingStepState extends State<PricingStep> {
               ),
               const SizedBox(height: 32),
               Material(
-                color: isDark ? AppColors.cardDark : AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color:
-                        isDark ? AppColors.borderDark : AppColors.borderLight,
+                  color: isDark ? AppColors.cardDark : AppColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color:
+                          isDark ? AppColors.borderDark : AppColors.borderLight,
+                    ),
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Price Section Header
-                    Row(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.payments_outlined,
-                            color: AppColors.primary, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          isArabic ? 'إعدادات السعر' : 'Price Settings',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildPriceField(
-                      controller: _priceController,
-                      label: isArabic ? 'السعر الأصلي' : 'Original Price',
-                      hint: '0',
-                      isDark: isDark,
-                      currency: state.currency,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildPriceField(
-                      controller: _discountPriceController,
-                      label: isArabic
-                          ? 'سعر الخصم (اختياري)'
-                          : 'Discount Price (Optional)',
-                      hint: isArabic ? 'اختياري' : 'Optional',
-                      isDark: isDark,
-                      currency: state.currency,
-                    ),
-
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Divider(),
-                    ),
-
-                    // Promotions Section Header
-                    Row(
-                      children: [
-                        const Icon(Icons.local_offer_outlined,
-                            color: AppColors.primary, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          isArabic ? 'العروض والشارات' : 'Promotions & Badges',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        isArabic
-                            ? 'تفعيل الشارة الترويجية'
-                            : 'Enable Promotional Badge',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? AppColors.textMainDark
-                              : AppColors.textMainLight,
-                        ),
-                      ),
-                      subtitle: Text(
-                        isArabic
-                            ? 'مثل: فلاش سيل، عرض خاص'
-                            : 'e.g., Flash Sale, Best Seller',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                      value: _isBadgeEnabled,
-                      activeThumbColor: AppColors.primary,
-                      onChanged: (value) {
-                        setState(() {
-                          _isBadgeEnabled = value;
-                          if (!value) {
-                            _selectedBadge = null;
-                          } else {
-                            final options =
-                                isArabic ? _badgeOptionsAr : _badgeOptionsEn;
-                            _selectedBadge ??= options.first;
-                          }
-                        });
-                        _updateCubit();
-                      },
-                    ),
-                    if (_isBadgeEnabled) ...[
-                      const SizedBox(height: 16),
-                      _buildBadgeDropdown(
-                        isDark: isDark,
-                        isArabic: isArabic,
-                      ),
-                    ],
-
-                    const SizedBox(height: 24),
-                    const Divider(),
-                    const SizedBox(height: 16),
-
-                    // Flash Sale Section Header
-                    Row(
-                      children: [
-                        const Icon(Icons.flash_on,
-                            color: Colors.orange, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          isArabic ? 'عرض الفلاش' : 'Flash Sale',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        isArabic ? 'تفعيل عرض الفلاش' : 'Enable Flash Sale',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? AppColors.textMainDark
-                              : AppColors.textMainLight,
-                        ),
-                      ),
-                      subtitle: Text(
-                        isArabic
-                            ? 'خصم لفترة محدودة مع عداد تنازلي'
-                            : 'Limited time discount with countdown',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                      value: _isFlashSaleEnabled,
-                      activeThumbColor: Colors.orange,
-                      onChanged: (value) {
-                        setState(() {
-                          _isFlashSaleEnabled = value;
-                          if (value) {
-                            _isBadgeEnabled = true;
-                            _selectedBadge = _flashSaleBadge(isArabic);
-                          }
-                        });
-                        _updateCubit();
-                      },
-                    ),
-
-                    if (_isFlashSaleEnabled) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.orange.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
+                        // Price Section Header
+                        Row(
                           children: [
-                            const Icon(
-                              Icons.info_outline,
-                              color: Colors.orange,
-                              size: 18,
-                            ),
+                            const Icon(Icons.payments_outlined,
+                                color: AppColors.primary, size: 20),
                             const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                isArabic
-                                    ? 'سعر الفلاش سيل = سعر الخصم. بعد نهاية الوقت يعود السعر الأصلي تلقائيًا.'
-                                    : 'Flash sale uses Discount Price. After end time, original price is restored automatically.',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? AppColors.textMainDark
-                                      : AppColors.textMainLight,
-                                ),
+                            Text(
+                              isArabic ? 'إعدادات السعر' : 'Price Settings',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          _buildDatePicker(
-                            context: context,
-                            label: isArabic ? 'تاريخ البداية' : 'Start Date',
-                            selectedDate: _flashSaleStartDate,
-                            onTap: () => _selectDate(true),
-                            isDark: isDark,
+                        const SizedBox(height: 16),
+                        _buildPriceField(
+                          controller: _priceController,
+                          label: isArabic ? 'السعر الأصلي' : 'Original Price',
+                          hint: '0',
+                          isDark: isDark,
+                          currency: state.currency,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildPriceField(
+                          controller: _discountPriceController,
+                          label: isArabic
+                              ? 'سعر الخصم (اختياري)'
+                              : 'Discount Price (Optional)',
+                          hint: isArabic ? 'اختياري' : 'Optional',
+                          isDark: isDark,
+                          currency: state.currency,
+                        ),
+                        const SizedBox(height: 24),
+                        _buildPricingOptionsSection(isArabic, isDark, state),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Divider(),
+                        ),
+
+                        // Promotions Section Header
+                        Row(
+                          children: [
+                            const Icon(Icons.local_offer_outlined,
+                                color: AppColors.primary, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              isArabic
+                                  ? 'العروض والشارات'
+                                  : 'Promotions & Badges',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            isArabic
+                                ? 'تفعيل الشارة الترويجية'
+                                : 'Enable Promotional Badge',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark
+                                  ? AppColors.textMainDark
+                                  : AppColors.textMainLight,
+                            ),
                           ),
-                          const SizedBox(width: 16),
-                          _buildDatePicker(
-                            context: context,
-                            label: isArabic ? 'تاريخ النهاية' : 'End Date',
-                            selectedDate: _flashSaleEndDate,
-                            onTap: () => _selectDate(false),
+                          subtitle: Text(
+                            isArabic
+                                ? 'مثل: فلاش سيل، عرض خاص'
+                                : 'e.g., Flash Sale, Best Seller',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? AppColors.textMutedDark
+                                  : AppColors.textMutedLight,
+                            ),
+                          ),
+                          value: _isBadgeEnabled,
+                          activeThumbColor: AppColors.primary,
+                          onChanged: (value) {
+                            setState(() {
+                              _isBadgeEnabled = value;
+                              if (!value) {
+                                _selectedBadge = null;
+                              } else {
+                                final options = isArabic
+                                    ? _badgeOptionsAr
+                                    : _badgeOptionsEn;
+                                _selectedBadge ??= options.first;
+                              }
+                            });
+                            _updateCubit();
+                          },
+                        ),
+                        if (_isBadgeEnabled) ...[
+                          const SizedBox(height: 16),
+                          _buildBadgeDropdown(
                             isDark: isDark,
+                            isArabic: isArabic,
                           ),
                         ],
-                      ),
-                    ],
 
-                    const SizedBox(height: 24),
-                    _buildPricePreview(state, isArabic, isDark),
-                  ],
-                ),
-              )),
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+
+                        // Flash Sale Section Header
+                        Row(
+                          children: [
+                            const Icon(Icons.flash_on,
+                                color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              isArabic ? 'عرض الفلاش' : 'Flash Sale',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            isArabic ? 'تفعيل عرض الفلاش' : 'Enable Flash Sale',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: isDark
+                                  ? AppColors.textMainDark
+                                  : AppColors.textMainLight,
+                            ),
+                          ),
+                          subtitle: Text(
+                            isArabic
+                                ? 'خصم لفترة محدودة مع عداد تنازلي'
+                                : 'Limited time discount with countdown',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? AppColors.textMutedDark
+                                  : AppColors.textMutedLight,
+                            ),
+                          ),
+                          value: _isFlashSaleEnabled,
+                          activeThumbColor: Colors.orange,
+                          onChanged: (value) {
+                            setState(() {
+                              _isFlashSaleEnabled = value;
+                              if (value) {
+                                _isBadgeEnabled = true;
+                                _selectedBadge = _flashSaleBadge(isArabic);
+                              }
+                            });
+                            _updateCubit();
+                          },
+                        ),
+
+                        if (_isFlashSaleEnabled) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.orange.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.orange,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    isArabic
+                                        ? 'سعر الفلاش سيل = سعر الخصم. بعد نهاية الوقت يعود السعر الأصلي تلقائيًا.'
+                                        : 'Flash sale uses Discount Price. After end time, original price is restored automatically.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isDark
+                                          ? AppColors.textMainDark
+                                          : AppColors.textMainLight,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              _buildDatePicker(
+                                context: context,
+                                label:
+                                    isArabic ? 'تاريخ البداية' : 'Start Date',
+                                selectedDate: _flashSaleStartDate,
+                                onTap: () => _selectDate(true),
+                                isDark: isDark,
+                              ),
+                              const SizedBox(width: 16),
+                              _buildDatePicker(
+                                context: context,
+                                label: isArabic ? 'تاريخ النهاية' : 'End Date',
+                                selectedDate: _flashSaleEndDate,
+                                onTap: () => _selectDate(false),
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+                        ],
+
+                        const SizedBox(height: 24),
+                        _buildPricePreview(state, isArabic, isDark),
+                      ],
+                    ),
+                  )),
               const SizedBox(height: 24),
               _buildPricingTips(isArabic, isDark),
               const SizedBox(height: 32),
@@ -520,6 +541,184 @@ class _PricingStepState extends State<PricingStep> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPricingOptionsSection(
+    bool isArabic,
+    bool isDark,
+    CourseEditorState state,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.grey50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.tune, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isArabic ? 'اختيارات الاشتراك' : 'Subscription Options',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _pricingOptionControllers.add(
+                      _PricingOptionControllers(
+                        label: TextEditingController(),
+                        price: TextEditingController(),
+                        durationDays: TextEditingController(),
+                      ),
+                    );
+                  });
+                  _updateCubit();
+                },
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(isArabic ? 'إضافة' : 'Add'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isArabic
+                ? 'مثال: 30 يوم، 60 يوم، 90 يوم. لو لم تضف اختيارات سيظهر سعر الكورس العادي.'
+                : 'Example: 30 days, 60 days, 90 days. If empty, students see the regular course price.',
+            style: TextStyle(
+              fontSize: 12,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (_pricingOptionControllers.isEmpty)
+            Text(
+              isArabic
+                  ? 'لا توجد اختيارات مضافة.'
+                  : 'No subscription options added.',
+              style: TextStyle(
+                color:
+                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              ),
+            )
+          else
+            ..._pricingOptionControllers.asMap().entries.map((entry) {
+              final index = entry.key;
+              final option = entry.value;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom:
+                      index == _pricingOptionControllers.length - 1 ? 0 : 12,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: _buildCompactTextField(
+                        controller: option.label,
+                        label: isArabic ? 'الاختيار' : 'Option',
+                        hint: isArabic ? '30 يوم' : '30 days',
+                        isDark: isDark,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 3,
+                      child: _buildCompactTextField(
+                        controller: option.price,
+                        label: isArabic ? 'السعر' : 'Price',
+                        hint: '0',
+                        isDark: isDark,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        suffixText: state.currency,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: _buildCompactTextField(
+                        controller: option.durationDays,
+                        label: isArabic ? 'أيام' : 'Days',
+                        hint: '30',
+                        isDark: isDark,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: isArabic ? 'حذف' : 'Remove',
+                      onPressed: () {
+                        setState(() {
+                          final removed =
+                              _pricingOptionControllers.removeAt(index);
+                          removed.dispose();
+                        });
+                        _updateCubit();
+                      },
+                      icon: const Icon(Icons.delete_outline),
+                      color: AppColors.error,
+                    ),
+                  ],
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required bool isDark,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    String? suffixText,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      onChanged: (_) => _updateCubit(),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        suffixText: suffixText,
+        filled: true,
+        fillColor: isDark ? AppColors.cardDark : AppColors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+        ),
+      ),
     );
   }
 
@@ -820,5 +1019,41 @@ class _PricingStepState extends State<PricingStep> {
         ],
       ),
     );
+  }
+}
+
+class _PricingOptionControllers {
+  final TextEditingController label;
+  final TextEditingController price;
+  final TextEditingController durationDays;
+
+  _PricingOptionControllers({
+    required this.label,
+    required this.price,
+    required this.durationDays,
+  });
+
+  factory _PricingOptionControllers.fromOption(CoursePricingOption option) {
+    return _PricingOptionControllers(
+      label: TextEditingController(text: option.label),
+      price: TextEditingController(text: option.price.toStringAsFixed(0)),
+      durationDays: TextEditingController(
+        text: option.durationDays?.toString() ?? '',
+      ),
+    );
+  }
+
+  CoursePricingOption toOption() {
+    return CoursePricingOption(
+      label: label.text.trim(),
+      price: double.tryParse(price.text.trim()) ?? 0,
+      durationDays: int.tryParse(durationDays.text.trim()),
+    );
+  }
+
+  void dispose() {
+    label.dispose();
+    price.dispose();
+    durationDays.dispose();
   }
 }

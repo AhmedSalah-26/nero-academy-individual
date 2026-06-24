@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/base/base_state.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../domain/entities/section_entity.dart';
 import '../../domain/entities/lesson_entity.dart';
 import '../../domain/entities/lesson_progress_entity.dart';
@@ -21,6 +22,7 @@ class CoursePlayerState extends Equatable {
   final LessonProgressEntity? currentProgress;
   final List<AttachmentEntity> lessonAttachments;
   final List<AttachmentEntity> courseAttachments;
+  final CourseGroupLinks groupLinks;
   final Map<String, LessonProgressEntity> progressMap;
   final int currentTabIndex;
   final bool isBookmarked;
@@ -41,6 +43,7 @@ class CoursePlayerState extends Equatable {
     this.currentProgress,
     this.lessonAttachments = const [],
     this.courseAttachments = const [],
+    this.groupLinks = const CourseGroupLinks(),
     this.progressMap = const {},
     this.currentTabIndex = 0,
     this.isBookmarked = false,
@@ -153,6 +156,7 @@ class CoursePlayerState extends Equatable {
     LessonProgressEntity? currentProgress,
     List<AttachmentEntity>? lessonAttachments,
     List<AttachmentEntity>? courseAttachments,
+    CourseGroupLinks? groupLinks,
     Map<String, LessonProgressEntity>? progressMap,
     int? currentTabIndex,
     bool? isBookmarked,
@@ -174,6 +178,7 @@ class CoursePlayerState extends Equatable {
       currentProgress: currentProgress ?? this.currentProgress,
       lessonAttachments: lessonAttachments ?? this.lessonAttachments,
       courseAttachments: courseAttachments ?? this.courseAttachments,
+      groupLinks: groupLinks ?? this.groupLinks,
       progressMap: progressMap ?? this.progressMap,
       currentTabIndex: currentTabIndex ?? this.currentTabIndex,
       isBookmarked: isBookmarked ?? this.isBookmarked,
@@ -197,6 +202,7 @@ class CoursePlayerState extends Equatable {
         currentProgress,
         lessonAttachments,
         courseAttachments,
+        groupLinks,
         progressMap,
         currentTabIndex,
         isBookmarked,

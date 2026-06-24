@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/services/app_logger.dart';
 import '../models/cart_item_model.dart';
 import '../models/cart_model.dart';
@@ -11,7 +12,11 @@ import '../../domain/entities/payment_method_entity.dart';
 /// Cart Remote Data Source - API calls to Supabase
 abstract class CartRemoteDataSource {
   Future<CartModel> getCart(String userId);
-  Future<CartItemModel> addToCart(String userId, String courseId);
+  Future<CartItemModel> addToCart(
+    String userId,
+    String courseId, {
+    CoursePricingOption? pricingOption,
+  });
   Future<void> removeFromCart(String userId, String cartItemId);
   Future<void> clearCart(String userId);
   Future<CouponModel> applyCoupon(String userId, String couponCode);
@@ -81,7 +86,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CartItemModel> addToCart(String userId, String courseId) async {
+  Future<CartItemModel> addToCart(
+    String userId,
+    String courseId, {
+    CoursePricingOption? pricingOption,
+  }) async {
     try {
       // Check if user is already enrolled in this course
       final enrollment = await supabase
@@ -102,7 +111,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       final course = await supabase
           .from('courses')
           .select(
-              'price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end')
+              'price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
           .eq('id', courseId)
           .single();
 
@@ -124,7 +133,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       double priceAtAdd = 0.0;
       if (!isFree) {
-        if (discountPrice != null && (!isFlashSale || isFlashSaleActive)) {
+        final selectedOption = _resolveSelectedPricingOption(
+          pricingOption,
+          course['pricing_options'],
+        );
+        if (selectedOption != null) {
+          priceAtAdd = selectedOption.price;
+        } else if (discountPrice != null &&
+            (!isFlashSale || isFlashSaleActive)) {
           priceAtAdd = double.tryParse(discountPrice.toString()) ?? 0.0;
         } else if (price != null) {
           priceAtAdd = double.tryParse(price.toString()) ?? 0.0;
@@ -139,6 +155,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'user_id': userId,
         'course_id': courseId,
         'price_at_add': priceAtAdd,
+        if (pricingOption != null) 'pricing_option': pricingOption.toJson(),
       }).select('''
             *,
             courses (
@@ -244,7 +261,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       // Get cart items
       final cartItems = await supabase
           .from('cart_items')
-          .select('course_id, price_at_add')
+          .select('course_id, price_at_add, pricing_option')
           .eq('user_id', userId);
 
       if ((cartItems as List).isEmpty) {
@@ -289,9 +306,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       }
 
       // ✅ CHECK: منع إرسال طلب جديد لو في طلب pending على نفس الكورسات
-      final cartCourseIds = filteredCartItems
-          .map((item) => item['course_id'] as String)
-          .toList();
+      final cartCourseIds =
+          filteredCartItems.map((item) => item['course_id'] as String).toList();
 
       final pendingEnrollments = await supabase
           .from('enrollments')
@@ -301,9 +317,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           .inFilter('course_id', cartCourseIds);
 
       if ((pendingEnrollments as List).isNotEmpty) {
-        final pendingCourseIds = pendingEnrollments
-            .map((e) => e['course_id'] as String)
-            .toList();
+        final pendingCourseIds =
+            pendingEnrollments.map((e) => e['course_id'] as String).toList();
         AppLogger.w(
             '🛒 [Checkout] User already has pending orders for: $pendingCourseIds');
         throw const ValidationException(
@@ -323,7 +338,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final courseData = await supabase
             .from('courses')
             .select(
-                'instructor_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end')
+                'instructor_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
             .eq('id', courseId)
             .single();
 
@@ -340,11 +355,23 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             (flashSaleStart == null || !now.isBefore(flashSaleStart)) &&
             (flashSaleEnd == null || !now.isAfter(flashSaleEnd));
 
+        final requestedOption = item['pricing_option'] is Map<String, dynamic>
+            ? CoursePricingOption.fromJson(
+                item['pricing_option'] as Map<String, dynamic>,
+              )
+            : null;
+        final selectedOption = _resolveSelectedPricingOption(
+          requestedOption,
+          courseData['pricing_options'],
+        );
+
         // Calculate current effective price
         double currentEffectivePrice = 0.0;
         if (!isFree) {
-          // Discount applies if: permanent (no flash sale) OR flash sale is active
-          if (discountPrice != null && (!isFlashSale || isFlashSaleActive)) {
+          if (selectedOption != null) {
+            currentEffectivePrice = selectedOption.price;
+          } else if (discountPrice != null &&
+              (!isFlashSale || isFlashSaleActive)) {
             currentEffectivePrice = discountPrice;
           } else {
             currentEffectivePrice = price;
@@ -372,6 +399,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           'effectivePrice': roundedPrice,
           'originalPrice': price, // Always pass the original course price
           'instructorId': instructorId,
+          'pricingOption': item['pricing_option'],
         });
       }
 
@@ -421,6 +449,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final priceAtAdd = processed['effectivePrice'] as double;
         final originalPrice = processed['originalPrice'] as double;
         final instructorId = processed['instructorId'] as String?;
+        final pricingOption = processed['pricingOption'];
         final itemCouponDiscount = processed['couponDiscount'] as double;
 
         AppLogger.i(
@@ -448,6 +477,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                 'progress_percentage': 0,
                 'completed_lessons': 0,
                 'price': priceAtAdd,
+                'pricing_option': pricingOption,
                 'discount': itemCouponDiscount,
                 'total_watch_time': 0,
                 'enrolled_at': DateTime.now().toIso8601String(),
@@ -522,6 +552,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               'parent_enrollment_id': parentEnrollmentId,
               'status': isFreeOrder ? 'active' : 'pending',
               'price': priceAtAdd,
+              'pricing_option': pricingOption,
               'discount': itemCouponDiscount,
               'enrolled_at': DateTime.now().toIso8601String(),
             }).eq('id', existing['id']);
@@ -604,5 +635,24 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
+  }
+
+  CoursePricingOption? _resolveSelectedPricingOption(
+    CoursePricingOption? requested,
+    dynamic rawOptions,
+  ) {
+    if (requested == null) return null;
+
+    final options = parseCoursePricingOptions(rawOptions);
+    for (final option in options) {
+      final sameLabel = option.label.trim() == requested.label.trim();
+      final sameDays = option.durationDays == requested.durationDays;
+      final samePrice = option.price.round() == requested.price.round();
+      if (sameLabel && sameDays && samePrice) {
+        return option;
+      }
+    }
+
+    throw const ValidationException('Invalid pricing option');
   }
 }

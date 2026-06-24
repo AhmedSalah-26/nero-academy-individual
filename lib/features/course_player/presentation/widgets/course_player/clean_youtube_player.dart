@@ -113,7 +113,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
     _videoController?.removeListener(_onVideoChanged);
     _chewieController?.dispose();
     _chewieController = null;
-    
+
     if (_videoController != null) {
       final service = sl<VideoPlayerNotifierService>();
       if (service.controller == _videoController) {
@@ -150,7 +150,9 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
       if (!mounted) return;
 
       final service = sl<VideoPlayerNotifierService>();
-      final isExisting = service.videoUrl == widget.videoUrl && service.controller != null && service.controller!.value.isInitialized;
+      final isExisting = service.videoUrl == widget.videoUrl &&
+          service.controller != null &&
+          service.controller!.value.isInitialized;
 
       if (isExisting) {
         _videoController = service.controller;
@@ -171,13 +173,17 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
           _videoController!,
           widget.videoUrl,
           courseId: context.read<CoursePlayerCubit>().state.courseId ?? '',
-          enrollmentId: context.read<CoursePlayerCubit>().state.enrollmentId ?? '',
+          enrollmentId:
+              context.read<CoursePlayerCubit>().state.enrollmentId ?? '',
           courseTitle: widget.courseTitle ?? '',
-          lessonId: context.read<CoursePlayerCubit>().state.currentLesson?.id ?? '',
+          lessonId:
+              context.read<CoursePlayerCubit>().state.currentLesson?.id ?? '',
           lessonTitle: widget.lessonTitle ?? '',
           instructorId: context.read<CoursePlayerCubit>().state.instructorId,
-          instructorName: context.read<CoursePlayerCubit>().state.instructorName,
-          instructorAvatar: context.read<CoursePlayerCubit>().state.instructorAvatar,
+          instructorName:
+              context.read<CoursePlayerCubit>().state.instructorName,
+          instructorAvatar:
+              context.read<CoursePlayerCubit>().state.instructorAvatar,
         );
       }
 
@@ -333,8 +339,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
       return;
     }
 
-    if (cubit.state.currentLesson != null &&
-        cubit.state.enrollmentId != null) {
+    if (cubit.state.currentLesson != null && cubit.state.enrollmentId != null) {
       if (seconds % 60 == 0) {
         AppLogger.i('[YouTubePlayer] Saving watch time: ${seconds}s');
       }
@@ -370,20 +375,6 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
     if (result != null && mounted && _videoController != null) {
       await _videoController!.seekTo(Duration(seconds: result));
     }
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  //  Retry from error state
-  // ══════════════════════════════════════════════════════════════
-
-  void _retry() {
-    _disposeControllers();
-    _retryCount = 0;
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    _initializePlayer();
   }
 
   // ══════════════════════════════════════════════════════════════
