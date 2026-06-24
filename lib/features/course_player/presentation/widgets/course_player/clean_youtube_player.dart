@@ -207,6 +207,10 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
         showControlsOnInitialize: true,
         allowFullScreen: false,
         allowPlaybackSpeedChanging: true,
+        optionsTranslation: OptionsTranslation(
+          playbackSpeedButtonText: 'course_player.playback_speed'.tr(),
+          cancelButtonText: 'common.cancel'.tr(),
+        ),
         additionalOptions: (context) => [
           OptionItem(
             onTap: (context) {

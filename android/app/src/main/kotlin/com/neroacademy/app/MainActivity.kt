@@ -84,6 +84,7 @@ class MainActivity : FlutterActivity() {
 
         val title    = args["title"]    as? String ?: getString(R.string.app_name)
         val subtitle = args["subtitle"] as? String ?: ""
+        val ongoing  = args["ongoing"]  as? Boolean ?: false
 
         // "Continue Lesson" button opens the app / brings it to foreground
         val continueLessonLabel = args["continueLabel"] as? String ?: "Continue Lesson"
@@ -93,13 +94,13 @@ class MainActivity : FlutterActivity() {
             .setContentTitle(title)
             .setContentText(subtitle)
             .setOnlyAlertOnce(true)
-            .setOngoing(false)
+            .setOngoing(ongoing)
             .setShowWhen(false)
-            .setAutoCancel(true)
+            .setAutoCancel(!ongoing)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             // Tap notification body → open app
             .setContentIntent(broadcastIntent("open", requestCode = 10))
-            // Swipe-dismiss → close
+            // Swipe-dismiss → close (only works when ongoing=false)
             .setDeleteIntent(broadcastIntent("close", requestCode = 14))
             // Single action: Continue Lesson
             .addAction(

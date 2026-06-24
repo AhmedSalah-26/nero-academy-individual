@@ -11,7 +11,6 @@ class VideoPlayerNotifierService extends ChangeNotifier {
 
   VideoPlayerController? _controller;
   String? _videoUrl;
-  DateTime _lastNotificationUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   // Metadata
   String? courseId;
@@ -87,12 +86,15 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     _isPlayerScreenActive = active;
 
     if (active) {
+      // Back on the player screen — hide the persistent notification
       isVisible.value = false;
+      unawaited(_hideNotification());
     } else {
+      // Left the player screen — show the "continue" notification so the
+      // user can tap it to come back, but keep the video running.
       if (_controller != null && _controller!.value.isInitialized) {
-        isVisible.value = false;
-        _controller!.pause();
-        unawaited(_hideNotification());
+        isVisible.value = true;
+        unawaited(_showOrUpdateNotification(force: true));
       }
     }
     notifyListeners();
@@ -146,6 +148,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
         'title': _safeText(lessonTitle, fallback: courseTitle ?? 'Nero Academy'),
         'subtitle': _safeText(courseTitle, fallback: ''),
         'continueLabel': 'كمّل الدرس',
+        'ongoing': !_isPlayerScreenActive,
       });
     } catch (e) {
       AppLogger.w(
