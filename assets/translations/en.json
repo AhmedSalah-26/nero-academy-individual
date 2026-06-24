@@ -1,5 +1,5 @@
 {
-  "app_name": "Shehab Academy",
+  "app_name": "Shahab Tech",
   "splash_slogan": "We will continue the journey together",
   "clear_all": "Clear All",
   "common": {
@@ -323,7 +323,7 @@
     "operation_id": "Operation ID",
     "admin_whatsapp": "Admin WhatsApp",
     "contact_whatsapp": "Contact on WhatsApp",
-    "whatsapp_message": "Hello, I want to complete my Shehab Academy payment. Operation ID: {orderId}",
+    "whatsapp_message": "Hello, I want to complete my Shahab Tech payment. Operation ID: {orderId}",
     "copied": "Copied"
   },
   "my_learning": {

@@ -552,7 +552,7 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.012),
                 Text(
-                  'شهاب اكاديمى',
+                  'شهاب تك',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.primaryOnDark

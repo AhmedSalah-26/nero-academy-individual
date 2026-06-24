@@ -1,5 +1,5 @@
 {
-  "app_name": "شهاب اكاديمى",
+  "app_name": "شهاب تك",
   "splash_slogan": "معاك هنكمل المشوار",
   "clear_all": "مسح الكل",
   "common": {
@@ -323,7 +323,7 @@
     "operation_id": "رقم العملية",
     "admin_whatsapp": "واتساب الإدارة",
     "contact_whatsapp": "تواصل على واتساب",
-    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب اكاديمي. رقم العملية: {orderId}",
+    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب تك. رقم العملية: {orderId}",
     "copied": "تم النسخ"
   },
   "my_learning": {
