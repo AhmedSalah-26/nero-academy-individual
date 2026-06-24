@@ -1,6 +1,6 @@
 -- 016_enrollment_notification_webhook.sql
 -- يقوم بإنشاء Webhook تلقائي يُطلق عند إضافة صف جديد في parent_enrollments
--- يستدعي Edge Function تُرسل إشعار Push للأدمن عبر OneSignal
+-- يستدعي Edge Function تُرسل إشعار Push للمدرس صاحب الكورس عبر OneSignal
 
 -- ======================================================
 -- الطريقة 1: استخدام pg_net لإرسال HTTP Request مباشرة
@@ -54,7 +54,7 @@ CREATE TRIGGER trigger_notify_admin_on_enrollment
 -- الطريقة 2: إنشاء Database Webhook يدوياً من Supabase Dashboard
 -- ======================================================
 -- اذهب إلى: Database > Webhooks > Create a new hook
--- Name: notify_admin_on_enrollment
+-- Name: notify_instructor_on_enrollment
 -- Table: parent_enrollments
 -- Events: INSERT
 -- Type: HTTP Request (POST)
