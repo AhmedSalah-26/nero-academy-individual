@@ -41,12 +41,7 @@ android {
         }
     }
 
-    packaging {
-        jniLibs {
-            // Keep debug symbols to avoid NDK strip tool failures with plugin .so files
-            keepDebugSymbols += setOf("**/*.so")
-        }
-    }
+
 }
 
 flutter {
