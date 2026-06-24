@@ -63,13 +63,11 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   int _currentPosition = 0;
   final int _totalDuration = 765;
   Timer? _progressTimer;
-  late final PageController _tabPageController;
   late final Future<List<QuizEntity>> _courseQuizzesFuture;
 
   @override
   void initState() {
     super.initState();
-    _tabPageController = PageController();
     _courseQuizzesFuture = _fetchCourseQuizzes();
     WidgetsBinding.instance.addObserver(this);
     // Prevent screen recording while watching videos
@@ -125,7 +123,6 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
     _progressTimer = null;
-    _tabPageController.dispose();
     // Save progress before disposing
     _saveProgress();
     // Re-allow screen recording when leaving player
@@ -324,41 +321,58 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     }
 
+    // Like the Home screen: video+header collapse on scroll, tabs stick at top
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (state.currentLesson != null)
-                  VideoPlayerSection(
-                    lesson: state.currentLesson!,
-                    currentPosition: _currentPosition,
-                    totalDuration: _totalDuration,
-                    isPlaying: _isPlaying,
-                    isDark: isDark,
-                    onPlayPause: _togglePlayPause,
-                    onReplay10: _replay10,
-                    onForward10: _forward10,
-                    onFullscreen: () => HapticFeedback.mediumImpact(),
-                    onCast: () {},
-                    onSeek: _onSeek,
-                    onSpeedTap: () {},
-                    onBack: _handleBack,
-                    courseTitle: state.courseTitle,
-                    sectionIndex: sectionIndex,
-                    lessonIndex: lessonIndex,
-                  ),
-                if (state.currentLesson != null)
-                  _buildLessonHeader(state, isDark),
-                ContentTabs(
-                  currentIndex: state.currentTabIndex,
-                  isDark: isDark,
-                  onTabChanged: _changeContentTab,
+          child: CustomScrollView(
+            slivers: [
+              // ── Collapsible: video player + lesson header ────────────
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    if (state.currentLesson != null)
+                      VideoPlayerSection(
+                        lesson: state.currentLesson!,
+                        currentPosition: _currentPosition,
+                        totalDuration: _totalDuration,
+                        isPlaying: _isPlaying,
+                        isDark: isDark,
+                        onPlayPause: _togglePlayPause,
+                        onReplay10: _replay10,
+                        onForward10: _forward10,
+                        onFullscreen: () => HapticFeedback.mediumImpact(),
+                        onCast: () {},
+                        onSeek: _onSeek,
+                        onSpeedTap: () {},
+                        onBack: _handleBack,
+                        courseTitle: state.courseTitle,
+                        sectionIndex: sectionIndex,
+                        lessonIndex: lessonIndex,
+                      ),
+                    if (state.currentLesson != null)
+                      _buildLessonHeader(state, isDark),
+                  ],
                 ),
-                _buildTabContent(state, isDark),
-              ],
-            ),
+              ),
+              // ── Sticky: tab bar (like search bar in home) ────────────
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyTabBarDelegate(
+                  isDark: isDark,
+                  child: ContentTabs(
+                    currentIndex: state.currentTabIndex,
+                    isDark: isDark,
+                    onTabChanged: _changeContentTab,
+                  ),
+                ),
+              ),
+              // ── Scrollable: tab content (no fixed height = all lessons show) ─
+              SliverToBoxAdapter(
+                child: _buildCurrentTabContent(state, isDark),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ),
         ),
         BottomActionBar(
@@ -437,67 +451,57 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     context.go('/my-learning');
   }
 
-  Widget _buildTabContent(CoursePlayerState state, bool isDark) {
-    if (_tabPageController.hasClients &&
-        _tabPageController.page?.round() != state.currentTabIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_tabPageController.hasClients) return;
-        _tabPageController.animateToPage(
-          state.currentTabIndex,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
+  /// Build the content for the currently selected tab.
+  /// No fixed height — all content is naturally sized so all lessons show.
+  Widget _buildCurrentTabContent(CoursePlayerState state, bool isDark) {
+    final maxH = MediaQuery.of(context).size.height * 0.75;
+    switch (state.currentTabIndex) {
+      case 0: // Curriculum — shrinkWrap, no height cap needed
+        return FutureBuilder<List<QuizEntity>>(
+          future: _courseQuizzesFuture,
+          builder: (context, snapshot) {
+            return CurriculumList(
+              sections: state.sections,
+              currentLesson: state.currentLesson,
+              completedLessons: const {},
+              quizzes: snapshot.data ?? const [],
+              isDark: isDark,
+              onLessonTap: (lesson) {
+                HapticFeedback.lightImpact();
+                context.read<CoursePlayerCubit>().selectLesson(lesson);
+              },
+              isLessonCompleted: state.isLessonCompleted,
+              getSectionCompletedCount: state.getSectionCompletedCount,
+            );
+          },
         );
-      });
-    }
-
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.62,
-      child: PageView(
-        controller: _tabPageController,
-        onPageChanged: (index) =>
-            context.read<CoursePlayerCubit>().changeTab(index),
-        children: [
-          // Tab 0: Curriculum
-          FutureBuilder<List<QuizEntity>>(
-            future: _courseQuizzesFuture,
-            builder: (context, snapshot) {
-              return CurriculumList(
-                sections: state.sections,
-                currentLesson: state.currentLesson,
-                completedLessons: const {},
-                quizzes: snapshot.data ?? const [],
-                isDark: isDark,
-                onLessonTap: (lesson) {
-                  HapticFeedback.lightImpact();
-                  context.read<CoursePlayerCubit>().selectLesson(lesson);
-                },
-                isLessonCompleted: state.isLessonCompleted,
-                getSectionCompletedCount: state.getSectionCompletedCount,
-              );
-            },
-          ),
-          // Tab 1: More
-          MoreTab(
-            isDark: isDark,
-            onNotesTap: _showNotes,
-            onBookmarksTap: _showBookmarks,
-            onAnnouncementsTap: _showAnnouncements,
-            onAttachmentsTap: () => _showAttachments(state),
-          ),
-          // Tab 2: Q&A
-          if (state.courseId != null && state.enrollmentId != null)
-            QASection(
+      case 1: // More
+        return MoreTab(
+          isDark: isDark,
+          onNotesTap: _showNotes,
+          onBookmarksTap: _showBookmarks,
+          onAnnouncementsTap: _showAnnouncements,
+          onAttachmentsTap: () => _showAttachments(state),
+        );
+      case 2: // Q&A
+        if (state.courseId != null && state.enrollmentId != null) {
+          return SizedBox(
+            height: maxH,
+            child: QASection(
               isDark: isDark,
               courseId: state.courseId!,
               enrollmentId: state.enrollmentId!,
               lessonId: state.currentLesson?.id,
               repository: context.read<CoursePlayerCubit>().repository,
-            )
-          else
-            const SizedBox.shrink(),
-          // Tab 3: Quizzes
-          if (state.courseId != null)
-            QuizzesSection(
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      case 3: // Quizzes
+        if (state.courseId != null) {
+          return SizedBox(
+            height: maxH,
+            child: QuizzesSection(
               isDark: isDark,
               courseId: state.courseId!,
               sections: state.sections,
@@ -511,31 +515,29 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                       _buildQuizNavigationQueryParameters(state, quiz),
                 );
               },
-            )
-          else
-            const SizedBox.shrink(),
-          // Tab 4: Rating
-          if (state.courseId != null && state.enrollmentId != null)
-            RatingSection(
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      case 4: // Rating
+        if (state.courseId != null && state.enrollmentId != null) {
+          return SizedBox(
+            height: maxH,
+            child: RatingSection(
               isDark: isDark,
               courseId: state.courseId!,
               enrollmentId: state.enrollmentId!,
-            )
-          else
-            const SizedBox.shrink(),
-        ],
-      ),
-    );
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   void _changeContentTab(int index) {
     context.read<CoursePlayerCubit>().changeTab(index);
-    if (!_tabPageController.hasClients) return;
-    _tabPageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-    );
   }
 
   Map<String, String> _buildQuizNavigationQueryParameters(
@@ -786,4 +788,29 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     }
   }
+}
+
+// ── Sticky tab bar delegate (same pattern as home search bar) ─────────────────
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final bool isDark;
+
+  const _StickyTabBarDelegate({required this.child, required this.isDark});
+
+  static const double _height = 48.0;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  bool shouldRebuild(covariant _StickyTabBarDelegate oldDelegate) => true;
 }
