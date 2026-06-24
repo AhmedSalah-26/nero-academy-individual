@@ -90,9 +90,10 @@ class VideoPlayerNotifierService extends ChangeNotifier {
       isVisible.value = false;
       unawaited(_hideNotification());
     } else {
-      // Left the player screen — show the "continue" notification so the
-      // user can tap it to come back, but keep the video running.
+      // Left the player screen — pause the video and show the notification
+      // so the user can tap it to come back and resume.
       if (_controller != null && _controller!.value.isInitialized) {
+        _controller!.pause();
         isVisible.value = true;
         unawaited(_showOrUpdateNotification(force: true));
       }
