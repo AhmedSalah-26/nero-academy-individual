@@ -97,7 +97,7 @@ class PaymentCard extends StatelessWidget {
 
                   // Total amount
                   Text(
-                    '${payment.total.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+                    _formatAmount(payment.total, isRtl),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -161,6 +161,8 @@ class PaymentCard extends StatelessWidget {
   }
 
   IconData _getPaymentIcon() {
+    if (payment.isFree) return Icons.card_giftcard_rounded;
+
     switch (payment.paymentMethod) {
       case 'card':
         return Icons.credit_card;
@@ -284,7 +286,7 @@ class PaymentCard extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '${course.price.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+                                _formatAmount(course.price, isRtl),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: theme.colorScheme.onSurface
@@ -411,7 +413,7 @@ class PaymentCard extends StatelessWidget {
             ),
           ),
           Text(
-            '${amount.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+            _formatAmount(amount, isRtl),
             style: TextStyle(
               fontSize: isTotal ? 18 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
@@ -425,5 +427,10 @@ class PaymentCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatAmount(double amount, bool isRtl) {
+    if (amount == 0) return 'Free';
+    return '${amount.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}';
   }
 }

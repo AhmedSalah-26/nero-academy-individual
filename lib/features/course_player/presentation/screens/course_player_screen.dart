@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/animations/animations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/services/app_logger.dart';
@@ -64,10 +63,12 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   int _currentPosition = 0;
   final int _totalDuration = 765;
   Timer? _progressTimer;
+  late final PageController _tabPageController;
 
   @override
   void initState() {
     super.initState();
+    _tabPageController = PageController();
     WidgetsBinding.instance.addObserver(this);
     // Prevent screen recording while watching videos
     ScreenProtectionService.enable();
@@ -108,6 +109,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
     _progressTimer = null;
+    _tabPageController.dispose();
     // Save progress before disposing
     _saveProgress();
     // Re-allow screen recording when leaving player
@@ -317,8 +319,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                 ContentTabs(
                   currentIndex: state.currentTabIndex,
                   isDark: isDark,
-                  onTabChanged: (i) =>
-                      context.read<CoursePlayerCubit>().changeTab(i),
+                  onTabChanged: _changeContentTab,
                 ),
                 _buildTabContent(state, isDark),
               ],
@@ -393,9 +394,6 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   }
 
   void _navigateBackFromPlayer() {
-    if (mounted) {
-      setState(() => _isPlaying = false);
-    }
     _saveProgress();
     if (context.canPop()) {
       context.pop();
@@ -405,71 +403,96 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   }
 
   Widget _buildTabContent(CoursePlayerState state, bool isDark) {
-    // Use AnimatedTabView for smooth transitions between tabs
-    return AnimatedTabView(
-      currentIndex: state.currentTabIndex,
-      duration: const Duration(milliseconds: 300),
-      children: [
-        // Tab 0: Curriculum
-        CurriculumList(
-          sections: state.sections,
-          currentLesson: state.currentLesson,
-          completedLessons: const {},
-          isDark: isDark,
-          onLessonTap: (lesson) {
-            HapticFeedback.lightImpact();
-            context.read<CoursePlayerCubit>().selectLesson(lesson);
-          },
-          isLessonCompleted: state.isLessonCompleted,
-          getSectionCompletedCount: state.getSectionCompletedCount,
-        ),
-        // Tab 1: More
-        MoreTab(
-          isDark: isDark,
-          onNotesTap: _showNotes,
-          onBookmarksTap: _showBookmarks,
-          onAnnouncementsTap: _showAnnouncements,
-          onAttachmentsTap: () => _showAttachments(state),
-        ),
-        // Tab 2: Q&A
-        if (state.courseId != null && state.enrollmentId != null)
-          QASection(
+    if (_tabPageController.hasClients &&
+        _tabPageController.page?.round() != state.currentTabIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_tabPageController.hasClients) return;
+        _tabPageController.animateToPage(
+          state.currentTabIndex,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+        );
+      });
+    }
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.62,
+      child: PageView(
+        controller: _tabPageController,
+        onPageChanged: (index) =>
+            context.read<CoursePlayerCubit>().changeTab(index),
+        children: [
+          // Tab 0: Curriculum
+          CurriculumList(
+            sections: state.sections,
+            currentLesson: state.currentLesson,
+            completedLessons: const {},
             isDark: isDark,
-            courseId: state.courseId!,
-            enrollmentId: state.enrollmentId!,
-            lessonId: state.currentLesson?.id,
-            repository: context.read<CoursePlayerCubit>().repository,
-          )
-        else
-          const SizedBox.shrink(),
-        // Tab 3: Quizzes
-        if (state.courseId != null)
-          QuizzesSection(
-            isDark: isDark,
-            courseId: state.courseId!,
-            repository: di.sl<QuizzesRepository>(),
-            onQuizTap: (quiz) {
-              AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
-              context.goNamed(
-                'quiz-info',
-                pathParameters: {'quizId': quiz.id},
-                queryParameters:
-                    _buildQuizNavigationQueryParameters(state, quiz),
-              );
+            onLessonTap: (lesson) {
+              HapticFeedback.lightImpact();
+              context.read<CoursePlayerCubit>().selectLesson(lesson);
             },
-          )
-        else
-          const SizedBox.shrink(),
-        // Tab 4: Rating
-        if (state.courseId != null && state.enrollmentId != null)
-          RatingSection(
+            isLessonCompleted: state.isLessonCompleted,
+            getSectionCompletedCount: state.getSectionCompletedCount,
+          ),
+          // Tab 1: More
+          MoreTab(
             isDark: isDark,
-            courseId: state.courseId!,
-            enrollmentId: state.enrollmentId!,
-          )
-        else
-          const SizedBox.shrink(),
-      ],
+            onNotesTap: _showNotes,
+            onBookmarksTap: _showBookmarks,
+            onAnnouncementsTap: _showAnnouncements,
+            onAttachmentsTap: () => _showAttachments(state),
+          ),
+          // Tab 2: Q&A
+          if (state.courseId != null && state.enrollmentId != null)
+            QASection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              enrollmentId: state.enrollmentId!,
+              lessonId: state.currentLesson?.id,
+              repository: context.read<CoursePlayerCubit>().repository,
+            )
+          else
+            const SizedBox.shrink(),
+          // Tab 3: Quizzes
+          if (state.courseId != null)
+            QuizzesSection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              repository: di.sl<QuizzesRepository>(),
+              onQuizTap: (quiz) {
+                AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
+                context.goNamed(
+                  'quiz-info',
+                  pathParameters: {'quizId': quiz.id},
+                  queryParameters:
+                      _buildQuizNavigationQueryParameters(state, quiz),
+                );
+              },
+            )
+          else
+            const SizedBox.shrink(),
+          // Tab 4: Rating
+          if (state.courseId != null && state.enrollmentId != null)
+            RatingSection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              enrollmentId: state.enrollmentId!,
+            )
+          else
+            const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+
+  void _changeContentTab(int index) {
+    context.read<CoursePlayerCubit>().changeTab(index);
+    if (!_tabPageController.hasClients) return;
+    _tabPageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
     );
   }
 

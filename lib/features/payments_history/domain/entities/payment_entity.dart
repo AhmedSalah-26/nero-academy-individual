@@ -37,6 +37,8 @@ class PaymentEntity extends Equatable {
   bool get isFailed => paymentStatus == 'failed';
   bool get isRefunded => paymentStatus == 'refunded';
   bool get isCancelled => paymentStatus == 'cancelled';
+  bool get isFree =>
+      total <= 0 || paymentMethod == 'free' || courses.every((c) => c.isFree);
 
   String get statusAr {
     switch (paymentStatus) {
@@ -73,6 +75,8 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodAr {
+    if (isFree) return 'مجاني';
+
     switch (paymentMethod) {
       case 'card':
         return 'بطاقة ائتمان';
@@ -90,6 +94,8 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodEn {
+    if (isFree) return 'Free';
+
     switch (paymentMethod) {
       case 'card':
         return 'Credit Card';
@@ -136,6 +142,8 @@ class PaymentCourseEntity extends Equatable {
     this.thumbnailUrl,
     required this.price,
   });
+
+  bool get isFree => price <= 0;
 
   @override
   List<Object?> get props => [courseId, title, thumbnailUrl, price];

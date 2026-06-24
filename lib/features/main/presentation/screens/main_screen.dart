@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/video_player_notifier_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../home/presentation/cubit/home_cubit.dart';
@@ -84,6 +85,7 @@ class _MainScreenState extends State<MainScreen> {
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop && currentIndex != 0) {
             HapticFeedback.selectionClick();
+            sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
             widget.navigationShell.goBranch(0);
           }
         },
@@ -166,6 +168,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _onTabTapped(int index) {
     HapticFeedback.selectionClick();
+    sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,

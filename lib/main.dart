@@ -15,7 +15,6 @@ import 'core/services/dev_http_overrides.dart';
 import 'core/services/theme_service.dart';
 
 import 'core/services/push_notification_service.dart';
-import 'core/shared_widgets/video_mini_player_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,13 +107,7 @@ class MyApp extends StatelessWidget {
                 child: child ?? const SizedBox(),
               );
 
-              final mainContent = kIsWeb ? MobileWebViewport(child: app) : app;
-              return Stack(
-                children: [
-                  mainContent,
-                  const VideoMiniPlayerOverlay(),
-                ],
-              );
+              return kIsWeb ? MobileWebViewport(child: app) : app;
             },
           ),
         );

@@ -1,10 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'app_logger.dart';
 
 class VideoPlayerNotifierService extends ChangeNotifier {
+  static const MethodChannel _channel =
+      MethodChannel('nero_academy/media_notification');
+
   VideoPlayerController? _controller;
   String? _videoUrl;
+  DateTime _lastNotificationUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   // Metadata
   String? courseId;
@@ -25,6 +32,10 @@ class VideoPlayerNotifierService extends ChangeNotifier {
   String? get videoUrl => _videoUrl;
   bool get isPlayerScreenActive => _isPlayerScreenActive;
 
+  VideoPlayerNotifierService() {
+    _channel.setMethodCallHandler(_handleNativeAction);
+  }
+
   void registerPlayer(
     VideoPlayerController controller,
     String videoUrl, {
@@ -37,8 +48,9 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     String? instructorName,
     String? instructorAvatar,
   }) {
-    AppLogger.i('[VideoPlayerNotifierService] Registering player for $videoUrl');
-    
+    AppLogger.i(
+        '[VideoPlayerNotifierService] Registering player for $videoUrl');
+
     if (_controller != null && _controller != controller) {
       _controller!.removeListener(_onControllerChanged);
       _controller!.dispose();
@@ -57,13 +69,15 @@ class VideoPlayerNotifierService extends ChangeNotifier {
 
     _controller!.addListener(_onControllerChanged);
     isPlaying.value = _controller!.value.isPlaying;
-    
+    unawaited(_showOrUpdateNotification(force: true));
+
     notifyListeners();
   }
 
   void _onControllerChanged() {
     if (_controller != null) {
       isPlaying.value = _controller!.value.isPlaying;
+      unawaited(_showOrUpdateNotification());
       notifyListeners();
     }
   }
@@ -73,15 +87,12 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     _isPlayerScreenActive = active;
 
     if (active) {
-      // If we entered the player screen, hide the mini player overlay
       isVisible.value = false;
     } else {
-      // If we left the player screen, and we have an active player that was playing/initialized
       if (_controller != null && _controller!.value.isInitialized) {
-        // Automatically pause video
+        isVisible.value = false;
         _controller!.pause();
-        // Show the mini player
-        isVisible.value = true;
+        unawaited(_hideNotification());
       }
     }
     notifyListeners();
@@ -100,15 +111,94 @@ class VideoPlayerNotifierService extends ChangeNotifier {
   }
 
   void dismiss() {
-    AppLogger.i('[VideoPlayerNotifierService] Dismissing mini-player');
+    AppLogger.i('[VideoPlayerNotifierService] Dismissing media session');
     isVisible.value = false;
     if (_controller != null) {
       _controller!.removeListener(_onControllerChanged);
+      _controller!.pause();
       _controller!.dispose();
       _controller = null;
     }
     _videoUrl = null;
+    unawaited(_hideNotification());
     notifyListeners();
+  }
+
+  Future<void> _handleNativeAction(MethodCall call) async {
+    if (call.method != 'mediaAction') return;
+
+    switch (call.arguments as String?) {
+      case 'playPause':
+        if (_controller?.value.isPlaying ?? false) {
+          pause();
+        } else {
+          play();
+        }
+        break;
+      case 'rewind10':
+        await _seekBy(const Duration(seconds: -10));
+        break;
+      case 'forward10':
+        await _seekBy(const Duration(seconds: 10));
+        break;
+      case 'close':
+        dismiss();
+        break;
+    }
+  }
+
+  Future<void> _seekBy(Duration delta) async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    final duration = controller.value.duration;
+    final target = controller.value.position + delta;
+    final clamped = target < Duration.zero
+        ? Duration.zero
+        : target > duration
+            ? duration
+            : target;
+
+    await controller.seekTo(clamped);
+  }
+
+  Future<void> _showOrUpdateNotification({bool force = false}) async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+
+    final now = DateTime.now();
+    if (!force &&
+        now.difference(_lastNotificationUpdate) <
+            const Duration(milliseconds: 700)) {
+      return;
+    }
+    _lastNotificationUpdate = now;
+
+    final value = controller.value;
+    try {
+      await _channel.invokeMethod<void>('show', {
+        'title':
+            _safeText(lessonTitle, fallback: courseTitle ?? 'Nero Academy'),
+        'subtitle': _safeText(courseTitle, fallback: ''),
+        'isPlaying': value.isPlaying,
+        'position': value.position.inMilliseconds,
+        'duration': value.duration.inMilliseconds,
+      });
+    } catch (e) {
+      AppLogger.w(
+          '[VideoPlayerNotifierService] Media notification unavailable: $e');
+    }
+  }
+
+  Future<void> _hideNotification() async {
+    try {
+      await _channel.invokeMethod<void>('hide');
+    } catch (_) {}
+  }
+
+  String _safeText(String? value, {required String fallback}) {
+    final trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? fallback : trimmed;
   }
 
   @override
@@ -117,6 +207,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
       _controller!.removeListener(_onControllerChanged);
       _controller!.dispose();
     }
+    unawaited(_hideNotification());
     super.dispose();
   }
 }

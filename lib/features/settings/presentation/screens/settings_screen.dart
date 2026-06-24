@@ -222,28 +222,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeTrackColor: AppColors.primary,
               ),
             ),
-            // Video Autoplay
-            ListTile(
-              leading: const Icon(
-                Icons.play_circle_outline,
-                size: 22,
-                color: AppColors.primary,
-              ),
-              title: Text(
-                'settings.video_autoplay'.tr(),
-                style: TextStyle(
-                  fontSize: 15,
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
-                ),
-              ),
-              trailing: Switch(
-                value: state.videoAutoplay,
-                onChanged: (v) =>
-                    context.read<SettingsCubit>().toggleVideoAutoplay(v),
-                activeTrackColor: AppColors.primary,
-              ),
-            ),
           ],
         ],
       ),
