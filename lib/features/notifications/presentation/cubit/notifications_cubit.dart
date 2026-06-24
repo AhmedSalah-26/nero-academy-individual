@@ -49,43 +49,60 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   Future<void> markAsRead(String notificationId) async {
     AppLogger.d('[$_tag] markAsRead: $notificationId');
 
+    final index = _notifications.indexWhere((n) => n.id == notificationId);
+    if (index == -1 || _notifications[index].isRead) return;
+
+    // Optimistic update: mark as read locally first
+    final previous = _notifications[index];
+    _notifications[index] =
+        _notifications[index].copyWith(isRead: true, readAt: DateTime.now());
+    final unreadCount = _notifications.where((n) => !n.isRead).length;
+    if (isClosed) return;
+    emit(NotificationsLoaded(
+      notifications: List.from(_notifications),
+      unreadCount: unreadCount,
+    ));
+
     try {
       await _repository.markAsRead(notificationId);
-
-      final index = _notifications.indexWhere((n) => n.id == notificationId);
-      if (index != -1) {
-        _notifications[index] = _notifications[index].copyWith(
-          isRead: true,
-          readAt: DateTime.now(),
-        );
-        final unreadCount = _notifications.where((n) => !n.isRead).length;
-        if (isClosed) return;
-        emit(NotificationsLoaded(
-          notifications: List.from(_notifications),
-          unreadCount: unreadCount,
-        ));
-      }
     } catch (e, s) {
-      AppLogger.e('[$_tag] markAsRead error', e, s);
+      AppLogger.e('[$_tag] markAsRead error — rolling back', e, s);
+      // Rollback if server call fails
+      _notifications[index] = previous;
+      if (isClosed) return;
+      emit(NotificationsLoaded(
+        notifications: List.from(_notifications),
+        unreadCount: _notifications.where((n) => !n.isRead).length,
+      ));
     }
   }
 
   Future<void> markAllAsRead() async {
     AppLogger.d('[$_tag] markAllAsRead');
 
+    // Optimistic update: update UI immediately so button feels responsive
+    final previousNotifications =
+        List<NotificationEntity>.from(_notifications);
+    _notifications = _notifications
+        .map((n) => n.copyWith(isRead: true, readAt: DateTime.now()))
+        .toList();
+    if (isClosed) return;
+    emit(NotificationsLoaded(
+      notifications: List.from(_notifications),
+      unreadCount: 0,
+    ));
+
     try {
       await _repository.markAllAsRead();
-
-      _notifications = _notifications
-          .map((n) => n.copyWith(isRead: true, readAt: DateTime.now()))
-          .toList();
+    } catch (e, s) {
+      AppLogger.e('[$_tag] markAllAsRead error — rolling back', e, s);
+      // Rollback if server call fails
+      _notifications = previousNotifications;
       if (isClosed) return;
       emit(NotificationsLoaded(
         notifications: List.from(_notifications),
-        unreadCount: 0,
+        unreadCount: _notifications.where((n) => !n.isRead).length,
       ));
-    } catch (e, s) {
-      AppLogger.e('[$_tag] markAllAsRead error', e, s);
     }
   }
 

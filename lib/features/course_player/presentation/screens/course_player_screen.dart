@@ -63,6 +63,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   int _currentPosition = 0;
   final int _totalDuration = 765;
   Timer? _progressTimer;
+  // Persistent controller so tab changes don't reset scroll to top
+  final ScrollController _playerScrollController = ScrollController();
   late final Future<List<QuizEntity>> _courseQuizzesFuture;
 
   @override
@@ -123,6 +125,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
     _progressTimer = null;
+    _playerScrollController.dispose();
     // Save progress before disposing
     _saveProgress();
     // Re-allow screen recording when leaving player
@@ -326,6 +329,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       children: [
         Expanded(
           child: CustomScrollView(
+            // Persistent controller: keeps scroll position when tabs change
+            controller: _playerScrollController,
             slivers: [
               // ── Collapsible: video player + lesson header ────────────
               SliverToBoxAdapter(

@@ -501,32 +501,6 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
                   maxLines: 2,
                 ),
               ),
-              const SizedBox(height: 16),
-              // Retry button
-              TextButton.icon(
-                onPressed: _retry,
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-                label: Text(
-                  'common.retry'.tr(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
