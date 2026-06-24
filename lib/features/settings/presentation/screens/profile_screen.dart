@@ -154,9 +154,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildStatItem(
                 '${state.coursesCount}', 'profile.courses'.tr(), isDark),
             _buildStatDivider(isDark),
-            _buildStatItem(
-                state.formattedWatchTime, 'profile.watch_time'.tr(), isDark),
-            _buildStatDivider(isDark),
             _buildStatItem('${state.dayStreak}', 'profile.streak'.tr(), isDark),
           ],
         ),
