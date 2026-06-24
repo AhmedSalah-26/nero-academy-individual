@@ -128,61 +128,24 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     if (call.method != 'mediaAction') return;
 
     switch (call.arguments as String?) {
-      case 'playPause':
-        if (_controller?.value.isPlaying ?? false) {
-          pause();
-        } else {
-          play();
-        }
-        break;
-      case 'rewind10':
-        await _seekBy(const Duration(seconds: -10));
-        break;
-      case 'forward10':
-        await _seekBy(const Duration(seconds: 10));
-        break;
       case 'close':
         dismiss();
         break;
     }
   }
 
-  Future<void> _seekBy(Duration delta) async {
-    final controller = _controller;
-    if (controller == null || !controller.value.isInitialized) return;
-
-    final duration = controller.value.duration;
-    final target = controller.value.position + delta;
-    final clamped = target < Duration.zero
-        ? Duration.zero
-        : target > duration
-            ? duration
-            : target;
-
-    await controller.seekTo(clamped);
-  }
-
   Future<void> _showOrUpdateNotification({bool force = false}) async {
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) return;
 
-    final now = DateTime.now();
-    if (!force &&
-        now.difference(_lastNotificationUpdate) <
-            const Duration(milliseconds: 700)) {
-      return;
-    }
-    _lastNotificationUpdate = now;
+    // Only show once (force=true on register) — no live position updates needed
+    if (!force) return;
 
-    final value = controller.value;
     try {
       await _channel.invokeMethod<void>('show', {
-        'title':
-            _safeText(lessonTitle, fallback: courseTitle ?? 'Nero Academy'),
+        'title': _safeText(lessonTitle, fallback: courseTitle ?? 'Nero Academy'),
         'subtitle': _safeText(courseTitle, fallback: ''),
-        'isPlaying': value.isPlaying,
-        'position': value.position.inMilliseconds,
-        'duration': value.duration.inMilliseconds,
+        'continueLabel': 'كمّل الدرس',
       });
     } catch (e) {
       AppLogger.w(

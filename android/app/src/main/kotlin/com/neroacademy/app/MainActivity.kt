@@ -11,28 +11,28 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.media.app.NotificationCompat.MediaStyle
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val channelName = "nero_academy/media_notification"
+
     private val notificationChannelId = "nero_academy_media"
     private val notificationId = 1204
     private val permissionRequestCode = 2401
 
     private var methodChannel: MethodChannel? = null
-    private var mediaSession: MediaSessionCompat? = null
+
+    // ------------------------------------------------------------------ //
+    //  Flutter engine setup
+    // ------------------------------------------------------------------ //
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
         methodChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            channelName
+            CHANNEL_NAME
         )
         methodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
@@ -48,22 +48,32 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        // Store reference so MediaActionReceiver can reach us
+        instance = this
+
         createNotificationChannel()
         handleMediaIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent) {
+    // ------------------------------------------------------------------ //
+    //  Lifecycle
+    // ------------------------------------------------------------------ //
+
+    override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         handleMediaIntent(intent)
     }
 
     override fun onDestroy() {
+        if (instance == this) instance = null
         hideMediaNotification()
-        mediaSession?.release()
-        mediaSession = null
         super.onDestroy()
     }
+
+    // ------------------------------------------------------------------ //
+    //  Media notification — simple "Continue Lesson" button only
+    // ------------------------------------------------------------------ //
 
     private fun showMediaNotification(args: Map<*, *>?) {
         if (args == null) return
@@ -72,77 +82,32 @@ class MainActivity : FlutterActivity() {
             return
         }
 
-        val title = args["title"] as? String ?: getString(R.string.app_name)
+        val title    = args["title"]    as? String ?: getString(R.string.app_name)
         val subtitle = args["subtitle"] as? String ?: ""
-        val isPlaying = args["isPlaying"] as? Boolean ?: false
-        val position = (args["position"] as? Number)?.toInt() ?: 0
-        val duration = (args["duration"] as? Number)?.toInt() ?: 0
 
-        val session = mediaSession ?: MediaSessionCompat(this, "NeroAcademyVideo").also {
-            mediaSession = it
-        }
-        session.isActive = true
-        session.setPlaybackState(
-            PlaybackStateCompat.Builder()
-                .setActions(
-                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                        PlaybackStateCompat.ACTION_PLAY or
-                        PlaybackStateCompat.ACTION_PAUSE or
-                        PlaybackStateCompat.ACTION_SEEK_TO
-                )
-                .setState(
-                    if (isPlaying) PlaybackStateCompat.STATE_PLAYING
-                    else PlaybackStateCompat.STATE_PAUSED,
-                    position.toLong(),
-                    if (isPlaying) 1f else 0f
-                )
-                .build()
-        )
-
-        val playPauseIcon = if (isPlaying) {
-            android.R.drawable.ic_media_pause
-        } else {
-            android.R.drawable.ic_media_play
-        }
-        val playPauseTitle = if (isPlaying) "Pause" else "Play"
+        // "Continue Lesson" button opens the app / brings it to foreground
+        val continueLessonLabel = args["continueLabel"] as? String ?: "Continue Lesson"
 
         val notification = NotificationCompat.Builder(this, notificationChannelId)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(subtitle)
             .setOnlyAlertOnce(true)
-            .setOngoing(isPlaying)
+            .setOngoing(false)
             .setShowWhen(false)
+            .setAutoCancel(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(activityIntent("open", 10))
-            .setDeleteIntent(activityIntent("close", 14))
+            // Tap notification body → open app
+            .setContentIntent(broadcastIntent("open", requestCode = 10))
+            // Swipe-dismiss → close
+            .setDeleteIntent(broadcastIntent("close", requestCode = 14))
+            // Single action: Continue Lesson
             .addAction(
-                android.R.drawable.ic_media_rew,
-                "-10",
-                activityIntent("rewind10", 11)
+                android.R.drawable.ic_media_play,
+                continueLessonLabel,
+                broadcastIntent("open", requestCode = 10)
             )
-            .addAction(
-                playPauseIcon,
-                playPauseTitle,
-                activityIntent("playPause", 12)
-            )
-            .addAction(
-                android.R.drawable.ic_media_ff,
-                "+10",
-                activityIntent("forward10", 13)
-            )
-            .addAction(
-                android.R.drawable.ic_menu_close_clear_cancel,
-                "Close",
-                activityIntent("close", 14)
-            )
-            .setStyle(
-                MediaStyle()
-                    .setMediaSession(session.sessionToken)
-                    .setShowActionsInCompactView(0, 1, 2)
-            )
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setProgress(duration, position.coerceAtMost(duration), duration <= 0)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
         NotificationManagerCompat.from(this).notify(notificationId, notification)
@@ -150,30 +115,33 @@ class MainActivity : FlutterActivity() {
 
     private fun hideMediaNotification() {
         NotificationManagerCompat.from(this).cancel(notificationId)
-        mediaSession?.isActive = false
     }
 
-    private fun handleMediaIntent(intent: Intent?) {
-        val action = intent?.action ?: return
-        if (!action.startsWith(actionPrefix)) return
+    // ------------------------------------------------------------------ //
+    //  Intent routing
+    // ------------------------------------------------------------------ //
 
-        val mediaAction = action.removePrefix(actionPrefix)
-        if (mediaAction == "open") return
+    private fun broadcastIntent(action: String, requestCode: Int): PendingIntent {
+        val intent = Intent(this, MediaActionReceiver::class.java).apply {
+            this.action = "$ACTION_PREFIX$action"
+        }
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        return PendingIntent.getBroadcast(this, requestCode, intent, flags)
+    }
+
+    private fun handleMediaIntent(intent: android.content.Intent?) {
+        val action = intent?.action ?: return
+        if (!action.startsWith(ACTION_PREFIX)) return
+
+        val mediaAction = action.removePrefix(ACTION_PREFIX)
+        if (mediaAction == "open") return   // just bring app to foreground
+
         methodChannel?.invokeMethod("mediaAction", mediaAction)
     }
 
-    private fun activityIntent(action: String, requestCode: Int): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            this.action = "$actionPrefix$action"
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        return PendingIntent.getActivity(
-            this,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-    }
+    // ------------------------------------------------------------------ //
+    //  Notification channel & permissions
+    // ------------------------------------------------------------------ //
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -181,9 +149,9 @@ class MainActivity : FlutterActivity() {
         val channel = NotificationChannel(
             notificationChannelId,
             "Video playback",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Video playback controls"
+            description = "Video playback progress"
             setSound(null, null)
         }
 
@@ -208,7 +176,25 @@ class MainActivity : FlutterActivity() {
         )
     }
 
+    // ------------------------------------------------------------------ //
+    //  Companion — static helpers used by MediaActionReceiver
+    // ------------------------------------------------------------------ //
+
     companion object {
-        private const val actionPrefix = "com.neroacademy.app.MEDIA_"
+        const val CHANNEL_NAME  = "nero_academy/media_notification"
+        const val ACTION_PREFIX = "com.neroacademy.app.MEDIA_"
+
+        @Volatile
+        private var instance: MainActivity? = null
+
+        fun onMediaAction(action: String): Boolean {
+            val activity = instance ?: return false
+            if (action == "open") return true
+
+            activity.runOnUiThread {
+                activity.methodChannel?.invokeMethod("mediaAction", action)
+            }
+            return true
+        }
     }
 }

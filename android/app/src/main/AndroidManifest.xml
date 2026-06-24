@@ -1,15 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
+
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    
+
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -31,13 +32,31 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Handle MEDIA_ intents if the receiver re-launches the activity -->
+            <!-- Handle MEDIA_ intents when receiver re-launches the activity -->
+            <intent-filter>
+                <action android:name="com.neroacademy.app.MEDIA_open"/>
+                <action android:name="com.neroacademy.app.MEDIA_close"/>
+            </intent-filter>
         </activity>
+
+        <!-- BroadcastReceiver for media notification button actions -->
+        <receiver
+            android:name=".MediaActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.neroacademy.app.MEDIA_open"/>
+                <action android:name="com.neroacademy.app.MEDIA_close"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.

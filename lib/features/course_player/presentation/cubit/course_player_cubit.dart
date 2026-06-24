@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/base/base_state.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/services/lesson_history_service.dart';
+import '../../../../core/services/video_player_notifier_service.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/lesson_entity.dart';
 import '../../domain/entities/lesson_progress_entity.dart';
@@ -226,6 +227,11 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
   Future<void> selectLesson(LessonEntity lesson) async {
     if (_isClosed) return;
     AppLogger.i('🎬 [CoursePlayer] Selecting lesson: ${lesson.id}');
+
+    // Dismiss the media notification / stop any background video
+    try {
+      sl<VideoPlayerNotifierService>().dismiss();
+    } catch (_) {}
 
     // Load progress first to get last position
     LessonProgressEntity? progress;
