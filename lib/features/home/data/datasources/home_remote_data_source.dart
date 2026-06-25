@@ -26,7 +26,7 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     id, title_ar, title_en, subtitle_ar, subtitle_en, thumbnail_url, preview_video_url,
     instructor_id, category_id, level, language, price, discount_price, currency,
     is_free, is_flash_sale, flash_sale_start, flash_sale_end,
-    badge,
+    badge, pricing_options,
     rating, rating_count, enrolled_count, total_duration, total_lessons,
     is_featured, is_published, published_at, created_at,
     available_from, available_until,
