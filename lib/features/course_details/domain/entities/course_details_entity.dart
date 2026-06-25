@@ -135,9 +135,7 @@ class CourseDetailsEntity extends Equatable {
   double get currentPrice {
     if (isFree) return 0;
     if (pricingOptions.isNotEmpty) {
-      final prices = pricingOptions.map((option) => option.price).toList()
-        ..sort();
-      return prices.first.round().toDouble();
+      return pricingOptions.first.currentPrice.round().toDouble();
     }
     // Flash sale makes discount time-limited
     if (isFlashSale) {
@@ -146,6 +144,15 @@ class CourseDetailsEntity extends Equatable {
       return price.round().toDouble();
     }
     final price = discountPrice ?? this.price;
+    return price.round().toDouble();
+  }
+
+  /// Get original price (before discount)
+  double get originalPrice {
+    if (isFree) return 0;
+    if (pricingOptions.isNotEmpty) {
+      return pricingOptions.first.price.round().toDouble();
+    }
     return price.round().toDouble();
   }
 
@@ -163,7 +170,12 @@ class CourseDetailsEntity extends Equatable {
 
   /// Get discount percentage
   int? get discountPercentage {
-    if (isFree || price <= 0) return null;
+    if (isFree || currentPrice <= 0) return null;
+    if (pricingOptions.isNotEmpty) {
+      final option = pricingOptions.first;
+      if (option.discountPrice == null || option.discountPrice! >= option.price) return null;
+      return ((option.price - option.discountPrice!) / option.price * 100).round();
+    }
     if (discountPrice == null || discountPrice! >= price) return null;
     // If flash sale, only show discount when active
     if (isFlashSale && !isFlashSaleActive) return null;

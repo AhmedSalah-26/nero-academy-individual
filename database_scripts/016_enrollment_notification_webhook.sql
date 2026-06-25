@@ -62,3 +62,4 @@ CREATE TRIGGER trigger_notify_admin_on_enrollment
 -- HTTP Headers:
 --   Authorization: Bearer <YOUR_SERVICE_ROLE_KEY>
 --   Content-Type: application/json
+ 

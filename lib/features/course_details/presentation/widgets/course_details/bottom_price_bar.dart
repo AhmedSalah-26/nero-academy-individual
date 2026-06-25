@@ -117,7 +117,7 @@ class BottomPriceBar extends StatelessWidget {
           Directionality(
             textDirection: ui.TextDirection.ltr,
             child: Text(
-              'EGP ${course.price.toStringAsFixed(0)}',
+              'EGP ${course.originalPrice.toStringAsFixed(0)}',
               style: TextStyle(
                 fontSize: 12,
                 color:

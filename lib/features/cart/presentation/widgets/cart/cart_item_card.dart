@@ -154,7 +154,7 @@ class CartItemCard extends StatelessWidget {
             item.pricingOption!.durationDays == null
                 ? item.pricingOption!.label
                 : '${item.pricingOption!.label} - ${item.pricingOption!.durationDays} ${locale == 'ar' ? 'يوم' : 'days'}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,

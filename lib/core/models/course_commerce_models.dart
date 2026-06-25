@@ -1,11 +1,13 @@
 class CoursePricingOption {
   final String label;
   final double price;
+  final double? discountPrice;
   final int? durationDays;
 
   const CoursePricingOption({
     required this.label,
     required this.price,
+    this.discountPrice,
     this.durationDays,
   });
 
@@ -13,6 +15,7 @@ class CoursePricingOption {
     return CoursePricingOption(
       label: (json['label'] as String? ?? '').trim(),
       price: (json['price'] as num?)?.toDouble() ?? 0,
+      discountPrice: (json['discount_price'] as num?)?.toDouble(),
       durationDays: (json['duration_days'] as num?)?.toInt(),
     );
   }
@@ -20,15 +23,18 @@ class CoursePricingOption {
   Map<String, dynamic> toJson() => {
         'label': label.trim(),
         'price': price,
+        if (discountPrice != null) 'discount_price': discountPrice,
         if (durationDays != null) 'duration_days': durationDays,
       };
 
   bool get isValid => label.trim().isNotEmpty && price >= 0;
 
+  double get currentPrice => discountPrice ?? price;
+
   String displayLabel(String currency) {
     final days = durationDays;
     final duration = days == null || days <= 0 ? '' : ' - $days days';
-    return '$label$duration - ${price.toStringAsFixed(0)} $currency';
+    return '$label$duration - ${currentPrice.toStringAsFixed(0)} $currency';
   }
 }
 

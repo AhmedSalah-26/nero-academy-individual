@@ -73,8 +73,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildSection(
               title: isArabic ? 'تواصل معنا' : 'Contact Us',
               content: isArabic
-                  ? 'إذا كان لديك أي أسئلة حول سياسة الخصوصية، يرجى التواصل معنا عبر البريد الإلكتروني: support@eduplatform.com'
-                  : 'If you have any questions about this privacy policy, please contact us at: support@eduplatform.com',
+                  ? 'إذا كان لديك أي أسئلة حول سياسة الخصوصية، يرجى التواصل معنا عبر الهاتف: +2010865017'
+                  : 'If you have any questions about this privacy policy, please contact us by phone: +2010865017',
               isDark: isDark,
             ),
             const SizedBox(height: 20),

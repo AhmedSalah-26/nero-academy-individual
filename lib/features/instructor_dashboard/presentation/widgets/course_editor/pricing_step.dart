@@ -14,8 +14,7 @@ class PricingStep extends StatefulWidget {
 }
 
 class _PricingStepState extends State<PricingStep> {
-  late TextEditingController _priceController;
-  late TextEditingController _discountPriceController;
+
   String? _selectedBadge;
   bool _isBadgeEnabled = false;
   bool _isFlashSaleEnabled = false;
@@ -45,11 +44,6 @@ class _PricingStepState extends State<PricingStep> {
   void initState() {
     super.initState();
     final state = context.read<CourseEditorCubit>().state;
-    _priceController = TextEditingController(
-        text: state.price > 0 ? state.price.toString() : '');
-    _discountPriceController = TextEditingController(
-      text: state.discountPrice?.toString() ?? '',
-    );
     _selectedBadge = state.badge;
     _isBadgeEnabled = state.badge != null && state.badge!.isNotEmpty;
     _isFlashSaleEnabled = state.isFlashSale;
@@ -64,8 +58,6 @@ class _PricingStepState extends State<PricingStep> {
 
   @override
   void dispose() {
-    _priceController.dispose();
-    _discountPriceController.dispose();
     for (final option in _pricingOptionControllers) {
       option.dispose();
     }
@@ -74,17 +66,6 @@ class _PricingStepState extends State<PricingStep> {
 
   void _updateCubit() {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final price = double.tryParse(_priceController.text) ?? 0;
-    final parsedDiscountPrice = _discountPriceController.text.isEmpty
-        ? null
-        : double.tryParse(_discountPriceController.text);
-
-    final hasValidDiscount = parsedDiscountPrice != null &&
-        parsedDiscountPrice > 0 &&
-        parsedDiscountPrice < price;
-
-    final discountPrice = hasValidDiscount ? parsedDiscountPrice : null;
-    final clearDiscountPrice = _discountPriceController.text.trim().isEmpty;
 
     final badge = _isFlashSaleEnabled
         ? _flashSaleBadge(isArabic)
@@ -98,10 +79,10 @@ class _PricingStepState extends State<PricingStep> {
         .where((option) => option.isValid)
         .toList();
 
+    // Price is now defined per subscription option — no global price/discount.
     context.read<CourseEditorCubit>().updatePricing(
-          price: price,
-          discountPrice: discountPrice,
-          clearDiscountPrice: clearDiscountPrice,
+          price: 0,
+          clearDiscountPrice: true,
           badge: badge,
           clearBadge: clearBadge,
           isFlashSale: _isFlashSaleEnabled,
@@ -130,7 +111,7 @@ class _PricingStepState extends State<PricingStep> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'تسعير الكورس' : 'Course Pricing',
+                isArabic ? 'تعديل التسعير' : 'Course Pricing',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -141,8 +122,8 @@ class _PricingStepState extends State<PricingStep> {
               const SizedBox(height: 8),
               Text(
                 isArabic
-                    ? 'حدد سعر الكورس والخصم إن وجد'
-                    : 'Set your course price and discount if applicable',
+                    ? 'كل اشتراك له سعره الخاص — يُعرض أول اشتراك في صفحة الكورس'
+                    : 'Each subscription has its own price — the first is shown on the course page',
                 style: TextStyle(
                   color: isDark
                       ? AppColors.textMutedDark
@@ -164,40 +145,6 @@ class _PricingStepState extends State<PricingStep> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Price Section Header
-                        Row(
-                          children: [
-                            const Icon(Icons.payments_outlined,
-                                color: AppColors.primary, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              isArabic ? 'إعدادات السعر' : 'Price Settings',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildPriceField(
-                          controller: _priceController,
-                          label: isArabic ? 'السعر الأصلي' : 'Original Price',
-                          hint: '0',
-                          isDark: isDark,
-                          currency: state.currency,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildPriceField(
-                          controller: _discountPriceController,
-                          label: isArabic
-                              ? 'سعر الخصم (اختياري)'
-                              : 'Discount Price (Optional)',
-                          hint: isArabic ? 'اختياري' : 'Optional',
-                          isDark: isDark,
-                          currency: state.currency,
-                        ),
-                        const SizedBox(height: 24),
                         _buildPricingOptionsSection(isArabic, isDark, state),
 
                         const Padding(
@@ -353,9 +300,9 @@ class _PricingStepState extends State<PricingStep> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    isArabic
-                                        ? 'سعر الفلاش سيل = سعر الخصم. بعد نهاية الوقت يعود السعر الأصلي تلقائيًا.'
-                                        : 'Flash sale uses Discount Price. After end time, original price is restored automatically.',
+                                     isArabic
+                                         ? 'بعد انتهاء وقت الفلاش، يعود سعر الاشتراك العادي تلقائيًا.'
+                                         : 'After the flash sale ends, the regular subscription price is restored automatically.',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: isDark
@@ -434,57 +381,6 @@ class _PricingStepState extends State<PricingStep> {
     );
   }
 
-  Widget _buildPriceField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required bool isDark,
-    required String currency,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          onChanged: (_) => _updateCubit(),
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(Icons.monetization_on_outlined,
-                size: 20,
-                color: isDark
-                    ? AppColors.textMutedDark
-                    : AppColors.textMutedLight),
-            suffixText: currency,
-            filled: true,
-            fillColor: isDark ? AppColors.surfaceDark : AppColors.grey50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildBadgeDropdown({
     required bool isDark,
@@ -581,6 +477,7 @@ class _PricingStepState extends State<PricingStep> {
                       _PricingOptionControllers(
                         label: TextEditingController(),
                         price: TextEditingController(),
+                        discountPrice: TextEditingController(),
                         durationDays: TextEditingController(),
                       ),
                     );
@@ -595,8 +492,8 @@ class _PricingStepState extends State<PricingStep> {
           const SizedBox(height: 8),
           Text(
             isArabic
-                ? 'مثال: 30 يوم، 60 يوم، 90 يوم. لو لم تضف اختيارات سيظهر سعر الكورس العادي.'
-                : 'Example: 30 days, 60 days, 90 days. If empty, students see the regular course price.',
+                ? 'أضف اختيارات الاشتراك وحدد سعر كل واحد. سيُعرض أول اشتراك في صفحة الكورس.'
+                : 'Add subscription options with individual prices. The first one is shown on the course page.',
             style: TextStyle(
               fontSize: 12,
               color:
@@ -623,22 +520,45 @@ class _PricingStepState extends State<PricingStep> {
                   bottom:
                       index == _pricingOptionControllers.length - 1 ? 0 : 12,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: _buildCompactTextField(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.cardDark : AppColors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color:
+                          isDark ? AppColors.borderDark : AppColors.borderLight,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: isArabic
+                            ? AlignmentDirectional.centerStart
+                            : AlignmentDirectional.centerEnd,
+                        child: IconButton(
+                          tooltip: isArabic ? 'حذف' : 'Remove',
+                          onPressed: () {
+                            setState(() {
+                              final removed =
+                                  _pricingOptionControllers.removeAt(index);
+                              removed.dispose();
+                            });
+                            _updateCubit();
+                          },
+                          icon: const Icon(Icons.delete_outline),
+                          color: AppColors.error,
+                        ),
+                      ),
+                      _buildCompactTextField(
                         controller: option.label,
                         label: isArabic ? 'الاختيار' : 'Option',
                         hint: isArabic ? '30 يوم' : '30 days',
                         isDark: isDark,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 3,
-                      child: _buildCompactTextField(
+                      const SizedBox(height: 12),
+                      _buildCompactTextField(
                         controller: option.price,
                         label: isArabic ? 'السعر' : 'Price',
                         hint: '0',
@@ -649,11 +569,20 @@ class _PricingStepState extends State<PricingStep> {
                         ],
                         suffixText: state.currency,
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
-                      child: _buildCompactTextField(
+                      const SizedBox(height: 12),
+                      _buildCompactTextField(
+                        controller: option.discountPrice,
+                        label: isArabic ? 'سعر الخصم (اختياري)' : 'Discount Price (Optional)',
+                        hint: '0',
+                        isDark: isDark,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        suffixText: state.currency,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildCompactTextField(
                         controller: option.durationDays,
                         label: isArabic ? 'أيام' : 'Days',
                         hint: '30',
@@ -663,21 +592,8 @@ class _PricingStepState extends State<PricingStep> {
                           FilteringTextInputFormatter.digitsOnly
                         ],
                       ),
-                    ),
-                    IconButton(
-                      tooltip: isArabic ? 'حذف' : 'Remove',
-                      onPressed: () {
-                        setState(() {
-                          final removed =
-                              _pricingOptionControllers.removeAt(index);
-                          removed.dispose();
-                        });
-                        _updateCubit();
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                      color: AppColors.error,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }),
@@ -724,10 +640,24 @@ class _PricingStepState extends State<PricingStep> {
 
   Widget _buildPricePreview(
       CourseEditorState state, bool isArabic, bool isDark) {
-    final hasDiscount =
-        state.discountPrice != null && state.discountPrice! < state.price;
+    // Show first valid pricing option price in preview
+    final validOptions = _pricingOptionControllers
+        .map((c) => c.toOption())
+        .where((o) => o.isValid)
+        .toList();
+    final firstOption = validOptions.isNotEmpty ? validOptions.first : null;
+    final firstOptionPrice = firstOption?.price;
+    final firstOptionDiscountPrice = firstOption?.discountPrice;
+    final firstOptionLabel = firstOption?.label;
+
+    final hasDiscount = firstOptionDiscountPrice != null &&
+        firstOptionPrice != null &&
+        firstOptionDiscountPrice < firstOptionPrice;
     final discountPercentage = hasDiscount
-        ? ((state.price - state.discountPrice!) / state.price * 100).round()
+        ? ((firstOptionPrice - firstOptionDiscountPrice) /
+                firstOptionPrice *
+                100)
+            .round()
         : 0;
 
     return Container(
@@ -752,48 +682,87 @@ class _PricingStepState extends State<PricingStep> {
                   isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
-          if (hasDiscount) ...[
-            Text(
-              '${state.price.toStringAsFixed(0)} ${state.currency}',
-              style: TextStyle(
-                decoration: TextDecoration.lineThrough,
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-              ),
-            ),
-            Text(
-              '${state.discountPrice!.toStringAsFixed(0)} ${state.currency}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.success,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '-$discountPercentage%',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.error,
+          if (firstOptionPrice != null && firstOptionPrice > 0) ...[
+            if (firstOptionLabel != null && firstOptionLabel.isNotEmpty)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  firstOptionLabel,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
-            ),
+            if (hasDiscount) ...[
+              Text(
+                '${firstOptionPrice.toStringAsFixed(0)} ${state.currency}',
+                style: TextStyle(
+                  decoration: TextDecoration.lineThrough,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
+              ),
+              Text(
+                '${firstOptionDiscountPrice.toStringAsFixed(0)} ${state.currency}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.success,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '-$discountPercentage%',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ] else
+              Text(
+                '${firstOptionPrice.toStringAsFixed(0)} ${state.currency}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                ),
+              ),
+            if (validOptions.length > 1)
+              Text(
+                isArabic
+                    ? '+ ${validOptions.length - 1} اشتراكات أخرى'
+                    : '+ ${validOptions.length - 1} more option(s)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
+              ),
           ] else
             Text(
-              state.price > 0
-                  ? '${state.price.toStringAsFixed(0)} ${state.currency}'
-                  : (isArabic ? 'مجاني' : 'Free'),
+              isArabic
+                  ? 'أضف اشتراكات لتحديد السعر'
+                  : 'Add subscription options to set pricing',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
                 color:
-                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
               ),
             ),
         ],
@@ -804,14 +773,14 @@ class _PricingStepState extends State<PricingStep> {
   Widget _buildPricingTips(bool isArabic, bool isDark) {
     final tips = isArabic
         ? [
-            'حدد سعراً تنافسياً بناءً على محتوى الكورس',
-            'استخدم الخصومات لجذب المزيد من الطلاب',
-            'يمكنك تغيير السعر في أي وقت',
+            'كل اشتراك له سعره الخاص — مثلاً: 30 يوم بـ100 جنيه، 60 يوم بـ180 جنيه',
+            'يُعرض الاشتراك الأول في صفحة الكورس — رتبهم بالأرخص أولاً',
+            'يمكنك تغيير الاشتراكات في أي وقت',
           ]
         : [
-            'Set a competitive price based on your course content',
-            'Use discounts to attract more students',
-            'You can change the price at any time',
+            'Each subscription has its own price — e.g., 30 days for 100 EGP',
+            'The first subscription is shown on the course page — put the cheapest first',
+            'You can update subscription options at any time',
           ];
 
     return Container(
@@ -1025,11 +994,13 @@ class _PricingStepState extends State<PricingStep> {
 class _PricingOptionControllers {
   final TextEditingController label;
   final TextEditingController price;
+  final TextEditingController discountPrice;
   final TextEditingController durationDays;
 
   _PricingOptionControllers({
     required this.label,
     required this.price,
+    required this.discountPrice,
     required this.durationDays,
   });
 
@@ -1037,6 +1008,9 @@ class _PricingOptionControllers {
     return _PricingOptionControllers(
       label: TextEditingController(text: option.label),
       price: TextEditingController(text: option.price.toStringAsFixed(0)),
+      discountPrice: TextEditingController(
+        text: option.discountPrice?.toStringAsFixed(0) ?? '',
+      ),
       durationDays: TextEditingController(
         text: option.durationDays?.toString() ?? '',
       ),
@@ -1047,6 +1021,7 @@ class _PricingOptionControllers {
     return CoursePricingOption(
       label: label.text.trim(),
       price: double.tryParse(price.text.trim()) ?? 0,
+      discountPrice: double.tryParse(discountPrice.text.trim()),
       durationDays: int.tryParse(durationDays.text.trim()),
     );
   }
@@ -1054,6 +1029,7 @@ class _PricingOptionControllers {
   void dispose() {
     label.dispose();
     price.dispose();
+    discountPrice.dispose();
     durationDays.dispose();
   }
 }
