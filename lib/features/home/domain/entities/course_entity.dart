@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/utils/availability_window.dart';
 
 /// Course Entity - Pure Dart Object for Course Cards
@@ -35,6 +36,7 @@ class CourseEntity extends Equatable {
   final DateTime? availableUntil;
   final DateTime createdAt;
   final String? badge;
+  final List<CoursePricingOption> pricingOptions;
 
   const CourseEntity({
     required this.id,
@@ -69,6 +71,7 @@ class CourseEntity extends Equatable {
     this.availableUntil,
     required this.createdAt,
     this.badge,
+    this.pricingOptions = const [],
   });
 
   String getTitle(String locale) =>
@@ -80,6 +83,9 @@ class CourseEntity extends Equatable {
   /// Get current effective price
   double get currentPrice {
     if (isFree) return 0;
+    if (pricingOptions.isNotEmpty) {
+      return pricingOptions.first.currentPrice.round().toDouble();
+    }
     // Flash sale makes discount time-limited
     if (isFlashSale) {
       final price =

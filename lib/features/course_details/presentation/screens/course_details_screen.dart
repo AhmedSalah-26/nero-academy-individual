@@ -670,6 +670,15 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 ),
                 const SizedBox(height: 12),
                 ...course.pricingOptions.map((option) {
+                  final hasDiscount = option.discountPrice != null &&
+                      option.discountPrice! < option.price;
+                  final discountPct = hasDiscount
+                      ? ((option.price - option.discountPrice!) /
+                              option.price *
+                              100)
+                          .round()
+                      : 0;
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
@@ -689,12 +698,61 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                                   ? '${option.durationDays} يوم'
                                   : '${option.durationDays} days',
                             ),
-                      trailing: Text(
-                        '${course.currency} ${option.price.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (hasDiscount) ...[
+                            Text(
+                              '${course.currency} ${option.discountPrice!.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${course.currency} ${option.price.toStringAsFixed(0)}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? AppColors.textMutedDark
+                                        : AppColors.textMutedLight,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '-$discountPct%',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else
+                            Text(
+                              '${course.currency} ${option.price.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                        ],
                       ),
                       onTap: () => Navigator.of(context).pop(option),
                     ),
