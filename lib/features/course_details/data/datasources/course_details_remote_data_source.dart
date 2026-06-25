@@ -87,8 +87,27 @@ class CourseDetailsRemoteDataSourceImpl
               total_students, total_courses, average_rating, is_verified
             ''').eq('instructor_id', instructorId).limit(1).maybeSingle();
 
+        // احسب عدد الكورسات المنشورة مباشرة من جدول courses
+        final coursesCountResult = await supabaseClient
+            .from('courses')
+            .select('id')
+            .eq('instructor_id', instructorId)
+            .eq('is_published', true);
+        final liveTotalCourses = (coursesCountResult as List).length;
+
+        // احسب عدد الطلاب المسجلين مباشرة من جدول enrollments
+        final studentsCountResult = await supabaseClient
+            .from('enrollments')
+            .select('user_id')
+            .eq('instructor_id', instructorId)
+            .eq('status', 'active');
+        final liveTotalStudents = (studentsCountResult as List).length;
+
         if (instructorProfile != null) {
-          data['instructor_profiles'] = instructorProfile;
+          final merged = Map<String, dynamic>.from(instructorProfile);
+          merged['total_courses'] = liveTotalCourses;
+          merged['total_students'] = liveTotalStudents;
+          data['instructor_profiles'] = merged;
         } else {
           // Use profiles data as fallback
           final profile = data['profiles'] as Map<String, dynamic>?;
@@ -105,8 +124,8 @@ class CourseDetailsRemoteDataSourceImpl
               'expertise': const <String>[],
               'social_links': const <String, dynamic>{},
               'website_url': null,
-              'total_students': 0,
-              'total_courses': 0,
+              'total_students': liveTotalStudents,
+              'total_courses': liveTotalCourses,
               'average_rating': 0.0,
               'is_verified': false,
             };

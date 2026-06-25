@@ -565,7 +565,9 @@
     "not_found": "لم يتم العثور على الدورة",
     "preview_not_available": "فيديو المعاينة غير متاح حالياً",
     "invalid_preview_link": "رابط فيديو المعاينة غير صالح",
-    "cannot_open_preview": "تعذر فتح فيديو المعاينة"
+    "cannot_open_preview": "تعذر فتح فيديو المعاينة",
+    "courses": "دورة",
+    "get_for_free": "احصل عليه مجاناً"
   },
   "instructor": {
     "instructor": "المدرس",

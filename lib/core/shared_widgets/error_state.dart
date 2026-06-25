@@ -104,7 +104,7 @@ class ErrorState extends StatelessWidget {
               ),
               SizedBox(height: metrics.messageGap),
               Text(
-                message ?? config.messageKey.tr(),
+                config.messageKey.tr(),
                 style: TextStyle(
                   fontFamily: 'Almarai',
                   fontSize: metrics.messageSize,

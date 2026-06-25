@@ -236,14 +236,20 @@ class InstructorCard extends StatelessWidget {
   }
 
   Widget _buildStats(bool isDark) {
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 6,
       children: [
         _buildStatItem(
           Icons.star_rounded,
           '${instructor.averageRating.toStringAsFixed(1)} ${'course_details.rating'.tr()}',
           isDark,
         ),
-        const SizedBox(width: 16),
+        _buildStatItem(
+          Icons.play_circle_outline_rounded,
+          '${_formatCount(instructor.totalCourses)} ${'course_details.courses'.tr()}',
+          isDark,
+        ),
         _buildStatItem(
           Icons.school_rounded,
           '${_formatCount(instructor.totalStudents)} ${'course_details.students'.tr()}',
