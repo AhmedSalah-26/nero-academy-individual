@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/shared_widgets/phone_input_field.dart';
 import '../../../../core/utils/toast_utils.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../../auth/presentation/widgets/login/avatar_picker.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -431,10 +432,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  /// بناء رقم الهاتف الكامل مع كود الدولة (مع حذف الصفر الأول إن وُجد)
-  String _buildFullPhone(String dialCode, String localPhone) {
-    final clean = localPhone.startsWith('0') ? localPhone.substring(1) : localPhone;
-    return '$dialCode$clean';
+  /// بناء رقم الهاتف الكامل مع كود الدولة (مع التنظيف والتحقق)
+  String? _buildFullPhone(String dialCode, String localPhone) {
+    final fullPhone = '$dialCode$localPhone';
+    final normalized = PhoneUtils.normalizeWhatsappNumber(fullPhone);
+    return normalized != null ? '+$normalized' : null;
   }
 
   Widget _buildBasicFields(bool isDark) {
