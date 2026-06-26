@@ -2,6 +2,7 @@ import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
+import '../../../../../core/utils/phone_utils.dart';
 import '../../models/user_model.dart';
 // import 'auth_helpers_mixin.dart';
 
@@ -61,7 +62,11 @@ mixin AuthProfileMixin {
         'updated_at': DateTime.now().toIso8601String()
       };
       if (name != null) updates['name'] = name;
-      if (phone != null) updates['phone'] = phone;
+      if (phone != null) {
+        // Normalize phone number to remove spaces and format correctly
+        final normalizedPhone = PhoneUtils.normalizeWhatsappNumber(phone);
+        updates['phone'] = normalizedPhone != null ? '+$normalizedPhone' : phone;
+      }
       if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
 
       await supabase.from('profiles').update(updates).eq('id', userId);

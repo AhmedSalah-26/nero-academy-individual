@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
+import '../../../../../core/utils/phone_utils.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../models/user_model.dart';
 
@@ -62,11 +63,129 @@ mixin AuthCoreMixin {
         );
       }
 
+      // Normalize phone number
+      String? normalizedPhone;
+      if (phone != null && phone.isNotEmpty) {
+        final cleaned = PhoneUtils.normalizeWhatsappNumber(phone);
+        normalizedPhone = cleaned != null ? '+$cleaned' : phone;
+      }
+
       logger.d('  Calling supabase.auth.signUp...');
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'name': name, 'role': role.toJson(), 'phone': phone},
+        data: {'name': name, 'role': role.toJson(), 'phone': normalizedPhone},
+        emailRedirectTo: AppConstants.authRedirectUrl,
+      );
+
+      if (response.user == null) {
+        logger.e('❌ [DataSource] SignUp failed: user is null');
+        throw const app_exceptions.AuthException('فشل في إنشاء الحساب');
+      }
+      logger
+          .i('✅ [DataSource] SignUp successful, userId: ${response.user!.id}');
+
+      String? avatarUrl;
+      // Upload avatar if provided
+      if (avatarBytes != null) {
+        logger.d('  Uploading avatar (${avatarBytes.length} bytes)...');
+        final fileName = '${response.user!.id}/avatar.jpg';
+        await supabase.storage.from('avatars').uploadBinary(
+              fileName,
+              avatarBytes,
+              fileOptions: const FileOptions(upsert: true),
+            );
+        avatarUrl = supabase.storage.from('avatars').getPublicUrl(fileName);
+        logger.i('✅ [DataSource] Avatar uploaded: $avatarUrl');
+      }
+
+      final profileData = <String, dynamic>{
+        'id': response.user!.id,
+        'email': email,
+        'name': name,
+        'role': role.toJson(),
+        'phone': normalizedPhone,
+        'is_active': true,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      if (avatarUrl != null) profileData['avatar_url'] = avatarUrl;
+
+      logger.d('  Upserting profile data: $profileData');
+      await supabase.from('profiles').upsert(profileData);
+      logger.i('✅ [DataSource] Profile created successfully');
+
+      if (role == UserRole.instructor) {
+        final instructorProfileData = <String, dynamic>{
+          'instructor_id': response.user!.id,
+          'display_name': name,
+          if (avatarUrl != null) 'avatar_url': avatarUrl,
+          if (headline != null) 'headline_ar': headline,
+          if (bio != null) 'bio_ar': bio,
+          if (expertise != null && expertise.isNotEmpty) 'expertise': expertise,
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+
+        final existingInstructorProfile = await supabase
+            .from('instructor_profiles')
+            .select('id')
+            .eq('instructor_id', response.user!.id)
+            .maybeSingle();
+
+        if (existingInstructorProfile != null) {
+          await supabase
+              .from('instructor_profiles')
+              .update(instructorProfileData)
+              .eq('instructor_id', response.user!.id);
+        } else {
+          await supabase.from('instructor_profiles').insert({
+            ...instructorProfileData,
+            'payout_method': 'wallet',
+          });
+        }
+      }
+
+      // Note: Phone will be added to auth.users later when user verifies it
+      // We don't add it here to avoid triggering OTP during registration
+
+      final profile = await getOrCreateProfile(response.user!);
+      checkUserAccess(profile);
+      return profile;
+    } on AuthApiException catch (e) {
+      logger.e('❌ [DataSource] AuthApiException: ${e.message}');
+      final message = e.message.toLowerCase();
+
+      // If account already exists, try logging in directly to avoid blocking user.
+      if (message.contains('email already registered') ||
+          message.contains('already registered')) {
+        logger
+            .w('⚠️ [DataSource] Email already exists, trying direct login...');
+        return await login(email: email, password: password);
+      }
+
+      throw handleAuthError(e);
+    } on PostgrestException catch (e) {
+      logger.e(
+          '❌ [DataSource] PostgrestException: ${e.message}, code: ${e.code}');
+      throw app_exceptions.ServerException(e.message, code: e.code);
+    } catch (e) {
+      logger.e('❌ [DataSource] Unknown error: $e');
+      rethrow;
+    }
+  }
+
+      logger.d('  Calling supabase.auth.signUp...');
+      
+      // Normalize phone number before signup
+      final normalizedPhone = phone != null 
+          ? PhoneUtils.normalizeWhatsappNumber(phone) 
+          : null;
+      final formattedPhone = normalizedPhone != null ? '+$normalizedPhone' : null;
+      
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'name': name, 'role': role.toJson(), 'phone': formattedPhone},
         emailRedirectTo: AppConstants.authRedirectUrl,
       );
 
