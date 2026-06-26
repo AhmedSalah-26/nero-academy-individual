@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/utils/availability_window.dart';
 
 /// Enrollment Status
-enum EnrollmentStatus { active, completed, expired }
+enum EnrollmentStatus { active, completed, expired, refunded }
 
 /// Enrollment Entity - Pure Dart Object
 class EnrollmentEntity extends Equatable {

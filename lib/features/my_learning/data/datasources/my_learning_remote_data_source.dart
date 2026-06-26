@@ -81,6 +81,7 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
           .from('enrollments')
           .select(_enrollmentSelect)
           .eq('user_id', userId)
+          .neq('status', 'refunded') // exclude refunded enrollments
           .or('access_expires_at.is.null,access_expires_at.gt.${DateTime.now().toUtc().toIso8601String()}');
 
       if (status != null) {

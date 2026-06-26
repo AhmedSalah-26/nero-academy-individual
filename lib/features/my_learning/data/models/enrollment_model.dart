@@ -53,6 +53,8 @@ class EnrollmentModel extends EnrollmentEntity {
       status = EnrollmentStatus.completed;
     } else if (statusStr == 'expired') {
       status = EnrollmentStatus.expired;
+    } else if (statusStr == 'refunded') {
+      status = EnrollmentStatus.refunded;
     }
 
     // Calculate remaining minutes
