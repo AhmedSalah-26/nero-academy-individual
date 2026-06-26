@@ -233,6 +233,8 @@ class _InstructorCouponsContentState extends State<InstructorCouponsContent> {
             discountValue: data['discount_value'],
             usageLimit: data['usage_limit'],
             endDate: data['end_date'],
+            scope: data['scope'],
+            courseIds: (data['course_ids'] as List?)?.cast<String>(),
           );
         } else {
           success = await cubit.createCoupon(
@@ -243,6 +245,8 @@ class _InstructorCouponsContentState extends State<InstructorCouponsContent> {
             discountValue: data['discount_value'],
             usageLimit: data['usage_limit'],
             endDate: data['end_date'],
+            scope: data['scope'],
+            courseIds: (data['course_ids'] as List?)?.cast<String>(),
           );
         }
         if (mounted) {

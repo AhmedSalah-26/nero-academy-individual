@@ -21,7 +21,7 @@ abstract class CartRemoteDataSource {
   Future<void> clearCart(String userId);
   Future<CouponModel> applyCoupon(String userId, String couponCode);
   Future<void> removeCoupon(String userId);
-  Future<CouponModel> validateCoupon(String couponCode);
+  Future<CouponModel> validateCoupon(String couponCode, {String? userId});
   Future<List<SavedPaymentMethodModel>> getSavedPaymentMethods(String userId);
   Future<OrderModel> checkout({
     required String userId,
@@ -205,12 +205,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CouponModel> validateCoupon(String couponCode) async {
+  Future<CouponModel> validateCoupon(String couponCode, {String? userId}) async {
     try {
+      final normalizedCode = couponCode.trim().toUpperCase();
       final response = await supabase
           .from('coupons')
           .select()
-          .eq('code', couponCode.toUpperCase())
+          .eq('code', normalizedCode)
           .eq('is_active', true)
           .single();
 
@@ -218,6 +219,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (!coupon.isValid) {
         throw const ValidationException('Coupon is expired or invalid');
       }
+
+      if (userId != null) {
+        await _validateCouponUsage(coupon, userId);
+        await _validateCouponScope(response, userId);
+      }
+
       return coupon;
     } on PostgrestException catch (e) {
       if (e.code == 'PGRST116') {
@@ -233,7 +240,66 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   @override
   Future<CouponModel> applyCoupon(String userId, String couponCode) async {
     // Coupon validation only - no storage (table doesn't exist)
-    return await validateCoupon(couponCode);
+    return await validateCoupon(couponCode, userId: userId);
+  }
+
+  Future<void> _validateCouponUsage(CouponModel coupon, String userId) async {
+    final usageLimit = coupon.usageLimit;
+    if (usageLimit != null && coupon.usageCount >= usageLimit) {
+      throw const ValidationException('Coupon usage limit reached');
+    }
+
+    final usageLimitPerUser = coupon.usageLimitPerUser;
+    if (usageLimitPerUser <= 0) return;
+
+    final usages = await supabase
+        .from('coupon_usages')
+        .select('id')
+        .eq('coupon_id', coupon.id)
+        .eq('user_id', userId);
+
+    if ((usages as List).length >= usageLimitPerUser) {
+      throw const ValidationException('You already used this coupon');
+    }
+  }
+
+  Future<void> _validateCouponScope(
+    Map<String, dynamic> couponJson,
+    String userId,
+  ) async {
+    final scope = couponJson['scope'] as String? ?? 'all';
+    if (scope != 'courses') return;
+
+    final couponId = couponJson['id'] as String;
+    final couponCourses = await supabase
+        .from('coupon_courses')
+        .select('course_id')
+        .eq('coupon_id', couponId);
+
+    final allowedCourseIds = (couponCourses as List)
+        .map((item) => item['course_id'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    if (allowedCourseIds.isEmpty) {
+      throw const ValidationException('Coupon is not assigned to any course');
+    }
+
+    final cartItems = await supabase
+        .from('cart_items')
+        .select('course_id')
+        .eq('user_id', userId);
+
+    final cartCourseIds = (cartItems as List)
+        .map((item) => item['course_id'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    final hasMatchingCourse =
+        cartCourseIds.any((courseId) => allowedCourseIds.contains(courseId));
+    if (!hasMatchingCourse) {
+      throw const ValidationException('Coupon is not valid for these courses');
+    }
   }
 
   @override

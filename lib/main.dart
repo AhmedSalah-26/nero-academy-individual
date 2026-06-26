@@ -19,8 +19,6 @@ import 'core/services/push_notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await _initializeFirebase();
-
   // DEVELOPMENT ONLY: Allow self-signed certificates
   // Remove this in production!
   if (kDebugMode) {
@@ -62,8 +60,13 @@ void main() async {
   );
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    PushNotificationService.initialize();
+    _initializeStartupServices();
   });
+}
+
+Future<void> _initializeStartupServices() async {
+  await _initializeFirebase();
+  await PushNotificationService.initialize();
 }
 
 Future<void> _initializeFirebase() async {
