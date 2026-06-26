@@ -57,7 +57,21 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
         }
       }
 
-      // No instructor number found — return null (hide the tile)
+      // Fallback: If enrollment query failed (e.g. due to RLS on pending status),
+      // get the main instructor/admin's phone number since this is an individual app.
+      final fallbackInstructor = await Supabase.instance.client
+          .from('profiles')
+          .select('phone')
+          .inFilter('role', ['admin', 'instructor'])
+          .not('phone', 'is', null)
+          .limit(1)
+          .maybeSingle();
+
+      final fallbackPhone = fallbackInstructor?['phone'] as String?;
+      if (fallbackPhone != null && fallbackPhone.isNotEmpty) {
+        return PhoneUtils.normalizeWhatsappNumber(fallbackPhone);
+      }
+
       return null;
     } catch (_) {
       return null;
