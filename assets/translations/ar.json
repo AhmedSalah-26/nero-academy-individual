@@ -322,6 +322,7 @@
     "manual_request_subtitle": "تواصل مع الإدارة على واتساب وأرسل رقم العملية لإتمام الدفع وتفعيل الكورس.",
     "operation_id": "رقم العملية",
     "admin_whatsapp": "واتساب الإدارة",
+    "instructor_whatsapp": "واتساب المدرب",
     "contact_whatsapp": "تواصل على واتساب",
     "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب تك. رقم العملية: {orderId}",
     "copied": "تم النسخ"

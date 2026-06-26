@@ -10,7 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 
 /// Manual order confirmation screen.
 class PaymentSuccessScreen extends StatefulWidget {
-  static const String fallbackAdminWhatsappNumber = '201000000000';
+  // No fallback — show instructor number only
 
   final String orderId;
 
@@ -24,13 +24,13 @@ class PaymentSuccessScreen extends StatefulWidget {
 }
 
 class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
-  late final Future<String> _adminWhatsappFuture = _loadAdminWhatsappNumber();
+  late final Future<String?> _instructorWhatsappFuture = _loadInstructorWhatsappNumber();
 
   String get shortOrderId => widget.orderId.length <= 8
       ? widget.orderId.toUpperCase()
       : widget.orderId.substring(0, 8).toUpperCase();
 
-  Future<String> _loadAdminWhatsappNumber() async {
+  Future<String?> _loadInstructorWhatsappNumber() async {
     try {
       // 1. Get the instructor_id from the first enrollment of this order
       final enrollment = await Supabase.instance.client
@@ -48,28 +48,16 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
             .eq('id', enrollment['instructor_id'])
             .maybeSingle();
 
-        if (instructor != null && instructor['phone'] != null) {
-          final phone = instructor['phone'] as String?;
-          if (phone != null && phone.isNotEmpty) {
-            return _normalizeWhatsappNumber(phone) ??
-                PaymentSuccessScreen.fallbackAdminWhatsappNumber;
-          }
+        final phone = instructor?['phone'] as String?;
+        if (phone != null && phone.isNotEmpty) {
+          return _normalizeWhatsappNumber(phone);
         }
       }
 
-      // Fallback: get admin's phone number if instructor's is not found
-      final admin = await Supabase.instance.client
-          .from('profiles')
-          .select('phone')
-          .inFilter('role', ['admin', 'instructor'])
-          .not('phone', 'is', null)
-          .limit(1)
-          .maybeSingle();
-
-      return _normalizeWhatsappNumber(admin?['phone'] as String?) ??
-          PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+      // No instructor number found — return null (hide the tile)
+      return null;
     } catch (_) {
-      return PaymentSuccessScreen.fallbackAdminWhatsappNumber;
+      return null;
     }
   }
 
@@ -141,17 +129,23 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                 onCopy: () => _copy(context, widget.orderId),
               ),
               const SizedBox(height: 12),
-              FutureBuilder<String>(
-                future: _adminWhatsappFuture,
+              FutureBuilder<String?>(
+                future: _instructorWhatsappFuture,
                 builder: (context, snapshot) {
-                  final adminWhatsappNumber = snapshot.data ??
-                      PaymentSuccessScreen.fallbackAdminWhatsappNumber;
-                  return _InfoTile(
-                    icon: Icons.chat_rounded,
-                    label: 'payment.admin_whatsapp'.tr(),
-                    value: '+$adminWhatsappNumber',
-                    isDark: isDark,
-                    onCopy: () => _copy(context, '+$adminWhatsappNumber'),
+                  final instructorNumber = snapshot.data;
+                  // Hide tile if no instructor number found
+                  if (instructorNumber == null) return const SizedBox.shrink();
+                  return Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      _InfoTile(
+                        icon: Icons.chat_rounded,
+                        label: 'payment.instructor_whatsapp'.tr(),
+                        value: '+$instructorNumber',
+                        isDark: isDark,
+                        onCopy: () => _copy(context, '+$instructorNumber'),
+                      ),
+                    ],
                   );
                 },
               ),
@@ -183,14 +177,15 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
   }
 
   Future<void> _openWhatsapp(BuildContext context) async {
-    final adminWhatsappNumber = await _adminWhatsappFuture;
+    final instructorNumber = await _instructorWhatsappFuture;
+    if (instructorNumber == null) return;
     final text = Uri.encodeComponent(
       'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
     );
-    final uri = Uri.parse('https://wa.me/$adminWhatsappNumber?text=$text');
+    final uri = Uri.parse('https://wa.me/$instructorNumber?text=$text');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
         context.mounted) {
-      _copy(context, '+$adminWhatsappNumber');
+      _copy(context, '+$instructorNumber');
     }
   }
 
