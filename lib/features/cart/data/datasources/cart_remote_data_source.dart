@@ -103,8 +103,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (enrollment != null) {
         final status = enrollment['status'] as String?;
         if (status == 'active' || status == 'completed') {
-          throw const ValidationException(
-              'You are already enrolled in this course');
+          throw const ValidationException('cart.already_enrolled');
+        } else if (status == 'pending') {
+          throw const ValidationException('cart.pending_enrollment');
         }
       }
 

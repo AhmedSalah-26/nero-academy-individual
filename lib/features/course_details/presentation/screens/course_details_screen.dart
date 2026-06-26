@@ -608,7 +608,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         } else {
           final errorMsg = cartCubit.state.addToCartError;
           if (errorMsg != null && errorMsg.isNotEmpty) {
-            _showErrorSnackBar(errorMsg);
+            _showErrorSnackBar(errorMsg.contains('.') ? errorMsg.tr() : errorMsg);
           } else {
             // Course might be already in cart
             _showInfoSnackBar('cart.already_in_cart'.tr());
