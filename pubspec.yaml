@@ -123,18 +123,19 @@ flutter:
         - asset: assets/fonts/Almarai/Almarai-ExtraBold.ttf
           weight: 800
 
-# ── Launcher Icons ─────────────────────────────────────────────────────────────
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logo 3.png"
+  image_path: "assets/logo2.png"  # استخدام PNG بدلاً من JPG
   min_sdk_android: 21
-  adaptive_icon_background: "#0a2fa8"
-  adaptive_icon_foreground: "assets/logo 3.png"
-  adaptive_icon_size: 70
+  # Adaptive icon لأندرويد (بدون إطار أبيض)
+  adaptive_icon_background: "#7C3AED"  # بنفسجي مناسب للبراند
+  adaptive_icon_foreground: "assets/logo2.png"
   web:
     generate: true
-    image_path: "assets/logo 3.png"
+    image_path: "assets/logo2.png"
+    background_color: "#7C3AED"
   windows:
     generate: true
-    image_path: "assets/logo 3.png"
+    image_path: "assets/logo2.png"
+    icon_size: 256
