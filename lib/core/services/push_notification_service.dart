@@ -3,8 +3,11 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class PushNotificationService {
   static const String appId = "19cc330b-c04c-4568-a34e-05cb98e1a385";
+  static bool _isInitialized = false;
 
   static Future<void> initialize() async {
+    if (_isInitialized || kIsWeb) return;
+
     try {
       // Set Log Level in debug mode
       if (kDebugMode) {
@@ -17,15 +20,19 @@ class PushNotificationService {
       // Request notification permission
       await OneSignal.Notifications.requestPermission(true);
 
-      debugPrint('🔔 [PushNotificationService] OneSignal Initialized successfully');
-    } catch (e) {
-      debugPrint('⚠️ [PushNotificationService] Error initializing OneSignal: $e');
+      _isInitialized = true;
+      debugPrint('[PushNotificationService] OneSignal initialized successfully');
+    } catch (e, stackTrace) {
+      debugPrint('[PushNotificationService] Error initializing OneSignal: $e');
+      debugPrint('[PushNotificationService] Stack trace: $stackTrace');
     }
   }
 
   /// Link Supabase User ID to OneSignal and set role tag for targeting
   /// role: 'admin', 'student', 'instructor', 'parent'
   static void login(String userId, {String role = 'student'}) {
+    if (!_isInitialized || kIsWeb) return;
+
     try {
       // ربط الـ Supabase user ID بـ OneSignal
       OneSignal.login(userId);
@@ -33,20 +40,23 @@ class PushNotificationService {
       // وضع تاغ بالدور للاستهداف لاحقاً (الأدمن يستقبل إشعارات الطلبات الجديدة)
       OneSignal.User.addTagWithKey('role', role);
 
-      debugPrint('🔔 [PushNotificationService] OneSignal logged in user: $userId (role: $role)');
-    } catch (e) {
-      debugPrint('⚠️ [PushNotificationService] OneSignal login error: $e');
+      debugPrint('[PushNotificationService] OneSignal logged in user: $userId (role: $role)');
+    } catch (e, stackTrace) {
+      debugPrint('[PushNotificationService] OneSignal login error: $e');
+      debugPrint('[PushNotificationService] Stack trace: $stackTrace');
     }
   }
 
   /// Unlink user ID on logout
   static void logout() {
+    if (!_isInitialized || kIsWeb) return;
+
     try {
       OneSignal.logout();
-      debugPrint('🔔 [PushNotificationService] OneSignal logged out user');
-    } catch (e) {
-      debugPrint('⚠️ [PushNotificationService] OneSignal logout error: $e');
+      debugPrint('[PushNotificationService] OneSignal logged out user');
+    } catch (e, stackTrace) {
+      debugPrint('[PushNotificationService] OneSignal logout error: $e');
+      debugPrint('[PushNotificationService] Stack trace: $stackTrace');
     }
   }
 }
-

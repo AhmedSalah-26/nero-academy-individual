@@ -67,7 +67,13 @@ mixin AuthCoreMixin {
       String? normalizedPhone;
       if (phone != null && phone.isNotEmpty) {
         final cleaned = PhoneUtils.normalizeWhatsappNumber(phone);
-        normalizedPhone = cleaned != null ? '+$cleaned' : phone;
+        if (cleaned == null) {
+          throw const app_exceptions.AuthException(
+            'رقم الهاتف غير صحيح. برجاء كتابة رقم مصري صحيح مثل 01012345678.',
+            code: 'invalid_phone',
+          );
+        }
+        normalizedPhone = '+$cleaned';
       }
 
       logger.d('  Calling supabase.auth.signUp...');

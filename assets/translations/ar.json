@@ -325,6 +325,7 @@
     "operation_id": "رقم العملية",
     "admin_whatsapp": "واتساب الإدارة",
     "instructor_whatsapp": "واتساب المدرب",
+    "instructor_whatsapp_unavailable": "رقم المدرب غير متاح حالياً",
     "contact_whatsapp": "تواصل على واتساب",
     "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب تك. رقم العملية: {orderId}",
     "copied": "تم النسخ"

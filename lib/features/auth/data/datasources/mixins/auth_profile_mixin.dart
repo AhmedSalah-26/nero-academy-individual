@@ -65,7 +65,13 @@ mixin AuthProfileMixin {
       if (phone != null) {
         // Normalize phone number to remove spaces and format correctly
         final normalizedPhone = PhoneUtils.normalizeWhatsappNumber(phone);
-        updates['phone'] = normalizedPhone != null ? '+$normalizedPhone' : phone;
+        if (normalizedPhone == null) {
+          throw const app_exceptions.AuthException(
+            'رقم الهاتف غير صحيح. برجاء كتابة رقم مصري صحيح مثل 01012345678.',
+            code: 'invalid_phone',
+          );
+        }
+        updates['phone'] = '+$normalizedPhone';
       }
       if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
 

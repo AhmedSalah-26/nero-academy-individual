@@ -35,31 +35,41 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
   Future<String?> _loadInstructorWhatsappNumber() async {
     try {
-      // 1. Get the instructor_id from the first enrollment of this order
+      final supabase = Supabase.instance.client;
+
+      // First try the enrollment created for this manual order.
       final enrollment = await Supabase.instance.client
           .from('enrollments')
-          .select('instructor_id')
+          .select('instructor_id, course_id')
           .eq('parent_enrollment_id', widget.orderId)
           .limit(1)
           .maybeSingle();
 
-      if (enrollment != null && enrollment['instructor_id'] != null) {
-        // 2. Get the phone number from profiles for this instructor
-        final instructor = await Supabase.instance.client
-            .from('profiles')
-            .select('phone')
-            .eq('id', enrollment['instructor_id'])
-            .maybeSingle();
+      final enrollmentInstructorId = enrollment?['instructor_id'] as String?;
+      final enrollmentPhone = await _loadProfilePhone(enrollmentInstructorId);
+      if (enrollmentPhone != null) {
+        return enrollmentPhone;
+      }
 
-        final phone = instructor?['phone'] as String?;
-        if (phone != null && phone.isNotEmpty) {
-          return PhoneUtils.normalizeWhatsappNumber(phone);
+      // If instructor_id was not readable on the pending enrollment, resolve it
+      // through the course attached to the order.
+      final courseId = enrollment?['course_id'] as String?;
+      if (courseId != null) {
+        final course = await supabase
+            .from('courses')
+            .select('instructor_id')
+            .eq('id', courseId)
+            .maybeSingle();
+        final coursePhone =
+            await _loadProfilePhone(course?['instructor_id'] as String?);
+        if (coursePhone != null) {
+          return coursePhone;
         }
       }
 
       // Fallback: If enrollment query failed (e.g. due to RLS on pending status),
       // get the main instructor/admin's phone number since this is an individual app.
-      final fallbackInstructor = await Supabase.instance.client
+      final fallbackInstructor = await supabase
           .from('profiles')
           .select('phone')
           .inFilter('role', ['admin', 'instructor'])
@@ -68,14 +78,40 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
           .maybeSingle();
 
       final fallbackPhone = fallbackInstructor?['phone'] as String?;
-      if (fallbackPhone != null && fallbackPhone.isNotEmpty) {
-        return PhoneUtils.normalizeWhatsappNumber(fallbackPhone);
-      }
-
-      return null;
-    } catch (_) {
+      return _normalizePhone(fallbackPhone);
+    } catch (e) {
+      debugPrint('[PaymentSuccess] Failed to load instructor phone: $e');
       return null;
     }
+  }
+
+  Future<String?> _loadProfilePhone(String? profileId) async {
+    if (profileId == null || profileId.isEmpty) return null;
+
+    final instructor = await Supabase.instance.client
+        .from('profiles')
+        .select('phone')
+        .eq('id', profileId)
+        .maybeSingle();
+
+    final rawPhone = instructor?['phone'] as String?;
+    return _normalizePhone(rawPhone);
+  }
+
+  String? _normalizePhone(String? phone) {
+    if (phone == null || phone.trim().isEmpty) return null;
+    final trimmed = phone.trim();
+    final normalized = PhoneUtils.normalizeWhatsappNumber(trimmed);
+    if (normalized != null) return normalized;
+
+    final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return null;
+
+    if (digits.startsWith('00') && digits.length > 2) {
+      return digits.substring(2);
+    }
+
+    return digits;
   }
 
   @override
@@ -141,9 +177,31 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
               FutureBuilder<String?>(
                 future: _instructorWhatsappFuture,
                 builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: LinearProgressIndicator(minHeight: 2),
+                    );
+                  }
+
                   final instructorNumber = snapshot.data;
-                  // Hide tile if no instructor number found
-                  if (instructorNumber == null) return const SizedBox.shrink();
+                  if (instructorNumber == null) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        _InfoTile(
+                          icon: Icons.info_outline_rounded,
+                          label: 'payment.instructor_whatsapp'.tr(),
+                          value: context.locale.languageCode == 'ar'
+                              ? 'رقم المدرب غير متاح حالياً'
+                              : 'Instructor phone is not available right now',
+                          isDark: isDark,
+                          onCopy: () {},
+                        ),
+                      ],
+                    );
+                  }
+
                   return Column(
                     children: [
                       const SizedBox(height: 12),
@@ -161,7 +219,11 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
               const Spacer(),
               AppButton(
                 text: 'payment.contact_whatsapp'.tr(),
-                onPressed: () => _openWhatsapp(context),
+                onPressed: () async {
+                  final instructorNumber = await _instructorWhatsappFuture;
+                  if (!context.mounted || instructorNumber == null) return;
+                  await _openWhatsapp(context, instructorNumber);
+                },
                 variant: AppButtonVariant.primary,
                 size: AppButtonSize.large,
                 icon: Icons.chat_rounded,
@@ -185,9 +247,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     );
   }
 
-  Future<void> _openWhatsapp(BuildContext context) async {
-    final instructorNumber = await _instructorWhatsappFuture;
-    if (instructorNumber == null) return;
+  Future<void> _openWhatsapp(
+    BuildContext context,
+    String instructorNumber,
+  ) async {
     final text = Uri.encodeComponent(
       'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
     );

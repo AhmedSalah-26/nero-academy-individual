@@ -323,6 +323,7 @@
     "operation_id": "Operation ID",
     "admin_whatsapp": "Admin WhatsApp",
     "instructor_whatsapp": "Instructor WhatsApp",
+    "instructor_whatsapp_unavailable": "Instructor phone is not available right now",
     "contact_whatsapp": "Contact on WhatsApp",
     "whatsapp_message": "Hello, I want to complete my Shahab Tech payment. Operation ID: {orderId}",
     "copied": "Copied"

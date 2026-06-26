@@ -123,8 +123,8 @@ class _RegisterFormFieldsState extends State<RegisterFormFields> {
   String getFullPhoneNumber() {
     final phone = widget.phoneCtrl.text.trim();
     if (phone.isEmpty) return '';
-    // إزالة الصفر الأول لو موجود
-    final cleanPhone = phone.startsWith('0') ? phone.substring(1) : phone;
-    return '$_countryDialCode$cleanPhone';
+    final cleanDialCode = _countryDialCode.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return '$cleanDialCode$cleanPhone';
   }
 }

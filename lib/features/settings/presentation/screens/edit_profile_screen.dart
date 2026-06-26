@@ -79,19 +79,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
 
       if (profile.phone != null) {
-        // استخراج كود الدولة من الرقم الكامل
         final phone = profile.phone!;
-        if (phone.startsWith('+')) {
-          // محاولة استخراج كود الدولة (أول 2-4 أرقام بعد +)
-          final match = RegExp(r'^\+(\d{1,4})(.*)').firstMatch(phone);
-          if (match != null) {
-            _countryDialCode = '+${match.group(1)}';
-            _phoneCtrl.text = match.group(2) ?? '';
-          } else {
-            _phoneCtrl.text = phone;
-          }
+        final normalized = PhoneUtils.normalizeWhatsappNumber(phone);
+        if (normalized != null && normalized.startsWith('20')) {
+          _countryDialCode = '+20';
+          _phoneCtrl.text = '0${normalized.substring(2)}';
         } else {
-          _phoneCtrl.text = phone;
+          _phoneCtrl.text = phone.replaceFirst(RegExp(r'^\+?20'), '0');
         }
       }
 
@@ -434,7 +428,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   /// بناء رقم الهاتف الكامل مع كود الدولة (مع التنظيف والتحقق)
   String? _buildFullPhone(String dialCode, String localPhone) {
-    final fullPhone = '$dialCode$localPhone';
+    final cleanDialCode = dialCode.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanLocalPhone = localPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final fullPhone = '$cleanDialCode$cleanLocalPhone';
     final normalized = PhoneUtils.normalizeWhatsappNumber(fullPhone);
     return normalized != null ? '+$normalized' : null;
   }
@@ -466,6 +462,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return PhoneInputField(
       controller: _phoneCtrl,
       label: 'auth.phone'.tr(),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'auth.phone_required'.tr();
+        }
+        return null;
+      },
       onCountryCodeChanged: (code) {
         setState(() {
           _countryDialCode = code;

@@ -467,8 +467,9 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _getFullPhoneNumber() {
     final phone = _phoneCtrl.text.trim();
     if (phone.isEmpty) return null;
-    final cleanPhone = phone.startsWith('0') ? phone.substring(1) : phone;
-    return '$_countryDialCode$cleanPhone';
+    final cleanDialCode = _countryDialCode.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return '$cleanDialCode$cleanPhone';
   }
 
   Widget _buildAwaitingVerificationView(bool isDark) {

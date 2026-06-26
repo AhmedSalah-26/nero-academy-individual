@@ -13,6 +13,12 @@ class PhoneUtils {
     if (digits.startsWith('00')) {
       digits = digits.substring(2);
     }
+
+    // Some saved values accidentally contain +20 + 010... together.
+    // Example: +20101010920472 -> 201010920472.
+    if (digits.startsWith('2010') && digits.length == 14) {
+      digits = '20${digits.substring(5)}';
+    }
     
     // If they typed +20 and also kept the leading 0 (e.g., 20010...)
     if (digits.startsWith('2001') && digits.length >= 12) {

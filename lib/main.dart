@@ -19,17 +19,7 @@ import 'core/services/push_notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint('⚠️ [Main] Failed to initialize Firebase: $e');
-  }
-
-  // Initialize OneSignal
-  await PushNotificationService.initialize();
+  await _initializeFirebase();
 
   // DEVELOPMENT ONLY: Allow self-signed certificates
   // Remove this in production!
@@ -70,6 +60,33 @@ void main() async {
       child: const MyApp(),
     ),
   );
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    PushNotificationService.initialize();
+  });
+}
+
+Future<void> _initializeFirebase() async {
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+
+    debugPrint('[Main] Firebase initialized successfully');
+  } on FirebaseException catch (e, stackTrace) {
+    if (e.code == 'duplicate-app') {
+      debugPrint('[Main] Firebase was already initialized');
+      return;
+    }
+
+    debugPrint('[Main] Failed to initialize Firebase: ${e.code} ${e.message}');
+    debugPrint('[Main] Stack trace: $stackTrace');
+  } catch (e, stackTrace) {
+    debugPrint('[Main] Failed to initialize Firebase: $e');
+    debugPrint('[Main] Stack trace: $stackTrace');
+  }
 }
 
 class MyApp extends StatelessWidget {
