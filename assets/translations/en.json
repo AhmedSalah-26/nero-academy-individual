@@ -319,7 +319,7 @@
     "back_to_home": "Back to Home",
     "pending_confirmation": "Payment is still being confirmed. Your subscription will activate after the bank confirms the payment.",
     "request_submitted": "Request submitted",
-    "manual_request_subtitle": "Contact admin on WhatsApp and send the operation ID to complete payment and activate your course.",
+    "manual_request_subtitle": "Contact the instructor on WhatsApp and send the operation ID to complete payment and activate your course.",
     "operation_id": "Operation ID",
     "admin_whatsapp": "Admin WhatsApp",
     "instructor_whatsapp": "Instructor WhatsApp",

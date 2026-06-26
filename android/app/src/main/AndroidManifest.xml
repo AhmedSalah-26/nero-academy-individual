@@ -83,5 +83,8 @@
             <data android:scheme="youtube"/>
         </intent>
         <package android:name="com.google.android.youtube"/>
+        <!-- WhatsApp -->
+        <package android:name="com.whatsapp"/>
+        <package android:name="com.whatsapp.w4b"/>
     </queries>
 </manifest>

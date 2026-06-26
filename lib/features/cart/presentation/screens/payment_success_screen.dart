@@ -182,8 +182,17 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     final text = Uri.encodeComponent(
       'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
     );
-    final uri = Uri.parse('https://wa.me/$instructorNumber?text=$text');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+    final uri = Uri.parse('whatsapp://send?phone=$instructorNumber&text=$text');
+    final fallbackUri = Uri.parse('https://api.whatsapp.com/send?phone=$instructorNumber&text=$text');
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+        return;
+      }
+    } catch (_) {}
+
+    if (!await launchUrl(fallbackUri, mode: LaunchMode.externalApplication) &&
         context.mounted) {
       _copy(context, '+$instructorNumber');
     }
@@ -247,6 +256,7 @@ class _InfoTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   value,
+                  textDirection: TextDirection.ltr,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
