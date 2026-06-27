@@ -1,4 +1,4 @@
-package com.neroacademy.app
+package com.shehabtech.edu
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -183,7 +183,7 @@ class MainActivity : FlutterActivity() {
 
     companion object {
         const val CHANNEL_NAME  = "nero_academy/media_notification"
-        const val ACTION_PREFIX = "com.neroacademy.app.MEDIA_"
+        const val ACTION_PREFIX = "com.shehabtech.edu.MEDIA_"
 
         @Volatile
         private var instance: MainActivity? = null

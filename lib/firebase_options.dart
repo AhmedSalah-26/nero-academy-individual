@@ -52,21 +52,19 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA2xWyeBX4RiBWQNyW7ML7ruo_0kW--eEM',
-    appId: '1:676270746216:android:28aa30dea7ffd14e5f29dd',
+    appId: '1:676270746216:android:c6ad34b1717993a85f29dd',
     messagingSenderId: '676270746216',
     projectId: 'nero-sehap',
     storageBucket: 'nero-sehap.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC_UZwkF-LHLoYmnVqRRRfRXq5Kz2uyt38',
-    appId: '1:676270746216:ios:8f8d019646d3b4505f29dd',
+    appId: '1:676270746216:ios:e8972a33168e4f2c5f29dd',
     messagingSenderId: '676270746216',
     projectId: 'nero-sehap',
     storageBucket: 'nero-sehap.firebasestorage.app',
-    iosBundleId: 'com.example.edu',
+    iosBundleId: 'com.shehabtech.edu',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyC_UZwkF-LHLoYmnVqRRRfRXq5Kz2uyt38',
     appId: '1:676270746216:ios:8f8d019646d3b4505f29dd',

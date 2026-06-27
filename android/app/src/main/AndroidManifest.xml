@@ -36,8 +36,8 @@
             <!-- Handle MEDIA_ intents if the receiver re-launches the activity -->
             <!-- Handle MEDIA_ intents when receiver re-launches the activity -->
             <intent-filter>
-                <action android:name="com.neroacademy.app.MEDIA_open"/>
-                <action android:name="com.neroacademy.app.MEDIA_close"/>
+                <action android:name="com.shehabtech.edu.MEDIA_open"/>
+                <action android:name="com.shehabtech.edu.MEDIA_close"/>
             </intent-filter>
         </activity>
 
@@ -46,8 +46,8 @@
             android:name=".MediaActionReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.neroacademy.app.MEDIA_open"/>
-                <action android:name="com.neroacademy.app.MEDIA_close"/>
+                <action android:name="com.shehabtech.edu.MEDIA_open"/>
+                <action android:name="com.shehabtech.edu.MEDIA_close"/>
             </intent-filter>
         </receiver>
 

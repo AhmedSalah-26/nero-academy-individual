@@ -1,4 +1,4 @@
-package com.neroacademy.app
+package com.shehabtech.edu
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -35,6 +35,6 @@ class MediaActionReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val ACTION_PREFIX = "com.neroacademy.app.MEDIA_"
+        const val ACTION_PREFIX = "com.shehabtech.edu.MEDIA_"
     }
 }
