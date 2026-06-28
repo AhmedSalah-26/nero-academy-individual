@@ -10,8 +10,8 @@ import '../../../../core/theme/app_colors.dart';
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
-  static const _supportPhoneDisplay = '+2010865017';
-  static const _supportWhatsappNumber = '2010865017';
+  static const _supportPhoneDisplay = '+201020865017';
+  static const _supportWhatsappNumber = '201020865017';
 
   @override
   Widget build(BuildContext context) {

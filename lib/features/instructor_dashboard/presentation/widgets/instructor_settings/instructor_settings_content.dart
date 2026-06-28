@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/services/logout_service.dart';
 import '../../../../../core/services/theme_service.dart';
@@ -284,7 +285,13 @@ class _InstructorSettingsContentState extends State<InstructorSettingsContent> {
               _SettingsItem(
                   icon: Icons.privacy_tip,
                   title: isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
-                  onTap: () => context.pushNamed('privacy-policy')),
+                  onTap: () async {
+                    final Uri url = Uri.parse(
+                        'https://AhmedSalah-26.github.io/shehabtech-privacy/');
+                    if (!await launchUrl(url)) {
+                      debugPrint('Could not launch $url');
+                    }
+                  }),
               _SettingsItem(
                   icon: Icons.logout,
                   title: isArabic ? 'تسجيل الخروج' : 'Logout',

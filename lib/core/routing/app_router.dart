@@ -51,7 +51,6 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/help_support_screen.dart';
 import '../../features/settings/presentation/screens/edit_profile_screen.dart';
-import '../../features/settings/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/terms_of_service_screen.dart';
 import '../../features/settings/presentation/cubit/profile_cubit.dart';
 // Course Search
@@ -537,13 +536,6 @@ class AppRouter {
           value: sl<ProfileCubit>(),
           child: const EditProfileScreen(),
         ),
-      ),
-
-      // Privacy Policy
-      GoRoute(
-        path: '/privacy-policy',
-        name: 'privacy-policy',
-        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
 
       // Terms of Service
@@ -1153,8 +1145,6 @@ class AppRouter {
       context.pushNamed('help-support');
   static void goToEditProfile(BuildContext context) =>
       context.pushNamed('edit-profile');
-  static void goToPrivacyPolicy(BuildContext context) =>
-      context.pushNamed('privacy-policy');
   static void goToTermsOfService(BuildContext context) =>
       context.pushNamed('terms-of-service');
 
