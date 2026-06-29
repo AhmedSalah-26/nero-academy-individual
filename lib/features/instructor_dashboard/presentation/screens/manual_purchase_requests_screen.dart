@@ -20,7 +20,11 @@ class _ManualPurchaseRequestsScreenState
   static const _pendingStatus = 'pending_manual_payment';
   static const _paidStatus = 'paid';
   static const _cancelledStatus = 'cancelled';
-  static const _manualStatuses = [_pendingStatus, _paidStatus, _cancelledStatus];
+  static const _manualStatuses = [
+    _pendingStatus,
+    _paidStatus,
+    _cancelledStatus
+  ];
 
   late final TabController _tabController;
   final _client = Supabase.instance.client;
@@ -55,8 +59,8 @@ class _ManualPurchaseRequestsScreenState
             id, user_id, total, subtotal, discount, payment_method,
             payment_status, created_at, paid_at, updated_at,
             profiles:user_id (name, email, phone),
-            enrollments (
-              id, course_id, status, price, pricing_option, access_expires_at,
+            manual_purchase_request_items (
+              id, course_id, price, pricing_option,
               courses:course_id (title_ar, title_en, thumbnail_url)
             )
           ''')
@@ -65,7 +69,8 @@ class _ManualPurchaseRequestsScreenState
           .order('created_at', ascending: false);
 
       final requests = (response as List)
-          .map((item) => _ManualPurchaseRequest.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              _ManualPurchaseRequest.fromJson(item as Map<String, dynamic>))
           .toList();
 
       if (!mounted) return;
@@ -108,14 +113,17 @@ class _ManualPurchaseRequestsScreenState
     );
   }
 
-  Future<void> _runAction(String orderId, Future<dynamic> Function() action) async {
+  Future<void> _runAction(
+      String orderId, Future<dynamic> Function() action) async {
     setState(() => _actionOrderId = orderId);
     try {
       await action();
       if (!mounted) return;
       AnimatedSnackbar.showSuccess(
         context: context,
-        message: context.locale.languageCode == 'ar' ? 'تم تحديث الطلب' : 'Request updated',
+        message: context.locale.languageCode == 'ar'
+            ? 'تم تحديث الطلب'
+            : 'Request updated',
       );
       await _loadRequests();
     } catch (_) {
@@ -170,8 +178,10 @@ class _ManualPurchaseRequestsScreenState
             indicatorColor: AppColors.primary,
             indicatorWeight: 2.5,
             labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+            labelStyle:
+                const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+            unselectedLabelStyle:
+                const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
             tabs: [
               _buildTab(
                 label: isArabic ? 'قيد المراجعة' : 'Pending',
@@ -233,7 +243,8 @@ class _ManualPurchaseRequestsScreenState
     );
   }
 
-  Tab _buildTab({required String label, required int count, required Color color}) {
+  Tab _buildTab(
+      {required String label, required int count, required Color color}) {
     return Tab(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -288,7 +299,8 @@ class _RequestsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (requests.isEmpty) {
-      return _RequestsEmptyState(status: status, isDark: isDark, isArabic: isArabic);
+      return _RequestsEmptyState(
+          status: status, isDark: isDark, isArabic: isArabic);
     }
 
     return RefreshIndicator(
@@ -331,7 +343,8 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.locale.languageCode == 'ar';
-    final dateFormat = DateFormat('dd MMM yyyy - hh:mm a', isArabic ? 'ar' : 'en');
+    final dateFormat =
+        DateFormat('dd MMM yyyy - hh:mm a', isArabic ? 'ar' : 'en');
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -357,7 +370,9 @@ class _RequestCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                        color: isDark
+                            ? AppColors.textMainDark
+                            : AppColors.textMainLight,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -365,7 +380,9 @@ class _RequestCard extends StatelessWidget {
                       dateFormat.format(request.createdAt),
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
                       ),
                     ),
                   ],
@@ -378,7 +395,8 @@ class _RequestCard extends StatelessWidget {
           const SizedBox(height: 12),
           _InfoRow(
             icon: Icons.confirmation_number_rounded,
-            text: '${isArabic ? 'رقم العملية' : 'Operation'}: ${request.shortId}',
+            text:
+                '${isArabic ? 'رقم العملية' : 'Operation'}: ${request.shortId}',
             isDark: isDark,
           ),
           if (request.phone.isNotEmpty || request.email.isNotEmpty) ...[
@@ -400,7 +418,8 @@ class _RequestCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.school_rounded, size: 16, color: AppColors.primary),
+                      const Icon(Icons.school_rounded,
+                          size: 16, color: AppColors.primary),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -408,7 +427,9 @@ class _RequestCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                            color: isDark
+                                ? AppColors.textMainDark
+                                : AppColors.textMainLight,
                           ),
                         ),
                       ),
@@ -441,7 +462,9 @@ class _RequestCard extends StatelessWidget {
               Text(
                 isArabic ? 'الإجمالي' : 'Total',
                 style: TextStyle(
-                  color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -469,7 +492,8 @@ class _RequestCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: () => onApprove(days),
                       icon: const Icon(Icons.check_rounded, size: 18),
-                      label: Text(isArabic ? 'قبول $days يوم' : 'Approve $days days'),
+                      label: Text(
+                          isArabic ? 'قبول $days يوم' : 'Approve $days days'),
                     ),
                   OutlinedButton.icon(
                     onPressed: onCancel,
@@ -492,7 +516,8 @@ class _RequestCard extends StatelessWidget {
 // ── Supporting widgets ─────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.text, required this.isDark});
+  const _InfoRow(
+      {required this.icon, required this.text, required this.isDark});
 
   final IconData icon;
   final String text;
@@ -502,7 +527,8 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 16,
+        Icon(icon,
+            size: 16,
             color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
         const SizedBox(width: 8),
         Expanded(
@@ -510,7 +536,8 @@ class _InfoRow extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
         ),
@@ -582,7 +609,8 @@ class _RequestStatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w800),
+        style:
+            TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -603,7 +631,9 @@ class _PricingOptionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final durationDays = option.durationDays;
     final parts = [
-      isArabic ? 'اختيار الطالب: ${option.label}' : 'Student selected: ${option.label}',
+      isArabic
+          ? 'اختيار الطالب: ${option.label}'
+          : 'Student selected: ${option.label}',
       if (durationDays != null && durationDays > 0)
         isArabic ? '$durationDays يوم' : '$durationDays days',
       '${option.price.toStringAsFixed(0)} EGP',
@@ -687,15 +717,19 @@ class _RequestsErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 42, color: AppColors.error),
+            const Icon(Icons.error_outline_rounded,
+                size: 42, color: AppColors.error),
             const SizedBox(height: 12),
             Text(
-              isArabic ? 'تعذر تحميل طلبات الشراء' : 'Could not load purchase requests',
+              isArabic
+                  ? 'تعذر تحميل طلبات الشراء'
+                  : 'Could not load purchase requests',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                color:
+                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
               ),
             ),
             const SizedBox(height: 12),
@@ -742,7 +776,9 @@ class _ManualPurchaseRequest {
 
   factory _ManualPurchaseRequest.fromJson(Map<String, dynamic> json) {
     final profile = json['profiles'] as Map<String, dynamic>?;
-    final enrollments = (json['enrollments'] as List<dynamic>? ?? [])
+    final requestItems = (json['manual_purchase_request_items']
+                as List<dynamic>? ??
+            [])
         .map((item) => _RequestCourse.fromJson(item as Map<String, dynamic>))
         .toList();
 
@@ -751,11 +787,12 @@ class _ManualPurchaseRequest {
       total: (json['total'] as num?)?.toDouble() ?? 0,
       paymentStatus: json['payment_status'] as String? ??
           _ManualPurchaseRequestsScreenState._pendingStatus,
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
       studentName: profile?['name'] as String? ?? 'Student',
       email: profile?['email'] as String? ?? '',
       phone: profile?['phone'] as String? ?? '',
-      courses: enrollments,
+      courses: requestItems,
     );
   }
 }

@@ -27,7 +27,8 @@ class PaymentSuccessScreen extends StatefulWidget {
 }
 
 class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
-  late final Future<String?> _instructorWhatsappFuture = _loadInstructorWhatsappNumber();
+  late final Future<String?> _instructorWhatsappFuture =
+      _loadInstructorWhatsappNumber();
 
   String get shortOrderId => widget.orderId.length <= 8
       ? widget.orderId.toUpperCase()
@@ -37,23 +38,24 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      // First try the enrollment created for this manual order.
-      final enrollment = await Supabase.instance.client
-          .from('enrollments')
+      // Paid manual requests do not create enrollments until the instructor
+      // approves them, so resolve the instructor through the saved order item.
+      final requestItem = await Supabase.instance.client
+          .from('manual_purchase_request_items')
           .select('instructor_id, course_id')
           .eq('parent_enrollment_id', widget.orderId)
           .limit(1)
           .maybeSingle();
 
-      final enrollmentInstructorId = enrollment?['instructor_id'] as String?;
-      final enrollmentPhone = await _loadProfilePhone(enrollmentInstructorId);
-      if (enrollmentPhone != null) {
-        return enrollmentPhone;
+      final itemInstructorId = requestItem?['instructor_id'] as String?;
+      final itemPhone = await _loadProfilePhone(itemInstructorId);
+      if (itemPhone != null) {
+        return itemPhone;
       }
 
-      // If instructor_id was not readable on the pending enrollment, resolve it
-      // through the course attached to the order.
-      final courseId = enrollment?['course_id'] as String?;
+      // If instructor_id was not readable on the order item, resolve it through
+      // the course attached to the request.
+      final courseId = requestItem?['course_id'] as String?;
       if (courseId != null) {
         final course = await supabase
             .from('courses')
@@ -255,7 +257,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
       'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
     );
     final uri = Uri.parse('whatsapp://send?phone=$instructorNumber&text=$text');
-    final fallbackUri = Uri.parse('https://api.whatsapp.com/send?phone=$instructorNumber&text=$text');
+    final fallbackUri = Uri.parse(
+        'https://api.whatsapp.com/send?phone=$instructorNumber&text=$text');
 
     try {
       if (await canLaunchUrl(uri)) {

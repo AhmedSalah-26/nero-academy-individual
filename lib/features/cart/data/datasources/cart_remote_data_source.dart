@@ -109,6 +109,19 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
+      final pendingOrderItem = await supabase
+          .from('manual_purchase_request_items')
+          .select('id, parent_enrollments!inner(user_id, payment_status)')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .eq('parent_enrollments.payment_status', 'pending_manual_payment')
+          .limit(1)
+          .maybeSingle();
+
+      if (pendingOrderItem != null) {
+        throw const ValidationException('cart.pending_enrollment');
+      }
+
       final course = await supabase
           .from('courses')
           .select(
@@ -205,7 +218,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CouponModel> validateCoupon(String couponCode, {String? userId}) async {
+  Future<CouponModel> validateCoupon(String couponCode,
+      {String? userId}) async {
     try {
       final normalizedCode = couponCode.trim().toUpperCase();
       final response = await supabase
@@ -376,16 +390,17 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       final cartCourseIds =
           filteredCartItems.map((item) => item['course_id'] as String).toList();
 
-      final pendingEnrollments = await supabase
-          .from('enrollments')
-          .select('course_id')
-          .eq('user_id', userId)
-          .eq('status', 'pending')
+      final pendingOrderItems = await supabase
+          .from('manual_purchase_request_items')
+          .select(
+              'course_id, parent_enrollments!inner(user_id, payment_status)')
+          .eq('parent_enrollments.user_id', userId)
+          .eq('parent_enrollments.payment_status', 'pending_manual_payment')
           .inFilter('course_id', cartCourseIds);
 
-      if ((pendingEnrollments as List).isNotEmpty) {
+      if ((pendingOrderItems as List).isNotEmpty) {
         final pendingCourseIds =
-            pendingEnrollments.map((e) => e['course_id'] as String).toList();
+            pendingOrderItems.map((e) => e['course_id'] as String).toList();
         AppLogger.w(
             '🛒 [Checkout] User already has pending orders for: $pendingCourseIds');
         throw const ValidationException(
@@ -510,7 +525,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
-      // Create enrollments for each course
+      // Free orders are enrolled immediately. Paid manual requests only create
+      // order items; enrollments are created by the instructor approval RPC.
       for (final processed in processedItems) {
         final courseId = processed['courseId'] as String;
         final priceAtAdd = processed['effectivePrice'] as double;
@@ -522,6 +538,20 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         AppLogger.i(
             '🛒 [Checkout] Processing course: $courseId, price: $priceAtAdd, originalPrice: $originalPrice, couponDiscount: $itemCouponDiscount');
 
+        if (!isFreeOrder) {
+          await supabase.from('manual_purchase_request_items').insert({
+            'parent_enrollment_id': parentEnrollmentId,
+            'user_id': userId,
+            'course_id': courseId,
+            'instructor_id': instructorId,
+            'price': priceAtAdd,
+            'original_price': originalPrice,
+            'discount': itemCouponDiscount,
+            'pricing_option': pricingOption,
+          });
+          continue;
+        }
+
         final existing = await supabase
             .from('enrollments')
             .select('id, status')
@@ -532,7 +562,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         if (existing == null) {
           AppLogger.i('🛒 [Checkout] Creating new enrollment...');
 
-          // Create enrollment with pending status if payment required
+          // This path is only for free orders; paid manual orders continue above.
           final enrollmentResponse = await supabase
               .from('enrollments')
               .insert({
@@ -540,7 +570,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                 'course_id': courseId,
                 'instructor_id': instructorId,
                 'parent_enrollment_id': parentEnrollmentId,
-                'status': isFreeOrder ? 'active' : 'pending',
+                'status': 'active',
                 'progress_percentage': 0,
                 'completed_lessons': 0,
                 'price': priceAtAdd,
@@ -617,7 +647,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                 '🛒 [Checkout] Updating existing pending enrollment...');
             await supabase.from('enrollments').update({
               'parent_enrollment_id': parentEnrollmentId,
-              'status': isFreeOrder ? 'active' : 'pending',
+              'status': 'active',
               'price': priceAtAdd,
               'pricing_option': pricingOption,
               'discount': itemCouponDiscount,
