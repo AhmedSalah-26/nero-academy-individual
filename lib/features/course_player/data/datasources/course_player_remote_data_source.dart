@@ -115,7 +115,10 @@ abstract class CoursePlayerRemoteDataSource {
     required String courseId,
   });
 
-  Future<CourseGroupLinks> getCourseGroupLinks({required String courseId});
+  Future<CourseGroupLinks> getCourseGroupLinks({
+    required String courseId,
+    required String enrollmentId,
+  });
 }
 
 /// Implementation of CoursePlayerRemoteDataSource
@@ -133,8 +136,23 @@ class CoursePlayerRemoteDataSourceImpl
   CoursePlayerRemoteDataSourceImpl(this.client);
 
   @override
-  Future<CourseGroupLinks> getCourseGroupLinks(
-      {required String courseId}) async {
+  Future<CourseGroupLinks> getCourseGroupLinks({
+    required String courseId,
+    required String enrollmentId,
+  }) async {
+    final enrollment = await client
+        .from('enrollments')
+        .select('id, parent_enrollments!inner(payment_status)')
+        .eq('id', enrollmentId)
+        .eq('course_id', courseId)
+        .inFilter('status', ['active', 'completed'])
+        .eq('parent_enrollments.payment_status', 'paid')
+        .maybeSingle();
+
+    if (enrollment == null) {
+      return const CourseGroupLinks();
+    }
+
     final response = await client
         .from('courses')
         .select('group_links')

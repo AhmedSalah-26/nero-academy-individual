@@ -382,10 +382,12 @@ class CoursePlayerRepositoryImpl implements CoursePlayerRepository {
   @override
   Future<Either<Failure, CourseGroupLinks>> getCourseGroupLinks({
     required String courseId,
+    required String enrollmentId,
   }) async {
     try {
       final result = await remoteDataSource.getCourseGroupLinks(
         courseId: courseId,
+        enrollmentId: enrollmentId,
       );
       return Right(result);
     } catch (e) {

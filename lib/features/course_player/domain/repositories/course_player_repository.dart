@@ -147,5 +147,6 @@ abstract class CoursePlayerRepository {
 
   Future<Either<Failure, CourseGroupLinks>> getCourseGroupLinks({
     required String courseId,
+    required String enrollmentId,
   });
 }

@@ -33,6 +33,17 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
                 thumbnail_url,
                 price
               )
+            ),
+            manual_purchase_request_items(
+              course_id,
+              price,
+              courses!inner(
+                id,
+                title_ar,
+                title_en,
+                thumbnail_url,
+                price
+              )
             )
           ''')
           .eq('user_id', normalizedUserId)
@@ -41,27 +52,10 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
       final List<PaymentModel> payments = [];
 
       for (final item in response as List<dynamic>) {
-        final enrollments = item['enrollments'] as List<dynamic>?;
-        final courses = <PaymentCourseModel>[];
-
-        if (enrollments != null) {
-          for (final enrollment in enrollments) {
-            final course = enrollment['courses'];
-            if (course != null) {
-              courses.add(PaymentCourseModel(
-                courseId: course['id'] as String,
-                title: course['title_ar'] as String? ??
-                    course['title_en'] as String? ??
-                    '',
-                thumbnailUrl: course['thumbnail_url'] as String?,
-                price: (course['price'] as num).toDouble(),
-              ));
-            }
-          }
-        }
+        final courses = _extractCourses(item as Map<String, dynamic>);
 
         payments.add(PaymentModel.fromJson({
-          ...item as Map<String, dynamic>,
+          ...item,
           'courses': courses
               .map((c) => {
                     'course_id': c.courseId,
@@ -98,29 +92,23 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
                 thumbnail_url,
                 price
               )
+            ),
+            manual_purchase_request_items(
+              course_id,
+              price,
+              courses!inner(
+                id,
+                title_ar,
+                title_en,
+                thumbnail_url,
+                price
+              )
             )
           ''').eq('id', normalizedPaymentId).maybeSingle();
 
       if (response == null) return null;
 
-      final enrollments = response['enrollments'] as List<dynamic>?;
-      final courses = <PaymentCourseModel>[];
-
-      if (enrollments != null) {
-        for (final enrollment in enrollments) {
-          final course = enrollment['courses'];
-          if (course != null) {
-            courses.add(PaymentCourseModel(
-              courseId: course['id'] as String,
-              title: course['title_ar'] as String? ??
-                  course['title_en'] as String? ??
-                  '',
-              thumbnailUrl: course['thumbnail_url'] as String?,
-              price: (course['price'] as num).toDouble(),
-            ));
-          }
-        }
-      }
+      final courses = _extractCourses(response);
 
       return PaymentModel.fromJson({
         ...response,
@@ -136,5 +124,44 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
     } catch (e) {
       throw Exception('Unable to load payment details.');
     }
+  }
+
+  List<PaymentCourseModel> _extractCourses(Map<String, dynamic> paymentJson) {
+    final courseById = <String, PaymentCourseModel>{};
+
+    void addCourseFrom(dynamic row, {bool preferRowPrice = false}) {
+      if (row is! Map<String, dynamic>) return;
+
+      final course = row['courses'];
+      if (course is! Map<String, dynamic>) return;
+
+      final courseId = (course['id'] ?? row['course_id']) as String?;
+      if (courseId == null || courseId.isEmpty) return;
+
+      final rowPrice = (row['price'] as num?)?.toDouble();
+      final coursePrice = (course['price'] as num?)?.toDouble() ?? 0.0;
+
+      courseById[courseId] = PaymentCourseModel(
+        courseId: courseId,
+        title: course['title_ar'] as String? ??
+            course['title_en'] as String? ??
+            '',
+        thumbnailUrl: course['thumbnail_url'] as String?,
+        price: preferRowPrice ? (rowPrice ?? coursePrice) : coursePrice,
+      );
+    }
+
+    for (final enrollment
+        in paymentJson['enrollments'] as List<dynamic>? ?? const []) {
+      addCourseFrom(enrollment);
+    }
+
+    for (final item
+        in paymentJson['manual_purchase_request_items'] as List<dynamic>? ??
+            const []) {
+      addCourseFrom(item, preferRowPrice: true);
+    }
+
+    return courseById.values.toList();
   }
 }

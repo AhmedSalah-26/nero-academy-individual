@@ -129,7 +129,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
         // Load course attachments
         await _loadCourseAttachments(courseId);
-        await _loadCourseGroupLinks(courseId);
+        await _loadCourseGroupLinks(courseId, enrollmentId);
 
         // Load lesson details if we have one
         if (initialLesson != null) {
@@ -157,8 +157,14 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
     );
   }
 
-  Future<void> _loadCourseGroupLinks(String courseId) async {
-    final result = await repository.getCourseGroupLinks(courseId: courseId);
+  Future<void> _loadCourseGroupLinks(
+    String courseId,
+    String enrollmentId,
+  ) async {
+    final result = await repository.getCourseGroupLinks(
+      courseId: courseId,
+      enrollmentId: enrollmentId,
+    );
     result.fold(
       (failure) {
         AppLogger.e(

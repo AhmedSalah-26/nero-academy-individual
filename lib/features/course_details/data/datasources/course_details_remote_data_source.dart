@@ -183,6 +183,12 @@ class CourseDetailsRemoteDataSourceImpl
       data['enrollment_status'] = enrollmentStatus;
       data['progress_percentage'] = progressPercentage;
 
+      final hasActiveCourseAccess =
+          enrollmentStatus == 'active' || enrollmentStatus == 'completed';
+      if (!isOwnerInstructor && !hasActiveCourseAccess) {
+        data['group_links'] = <String, dynamic>{};
+      }
+
       // Students should never see unpublished sections/lessons.
       if (!isOwnerInstructor) {
         _filterUnpublishedCurriculumForStudent(data, updateCounts: false);
