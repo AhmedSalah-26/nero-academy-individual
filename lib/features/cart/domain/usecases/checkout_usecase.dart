@@ -18,6 +18,8 @@ class CheckoutUseCase extends UseCaseWithParams<OrderEntity, CheckoutParams> {
       paymentMethod: params.paymentMethod,
       savedPaymentMethodId: params.savedPaymentMethodId,
       cardDetails: params.cardDetails,
+      couponId: params.couponId,
+      couponCode: params.couponCode,
       couponDiscountTotal: params.couponDiscountTotal,
     );
   }
@@ -29,6 +31,8 @@ class CheckoutParams {
   final PaymentMethodType paymentMethod;
   final String? savedPaymentMethodId;
   final Map<String, dynamic>? cardDetails;
+  final String? couponId;
+  final String? couponCode;
   final double couponDiscountTotal;
 
   const CheckoutParams({
@@ -36,6 +40,8 @@ class CheckoutParams {
     required this.paymentMethod,
     this.savedPaymentMethodId,
     this.cardDetails,
+    this.couponId,
+    this.couponCode,
     this.couponDiscountTotal = 0,
   });
 }

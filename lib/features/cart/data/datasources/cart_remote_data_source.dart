@@ -28,6 +28,8 @@ abstract class CartRemoteDataSource {
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   });
   Future<List<CartItemModel>> getRecommendedCourses(String userId, int limit);
@@ -334,6 +336,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   }) async {
     try {
@@ -500,6 +504,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'total': finalTotal,
             'subtotal': total,
             'discount': couponDiscountTotal,
+            'coupon_id': couponId,
+            'coupon_code': couponCode,
             'coupon_discount': couponDiscountTotal,
             'payment_method': isFreeOrder ? 'free' : 'manual',
             'payment_status': isFreeOrder ? 'paid' : 'pending_manual_payment',

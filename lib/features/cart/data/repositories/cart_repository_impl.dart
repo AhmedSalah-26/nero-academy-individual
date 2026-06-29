@@ -197,6 +197,8 @@ class CartRepositoryImpl implements CartRepository {
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   }) async {
     AppLogger.i(
@@ -208,6 +210,8 @@ class CartRepositoryImpl implements CartRepository {
         paymentMethod: paymentMethod,
         savedPaymentMethodId: savedPaymentMethodId,
         cardDetails: cardDetails,
+        couponId: couponId,
+        couponCode: couponCode,
         couponDiscountTotal: couponDiscountTotal,
       );
       AppLogger.success('[CartRepo] Checkout complete - Order: ${order.id}');

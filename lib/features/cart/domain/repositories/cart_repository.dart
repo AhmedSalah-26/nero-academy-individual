@@ -52,6 +52,8 @@ abstract class CartRepository {
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   });
 

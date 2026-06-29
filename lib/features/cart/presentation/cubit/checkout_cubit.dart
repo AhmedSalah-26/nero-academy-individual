@@ -56,6 +56,8 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       CheckoutParams(
         userId: _currentUserId!,
         paymentMethod: PaymentMethodType.manual,
+        couponId: state.cart?.appliedCoupon?.id,
+        couponCode: state.cart?.appliedCoupon?.code,
         couponDiscountTotal: state.cart?.discountAmount ?? 0,
       ),
     );
