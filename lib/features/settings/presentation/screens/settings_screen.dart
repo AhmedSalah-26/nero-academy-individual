@@ -28,13 +28,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  void _loadSettings() {
+  Future<void> _loadSettings() async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId != null) {
-      context.read<SettingsCubit>().loadSettings(userId);
+      await context.read<SettingsCubit>().loadSettings(userId);
     } else {
       context.read<SettingsCubit>().loadGuestSettings();
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await _loadSettings();
   }
 
   bool get _isGuest => Supabase.instance.client.auth.currentUser == null;
@@ -63,13 +68,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         leading: const AppBackButton(),
         surfaceTintColor: Colors.transparent,
       ),
-      body: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const AppLoadingState();
-          }
-          return _buildContent(state, isDark);
-        },
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+        child: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox(height: 500, child: AppLoadingState()),
+              );
+            }
+            return _buildContent(state, isDark);
+          },
+        ),
       ),
     );
   }
@@ -78,6 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     int sectionIndex = 0;
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

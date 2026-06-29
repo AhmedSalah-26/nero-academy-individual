@@ -17,6 +17,11 @@ class InstructorSettingsContent extends StatefulWidget {
 }
 
 class _InstructorSettingsContentState extends State<InstructorSettingsContent> {
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    setState(() {});
+  }
+
   Future<void> _logout(BuildContext context) async {
     await LogoutService.logout(context);
   }
@@ -237,70 +242,76 @@ class _InstructorSettingsContentState extends State<InstructorSettingsContent> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSection(
-            context,
-            title: isArabic ? 'الحساب' : 'Account',
-            items: [
-              _SettingsItem(
-                  icon: Icons.person,
-                  title: isArabic ? 'الملف الشخصي' : 'Profile',
-                  onTap: () => context.pushNamed('edit-profile')),
-            ],
-            isDark: isDark,
-          ),
-          const SizedBox(height: 24),
-          _buildSection(
-            context,
-            title: isArabic ? 'التطبيق' : 'App',
-            items: [
-              _SettingsItem(
-                  icon: Icons.language,
-                  title: isArabic ? 'اللغة' : 'Language',
-                  onTap: () => _showLanguageSelector(context, isDark)),
-              _SettingsItem(
-                  icon: isDark ? Icons.dark_mode : Icons.light_mode,
-                  title: isArabic ? 'المظهر' : 'Theme',
-                  onTap: () => _showThemeSelector(context, isDark)),
-              _SettingsItem(
-                  icon: Icons.notifications,
-                  title: isArabic ? 'الإشعارات' : 'Notifications',
-                  onTap: () => _showNotificationsSettings(context, isDark)),
-            ],
-            isDark: isDark,
-          ),
-          const SizedBox(height: 24),
-          _buildSection(
-            context,
-            title: isArabic ? 'أخرى' : 'Other',
-            items: [
-              _SettingsItem(
-                  icon: Icons.help,
-                  title: isArabic ? 'المساعدة' : 'Help & Support',
-                  onTap: () => context.pushNamed('help-support')),
-              _SettingsItem(
-                  icon: Icons.privacy_tip,
-                  title: isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
-                  onTap: () async {
-                    final Uri url = Uri.parse(
-                        'https://AhmedSalah-26.github.io/shehabtech-privacy/');
-                    if (!await launchUrl(url)) {
-                      debugPrint('Could not launch $url');
-                    }
-                  }),
-              _SettingsItem(
-                  icon: Icons.logout,
-                  title: isArabic ? 'تسجيل الخروج' : 'Logout',
-                  onTap: () => _logout(context),
-                  isDestructive: true),
-            ],
-            isDark: isDark,
-          ),
-        ],
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppColors.primary,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSection(
+              context,
+              title: isArabic ? 'الحساب' : 'Account',
+              items: [
+                _SettingsItem(
+                    icon: Icons.person,
+                    title: isArabic ? 'الملف الشخصي' : 'Profile',
+                    onTap: () => context.pushNamed('edit-profile')),
+              ],
+              isDark: isDark,
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              context,
+              title: isArabic ? 'التطبيق' : 'App',
+              items: [
+                _SettingsItem(
+                    icon: Icons.language,
+                    title: isArabic ? 'اللغة' : 'Language',
+                    onTap: () => _showLanguageSelector(context, isDark)),
+                _SettingsItem(
+                    icon: isDark ? Icons.dark_mode : Icons.light_mode,
+                    title: isArabic ? 'المظهر' : 'Theme',
+                    onTap: () => _showThemeSelector(context, isDark)),
+                _SettingsItem(
+                    icon: Icons.notifications,
+                    title: isArabic ? 'الإشعارات' : 'Notifications',
+                    onTap: () => _showNotificationsSettings(context, isDark)),
+              ],
+              isDark: isDark,
+            ),
+            const SizedBox(height: 24),
+            _buildSection(
+              context,
+              title: isArabic ? 'أخرى' : 'Other',
+              items: [
+                _SettingsItem(
+                    icon: Icons.help,
+                    title: isArabic ? 'المساعدة' : 'Help & Support',
+                    onTap: () => context.pushNamed('help-support')),
+                _SettingsItem(
+                    icon: Icons.privacy_tip,
+                    title: isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
+                    onTap: () async {
+                      final Uri url = Uri.parse(
+                          'https://AhmedSalah-26.github.io/shehabtech-privacy/');
+                      if (!await launchUrl(url)) {
+                        debugPrint('Could not launch $url');
+                      }
+                    }),
+                _SettingsItem(
+                    icon: Icons.logout,
+                    title: isArabic ? 'تسجيل الخروج' : 'Logout',
+                    onTap: () => _logout(context),
+                    isDestructive: true),
+              ],
+              isDark: isDark,
+            ),
+          ],
+        ),
       ),
     );
   }

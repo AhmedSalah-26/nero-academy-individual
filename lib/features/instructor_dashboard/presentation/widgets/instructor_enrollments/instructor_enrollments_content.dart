@@ -2,6 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -40,6 +41,11 @@ class _InstructorEnrollmentsContentState
         _scrollController.position.maxScrollExtent - 200) {
       context.read<InstructorEnrollmentsCubit>().loadMore();
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await context.read<InstructorEnrollmentsCubit>().loadEnrollments();
   }
 
   @override
@@ -120,11 +126,30 @@ class _InstructorEnrollmentsContentState
 
             // Enrollments list
             Expanded(
-              child: state.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.filteredEnrollments.isEmpty
-                      ? _buildEmptyState(isArabic)
-                      : _buildEnrollmentsList(state, isArabic),
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                color: AppColors.primary,
+                backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+                child: state.isLoading
+                    ? const SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: 360,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      )
+                    : state.filteredEnrollments.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 360,
+                                child: _buildEmptyState(isArabic),
+                              ),
+                            ],
+                          )
+                        : _buildEnrollmentsList(state, isArabic),
+              ),
             ),
           ],
         );
@@ -237,6 +262,7 @@ class _InstructorEnrollmentsContentState
   Widget _buildEnrollmentsList(
       InstructorEnrollmentsState state, bool isArabic) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       itemCount:
           state.filteredEnrollments.length + (state.isLoadingMore ? 1 : 0),

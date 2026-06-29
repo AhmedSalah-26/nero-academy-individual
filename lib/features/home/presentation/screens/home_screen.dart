@@ -77,7 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _onRefresh() async {
     HapticFeedback.mediumImpact();
     try {
-      await context.read<HomeCubit>().refreshHomeData();
+      await Future.wait([
+        context.read<HomeCubit>().refreshHomeData(),
+        _loadUserData(),
+        di.sl<NotificationsCubit>().loadNotifications(),
+      ]);
     } catch (e) {
       AppLogger.e('[HomeScreen] Error refreshing', e);
     }
@@ -268,9 +272,7 @@ class _EmptyCoursesState extends StatelessWidget {
         child: Text(
           'home.no_courses_available'.tr(),
           style: TextStyle(
-            color: isDark
-                ? AppColors.textMutedDark
-                : const Color(0xFF6B7280),
+            color: isDark ? AppColors.textMutedDark : const Color(0xFF6B7280),
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),

@@ -37,13 +37,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _loadWishlist();
   }
 
-  void _loadWishlist() {
+  Future<void> _loadWishlist() async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     AppLogger.i('❤️ [WishlistScreen] Loading wishlist for user: $userId');
 
     if (userId != null) {
-      context.read<WishlistCubit>().loadWishlist(userId);
+      await context.read<WishlistCubit>().loadWishlist(userId);
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await _loadWishlist();
   }
 
   @override
@@ -62,7 +67,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 hasItems: state.items.isNotEmpty,
                 onClear: state.items.isNotEmpty ? _showClearConfirmation : null,
               ),
-              Expanded(child: _buildContent(state, isDark)),
+              Expanded(child: _buildRefreshableContent(state, isDark)),
             ],
           );
         },
@@ -111,6 +116,27 @@ class _WishlistScreenState extends State<WishlistScreen> {
           isDark: isDark,
         );
       },
+    );
+  }
+
+  Widget _buildRefreshableContent(WishlistState state, bool isDark) {
+    final content = _buildContent(state, isDark);
+    final isScrollableContent =
+        !state.isLoading && !state.isError && !state.isEmpty;
+
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppColors.primary,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      child: isScrollableContent
+          ? content
+          : SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.75,
+                child: content,
+              ),
+            ),
     );
   }
 
