@@ -102,20 +102,20 @@ export default function WishlistPage() {
   const getActionButton = (course: WishlistCourse) => {
     if (enrolledCourseIds.includes(course.id)) {
       return (
-        <Link href={`/learn/${course.id}`} className={`${styles.actionBtn} ${styles.enrolled}`}>
+        <Link href={`/learn/${course.id}`} className={`${styles.actionBtn} ${styles.enrolled}`} onClick={(e) => e.stopPropagation()}>
           <span>{lang === 'ar' ? 'اذهب للتعلم' : 'Go to Learning'}</span>
         </Link>
       );
     }
     if (cart.includes(course.id)) {
       return (
-        <span className={`${styles.actionBtn} ${styles.inCart}`}>
+        <span className={`${styles.actionBtn} ${styles.inCart}`} onClick={(e) => e.stopPropagation()}>
           <span>{lang === 'ar' ? 'في السلة' : 'In Cart'}</span>
         </span>
       );
     }
     return (
-      <button className={styles.actionBtn} onClick={() => addToCart(course.id)} type="button">
+      <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); addToCart(course.id); }} type="button">
         <span>{t.addToCart}</span>
       </button>
     );
@@ -201,7 +201,7 @@ export default function WishlistPage() {
           ) : (
             <section className={styles.grid}>
               {filteredItems.map((c) => (
-                <article className={styles.card} key={c.id}>
+                <article className={styles.card} key={c.id} onClick={() => router.push(`/courses/${c.id}`)} style={{ cursor: 'pointer' }}>
                   <div className={styles.cardMedia}>
                     {c.thumbnail_url ? (
                       <img
@@ -217,7 +217,7 @@ export default function WishlistPage() {
                     )}
                     <button
                       className={styles.favBtn}
-                      onClick={() => removeFromWishlist(c.id)}
+                      onClick={(e) => { e.stopPropagation(); removeFromWishlist(c.id); }}
                       type="button"
                       aria-label={lang === 'ar' ? 'إزالة من المفضلة' : 'Remove from wishlist'}
                     >
