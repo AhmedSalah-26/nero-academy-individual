@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { Language, translations } from '../lib/translations';
@@ -315,6 +316,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('nero_cart');
     localStorage.removeItem('nero_wishlist');
   };
+
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const isPublicRoute = (path: string) => {
+      if (path === '/' || path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password' || path === '/search' || path === '/cart' || path === '/privacy' || path === '/terms') {
+        return true;
+      }
+      if (path === '/courses' || path.startsWith('/courses/')) {
+        return true;
+      }
+      return false;
+    };
+
+    if (!loading && !user && !isPublicRoute(pathname)) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [loading, user, pathname, router]);
 
   return (
     <AppContext.Provider

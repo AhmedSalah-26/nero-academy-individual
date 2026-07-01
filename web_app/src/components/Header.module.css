@@ -6,6 +6,17 @@
   background: transparent;
 }
 
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: var(--background);
+  z-index: -1;
+}
+
 .container {
   width: min(1420px, 100%);
   min-height: 72px;

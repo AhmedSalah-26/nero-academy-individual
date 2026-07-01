@@ -292,6 +292,8 @@ export default function HomePage() {
               const inCart = cart.includes(course.id);
               const isWishlisted = wishlist.includes(course.id);
               const isEnrolled = enrolledCourseIds.includes(course.id);
+              const basePrice = getBaseCoursePrice(course);
+              const effectivePrice = getEffectiveCoursePrice(course);
               const hasDiscount = hasCourseDiscount(course);
               const title = lang === 'ar' ? course.title_ar : course.title_en;
               const subtitle = lang === 'ar' ? course.subtitle_ar : course.subtitle_en;
@@ -331,8 +333,8 @@ export default function HomePage() {
                           <strong>{lang === 'ar' ? 'مجاني' : 'Free'}</strong>
                         ) : (
                           <>
-                            <strong>{hasDiscount ? course.discount_price : course.price} {lang === 'ar' ? 'ج.م' : 'EGP'}</strong>
-                            {hasDiscount && <del>{course.price}</del>}
+                            <strong>{effectivePrice} {lang === 'ar' ? 'ج.م' : 'EGP'}</strong>
+                            {hasDiscount && <del>{basePrice}</del>}
                           </>
                         )}
                       </div>
