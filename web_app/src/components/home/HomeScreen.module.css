@@ -28,12 +28,12 @@
    ======================================== */
 .hero {
   position: relative;
-  min-height: 370px;
+  min-height: 290px;
   display: block;
   overflow: hidden;
   margin-bottom: 20px;
   border: 1px solid rgba(99, 102, 241, 0.22);
-  border-radius: 28px;
+  border-radius: 24px;
   background: #0f112a url('/COVER.png') no-repeat right center;
   background-size: contain;
   box-shadow: 0 24px 56px rgba(49, 46, 129, 0.22);
@@ -85,8 +85,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px;
-  padding: 42px 42px 42px 26px;
+  gap: 12px;
+  padding: 24px 32px;
   color: #fff;
   max-width: 600px;
 }
@@ -96,18 +96,18 @@
   align-items: center;
   gap: 8px;
   width: fit-content;
-  padding: 8px 13px;
+  padding: 6px 10px;
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.14);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 800;
   backdrop-filter: blur(14px);
 }
 
 .heroGreeting {
-  font-size: clamp(2.1rem, 4vw, 3.45rem);
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
   font-weight: 950;
   color: #fff;
   margin: 0;
@@ -116,10 +116,10 @@
 
 .heroSubtitle {
   max-width: 560px;
-  font-size: 1.04rem;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.88);
   margin: 0;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 
 .heroActions {
@@ -134,11 +134,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  min-height: 48px;
-  padding: 0 20px;
-  border-radius: 14px;
-  font-size: 0.94rem;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 0.84rem;
   font-weight: 900;
   text-decoration: none;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -163,10 +163,10 @@
 
 .heroProgressCard {
   width: min(100%, 500px);
-  margin-top: 10px;
-  padding: 18px;
+  margin-top: 4px;
+  padding: 12px 16px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 22px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.14);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(18px);
@@ -177,18 +177,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .progressLabel {
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.86rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
 .heroProgressCard strong {
   color: #fff;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
 }
 
 .progressTrack,
@@ -209,9 +209,9 @@
 }
 
 .heroProgressCard p {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
