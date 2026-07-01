@@ -1,4 +1,5 @@
 import styles from './PriceTag.module.css';
+import { NumberUtils } from '../../lib/formatters';
 
 interface PriceTagProps {
   price: number;
@@ -16,7 +17,7 @@ export default function PriceTag({
   free = false,
   discount,
   size = 'md',
-  currency = 'ج.م',
+  currency,
   className,
 }: PriceTagProps) {
   const computedDiscount =
@@ -31,11 +32,11 @@ export default function PriceTag({
       ) : (
         <>
           <span className={styles.price}>
-            {price} {currency}
+            {currency ? `${price} ${currency}` : NumberUtils.formatPrice(price)}
           </span>
           {originalPrice && originalPrice > price && (
             <span className={styles.originalPrice}>
-              {originalPrice} {currency}
+              {currency ? `${originalPrice} ${currency}` : NumberUtils.formatPrice(originalPrice)}
             </span>
           )}
           {computedDiscount && computedDiscount > 0 && (

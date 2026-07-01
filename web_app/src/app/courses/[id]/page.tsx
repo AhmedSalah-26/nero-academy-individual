@@ -26,6 +26,7 @@ import {
 import styles from './page.module.css';
 import { sanitizeHtml } from '../../../lib/sanitize';
 import { usePageTransition } from '../../../lib/animations';
+import { getBaseCoursePrice, getEffectiveCoursePrice, hasCourseDiscount } from '../../../lib/pricing';
 
 interface Lesson {
   id: string;
@@ -67,6 +68,7 @@ interface CourseDetails {
   price: number;
   discount_price: number;
   is_free: boolean;
+  pricing_options: PricingOption[];
   currency: string;
   total_lessons: number;
   total_duration: number;
@@ -76,7 +78,6 @@ interface CourseDetails {
   rating: number;
   rating_count: number;
   rating_distribution: Record<string, number>;
-  pricing_options: PricingOption[];
   requirements: string[];
   objectives: string[];
   target_audience: string[];
@@ -124,18 +125,22 @@ export default function CourseDetailsPage() {
           .single();
 
         if (courseData && !courseError) {
+          const parsedOptions = typeof courseData.pricing_options === 'string' ? JSON.parse(courseData.pricing_options) : (courseData.pricing_options || []);
           const parsedCourse = {
             ...courseData,
             requirements: typeof courseData.requirements === 'string' ? JSON.parse(courseData.requirements) : (courseData.requirements || []),
             objectives: typeof courseData.objectives === 'string' ? JSON.parse(courseData.objectives) : (courseData.objectives || []),
             target_audience: typeof courseData.target_audience === 'string' ? JSON.parse(courseData.target_audience) : (courseData.target_audience || []),
             rating_distribution: typeof courseData.rating_distribution === 'string' ? JSON.parse(courseData.rating_distribution) : (courseData.rating_distribution || {}),
-            pricing_options: typeof courseData.pricing_options === 'string' ? JSON.parse(courseData.pricing_options) : (courseData.pricing_options || []),
+            pricing_options: parsedOptions,
             total_quizzes: courseData.total_quizzes || 0,
             has_certificate: courseData.has_certificate ?? true,
             rating_count: courseData.rating_count || 0,
           };
           setCourse(parsedCourse as CourseDetails);
+          if (parsedOptions && parsedOptions.length > 0) {
+            setSelectedPricingId(parsedOptions[0].id);
+          }
         }
 
         const { data: sectionsData, error: sectionsError } = await supabase
@@ -256,10 +261,12 @@ export default function CourseDetailsPage() {
   }
 
   const inCart = cart.includes(course.id);
-  const hasDiscount = course.discount_price && course.discount_price < course.price;
+  const basePrice = getBaseCoursePrice(course);
+  const effectivePrice = getEffectiveCoursePrice(course);
+  const hasDiscount = hasCourseDiscount(course);
   const isEnrolled = isEnrolledLocal || enrolledCourseIds.includes(course.id);
   const isFree = course.is_free;
-  const hasMultiplePricing = course.pricing_options && course.pricing_options.length > 1;
+  const hasMultiplePricing = course.pricing_options && course.pricing_options.length > 0;
   const totalHours = Math.round((course.total_duration || 0) / 60 * 10) / 10;
 
   const ctaState = isEnrolled
@@ -486,15 +493,15 @@ export default function CourseDetailsPage() {
                   {hasDiscount ? (
                     <>
                       <span className={styles.price}>
-                        {course.discount_price} {t.egp}
+                        {effectivePrice} {t.egp}
                       </span>
                       <span className={styles.oldPrice}>
-                        {course.price} {t.egp}
+                        {basePrice} {t.egp}
                       </span>
                     </>
                   ) : (
                     <span className={styles.price}>
-                      {course.price} {t.egp}
+                      {effectivePrice} {t.egp}
                     </span>
                   )}
                   {hasMultiplePricing && (
@@ -517,9 +524,9 @@ export default function CourseDetailsPage() {
                 </Link>
               )}
               {ctaState === 'getForFree' && (
-                <Link href={`/learn/${course.id}`} className={`${styles.primaryBtn} gradient-bg`}>
+                <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>
                   {lang === 'ar' ? 'احصل عليه مجاناً' : 'Get for Free'}
-                </Link>
+                </button>
               )}
               {ctaState === 'goToCart' && (
                 <Link href="/cart" className={`${styles.primaryBtn} gradient-bg`}>

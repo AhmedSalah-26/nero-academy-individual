@@ -181,8 +181,27 @@ export default function CourseFilterSheet({
 
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>{t.priceRange}</h3>
-          <div className={styles.rangeRow}>
-            <span className={styles.rangeLabel}>{priceMin} {t.egp}</span>
+          <div className={styles.rangeValues}>
+            <span className={styles.rangeValue}>
+              <span className={styles.rangeValueLabel}>{t.egp}</span>
+              <strong>{priceMin}</strong>
+            </span>
+            <span className={styles.rangeDash}>—</span>
+            <span className={styles.rangeValue}>
+              <span className={styles.rangeValueLabel}>{t.egp}</span>
+              <strong>{priceMax}</strong>
+            </span>
+          </div>
+          <div className={styles.sliderWrap}>
+            <div className={styles.rangeTrack}>
+              <div
+                className={styles.rangeFill}
+                style={{
+                  insetInlineStart: `${(priceMin / 500) * 100}%`,
+                  insetInlineEnd: `${100 - (priceMax / 500) * 100}%`,
+                }}
+              />
+            </div>
             <div className={styles.rangeInputs}>
               <input
                 type="range"
@@ -209,16 +228,6 @@ export default function CourseFilterSheet({
                 className={styles.rangeSlider}
               />
             </div>
-            <span className={styles.rangeLabel}>{priceMax} {t.egp}</span>
-          </div>
-          <div className={styles.rangeTrack}>
-            <div
-              className={styles.rangeFill}
-              style={{
-                left: `${(priceMin / 500) * 100}%`,
-                right: `${100 - (priceMax / 500) * 100}%`,
-              }}
-            />
           </div>
         </div>
 

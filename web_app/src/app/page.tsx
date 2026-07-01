@@ -1,15 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  ArrowBack,
-  ArrowForward,
   ArrowLeft,
   ArrowRight,
   Science,
-  School,
   MenuBook,
   Check,
   ChevronLeft,
@@ -27,9 +24,11 @@ import {
   EmojiEvents,
   Groups,
   VideoLibrary,
+  Assessment,
 } from '@mui/icons-material';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
+import { getBaseCoursePrice, getEffectiveCoursePrice, hasCourseDiscount } from '../lib/pricing';
 import { HomeScreen } from '../components/home';
 import styles from './page.module.css';
 
@@ -43,6 +42,7 @@ interface Course {
   price: number;
   discount_price: number;
   is_free: boolean;
+  pricing_options?: unknown;
   total_lessons: number;
   total_duration: number;
   enrolled_count: number;
@@ -67,6 +67,22 @@ const testimonials = [
   },
 ];
 
+const stats = [
+  { icon: Groups, value: '+15K', label_ar: 'طالب سجل معنا', label_en: 'students joined' },
+  { icon: Schedule, value: '+200', label_ar: 'ساعة محتوى', label_en: 'content hours' },
+  { icon: Star, value: '+98%', label_ar: 'نتائج مميزة', label_en: 'great results', color: 'var(--warning)' },
+  { icon: EmojiEvents, value: '+10', label_ar: 'سنوات خبرة', label_en: 'years experience' },
+];
+
+const features = [
+  { icon: VideoLibrary, title_ar: 'شرح بسيط ومركز', title_en: 'Simple & focused lessons', desc_ar: 'نفهم الفكرة من أساسها بأمثلة واضحة وتطبيق مباشر.', desc_en: 'Understand concepts from the ground up with clear examples.' },
+  { icon: EditNote, title_ar: 'خطة مذاكرة منظمة', title_en: 'Organized study plan', desc_ar: 'جدول واضح يساعدك تخلص المنهج من غير تشتت.', desc_en: 'A clear schedule to finish the curriculum without distraction.' },
+  { icon: Assessment, title_ar: 'نماذج امتحانات', title_en: 'Exam models', desc_ar: 'اختبارات بنفس النظام عشان تدخل الامتحان جاهز.', desc_en: 'Tests in the same format so you enter the exam prepared.' },
+  { icon: Security, title_ar: 'متابعة وتقييم مستمر', title_en: 'Continuous tracking', desc_ar: 'تقارير دورية توضح مستواك ونقاط التحسن.', desc_en: 'Regular reports showing your level and improvement areas.' },
+  { icon: HelpIcon, title_ar: 'تفاعل وإجابة للأسئلة', title_en: 'Q&A interaction', desc_ar: 'اسأل في أي جزئية وخد الإجابة التي توضحها.', desc_en: 'Ask about any part and get clarifying answers.' },
+  { icon: Science, title_ar: 'مراجعات ليلة الامتحان', title_en: 'Last-minute reviews', desc_ar: 'ملخصات مركزة لأهم الأفكار والنقاط المتوقعة.', desc_en: 'Focused summaries of key concepts and expected points.' },
+];
+
 export default function HomePage() {
   const {
     lang,
@@ -81,6 +97,12 @@ export default function HomePage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const sectionRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+
+  const setSectionRef = useCallback((id: string, el: HTMLElement | null) => {
+    sectionRefs.current.set(id, el);
+  }, []);
 
   useEffect(() => {
     async function fetchCourses() {
@@ -101,6 +123,28 @@ export default function HomePage() {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-section-id');
+            if (id) {
+              setVisibleSections((prev) => new Set([...prev, id]));
+            }
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    sectionRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredCourses = courses.filter((course) => {
     const title = lang === 'ar' ? course.title_ar : course.title_en;
@@ -118,87 +162,111 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
+      {/* Hero Section */}
       <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <div className={styles.eyebrow}>
-            <AutoAwesome fontSize="inherit" />
-            {lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}
-          </div>
-          <h1>
-            {lang === 'ar' ? (
-              <>
-                افهم الكيمياء.
-                <span>حقق الدرجة.</span>
-              </>
-            ) : (
-              <>
-                Understand chemistry.
-                <span>Earn the grade.</span>
-              </>
-            )}
-          </h1>
-          <p>
-            {lang === 'ar'
-              ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
-              : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
-          </p>
-          <div className={styles.heroActions}>
-            <Link href={user ? '/my-learning' : '/login'} className={styles.primaryButton}>
-              <PlayArrow fontSize="inherit" />
-              {lang === 'ar' ? 'ابدأ التعلم الآن' : 'Start learning'}
-            </Link>
-            <a href="#courses" className={styles.textButton}>
-              {lang === 'ar' ? 'استكشف الكورسات' : 'Explore courses'}
-              {arrow}
-            </a>
-          </div>
-          <p className={styles.teacherNote}>{lang === 'ar' ? 'د/ أحمد الشيخ • مدرس الكيمياء للمرحلة الثانوية' : 'Dr. Ahmed El-Sheikh • High school chemistry teacher'}</p>
+        <div className={styles.heroBg}>
+          <div className={styles.heroBgGradient} />
+          <div className={styles.heroBgGrid} />
         </div>
-
-        <div className={styles.heroVisual}>
-          <div className={styles.teacherHalo} />
-          <div className={styles.teacherFrame}>
-            <Image
-              src="/chemistry-teacher-v2.png"
-              alt={lang === 'ar' ? 'مدرس الكيمياء أحمد الشيخ' : 'Chemistry teacher Ahmed El-Sheikh'}
-              fill
-              priority
-              sizes="(max-width: 760px) 78vw, 520px"
-              className={styles.teacherImage}
-            />
+        
+        <div className={styles.heroContent}>
+          <div className={`${styles.heroText} animate-fade-up`}>
+            <div className={styles.heroBadge}>
+              <AutoAwesome fontSize="small" />
+              <span>{lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}</span>
+            </div>
+            
+            <h1>
+              {lang === 'ar' ? (
+                <>
+                  افهم الكيمياء.<br />
+                  <span>حقق الدرجة.</span>
+                </>
+              ) : (
+                <>
+                  Understand chemistry.<br />
+                  <span>Earn the grade.</span>
+                </>
+              )}
+            </h1>
+            
+            <p>
+              {lang === 'ar'
+                ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
+                : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
+            </p>
+            
+            <div className={styles.heroButtons}>
+              <Link href={user ? '/my-learning' : '/login'} className={styles.primaryBtn}>
+                <PlayArrow fontSize="inherit" />
+                {lang === 'ar' ? 'ابدأ التعلم الآن' : 'Start learning'}
+              </Link>
+              <a href="#courses" className={styles.secondaryBtn}>
+                {lang === 'ar' ? 'استكشف الكورسات' : 'Explore courses'}
+                {arrow}
+              </a>
+            </div>
           </div>
-          <div className={styles.teacherBadge}>
-            <span><EmojiEvents fontSize="small" /></span>
-            <div>
-              <strong>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</strong>
-              <small>{lang === 'ar' ? 'خبرة أكثر من 10 سنوات' : 'More than 10 years of experience'}</small>
+
+          <div className={styles.heroVisual}>
+            <div className={styles.visualOrb} />
+            <div className={styles.visualRing} />
+            <div className={styles.teacherContainer}>
+              <Image
+                src="/chemistry-teacher-v2.png"
+                alt={lang === 'ar' ? 'مدرس الكيمياء أحمد الشيخ' : 'Chemistry teacher Ahmed El-Sheikh'}
+                fill
+                priority
+                sizes="(max-width: 760px) 78vw, 520px"
+                className={styles.teacherImg}
+              />
+            </div>
+            
+            <div className={`${styles.floatingCard} ${styles.floatingCard1}`}>
+              <div className={styles.cardIcon}><VideoLibrary fontSize="small" /></div>
+              <div>
+                <strong>{lang === 'ar' ? '+150 درس' : '+150 Lessons'}</strong>
+                <small>{lang === 'ar' ? 'محتوى تفاعلي' : 'Interactive content'}</small>
+              </div>
+            </div>
+            
+            <div className={`${styles.floatingCard} ${styles.floatingCard2}`}>
+              <div className={styles.cardIcon}><Star fontSize="small" sx={{ color: 'var(--warning)' }} /></div>
+              <div>
+                <strong>{lang === 'ar' ? '4.9/5' : '4.9/5'}</strong>
+                <small>{lang === 'ar' ? 'تقييم الطلاب' : 'Student rating'}</small>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className={styles.heroStats}>
-          <div><span><Groups fontSize="small" /></span><strong>+15K</strong><small>{lang === 'ar' ? 'طالب سجل معنا' : 'students joined'}</small></div>
-          <div><span><Schedule fontSize="small" /></span><strong>+200</strong><small>{lang === 'ar' ? 'ساعة محتوى' : 'content hours'}</small></div>
-          <div><span><Star fontSize="small" sx={{ color: 'var(--warning)' }} /></span><strong>+98%</strong><small>{lang === 'ar' ? 'نتائج مميزة' : 'great results'}</small></div>
-          <div><span><EmojiEvents fontSize="small" /></span><strong>+10</strong><small>{lang === 'ar' ? 'سنوات خبرة' : 'years experience'}</small></div>
+        <div className={`${styles.heroStats} animate-fade-up`}>
+          {stats.map((stat, index) => (
+            <div key={index} className={styles.statItem}>
+              <div className={styles.statIcon}>
+                <stat.icon fontSize="small" sx={stat.color ? { color: stat.color } : undefined} />
+              </div>
+              <div className={styles.statContent}>
+                <strong>{stat.value}</strong>
+                <small>{lang === 'ar' ? stat.label_ar : stat.label_en}</small>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="courses" className={styles.section}>
-        <div className={styles.sectionHeading}>
-          <div>
+      {/* Courses Section */}
+      <section id="courses" className={`${styles.section} ${styles.coursesSection}`} data-section-id="courses">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionLabel}>
             <span>{lang === 'ar' ? 'ابدأ من مستواك' : 'Start at your level'}</span>
-            <h2>{lang === 'ar' ? 'الكورسات المتاحة' : 'Available courses'}</h2>
-            <p>{lang === 'ar' ? 'محتوى مرتب، شرح مركز، وتدريب بعد كل فكرة.' : 'Structured content, focused teaching, and practice after every idea.'}</p>
           </div>
-          <Link href="/search" className={styles.outlineButton}>
-            {lang === 'ar' ? 'عرض كل الكورسات' : 'View all courses'}
-            {arrow}
-          </Link>
+          <h2>{lang === 'ar' ? 'الكورسات المتاحة' : 'Available courses'}</h2>
+          <p>{lang === 'ar' ? 'محتوى مرتب، شرح مركز، وتدريب بعد كل فكرة.' : 'Structured content, focused teaching, and practice after every idea.'}</p>
         </div>
 
-        <label className={styles.searchBox}>
-          <Search fontSize="small" />
+        <div className={styles.searchWrapper}>
+          <Search fontSize="small" className={styles.searchIcon} />
           <input
             type="search"
             placeholder={lang === 'ar' ? 'ابحث باسم الكورس...' : 'Search courses...'}
@@ -206,67 +274,74 @@ export default function HomePage() {
             onChange={(event) => setSearchQuery(event.target.value)}
           />
           <kbd>/</kbd>
-        </label>
+        </div>
 
         {loadingCourses ? (
-          <div className={styles.emptyState}>{lang === 'ar' ? 'جاري تجهيز الكورسات...' : 'Preparing courses...'}</div>
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <span>{lang === 'ar' ? 'جاري تجهيز الكورسات...' : 'Preparing courses...'}</span>
+          </div>
         ) : filteredCourses.length === 0 ? (
           <div className={styles.emptyState}>
-            <MenuBook fontSize="small" />
-            {lang === 'ar' ? 'لا توجد كورسات مطابقة حاليًا.' : 'No matching courses yet.'}
+            <MenuBook fontSize="large" />
+            <span>{lang === 'ar' ? 'لا توجد كورسات مطابقة حاليًا.' : 'No matching courses yet.'}</span>
           </div>
         ) : (
-          <div className={styles.courseGrid}>
+          <div className={styles.coursesGrid}>
             {filteredCourses.map((course, index) => {
               const inCart = cart.includes(course.id);
               const isWishlisted = wishlist.includes(course.id);
               const isEnrolled = enrolledCourseIds.includes(course.id);
-              const hasDiscount = course.discount_price > 0 && course.discount_price < course.price;
+              const hasDiscount = hasCourseDiscount(course);
               const title = lang === 'ar' ? course.title_ar : course.title_en;
               const subtitle = lang === 'ar' ? course.subtitle_ar : course.subtitle_en;
 
               return (
                 <article className={styles.courseCard} key={course.id}>
-                  <div className={styles.courseMedia}>
+                  <div className={styles.courseImage}>
                     {course.thumbnail_url ? (
                       <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
                     ) : (
-                      <div className={styles.coursePlaceholder}><Science fontSize="small" /></div>
+                      <div className={styles.coursePlaceholder}>
+                        <Science fontSize="large" />
+                      </div>
                     )}
-                    <span className={styles.courseNumber}>0{index + 1}</span>
+                    <div className={styles.courseBadge}>0{index + 1}</div>
                     <button
                       type="button"
-                      className={`${styles.favoriteButton} ${isWishlisted ? styles.favoriteActive : ''}`}
+                      className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistActive : ''}`}
                       onClick={() => isWishlisted ? removeFromWishlist(course.id) : addToWishlist(course.id)}
                       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                       <Favorite fontSize="small" sx={{ color: isWishlisted ? 'var(--error)' : 'var(--text-muted)' }} />
                     </button>
                   </div>
-                  <div className={styles.courseBody}>
+                  
+                  <div className={styles.courseContent}>
                     <div className={styles.courseMeta}>
-                      <span><MenuBook fontSize="small" /> {course.total_lessons || 0} {lang === 'ar' ? 'درس' : 'lessons'}</span>
-                      <span><Schedule fontSize="small" /> {course.total_duration || 0} {lang === 'ar' ? 'دقيقة' : 'min'}</span>
+                      <span><MenuBook fontSize="small" /> {course.total_lessons || 0}</span>
+                      <span><Schedule fontSize="small" /> {course.total_duration || 0}min</span>
                     </div>
                     <h3>{title}</h3>
                     <p>{subtitle}</p>
+                    
                     <div className={styles.courseFooter}>
-                      <div className={styles.price}>
+                      <div className={styles.coursePrice}>
                         {course.is_free ? (
                           <strong>{lang === 'ar' ? 'مجاني' : 'Free'}</strong>
                         ) : (
                           <>
                             <strong>{hasDiscount ? course.discount_price : course.price} {lang === 'ar' ? 'ج.م' : 'EGP'}</strong>
-                            {hasDiscount && <del>{course.price} {lang === 'ar' ? 'ج.م' : 'EGP'}</del>}
+                            {hasDiscount && <del>{course.price}</del>}
                           </>
                         )}
                       </div>
                       {isEnrolled ? (
-                        <Link href={`/learn/${course.id}`} className={styles.cardAction}>
+                        <Link href={`/learn/${course.id}`} className={styles.actionBtn}>
                           <PlayArrow fontSize="inherit" />
                         </Link>
                       ) : (
-                        <button className={styles.cardAction} onClick={() => addToCart(course.id)} disabled={inCart}>
+                        <button className={styles.actionBtn} onClick={() => addToCart(course.id)} disabled={inCart}>
                           {inCart ? <Check fontSize="small" /> : <Add fontSize="small" />}
                         </button>
                       )}
@@ -277,79 +352,114 @@ export default function HomePage() {
             })}
           </div>
         )}
+
+        <div className={styles.sectionFooter}>
+          <Link href="/search" className={styles.viewAllBtn}>
+            {lang === 'ar' ? 'عرض كل الكورسات' : 'View all courses'}
+            {arrow}
+          </Link>
+        </div>
       </section>
 
-      <section className={`${styles.section} ${styles.gradesSection}`}>
-        <div className={styles.gradesCopy}>
-          <span>{lang === 'ar' ? 'اختار مرحلتك' : 'Choose your grade'}</span>
+      {/* Grades Section */}
+      <section className={`${styles.section} ${styles.gradesSection}`} data-section-id="grades">
+        <div className={styles.gradesContent}>
+          <div className={styles.sectionLabel}>
+            <span>{lang === 'ar' ? 'اختار مرحلتك' : 'Choose your grade'}</span>
+          </div>
           <h2>{lang === 'ar' ? 'السنوات الدراسية' : 'School years'}</h2>
           <p>{lang === 'ar' ? 'كل محتوى سنتك في مكان واحد، مرتب من أول درس لآخر مراجعة.' : 'Everything for your school year, organized from the first lesson to final revision.'}</p>
-          <Link href="/search" className={styles.primaryButton}>{lang === 'ar' ? 'شاهد كل الكورسات' : 'See all courses'} {arrow}</Link>
+          <Link href="/search" className={styles.primaryBtn}>
+            {lang === 'ar' ? 'شاهد كل الكورسات' : 'See all courses'}
+            {arrow}
+          </Link>
         </div>
-        <div className={styles.gradeList}>
+
+        <div className={styles.gradesGrid}>
           {[
             ['01', 'الصف الأول الثانوي', 'علوم متكاملة وتأسيس قوي'],
             ['02', 'الصف الثاني الثانوي', 'شرح المنهج وتدريب متدرج'],
             ['03', 'الصف الثالث الثانوي', 'شرح ومراجعات وليالي الامتحان'],
-          ].map(([number, title, description]) => (
-            <Link href="/search" className={styles.gradeItem} key={number}>
-              <b>{number}</b><div><h3>{title}</h3><p>{description}</p></div>{arrow}
+          ].map(([number, title, description], idx) => (
+            <Link href="/search" className={styles.gradeCard} key={number}>
+              <div className={styles.gradeNumber}>{number}</div>
+              <div className={styles.gradeContent}>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+              <div className={styles.gradeArrow}>{arrow}</div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section id="method" className={`${styles.section} ${styles.journey}`}>
-        <div className={styles.journeyIntro}>
-          <span>{lang === 'ar' ? 'ليه تختار منصتنا؟' : 'Why choose us?'}</span>
+      {/* Features Section */}
+      <section className={`${styles.section} ${styles.featuresSection}`} data-section-id="features">
+        <div className={styles.featuresHeader}>
+          <div className={styles.sectionLabel}>
+            <span>{lang === 'ar' ? 'ليه تختار منصتنا؟' : 'Why choose us?'}</span>
+          </div>
           <h2>{lang === 'ar' ? 'إيه اللي هتلاقيه على المنصة؟' : 'What will you find on the platform?'}</h2>
           <p>{lang === 'ar' ? 'منظومة مذاكرة متكاملة تساعدك تفهم وتطبق وتتابع مستواك.' : 'A complete study system that helps you understand, practice, and track progress.'}</p>
         </div>
-        <div className={styles.steps}>
-          <article><span><VideoLibrary fontSize="small" /></span><h3>شرح بسيط ومركز</h3><p>نفهم الفكرة من أساسها بأمثلة واضحة وتطبيق مباشر.</p></article>
-          <article><span><EditNote fontSize="small" /></span><h3>خطة مذاكرة منظمة</h3><p>جدول واضح يساعدك تخلص المنهج من غير تشتت.</p></article>
-          <article><span><EmojiEvents fontSize="small" /></span><h3>نماذج امتحانات</h3><p>اختبارات بنفس النظام عشان تدخل الامتحان جاهز.</p></article>
-          <article><span><Security fontSize="small" /></span><h3>متابعة وتقييم مستمر</h3><p>تقارير دورية توضح مستواك ونقاط التحسن.</p></article>
-          <article><span><HelpIcon fontSize="small" /></span><h3>تفاعل وإجابة للأسئلة</h3><p>اسأل في أي جزئية وخد الإجابة التي توضحها.</p></article>
-          <article><span><Science fontSize="small" /></span><h3>مراجعات ليلة الامتحان</h3><p>ملخصات مركزة لأهم الأفكار والنقاط المتوقعة.</p></article>
+
+        <div className={styles.featuresGrid}>
+          {features.map((feature, idx) => (
+            <div className={styles.featureCard} key={idx}>
+              <div className={styles.featureIcon}>
+                <feature.icon fontSize="medium" />
+              </div>
+              <h3>{lang === 'ar' ? feature.title_ar : feature.title_en}</h3>
+              <p>{lang === 'ar' ? feature.desc_ar : feature.desc_en}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="reviews" className={`${styles.section} ${styles.reviews}`}>
-        <div className={styles.sectionHeading}>
-          <div>
+      {/* Testimonials Section */}
+      <section className={`${styles.section} ${styles.testimonialsSection}`} data-section-id="testimonials">
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionLabel}>
             <span>{lang === 'ar' ? 'من قلب الفصل' : 'From the classroom'}</span>
-            <h2>{lang === 'ar' ? 'طلاب فهموا، فتفوقوا' : 'Students who understood, then excelled'}</h2>
           </div>
-          <div className={styles.reviewArrows}>
-            <button aria-label="Previous"><ChevronRight fontSize="small" /></button>
-            <button aria-label="Next"><ChevronLeft fontSize="small" /></button>
-          </div>
+          <h2>{lang === 'ar' ? 'طلاب فهموا، فتفوقوا' : 'Students who understood, then excelled'}</h2>
         </div>
-        <div className={styles.reviewGrid}>
+
+        <div className={styles.testimonialsGrid}>
           {testimonials.map((review, index) => (
-            <article key={review.name} className={styles.reviewCard}>
-              <div className={styles.reviewTop}>
-                <span>{review.name.charAt(0)}</span>
-                <div><h3>{review.name}</h3><small>{review.grade}</small></div>
-                <b>0{index + 1}</b>
+            <article key={review.name} className={styles.testimonialCard}>
+              <div className={styles.testimonialHeader}>
+                <div className={styles.testimonialAvatar}>{review.name.charAt(0)}</div>
+                <div className={styles.testimonialInfo}>
+                  <h4>{review.name}</h4>
+                  <span>{review.grade}</span>
+                </div>
+                <div className={styles.testimonialNumber}>0{index + 1}</div>
               </div>
-              <div className={styles.stars}>{Array.from({ length: 5 }).map((_, star) => <Star key={star} fontSize="small" sx={{ color: 'var(--warning)' }} />)}</div>
-              <p>“{review.text}”</p>
+              <div className={styles.testimonialStars}>
+                {Array.from({ length: 5 }).map((_, star) => (
+                  <Star key={star} fontSize="small" sx={{ color: 'var(--warning)' }} />
+                ))}
+              </div>
+              <p>"{review.text}"</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className={styles.cta}>
-        <div>
-          <span><Groups fontSize="small" /> {lang === 'ar' ? 'انضم لطلابنا اليوم' : 'Join our students today'}</span>
+      {/* CTA Section */}
+      <section className={styles.ctaSection}>
+        <div className={styles.ctaContent}>
+          <div className={styles.ctaBadge}>
+            <Groups fontSize="small" />
+            <span>{lang === 'ar' ? 'انضم لطلابنا اليوم' : 'Join our students today'}</span>
+          </div>
           <h2>{lang === 'ar' ? 'جاهز تخلي الكيمياء أسهل مادة عندك؟' : 'Ready to make chemistry your easiest subject?'}</h2>
+          <Link href={user ? '/my-learning' : '/login'} className={styles.ctaBtn}>
+            {lang === 'ar' ? 'ابدأ مجانًا' : 'Start for free'}
+            {arrow}
+          </Link>
         </div>
-        <Link href={user ? '/my-learning' : '/login'} className={styles.ctaButton}>
-          {lang === 'ar' ? 'ابدأ مجانًا' : 'Start for free'}
-          {arrow}
-        </Link>
       </section>
     </div>
   );

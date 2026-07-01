@@ -1,4 +1,37 @@
-.section{margin-bottom:24px}
-.horizontalScroll{display:flex;gap:12px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none;-ms-overflow-style:none}
-.horizontalScroll::-webkit-scrollbar{display:none}
-.verticalList{display:flex;flex-direction:column;gap:12px;padding:0 16px}
+.section {
+  padding-top: 34px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  margin-bottom: 36px;
+}
+
+.horizontalScroll {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+  padding: 0;
+  overflow: visible;
+}
+
+.verticalList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0;
+}
+
+@media (max-width: 900px) {
+  .horizontalScroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .verticalList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .horizontalScroll {
+    grid-template-columns: 1fr;
+  }
+}

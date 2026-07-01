@@ -3,29 +3,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
-  PlayCircle,
-  Forum,
+  School,
   Person,
   Notifications,
   ShoppingCart,
   Favorite,
   History,
+  Receipt,
   LightMode,
   DarkMode,
   Login,
   Logout,
+  Search,
+  Settings,
 } from '@mui/icons-material';
 import { useApp } from '../context/AppContext';
-import { BottomNavBar } from './ui';
 import styles from './Header.module.css';
-
-const MOBILE_NAV_ITEMS = [
-  { id: 'home', label_ar: 'الرئيسية', label_en: 'Home', icon: Home, href: '/' },
-  { id: 'learning', label_ar: 'تعليمي', label_en: 'My Learning', icon: PlayCircle, href: '/my-learning' },
-  { id: 'forums', label_ar: 'المنتديات', label_en: 'Forums', icon: Forum, href: '/forums' },
-  { id: 'profile', label_ar: 'حسابي', label_en: 'Profile', icon: Person, href: '/profile' },
-];
 
 export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
@@ -50,19 +43,27 @@ export function Header() {
     { href: '/#reviews', label: lang === 'ar' ? 'آراء الطلاب' : 'Reviews' },
   ];
 
-  const mobileActiveId = MOBILE_NAV_ITEMS.find(item => isActive(item.href))?.id || 'home';
-
   return (
-    <>
-      <header className={styles.header}>
+    <header className={styles.header}>
         <div className={styles.container}>
-          <Link href="/" className={styles.logo} aria-label={t.appName}>
-            <span className={styles.logoIcon}><Home fontSize="small" /></span>
-            <span className={styles.logoText}>
-              <b>{lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}</b>
-              <small>{lang === 'ar' ? 'منصة التعليم' : 'Learning Platform'}</small>
-            </span>
-          </Link>
+          <div className={styles.logoWrapper}>
+            <Link href="/" className={styles.logo} aria-label={t.appName}>
+              <span className={styles.logoIcon}>
+                <img src="/logo2.png" alt="Logo" className={styles.logoImg} />
+              </span>
+              <span className={styles.logoText}>
+                <b>{lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}</b>
+                <small>{lang === 'ar' ? 'منصة التعليم' : 'Learning Platform'}</small>
+              </span>
+            </Link>
+
+            <Link href="/search" className={styles.headerSearch} aria-label={lang === 'ar' ? 'بحث' : 'Search'}>
+              <Search className={styles.headerSearchIcon} />
+              <span className={styles.headerSearchText}>
+                {lang === 'ar' ? 'ابحث عن درس...' : 'Search...'}
+              </span>
+            </Link>
+          </div>
 
           <nav className={styles.nav} aria-label={lang === 'ar' ? 'التنقل الرئيسي' : 'Main navigation'}>
             {desktopNavItems.map((item) => (
@@ -84,6 +85,9 @@ export function Header() {
                 <Link href="/history" className={styles.squareButton} aria-label={lang === 'ar' ? 'السجل' : 'History'}>
                   <History fontSize="small" />
                 </Link>
+                <Link href="/orders-status" className={styles.squareButton} aria-label={lang === 'ar' ? 'الطلبات' : 'Orders'}>
+                  <Receipt fontSize="small" />
+                </Link>
               </>
             )}
             <Link href="/cart" className={styles.squareButton} aria-label={t.cart}>
@@ -95,11 +99,14 @@ export function Header() {
             </button>
             {user ? (
               <div className={styles.userCard}>
-                <Link href="/profile" className={styles.userProfile}>
+                <div className={styles.userProfile}>
                   <span className={styles.avatar}>
                     {profile?.avatar_url ? <img src={profile.avatar_url} alt={profile.name || ''} /> : <Person fontSize="small" />}
                   </span>
                   <span className={styles.userName}>{profile?.name || user.email}</span>
+                </div>
+                <Link href="/profile" className={styles.settings} title={lang === 'ar' ? 'الملف الشخصي' : 'Profile'}>
+                  <Settings fontSize="small" />
                 </Link>
                 <button onClick={signOut} className={styles.logout} title={t.logout}><Logout fontSize="small" /></button>
               </div>
@@ -108,17 +115,6 @@ export function Header() {
             )}
           </div>
         </div>
-      </header>
-
-      <BottomNavBar
-        items={MOBILE_NAV_ITEMS.map(item => ({
-          id: item.id,
-          label: lang === 'ar' ? item.label_ar : item.label_en,
-          icon: <item.icon fontSize="small" />,
-          href: item.href,
-        }))}
-        activeId={mobileActiveId}
-      />
-    </>
+    </header>
   );
 }

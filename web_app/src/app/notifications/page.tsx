@@ -96,7 +96,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <main className={styles.page}>
-        <div className={styles.header}><AppBackButton /><h1>{lang === 'ar' ? 'الإشعارات' : 'Notifications'}</h1></div>
+        <div className={styles.header}><h1>{lang === 'ar' ? 'الإشعارات' : 'Notifications'}</h1></div>
         <div className={styles.shimmerGrid}>{Array.from({ length: 5 }).map((_, i) => <ShimmerEffect key={i} height={72} />)}</div>
       </main>
     );
@@ -105,7 +105,6 @@ export default function NotificationsPage() {
   return (
     <main ref={pageRef} className={styles.page}>
       <div className={styles.header}>
-        <AppBackButton />
         <h1>{lang === 'ar' ? 'الإشعارات' : 'Notifications'}</h1>
         {unreadCount > 0 && <span className={styles.unreadBadge}>{unreadCount}</span>}
       </div>
@@ -120,9 +119,17 @@ export default function NotificationsPage() {
       )}
 
       {!user ? (
-        <EmptyState type="notifications" />
+        <EmptyState
+          type="notifications"
+          title={lang === 'ar' ? 'يرجى تسجيل الدخول' : 'Please Login'}
+          message={lang === 'ar' ? 'يجب تسجيل الدخول لعرض الإشعارات الخاصة بك.' : 'Please login to view your notifications.'}
+        />
       ) : items.length === 0 ? (
-        <EmptyState type="notifications" />
+        <EmptyState
+          type="notifications"
+          title={lang === 'ar' ? 'لا توجد إشعارات جديدة' : 'No new notifications'}
+          message={lang === 'ar' ? 'سنقوم بتنبيهك بمجرد وجود تحديثات أو رسائل جديدة.' : "We'll let you know when there are updates or new messages."}
+        />
       ) : (
         <div className={styles.groups}>
           {grouped.map((group) => (

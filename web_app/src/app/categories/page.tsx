@@ -6,17 +6,19 @@ import {
   Code,
   DesignServices,
   BusinessCenter,
-  Psychology,
+  Campaign,
   CameraAlt,
   GraphicEq,
   School,
   Language,
   HealthAndSafety,
   Smartphone,
+  Science,
+  Calculate,
+  FolderOpen,
 } from '@mui/icons-material';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
-import { AppColors } from '../../lib/designTokens';
 import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
@@ -24,95 +26,48 @@ interface CategoryData {
   id: string;
   name_ar: string;
   name_en: string;
-  courseCount?: number;
+  icon_name?: string;
 }
 
-interface HardcodedCategory {
-  id: string;
-  name_ar: string;
-  name_en: string;
-  icon: React.ReactNode;
-  color: string;
+function getCategoryConfig(iconName?: string) {
+  switch (iconName?.toLowerCase()) {
+    case 'code':
+      return { icon: <Code fontSize="medium" />, color: '#2563EB' };
+    case 'design':
+      return { icon: <DesignServices fontSize="medium" />, color: '#8B5CF6' };
+    case 'business':
+      return { icon: <BusinessCenter fontSize="medium" />, color: '#059669' };
+    case 'marketing':
+      return { icon: <Campaign fontSize="medium" />, color: '#D97706' };
+    case 'photography':
+      return { icon: <CameraAlt fontSize="medium" />, color: '#DC2626' };
+    case 'music':
+      return { icon: <GraphicEq fontSize="medium" />, color: '#7C3AED' };
+    case 'academics':
+    case 'school':
+      return { icon: <School fontSize="medium" />, color: '#0891B2' };
+    case 'language':
+    case 'languages':
+      return { icon: <Language fontSize="medium" />, color: '#4F46E5' };
+    case 'health':
+      return { icon: <HealthAndSafety fontSize="medium" />, color: '#16A34A' };
+    case 'mobile':
+    case 'smartphone':
+      return { icon: <Smartphone fontSize="medium" />, color: '#E11D48' };
+    case 'science':
+      return { icon: <Science fontSize="medium" />, color: '#F59E0B' };
+    case 'math':
+      return { icon: <Calculate fontSize="medium" />, color: '#0EA5E9' };
+    default:
+      return { icon: <FolderOpen fontSize="medium" />, color: '#64748B' };
+  }
 }
-
-const HARDCODED_CATEGORIES: HardcodedCategory[] = [
-  {
-    id: 'programming',
-    name_ar: 'البرمجة',
-    name_en: 'Programming',
-    icon: <Code fontSize="medium" />,
-    color: '#2563EB',
-  },
-  {
-    id: 'design',
-    name_ar: 'التصميم',
-    name_en: 'Design',
-    icon: <DesignServices fontSize="medium" />,
-    color: '#8B5CF6',
-  },
-  {
-    id: 'business',
-    name_ar: 'الأعمال',
-    name_en: 'Business',
-    icon: <BusinessCenter fontSize="medium" />,
-    color: '#059669',
-  },
-  {
-    id: 'marketing',
-    name_ar: 'التسويق',
-    name_en: 'Marketing',
-    icon: <Psychology fontSize="medium" />,
-    color: '#D97706',
-  },
-  {
-    id: 'photography',
-    name_ar: 'التصوير',
-    name_en: 'Photography',
-    icon: <CameraAlt fontSize="medium" />,
-    color: '#DC2626',
-  },
-  {
-    id: 'music',
-    name_ar: 'الموسيقى',
-    name_en: 'Music',
-    icon: <GraphicEq fontSize="medium" />,
-    color: '#7C3AED',
-  },
-  {
-    id: 'academics',
-    name_ar: 'الأكاديمي',
-    name_en: 'Academics',
-    icon: <School fontSize="medium" />,
-    color: '#0891B2',
-  },
-  {
-    id: 'languages',
-    name_ar: 'اللغات',
-    name_en: 'Languages',
-    icon: <Language fontSize="medium" />,
-    color: '#4F46E5',
-  },
-  {
-    id: 'health',
-    name_ar: 'الصحة',
-    name_en: 'Health',
-    icon: <HealthAndSafety fontSize="medium" />,
-    color: '#16A34A',
-  },
-  {
-    id: 'mobile',
-    name_ar: 'تطوير التطبيقات',
-    name_en: 'App Development',
-    icon: <Smartphone fontSize="medium" />,
-    color: '#E11D48',
-  },
-];
 
 export default function CategoriesPage() {
   const pageRef = usePageTransition();
   const { lang, t } = useApp();
   const router = useRouter();
-  const [dbCategories, setDbCategories] = useState<CategoryData[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -120,11 +75,12 @@ export default function CategoriesPage() {
       try {
         const { data, error } = await supabase
           .from('categories')
-          .select('id, name_ar, name_en')
-          .eq('is_active', true);
+          .select('id, name_ar, name_en, icon_name')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
 
         if (data && !error) {
-          setDbCategories(data as CategoryData[]);
+          setCategories(data as CategoryData[]);
         }
       } catch (err) {
         console.error('Error loading categories:', err);
@@ -135,19 +91,18 @@ export default function CategoriesPage() {
     loadCategories();
   }, []);
 
-  const mergedCategories = HARDCODED_CATEGORIES.map((hc) => {
-    const dbMatch = dbCategories.find((db) => db.id === hc.id);
-    return {
-      ...hc,
-      dbId: dbMatch?.id,
-    };
-  });
-
   const handleCategoryClick = (categoryId: string) => {
-    const dbId = dbCategories.find((db) => db.id === categoryId)?.id;
-    const navId = dbId || categoryId;
-    router.push(`/search?category=${navId}`);
+    router.push(`/search?category=${categoryId}`);
   };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingState}>
+        <div className={styles.spinner}></div>
+        <p>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
+      </div>
+    );
+  }
 
   return (
     <div ref={pageRef} className="container fade-in">
@@ -159,8 +114,10 @@ export default function CategoriesPage() {
       </div>
 
       <div className={styles.grid}>
-        {mergedCategories.map((cat) => {
-          const alphaColor = cat.color + '26';
+        {categories.map((cat) => {
+          const cfg = getCategoryConfig(cat.icon_name);
+          const alphaColor = cfg.color + '26'; // 15% opacity overlay color
+
           return (
             <button
               key={cat.id}
@@ -170,9 +127,9 @@ export default function CategoriesPage() {
             >
               <div
                 className={styles.iconContainer}
-                style={{ backgroundColor: alphaColor, color: cat.color }}
+                style={{ backgroundColor: alphaColor, color: cfg.color }}
               >
-                {cat.icon}
+                {cfg.icon}
               </div>
               <span className={styles.categoryName}>
                 {lang === 'ar' ? cat.name_ar : cat.name_en}

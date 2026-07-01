@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { History, PlayCircle, MenuBook, OndemandVideo } from '@mui/icons-material';
 import { supabase } from '../../lib/supabaseClient';
 import { useApp } from '../../context/AppContext';
-import { FeaturePageHero } from '../../components/FeaturePageHero';
 import { AppBackButton, ShimmerEffect, EmptyState } from '../../components/ui';
 import { AppDateUtils } from '../../lib/formatters';
 import { usePageTransition } from '../../lib/animations';
@@ -116,15 +115,13 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <main className={styles.page}>
-        <div className={styles.backRow}>
-          <AppBackButton />
+        <div className={styles.hero}>
+          <div className={styles.heroText}>
+            <h1>{lang === 'ar' ? 'سجل التعلم' : 'Learning History'}</h1>
+            <p>{lang === 'ar' ? 'ارجع بسرعة لآخر الكورسات التي درستها وتابع تقدمك.' : 'Return to your recent learning activity.'}</p>
+          </div>
+          <div className={styles.heroIcon}>📜</div>
         </div>
-        <FeaturePageHero
-          icon={History}
-          eyebrow="ACTIVITY"
-          title={lang === 'ar' ? 'سجل التعلم' : 'Learning History'}
-          subtitle={lang === 'ar' ? 'ارجع بسرعة لآخر الكورسات التي درستها وتابع تقدمك.' : 'Return to your recent learning activity.'}
-        />
         <div className={styles.shimmerList}>
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className={styles.shimmerCard}>
@@ -142,16 +139,13 @@ export default function HistoryPage() {
 
   return (
     <main ref={pageRef} className={styles.page}>
-      <div className={styles.backRow}>
-        <AppBackButton />
+      <div className={styles.hero}>
+        <div className={styles.heroText}>
+          <h1>{lang === 'ar' ? 'سجل التعلم' : 'Learning History'}</h1>
+          <p>{lang === 'ar' ? 'ارجع بسرعة لآخر الدروس التي درستها وتابع تقدمك.' : 'Return to your recent lesson activity.'}</p>
+        </div>
+        <div className={styles.heroIcon}>📜</div>
       </div>
-
-      <FeaturePageHero
-        icon={History}
-        eyebrow="ACTIVITY"
-        title={lang === 'ar' ? 'سجل التعلم' : 'Learning History'}
-        subtitle={lang === 'ar' ? 'ارجع بسرعة لآخر الدروس التي درستها وتابع تقدمك.' : 'Return to your recent lesson activity.'}
-      />
 
       {items.length === 0 ? (
         <div className={styles.emptyWrap}>

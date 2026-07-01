@@ -45,8 +45,8 @@ export default function ForgotPasswordPage() {
 
   const validatePhase2 = useCallback((): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!otp.trim()) {
-      newErrors.otp = lang === 'ar' ? 'الكود مطلوب' : 'Code is required';
+    if (!/^\d{6}$/.test(otp.trim())) {
+      newErrors.otp = lang === 'ar' ? 'أدخل كود مكون من 6 أرقام' : 'Enter the 6-digit code';
     }
     const passErr = Validators.password(newPassword, { lang });
     if (passErr) newErrors.newPassword = passErr;
@@ -72,6 +72,9 @@ export default function ForgotPasswordPage() {
       if (otpError) {
         setError(otpError.message);
       } else {
+        setOtp('');
+        setNewPassword('');
+        setConfirmPassword('');
         setPhase(2);
         ToastUtils.showSuccess(
           lang === 'ar'
@@ -187,7 +190,7 @@ export default function ForgotPasswordPage() {
         {error && <div className={styles.errorAlert}>{error}</div>}
 
         {phase === 1 ? (
-          <form onSubmit={handleSendCode} className={styles.form}>
+          <form onSubmit={handleSendCode} className={styles.form} autoComplete="on">
             <div className={styles.inputGroup}>
               <label className={styles.label}>{t.email}</label>
               <div className={styles.inputWrapper}>
@@ -198,6 +201,8 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                   placeholder="you@example.com"
+                  autoComplete="email"
+                  dir="ltr"
                   className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                 />
               </div>
@@ -216,17 +221,33 @@ export default function ForgotPasswordPage() {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerifyAndReset} className={styles.form}>
+          <form onSubmit={handleVerifyAndReset} className={styles.form} autoComplete="off">
+            <input
+              type="email"
+              name="username"
+              value={email}
+              readOnly
+              hidden
+              autoComplete="username"
+            />
             <div className={styles.inputGroup}>
               <label className={styles.label}>{t.enterOtp}</label>
               <input
                 type="text"
                 required
+                name="reset_otp"
                 value={otp}
-                onChange={(e) => { setOtp(e.target.value); clearError('otp'); }}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
+                  clearError('otp');
+                }}
                 placeholder="123456"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                autoComplete="one-time-code"
+                dir="ltr"
                 className={`${styles.input} ${styles.otpInput} ${errors.otp ? styles.inputError : ''}`}
-                style={{ padding: '14px 16px', letterSpacing: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 700 }}
               />
               {errors.otp && <span className={styles.fieldError}>{errors.otp}</span>}
             </div>
@@ -243,6 +264,7 @@ export default function ForgotPasswordPage() {
                   value={newPassword}
                   onChange={(e) => { setNewPassword(e.target.value); clearError('newPassword'); }}
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   className={`${styles.input} ${errors.newPassword ? styles.inputError : ''}`}
                 />
               </div>
@@ -261,6 +283,7 @@ export default function ForgotPasswordPage() {
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
                 />
               </div>

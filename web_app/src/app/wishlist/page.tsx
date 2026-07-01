@@ -3,14 +3,19 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Favorite, FavoriteBorder, ShoppingCart, Delete, PlayCircle, CheckCircle, ArrowForward } from '@mui/icons-material';
+import { Favorite, FavoriteBorder, ShoppingCart, Delete, PlayCircle, CheckCircle, ArrowForward, BookmarkBorder } from '@mui/icons-material';
 import { supabase } from '../../lib/supabaseClient';
 import { useApp } from '../../context/AppContext';
-import { FeaturePageHero } from '../../components/FeaturePageHero';
 import { ShimmerEffect, EmptyState, FilterChips, PriceTag, RatingStars, AppButton } from '../../components/ui';
 import { NumberUtils, AppDateUtils } from '../../lib/formatters';
+import { getBaseCoursePrice, getEffectiveCoursePrice, hasCourseDiscount } from '../../lib/pricing';
 import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
+
+interface InstructorProfile {
+  id?: string;
+  name?: string;
+}
 
 interface WishlistCourse {
   id: string;
@@ -22,10 +27,11 @@ interface WishlistCourse {
   price: number;
   discount_price?: number;
   is_free?: boolean;
+  pricing_options?: unknown;
   rating?: number;
   rating_count?: number;
-  instructor_name_ar?: string;
-  instructor_name_en?: string;
+  instructor_name?: string;
+  profiles?: InstructorProfile | InstructorProfile[] | null;
   created_at?: string;
   price_history?: number;
 }
@@ -52,9 +58,16 @@ export default function WishlistPage() {
       try {
         const { data } = await supabase
           .from('courses')
-          .select('id, title_ar, title_en, subtitle_ar, subtitle_en, thumbnail_url, price, discount_price, is_free, rating, rating_count, instructor_name_ar, instructor_name_en, created_at')
+          .select('id, title_ar, title_en, subtitle_ar, subtitle_en, thumbnail_url, price, discount_price, is_free, pricing_options, rating, rating_count, created_at, profiles!courses_instructor_id_fkey(id, name)')
           .in('id', wishlist);
-        if (active) setItems((data || []) as WishlistCourse[]);
+        if (active) {
+          const itemsWithInstructor = (data || []).map((course: unknown) => {
+            const c = course as WishlistCourse;
+            const profile = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
+            return { ...c, instructor_name: profile?.name } as WishlistCourse;
+          });
+          setItems(itemsWithInstructor);
+        }
       } catch {
         if (active) setItems([]);
       } finally {
@@ -68,15 +81,14 @@ export default function WishlistPage() {
   const filteredItems = useMemo(() => {
     const currentFilter = filter[0] || 'all';
     if (currentFilter === 'all') return items;
-    if (currentFilter === 'price-drops') return items.filter((c) => c.discount_price && c.discount_price < c.price);
+    if (currentFilter === 'price-drops') return items.filter((c) => hasCourseDiscount(c));
     if (currentFilter === 'enrolled') return items.filter((c) => enrolledCourseIds.includes(c.id));
     return items;
   }, [items, filter, enrolledCourseIds]);
 
   const totalValue = useMemo(() => {
     return filteredItems.reduce((sum, c) => {
-      const price = c.is_free ? 0 : (c.discount_price || c.price || 0);
-      return sum + price;
+      return sum + getEffectiveCoursePrice(c);
     }, 0);
   }, [filteredItems]);
 
@@ -90,23 +102,20 @@ export default function WishlistPage() {
   const getActionButton = (course: WishlistCourse) => {
     if (enrolledCourseIds.includes(course.id)) {
       return (
-        <Link href={`/learn/${course.id}`} className={styles.actionPurchased}>
-          <PlayCircle fontSize="small" />
+        <Link href={`/learn/${course.id}`} className={`${styles.actionBtn} ${styles.enrolled}`}>
           <span>{lang === 'ar' ? 'اذهب للتعلم' : 'Go to Learning'}</span>
         </Link>
       );
     }
     if (cart.includes(course.id)) {
       return (
-        <span className={styles.actionInCart}>
-          <CheckCircle fontSize="small" />
+        <span className={`${styles.actionBtn} ${styles.inCart}`}>
           <span>{lang === 'ar' ? 'في السلة' : 'In Cart'}</span>
         </span>
       );
     }
     return (
-      <button className={styles.actionCart} onClick={() => addToCart(course.id)} type="button">
-        <ShoppingCart fontSize="small" />
+      <button className={styles.actionBtn} onClick={() => addToCart(course.id)} type="button">
         <span>{t.addToCart}</span>
       </button>
     );
@@ -114,23 +123,25 @@ export default function WishlistPage() {
 
   const filterChips = [
     { id: 'all', label: t.all, count: items.length },
-    { id: 'price-drops', label: t.priceDrops, count: items.filter((c) => c.discount_price && c.discount_price < c.price).length },
+    { id: 'price-drops', label: t.priceDrops, count: items.filter((c) => hasCourseDiscount(c)).length },
     { id: 'enrolled', label: t.enrolled, count: items.filter((c) => enrolledCourseIds.includes(c.id)).length },
   ];
 
   if (loading) {
     return (
       <main className={styles.page}>
-        <FeaturePageHero
-          icon={Favorite}
-          eyebrow={lang === 'ar' ? 'محفوظاتك' : 'SAVED'}
-          title={lang === 'ar' ? 'المفضلة' : 'Wishlist'}
-          subtitle={lang === 'ar' ? 'كل الكورسات التي حفظتها للعودة إليها لاحقاً.' : 'Courses you saved for later.'}
-        />
+        <div className={styles.hero}>
+          <div className={styles.heroText}>
+            <p className={styles.heroEyebrow}>{lang === 'ar' ? 'محفوظاتك' : 'SAVED'}</p>
+            <h1>{lang === 'ar' ? 'المفضلة' : 'Wishlist'}</h1>
+            <p>{lang === 'ar' ? 'كل الكورسات التي حفظتها للعودة إليها لاحقاً.' : 'Courses you saved for later.'}</p>
+          </div>
+          <div className={styles.heroIcon}>❤️</div>
+        </div>
         <div className={styles.shimmerGrid}>
           {[1, 2, 3].map((i) => (
             <div key={i} className={styles.shimmerCard}>
-              <ShimmerEffect width="100%" height="160px" borderRadius="lg" />
+              <ShimmerEffect width="100%" height="180px" borderRadius="lg" />
               <div className={styles.shimmerBody}>
                 <ShimmerEffect width="80%" height="16px" borderRadius="sm" />
                 <ShimmerEffect width="60%" height="12px" borderRadius="sm" />
@@ -145,12 +156,15 @@ export default function WishlistPage() {
 
   return (
     <main ref={pageRef} className={styles.page}>
-      <FeaturePageHero
-        icon={Favorite}
-        eyebrow={lang === 'ar' ? 'محفوظاتك' : 'SAVED'}
-        title={lang === 'ar' ? 'المفضلة' : 'Wishlist'}
-        subtitle={lang === 'ar' ? 'كل الكورسات التي حفظتها للعودة إليها لاحقاً.' : 'Courses you saved for later.'}
-      />
+      {/* Hero */}
+      <div className={styles.hero}>
+        <div className={styles.heroText}>
+          <p className={styles.heroEyebrow}>{lang === 'ar' ? 'محفوظاتك' : 'SAVED'}</p>
+          <h1>{lang === 'ar' ? 'المفضلة' : 'Wishlist'}</h1>
+          <p>{lang === 'ar' ? 'كل الكورسات التي حفظتها للعودة إليها لاحقاً.' : 'Courses you saved for later.'}</p>
+        </div>
+        <div className={styles.heroIcon}>❤️</div>
+      </div>
 
       {items.length === 0 ? (
         <div className={styles.emptyWrap}>
@@ -164,8 +178,16 @@ export default function WishlistPage() {
         </div>
       ) : (
         <>
-          <div className={styles.filterRow}>
+          {/* Toolbar: filter + stats */}
+          <div className={styles.toolbar}>
             <FilterChips items={filterChips} selected={filter} onChange={setFilter} />
+            <div className={styles.statsRow}>
+              <span className={styles.statBadge}>
+                <Favorite sx={{ fontSize: 14, color: '#E11D48' }} />
+                <strong>{items.length}</strong>
+                {lang === 'ar' ? ' كورس' : ' courses'}
+              </span>
+            </div>
           </div>
 
           {filteredItems.length === 0 ? (
@@ -201,17 +223,17 @@ export default function WishlistPage() {
                     >
                       <Favorite fontSize="small" />
                     </button>
-                    {c.discount_price && c.discount_price < c.price && (
+                    {hasCourseDiscount(c) && (
                       <span className={styles.priceDropBadge}>
-                        -{Math.round(((c.price - c.discount_price) / c.price) * 100)}%
+                        -{Math.round(((getBaseCoursePrice(c) - getEffectiveCoursePrice(c)) / getBaseCoursePrice(c)) * 100)}%
                       </span>
                     )}
                   </div>
 
                   <div className={styles.cardBody}>
-                    {(c.instructor_name_ar || c.instructor_name_en) && (
+                    {c.instructor_name && (
                       <p className={styles.instructorName}>
-                        {lang === 'ar' ? c.instructor_name_ar : c.instructor_name_en}
+                        {c.instructor_name}
                       </p>
                     )}
 
@@ -231,19 +253,22 @@ export default function WishlistPage() {
                       </div>
                     )}
 
-                    <div className={styles.cardPricing}>
-                      {c.is_free ? (
-                        <span className={styles.freeLabel}>{t.free}</span>
-                      ) : (
-                        <PriceTag
-                          price={c.discount_price || c.price}
-                          originalPrice={c.discount_price ? c.price : undefined}
-                          size="sm"
-                        />
-                      )}
-                    </div>
-
-                    <div className={styles.cardActions}>
+                    <div className={styles.cardFooter}>
+                      <div className={styles.price}>
+                        {c.is_free ? (
+                          <span className={styles.free}>{t.free}</span>
+                        ) : hasCourseDiscount(c) ? (
+                          <>
+                            <span>{getEffectiveCoursePrice(c)} {t.egp}</span>
+                            <del>{getBaseCoursePrice(c)} {t.egp}</del>
+                            <span className={styles.discountBadge}>
+                              -{Math.round((1 - getEffectiveCoursePrice(c) / getBaseCoursePrice(c)) * 100)}%
+                            </span>
+                          </>
+                        ) : (
+                          <span>{getEffectiveCoursePrice(c)} {t.egp}</span>
+                        )}
+                      </div>
                       {getActionButton(c)}
                     </div>
 

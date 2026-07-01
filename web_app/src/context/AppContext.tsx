@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { Language, translations } from '../lib/translations';
+import { getEffectiveCoursePrice } from '../lib/pricing';
 
 interface UserProfile {
   id: string;
@@ -101,6 +102,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // not keep protected pages stuck behind a loading screen.
         setLoading(false);
         
+        const offlineCart = JSON.parse(localStorage.getItem('nero_cart') || '[]') as string[];
+        const offlineWish = JSON.parse(localStorage.getItem('nero_wishlist') || '[]') as string[];
+
+        if (offlineCart.length > 0) {
+          await supabase.from('cart_items').upsert(
+            offlineCart.map((courseId) => ({
+              user_id: session.user.id,
+              course_id: courseId,
+              price_at_add: 0,
+            })),
+            { onConflict: 'user_id,course_id' }
+          );
+          localStorage.removeItem('nero_cart');
+        }
+
+        if (offlineWish.length > 0) {
+          await supabase.from('wishlist').upsert(
+            offlineWish.map((courseId) => ({
+              user_id: session.user.id,
+              course_id: courseId,
+            })),
+            { onConflict: 'user_id,course_id' }
+          );
+          localStorage.removeItem('nero_wishlist');
+        }
+
         // Fetch profile
         const { data: prof, error } = await supabase
           .from('profiles')
@@ -205,11 +232,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCart(nextCart);
 
     if (user) {
+      const { data: course } = await supabase
+        .from('courses')
+        .select('price, discount_price, is_free, pricing_options, is_flash_sale, flash_sale_price, flash_sale_start, flash_sale_end')
+        .eq('id', courseId)
+        .maybeSingle();
+
       // Sync to DB
       await supabase.from('cart_items').upsert({
         user_id: user.id,
         course_id: courseId,
-        price_at_add: 0 // Fetch dynamically or update on checkout
+        price_at_add: course ? getEffectiveCoursePrice(course) : 0
       });
     } else {
       localStorage.setItem('nero_cart', JSON.stringify(nextCart));

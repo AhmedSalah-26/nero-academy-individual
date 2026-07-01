@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" data-scroll-behavior="smooth">
       <body>
         <AppProvider>
           <div
@@ -33,7 +33,7 @@ export default function RootLayout({
             <footer
               style={{
                 textAlign: 'center',
-                padding: '28px 20px 100px',
+                padding: '28px 20px',
                 borderTop: '1px solid var(--border)',
                 color: 'var(--text-secondary)',
                 fontSize: '0.72rem',

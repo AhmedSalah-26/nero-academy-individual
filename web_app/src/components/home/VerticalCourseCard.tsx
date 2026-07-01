@@ -2,6 +2,11 @@
 
 import Link from 'next/link';
 import { useApp } from '../../context/AppContext';
+import {
+  getBaseCoursePrice,
+  getCourseDiscountPercentage,
+  getEffectiveCoursePrice,
+} from '../../lib/pricing';
 import styles from './VerticalCourseCard.module.css';
 
 export interface CourseData {
@@ -14,7 +19,9 @@ export interface CourseData {
   price: number;
   discount_price?: number;
   is_free: boolean;
+  pricing_options?: unknown;
   is_flash_sale?: boolean;
+  flash_sale_price?: number;
   flash_sale_start?: string;
   flash_sale_end?: string;
   rating: number;
@@ -40,62 +47,40 @@ function formatCount(count: number): string {
   return count.toString();
 }
 
-function isFlashSaleActive(course: CourseData): boolean {
-  if (!course.is_flash_sale) return false;
-  const now = Date.now();
-  if (course.flash_sale_start && now < new Date(course.flash_sale_start).getTime()) return false;
-  if (course.flash_sale_end && now > new Date(course.flash_sale_end).getTime()) return false;
-  return true;
-}
-
-function getDiscountPercentage(course: CourseData): number | null {
-  if (course.is_free || course.price <= 0) return null;
-  if (course.discount_price == null || course.discount_price >= course.price) return null;
-  if (course.is_flash_sale && !isFlashSaleActive(course)) return null;
-  return Math.round(((course.price - course.discount_price) / course.price) * 100);
-}
-
-function getCurrentPrice(course: CourseData): number {
-  if (course.is_free) return 0;
-  if (course.is_flash_sale && isFlashSaleActive(course)) return course.discount_price ?? course.price;
-  return course.discount_price ?? course.price;
-}
-
 export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, width }: VerticalCourseCardProps) {
   const { lang, addToCart, cart } = useApp();
   const title = lang === 'ar' ? (course.title_ar || course.title_en || '') : (course.title_en || course.title_ar || '');
   const inCart = cart.includes(course.id);
-  const discountPct = getDiscountPercentage(course);
-  const currentPrice = getCurrentPrice(course);
-  const hasDiscount = currentPrice < course.price && !course.is_free;
+  const discountPct = getCourseDiscountPercentage(course);
+  const basePrice = getBaseCoursePrice(course);
+  const currentPrice = getEffectiveCoursePrice(course);
+  const hasDiscount = discountPct != null;
 
   return (
-    <article className={styles.card} style={width ? { width } : undefined}>
-      <Link href={`/courses/${course.id}`} className={styles.thumbnailLink}>
-        <div className={styles.thumbnail}>
-          {course.thumbnail_url ? (
-            <img src={course.thumbnail_url} alt={title} className={styles.img} />
-          ) : (
-            <div className={styles.thumbnailFallback}>
-              <span className={styles.playIcon}>▶</span>
-            </div>
-          )}
-          {course.badge ? (
-            <span className={`${styles.badge} ${styles.badgeCustom}`}>{course.badge}</span>
-          ) : course.is_free ? (
-            <span className={`${styles.badge} ${styles.badgeFree}`}>{lang === 'ar' ? 'مجاني' : 'Free'}</span>
-          ) : discountPct ? (
-            <span className={`${styles.badge} ${styles.badgeDiscount}`}>{discountPct}%</span>
-          ) : null}
-          <button
-            className={`${styles.wishlist} ${isWishlisted ? styles.wishlistActive : ''}`}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onWishlistToggle(); }}
-            aria-label="Wishlist"
-          >
-            {isWishlisted ? '❤️' : '🤍'}
-          </button>
-        </div>
-      </Link>
+    <Link href={`/courses/${course.id}`} className={styles.card} style={width ? { width } : undefined}>
+      <div className={styles.thumbnail}>
+        {course.thumbnail_url ? (
+          <img src={course.thumbnail_url} alt={title} className={styles.img} />
+        ) : (
+          <div className={styles.thumbnailFallback}>
+            <span className={styles.playIcon}>▶</span>
+          </div>
+        )}
+        {course.badge ? (
+          <span className={`${styles.badge} ${styles.badgeCustom}`}>{course.badge}</span>
+        ) : course.is_free ? (
+          <span className={`${styles.badge} ${styles.badgeFree}`}>{lang === 'ar' ? 'مجاني' : 'Free'}</span>
+        ) : discountPct ? (
+          <span className={`${styles.badge} ${styles.badgeDiscount}`}>{discountPct}%</span>
+        ) : null}
+        <button
+          className={`${styles.wishlist} ${isWishlisted ? styles.wishlistActive : ''}`}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onWishlistToggle(); }}
+          aria-label="Wishlist"
+        >
+          {isWishlisted ? '❤️' : '🤍'}
+        </button>
+      </div>
       <div className={styles.body}>
         <h3 className={styles.title}>{title}</h3>
         {course.instructor_name && <p className={styles.instructor}>{course.instructor_name}</p>}
@@ -114,11 +99,19 @@ export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, wid
           ) : (
             <span className={styles.price}>
               {course.currency || (lang === 'ar' ? 'ج.م' : 'EGP')} {Math.round(currentPrice)}
-              {hasDiscount && <del className={styles.origPrice}>{Math.round(course.price)}</del>}
+              {hasDiscount && <del className={styles.origPrice}>{Math.round(basePrice)}</del>}
             </span>
           )}
+          <button
+            type="button"
+            className={`${styles.cartButton} ${inCart ? styles.cartButtonAdded : ''}`}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(course.id); }}
+            disabled={inCart}
+          >
+            {inCart ? (lang === 'ar' ? 'تمت الإضافة' : 'Added') : (lang === 'ar' ? 'أضف للسلة' : 'Add to cart')}
+          </button>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

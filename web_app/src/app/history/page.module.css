@@ -1,12 +1,74 @@
+/* ── Learning History Page – Web-first design ── */
+
 .page {
-  width: min(1320px, calc(100% - 34px));
-  margin: 28px auto 80px;
+  width: min(900px, 100% - 48px);
+  margin: 0 auto;
+  padding: 32px 0 80px;
+}
+
+/* ── Hero ── */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  padding: 36px 44px;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #9333EA 100%);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(124, 58, 237, 0.25);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='40' cy='40' r='28'/%3E%3Ccircle cx='8' cy='8' r='5'/%3E%3Ccircle cx='72' cy='72' r='5'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.heroText {
+  position: relative;
+  z-index: 1;
+}
+
+.heroText h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.heroText p {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.75);
+  margin: 0;
+}
+
+.heroIcon {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex-shrink: 0;
+  font-size: 1.8rem;
 }
 
 .backRow {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
+/* ── Content ── */
 .emptyWrap {
   padding: 60px 24px;
   display: flex;
@@ -20,7 +82,7 @@
 .dateLabel {
   margin: 0 0 14px;
   font-family: var(--font-display);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-muted);
   padding-bottom: 8px;
@@ -30,39 +92,37 @@
 .lessonList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .lessonCard {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border: 1px solid var(--glass-border);
-  border-radius: 18px;
-  background: var(--surface-card);
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
   color: inherit;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .lessonCard:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--primary) 36%, var(--border));
+  border-color: rgba(124, 58, 237, 0.2);
   box-shadow: var(--shadow-md);
 }
 
 .lessonThumb {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 58px;
+  height: 58px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background:
-    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 36%),
-    var(--surface-soft);
+  background: linear-gradient(135deg, var(--surface-soft), var(--primary-light));
 }
 
 .lessonImg {
@@ -76,7 +136,7 @@
   height: 100%;
   display: grid;
   place-items: center;
-  color: var(--border);
+  color: rgba(var(--primary-rgb), 0.3);
 }
 
 .completedDot {
@@ -87,7 +147,7 @@
   height: 14px;
   border-radius: 50%;
   background: var(--success);
-  border: 2px solid var(--surface-card);
+  border: 2px solid var(--surface);
 }
 
 .hidden {
@@ -105,7 +165,7 @@
 .lessonTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.35;
@@ -117,17 +177,18 @@
 
 .courseName {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-weight: 600;
 }
 
 .timeAgo {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
 }
 
@@ -140,61 +201,63 @@
 .playIcon {
   font-size: 28px !important;
   color: var(--primary);
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .lessonCard:hover .playIcon {
   color: var(--primary-dark);
+  transform: scale(1.08);
 }
 
 .doneBadge {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   font-size: 0.68rem;
   font-weight: 700;
   color: var(--success);
   background: var(--success-light);
+  border: 1px solid rgba(var(--success-rgb, 34, 197, 94), 0.2);
 }
 
 .shimmerList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .shimmerCard {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border: 1px solid var(--glass-border);
-  border-radius: 18px;
-  background: var(--surface-card);
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
 .shimmerBody {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 768px) {
   .page {
-    width: calc(100% - 20px);
-    margin-top: 14px;
+    width: calc(100% - 32px);
+    padding: 20px 0 70px;
   }
-  .lessonCard {
-    padding: 10px 12px;
-    gap: 10px;
-  }
-  .lessonThumb {
-    width: 44px;
-    height: 44px;
-  }
-}
 
-[data-theme="dark"] .lessonCard,
-[data-theme="dark"] .shimmerCard {
-  background: var(--surface-card);
+  .hero {
+    padding: 24px 20px;
+    margin-bottom: 24px;
+  }
+
+  .heroText h1 { font-size: 1.4rem; }
+  .heroIcon { display: none; }
+
+  .lessonCard {
+    padding: 12px 14px;
+    gap: 12px;
+  }
 }

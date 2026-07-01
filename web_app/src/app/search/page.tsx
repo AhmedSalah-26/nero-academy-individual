@@ -8,6 +8,7 @@ import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
 import { useFadeIn, useStagger } from '../../lib/animations';
 import { CourseFilterSheet, type CourseFilterState } from '../../components/ui';
+import { getBaseCoursePrice, getEffectiveCoursePrice, hasCourseDiscount } from '../../lib/pricing';
 import styles from './page.module.css';
 
 interface Course {
@@ -20,6 +21,7 @@ interface Course {
   price: number;
   discount_price: number;
   is_free: boolean;
+  pricing_options?: unknown;
   total_duration: number;
   enrolled_count: number;
   rating: number;
@@ -147,7 +149,7 @@ function SearchContent() {
       const matchesLanguage = legacyFilters.language === 'all' || c.language === legacyFilters.language;
 
       let matchesPrice = true;
-      const effectivePrice = c.discount_price || c.price;
+      const effectivePrice = getEffectiveCoursePrice(c);
       if (filters.priceMin > 0 || filters.priceMax < 500) {
         if (c.is_free) {
           matchesPrice = filters.priceMin === 0;
@@ -181,8 +183,8 @@ function SearchContent() {
     list = [...list].sort((a, b) => {
       if (filters.sort === 'newest') return 0;
       if (filters.sort === 'rating') return (b.rating || 0) - (a.rating || 0);
-      if (filters.sort === 'priceLow') return (a.discount_price || a.price) - (b.discount_price || b.price);
-      if (filters.sort === 'priceHigh') return (b.discount_price || b.price) - (a.discount_price || a.price);
+      if (filters.sort === 'priceLow') return getEffectiveCoursePrice(a) - getEffectiveCoursePrice(b);
+      if (filters.sort === 'priceHigh') return getEffectiveCoursePrice(b) - getEffectiveCoursePrice(a);
       return (b.enrolled_count || 0) - (a.enrolled_count || 0);
     });
 
@@ -200,26 +202,29 @@ function SearchContent() {
 
   return (
     <div className="container">
-      <div ref={heroRef} className={`${styles.hero} glass`}>
-        <h1>{lang === 'ar' ? 'ابحث عن كورسك' : 'Find your course'}</h1>
-        <form className={styles.searchBox} onSubmit={handleSearchSubmit}>
-          <Search fontSize="small" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={lang === 'ar' ? 'ابحث بالعنوان أو الوصف...' : 'Search by title or description...'}
-          />
-          <button
-            className={styles.filterToggle}
-            onClick={() => setShowFilters(true)}
-            type="button"
-            data-active={activeFiltersCount > 0}
-          >
-            <Tune fontSize="small" />
-            {activeFiltersCount > 0 && <span>{activeFiltersCount}</span>}
-          </button>
-        </form>
+      <div ref={heroRef} className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1>{lang === 'ar' ? 'ابحث عن كورسك 🎓' : 'Find your course 🎓'}</h1>
+          <form className={styles.searchBox} onSubmit={handleSearchSubmit}>
+            <Search fontSize="small" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={lang === 'ar' ? 'ابحث بالعنوان أو الوصف...' : 'Search by title or description...'}
+            />
+            <button
+              className={styles.filterToggle}
+              onClick={() => setShowFilters(true)}
+              type="button"
+              data-active={activeFiltersCount > 0}
+            >
+              <Tune fontSize="small" />
+              {activeFiltersCount > 0 && <span>{activeFiltersCount}</span>}
+            </button>
+          </form>
+        </div>
+        <span className={styles.heroEmoji} aria-hidden>📚</span>
       </div>
 
       {!hasQuery && recentSearches.length > 0 && (
@@ -280,7 +285,8 @@ function SearchContent() {
 
       <div className={styles.resultsHeader}>
         <span>
-          {filtered.length} {lang === 'ar' ? 'نتيجة' : 'result'}{filtered.length !== 1 && lang === 'en' ? 's' : ''}
+          <span className={styles.resultsCount}>{filtered.length}</span>
+          {' '}{lang === 'ar' ? 'نتيجة' : `result${filtered.length !== 1 ? 's' : ''}`}
         </span>
         {activeFiltersCount > 0 && (
           <button
@@ -316,7 +322,9 @@ function SearchContent() {
           {filtered.map((course) => {
             const inCart = cart.includes(course.id);
             const isEnrolled = enrolledCourseIds.includes(course.id);
-            const hasDiscount = course.discount_price > 0 && course.discount_price < course.price;
+            const basePrice = getBaseCoursePrice(course);
+            const effectivePrice = getEffectiveCoursePrice(course);
+            const hasDiscount = hasCourseDiscount(course);
 
             return (
               <article key={course.id} className={styles.courseCard}>
@@ -326,12 +334,19 @@ function SearchContent() {
                   ) : (
                     <div className={styles.thumbPlaceholder} />
                   )}
+                  {course.level && (
+                    <span className={styles.levelBadge}>
+                      {lang === 'ar'
+                        ? course.level === 'beginner' ? 'مبتدئ' : course.level === 'intermediate' ? 'متوسط' : 'متقدم'
+                        : course.level}
+                    </span>
+                  )}
                 </Link>
                 <div className={styles.cardBody}>
                   <h3>{lang === 'ar' ? course.title_ar : course.title_en}</h3>
                   <p>{lang === 'ar' ? course.subtitle_ar : course.subtitle_en}</p>
                   <div className={styles.metaRow}>
-                    <span><Star fontSize="small" fill="currentColor" /> {Number(course.rating || 0).toFixed(1)}</span>
+                    <span className={styles.ratingVal}><Star fontSize="small" /> {Number(course.rating || 0).toFixed(1)}</span>
                     <span><Schedule fontSize="small" /> {course.total_duration || 0} {t.durationMinutes}</span>
                     <span><Groups fontSize="small" /> {course.enrolled_count || 0}</span>
                   </div>
@@ -341,11 +356,14 @@ function SearchContent() {
                         <span className={styles.free}>{t.free}</span>
                       ) : hasDiscount ? (
                         <>
-                          <span>{course.discount_price} {t.egp}</span>
-                          <del>{course.price} {t.egp}</del>
+                          <span>{effectivePrice} {t.egp}</span>
+                          <del>{basePrice} {t.egp}</del>
+                          <span className={styles.discountBadge}>
+                            -{Math.round((1 - effectivePrice / basePrice) * 100)}%
+                          </span>
                         </>
                       ) : (
-                        <span>{course.price} {t.egp}</span>
+                        <span>{effectivePrice} {t.egp}</span>
                       )}
                     </div>
                     {isEnrolled ? (

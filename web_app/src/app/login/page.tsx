@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { Suspense, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
 import { Validators } from '../../lib/validators';
@@ -20,10 +20,16 @@ import {
 import styles from './page.module.css';
 import { usePageTransition } from '../../lib/animations';
 
-export default function LoginPage() {
+function LoginContent() {
   const pageRef = usePageTransition();
   const { lang, t, refreshAuth, user } = useApp();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
+  const safeRedirect =
+    redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+      ? redirectParam
+      : '/';
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -50,8 +56,19 @@ export default function LoginPage() {
   };
 
   React.useEffect(() => {
-    if (user) router.replace('/');
-  }, [router, user]);
+    if (!user) return;
+
+    let cancelled = false;
+    async function finishAuthRedirect() {
+      await refreshAuth();
+      if (!cancelled) router.replace(safeRedirect);
+    }
+
+    void finishAuthRedirect();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, safeRedirect, user?.id]);
 
   const handleSocialLogin = async (provider: 'google') => {
     setLoading(true);
@@ -60,7 +77,10 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+          redirectTo:
+            typeof window !== 'undefined'
+              ? `${window.location.origin}/login?redirect=${encodeURIComponent(safeRedirect)}`
+              : undefined,
         },
       });
       if (error) throw error;
@@ -112,8 +132,8 @@ export default function LoginPage() {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       if (data.user) {
-        router.replace('/');
-        void refreshAuth();
+        await refreshAuth();
+        router.replace(safeRedirect);
       }
     } catch (err: unknown) {
       console.error(err);
@@ -154,8 +174,8 @@ export default function LoginPage() {
         setSignedUpEmail(email);
         setShowVerification(true);
       } else if (data.user) {
-        void refreshAuth();
-        router.push('/interests');
+        await refreshAuth();
+        router.push(safeRedirect === '/' ? '/interests' : safeRedirect);
       }
     } catch (err: unknown) {
       console.error(err);
@@ -289,6 +309,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                   placeholder="you@example.com"
+                  autoComplete="email"
+                  dir="ltr"
                   className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                 />
               </div>
@@ -305,6 +327,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
                 />
               </div>
@@ -375,6 +398,8 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                       placeholder="you@example.com"
+                      autoComplete="email"
+                      dir="ltr"
                       className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                     />
                   </div>
@@ -414,6 +439,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
                       placeholder="••••••••"
+                      autoComplete="new-password"
                       className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
                     />
                   </div>
@@ -432,6 +458,7 @@ export default function LoginPage() {
                       value={confirmPassword}
                       onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
                       placeholder="••••••••"
+                      autoComplete="new-password"
                       className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
                     />
                   </div>
@@ -498,5 +525,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <LoginContent />
+    </Suspense>
   );
 }

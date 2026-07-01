@@ -2,6 +2,11 @@
 
 import Link from 'next/link';
 import { useApp } from '../../context/AppContext';
+import {
+  getBaseCoursePrice,
+  getCourseDiscountPercentage,
+  getEffectiveCoursePrice,
+} from '../../lib/pricing';
 import type { CourseData } from './VerticalCourseCard';
 import styles from './HorizontalCourseCard.module.css';
 
@@ -17,48 +22,34 @@ function formatCount(count: number): string {
   return count.toString();
 }
 
-function getCurrentPrice(course: CourseData): number {
-  if (course.is_free) return 0;
-  if (course.is_flash_sale) {
-    const now = Date.now();
-    const active = (!course.flash_sale_start || now >= new Date(course.flash_sale_start).getTime()) &&
-                   (!course.flash_sale_end || now <= new Date(course.flash_sale_end).getTime());
-    if (active) return course.discount_price ?? course.price;
-  }
-  return course.discount_price ?? course.price;
-}
-
 export function HorizontalCourseCard({ course, isWishlisted, onWishlistToggle }: HorizontalCourseCardProps) {
   const { lang } = useApp();
   const title = lang === 'ar' ? (course.title_ar || course.title_en || '') : (course.title_en || course.title_ar || '');
-  const currentPrice = getCurrentPrice(course);
-  const hasDiscount = currentPrice < course.price && !course.is_free;
-  const discountPct = !course.is_free && course.discount_price && course.discount_price < course.price
-    ? Math.round(((course.price - course.discount_price) / course.price) * 100)
-    : null;
+  const currentPrice = getEffectiveCoursePrice(course);
+  const basePrice = getBaseCoursePrice(course);
+  const discountPct = getCourseDiscountPercentage(course);
+  const hasDiscount = discountPct != null;
   const isNew = course.is_flash_sale && discountPct;
 
   return (
-    <article className={styles.card}>
-      <Link href={`/courses/${course.id}`} className={styles.thumbnailLink}>
-        <div className={styles.thumbnail}>
-          {course.thumbnail_url ? (
-            <img src={course.thumbnail_url} alt={title} className={styles.img} />
-          ) : (
-            <div className={styles.thumbnailFallback}>▶</div>
-          )}
-          {discountPct && course.is_flash_sale && (
-            <span className={styles.discountBadge}>{discountPct}%</span>
-          )}
-          <button
-            className={`${styles.wishlist} ${isWishlisted ? styles.wishlistActive : ''}`}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onWishlistToggle(); }}
-            aria-label="Wishlist"
-          >
-            {isWishlisted ? '❤️' : '🤍'}
-          </button>
-        </div>
-      </Link>
+    <Link href={`/courses/${course.id}`} className={styles.card}>
+      <div className={styles.thumbnail}>
+        {course.thumbnail_url ? (
+          <img src={course.thumbnail_url} alt={title} className={styles.img} />
+        ) : (
+          <div className={styles.thumbnailFallback}>▶</div>
+        )}
+        {discountPct && course.is_flash_sale && (
+          <span className={styles.discountBadge}>{discountPct}%</span>
+        )}
+        <button
+          className={`${styles.wishlist} ${isWishlisted ? styles.wishlistActive : ''}`}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onWishlistToggle(); }}
+          aria-label="Wishlist"
+        >
+          {isWishlisted ? '❤️' : '🤍'}
+        </button>
+      </div>
       <div className={styles.body}>
         <div className={styles.titleRow}>
           <h3 className={styles.title}>{title}</h3>
@@ -75,12 +66,12 @@ export function HorizontalCourseCard({ course, isWishlisted, onWishlistToggle }:
             <span className={styles.freePrice}>{lang === 'ar' ? 'مجاني' : 'Free'}</span>
           ) : (
             <span className={styles.price}>
-              {hasDiscount && <del className={styles.del}>{Math.round(course.price)}</del>}
+              {hasDiscount && <del className={styles.del}>{Math.round(basePrice)}</del>}
               {course.currency || (lang === 'ar' ? 'ج.م' : 'EGP')} {Math.round(currentPrice)}
             </span>
           )}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

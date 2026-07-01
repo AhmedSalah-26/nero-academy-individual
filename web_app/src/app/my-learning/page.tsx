@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { PlayCircle, EmojiEvents, MenuBook, Schedule, Lock, TrendingUp } from '@mui/icons-material';
 import { ShimmerEffect, EmptyState, FilterChips, SectionHeader, RatingStars } from '../../components/ui';
 import { NumberUtils, AppDateUtils } from '../../lib/formatters';
+import { getEffectiveCoursePrice } from '../../lib/pricing';
 import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
@@ -17,7 +18,7 @@ interface EnrolledCourse {
   progress_percentage: number;
   completed_lessons: number;
   status: string;
-  expiry_date?: string;
+  access_expires_at?: string;
   last_accessed_at?: string;
   courses: {
     title_ar: string;
@@ -39,6 +40,7 @@ interface RecommendedCourse {
   price: number;
   discount_price: number;
   is_free: boolean;
+  pricing_options?: unknown;
   rating?: number;
 }
 
@@ -74,7 +76,7 @@ export default function MyLearningPage() {
             progress_percentage,
             completed_lessons,
             status,
-            expiry_date,
+            access_expires_at,
             last_accessed_at,
             courses (
               title_ar,
@@ -112,7 +114,7 @@ export default function MyLearningPage() {
       try {
         const { data } = await supabase
           .from('courses')
-          .select('id, title_ar, title_en, thumbnail_url, price, discount_price, is_free, rating')
+          .select('id, title_ar, title_en, thumbnail_url, price, discount_price, is_free, pricing_options, rating')
           .not('id', 'in', `(${enrolledCourseIds.join(',')})`)
           .eq('is_published', true)
           .limit(4);
@@ -159,7 +161,7 @@ export default function MyLearningPage() {
 
   const getStatusBadge = (enroll: EnrolledCourse) => {
     const isCompleted = enroll.status === 'completed' || enroll.progress_percentage >= 100;
-    const isExpired = enroll.status === 'expired' || (enroll.expiry_date && new Date(enroll.expiry_date) < new Date());
+    const isExpired = enroll.status === 'expired' || (enroll.access_expires_at && new Date(enroll.access_expires_at) < new Date());
     const isInactive = enroll.status === 'inactive';
 
     if (isCompleted) {
@@ -227,8 +229,9 @@ export default function MyLearningPage() {
 
   return (
     <div ref={pageRef} className="container fade-in">
+      {/* ── Hero Header ── */}
       <div className={styles.dashboardHeader}>
-        <div>
+        <div className={styles.headerText}>
           <h1 className={styles.pageTitle}>{t.myLearningTitle}</h1>
           <p className={styles.subtext}>
             {lang === 'ar'
@@ -236,10 +239,24 @@ export default function MyLearningPage() {
               : 'Track your academic progress and complete your training courses'}
           </p>
         </div>
+        <div className={styles.headerStats}>
+          <div className={styles.statPill}>
+            <strong>{enrollments.filter((e) => e.status === 'active' && e.progress_percentage < 100).length}</strong>
+            <span>{lang === 'ar' ? 'جارية' : 'In Progress'}</span>
+          </div>
+          <div className={styles.statPill}>
+            <strong>{enrollments.filter((e) => e.status === 'completed' || e.progress_percentage >= 100).length}</strong>
+            <span>{lang === 'ar' ? 'مكتملة' : 'Completed'}</span>
+          </div>
+          <div className={styles.statPill}>
+            <strong>{enrollments.length}</strong>
+            <span>{lang === 'ar' ? 'الكل' : 'Total'}</span>
+          </div>
+        </div>
       </div>
 
       {continueCourse && (
-        <div className={`${styles.continueCard} glass`}>
+        <div className={styles.continueCard}>
           <div className={styles.continueThumb}>
             {continueCourse.courses.thumbnail_url ? (
               <img
@@ -249,7 +266,7 @@ export default function MyLearningPage() {
               />
             ) : (
               <div className={styles.continuePlaceholder}>
-                <PlayCircle fontSize="large" />
+                <PlayCircle sx={{ fontSize: 64 }} />
               </div>
             )}
             <div className={styles.continueOverlay}>
@@ -258,6 +275,7 @@ export default function MyLearningPage() {
           </div>
           <div className={styles.continueBody}>
             <span className={styles.continueLabel}>
+              <PlayCircle sx={{ fontSize: 14 }} />
               {lang === 'ar' ? 'واصل التعلم' : 'Continue Learning'}
             </span>
             <h3 className={styles.continueTitle}>
@@ -278,7 +296,7 @@ export default function MyLearningPage() {
             {getStatusBadge(continueCourse)}
             <Link
               href={`/learn/${continueCourse.course_id}`}
-              className={`${styles.continueBtn} gradient-bg`}
+              className={styles.continueBtn}
             >
               <PlayCircle fontSize="small" />
               <span>{t.continueLearning}</span>
@@ -317,7 +335,7 @@ export default function MyLearningPage() {
             <div className={styles.coursesGrid}>
               {paginated.map((enroll) => {
                 const courseDetails = enroll.courses;
-                const isExpired = enroll.status === 'expired' || (enroll.expiry_date && new Date(enroll.expiry_date) < new Date());
+                const isExpired = enroll.status === 'expired' || (enroll.access_expires_at && new Date(enroll.access_expires_at) < new Date());
 
                 return (
                   <div key={enroll.id} className={`${styles.courseCard} glass animate-hover`}>
@@ -417,7 +435,7 @@ export default function MyLearningPage() {
                   <span className={styles.recPrice}>
                     {course.is_free
                       ? t.free
-                      : NumberUtils.formatPrice(course.discount_price || course.price, lang)
+                      : NumberUtils.formatPrice(getEffectiveCoursePrice(course), lang)
                     }
                   </span>
                 </div>

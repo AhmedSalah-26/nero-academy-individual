@@ -16,6 +16,118 @@
   color: var(--text-main);
 }
 
+/* ── Price range values display ── */
+.rangeValues {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.rangeValue {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  background: var(--primary-light);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+}
+
+.rangeValue strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.rangeValueLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.rangeDash {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* ── Slider wrapper: track on top, inputs stacked below ── */
+.sliderWrap {
+  position: relative;
+  padding: 8px 0;
+}
+
+/* Visual track */
+.rangeTrack {
+  position: relative;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-light);
+  margin: 0 10px 12px;
+}
+
+.rangeFill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+}
+
+/* Inputs stacked — both cover full width, pointer-events on thumb only */
+.rangeInputs {
+  position: relative;
+  height: 28px;
+}
+
+.rangeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 28px;
+  border-radius: 99px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  pointer-events: none;    /* let only the thumb be clickable */
+}
+
+.rangeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.4);
+  pointer-events: all;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rangeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.5);
+}
+
+.rangeSlider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.4);
+  pointer-events: all;
+}
+
+/* ── Legacy classes (kept for safety) ── */
 .rangeRow {
   display: flex;
   align-items: center;
@@ -30,64 +142,7 @@
   text-align: center;
 }
 
-.rangeInputs {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  position: relative;
-}
-
-.rangeSlider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 99px;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
-}
-
-.rangeSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--primary);
-  cursor: pointer;
-  border: 3px solid white;
-  box-shadow: var(--shadow-sm);
-}
-
-.rangeSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--primary);
-  cursor: pointer;
-  border: 3px solid white;
-  box-shadow: var(--shadow-sm);
-}
-
-.rangeTrack {
-  position: relative;
-  height: 6px;
-  border-radius: 99px;
-  background: var(--surface-soft);
-  margin-top: -4px;
-  margin-bottom: 8px;
-}
-
-.rangeFill {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  border-radius: 99px;
-  background: var(--primary);
-}
-
+/* ── Actions ── */
 .actions {
   display: flex;
   align-items: center;

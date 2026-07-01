@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
-import { Delete, ShoppingCart, Sell, Error as ErrorIcon, ArrowForward, ArrowBack, ExpandMore, ExpandLess, CheckCircle, Close } from '@mui/icons-material';
+import { Delete, ShoppingCart, Sell, Error as ErrorIcon, ArrowForward, ArrowBack, ExpandMore, ExpandLess, CheckCircle, Close, Sync } from '@mui/icons-material';
 import { ShimmerEffect, EmptyState, RatingStars, PriceTag } from '../../components/ui';
 import { NumberUtils } from '../../lib/formatters';
+import { getBaseCoursePrice, getEffectiveCoursePrice, hasCourseDiscount } from '../../lib/pricing';
 import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
@@ -19,10 +20,25 @@ interface CartItem {
   price: number;
   discount_price: number;
   is_free: boolean;
-  instructor_name_ar?: string;
-  instructor_name_en?: string;
+  pricing_options?: unknown;
+  instructor_id?: string;
+  instructor_name?: string;
   rating?: number;
   rating_count?: number;
+}
+
+interface InstructorProfile {
+  id?: string;
+  name?: string;
+}
+
+interface RawCourse extends CartItem {
+  profiles?: InstructorProfile | InstructorProfile[] | null;
+}
+
+interface CartRow {
+  course_id: string;
+  courses?: RawCourse | RawCourse[] | null;
 }
 
 interface Coupon {
@@ -40,13 +56,15 @@ interface Coupon {
 
 export default function CartPage() {
   const pageRef = usePageTransition();
-  const { lang, t, user, cart, removeFromCart } = useApp();
+  const { lang, t, user, cart, removeFromCart, clearCart } = useApp();
   const router = useRouter();
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
   const [shakeId, setShakeId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [couponCode, setCouponCode] = useState('');
   const [couponData, setCouponData] = useState<Coupon | null>(null);
@@ -55,35 +73,103 @@ export default function CartPage() {
   const [couponOpen, setCouponOpen] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchCartItems() {
-      if (cart.length === 0) {
-        setItems([]);
-        setLoading(false);
-        return;
-      }
+      setLoading(true);
 
       try {
-        const { data, error } = await supabase
-          .from('courses')
-          .select('id, title_ar, title_en, thumbnail_url, price, discount_price, is_free, instructor_name_ar, instructor_name_en, rating, rating_count')
-          .in('id', cart);
+        let courseIds = [...cart];
+        const prefetchedItems = new Map<string, CartItem>();
 
-        if (data && !error) {
-          setItems(data as CartItem[]);
+        if (user?.id) {
+          const { data: dbCart, error: dbCartError } = await supabase
+            .from('cart_items')
+            .select(`
+              course_id,
+              courses (
+                id,
+                title_ar,
+                title_en,
+                thumbnail_url,
+                price,
+                discount_price,
+                is_free,
+                pricing_options,
+                rating,
+                rating_count,
+                profiles!courses_instructor_id_fkey (
+                  id,
+                  name
+                )
+              )
+            `)
+            .eq('user_id', user.id);
+
+          if (!dbCartError && dbCart?.length) {
+            const dbItems = (dbCart as CartRow[])
+              .map((row) => {
+                const course = Array.isArray(row.courses) ? row.courses[0] : row.courses;
+                if (!course?.id) return null;
+                const profile = Array.isArray(course.profiles) ? course.profiles[0] : course.profiles;
+                return { ...course, instructor_id: profile?.id || course.instructor_id, instructor_name: profile?.name } as CartItem;
+              })
+              .filter((course): course is CartItem => course !== null);
+
+            dbItems.forEach((item) => prefetchedItems.set(item.id, item));
+
+            courseIds = [...courseIds, ...dbCart.map((row: CartRow) => row.course_id)];
+          }
+        } else if (courseIds.length === 0 && typeof window !== 'undefined') {
+          try {
+            const offlineCart = JSON.parse(localStorage.getItem('nero_cart') || '[]') as string[];
+            courseIds = offlineCart;
+          } catch {
+            courseIds = [];
+          }
+        }
+
+        const cleanIds = Array.from(new Set(courseIds.filter(Boolean)));
+        const missingIds = cleanIds.filter((id) => !prefetchedItems.has(id));
+
+        if (cleanIds.length === 0) {
+          if (!cancelled) setItems([]);
+          return;
+        }
+
+        if (missingIds.length > 0) {
+          const { data, error } = await supabase
+            .from('courses')
+            .select('id, title_ar, title_en, thumbnail_url, price, discount_price, is_free, pricing_options, rating, rating_count, instructor_id, profiles!courses_instructor_id_fkey(id, name)')
+            .in('id', missingIds);
+
+          if (!error && data) {
+            (data as unknown as RawCourse[])
+              .map((course) => {
+                const profile = Array.isArray(course.profiles) ? course.profiles[0] : course.profiles;
+                return { ...course, instructor_id: profile?.id || course.instructor_id, instructor_name: profile?.name } as CartItem;
+              })
+              .forEach((item) => prefetchedItems.set(item.id, item));
+          }
+        }
+
+        if (!cancelled) {
+          setItems(cleanIds.map((id) => prefetchedItems.get(id)).filter((item): item is CartItem => Boolean(item)));
         }
       } catch (err) {
         console.error('Error fetching cart details:', err);
+        if (!cancelled) setItems([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     fetchCartItems();
-  }, [cart]);
+    return () => { cancelled = true; };
+  }, [cart, user?.id]);
 
   const subtotal = items.reduce((sum, item) => {
-    const price = item.is_free ? 0 : (item.discount_price || item.price || 0);
-    return sum + price;
+    return sum + getEffectiveCoursePrice(item);
   }, 0);
 
   let discount = 0;
@@ -178,18 +264,157 @@ export default function CartPage() {
     }
   }, [removeFromCart]);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!user) {
-      router.push('/login?redirect=/checkout');
-    } else {
-      sessionStorage.setItem('checkout_totals', JSON.stringify({
-        subtotal,
-        discount,
-        total,
-        couponId: couponData?.id || null,
-        couponCode: couponData?.code || null
-      }));
-      router.push('/checkout');
+      router.push('/login?redirect=/cart');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      if (items.length === 0) {
+        throw new Error(t.emptyCart || 'Cart is empty');
+      }
+
+      // Check if user is already enrolled in any of these courses
+      const courseIds = items.map((item) => item.id);
+      const { data: enrolledCheck } = await supabase
+        .from('enrollments')
+        .select('course_id')
+        .eq('user_id', user.id)
+        .in('status', ['active', 'completed']);
+
+      const alreadyEnrolledIds = new Set(enrolledCheck?.map((e) => e.course_id) || []);
+      const filteredItems = items.filter((item) => !alreadyEnrolledIds.has(item.id));
+
+      if (filteredItems.length === 0) {
+        throw new Error(lang === 'ar' ? 'جميع الكورسات في سلتك مشترك بها بالفعل.' : 'All courses in your cart are already enrolled.');
+      }
+
+      // ✅ Check: Prevent submitting a new request if there's already a pending one for the same courses
+      const filteredCourseIds = filteredItems.map((item) => item.id);
+      const { data: pendingItems } = await supabase
+        .from('manual_purchase_request_items')
+        .select('course_id, parent_enrollments!inner(user_id, payment_status)')
+        .eq('parent_enrollments.user_id', user.id)
+        .eq('parent_enrollments.payment_status', 'pending_manual_payment')
+        .in('course_id', filteredCourseIds);
+
+      if (pendingItems && pendingItems.length > 0) {
+        const pendingCourseIds = pendingItems.map((p: { course_id: string }) => p.course_id);
+        const pendingTitles = filteredItems
+          .filter((item) => pendingCourseIds.includes(item.id))
+          .map((item) => lang === 'ar' ? item.title_ar : item.title_en)
+          .join('، ');
+        throw new Error(
+          lang === 'ar'
+            ? `لديك طلب شراء معلق بالفعل للكورسات التالية: ${pendingTitles}. انتظر موافقة المدرس أولاً.`
+            : `You already have a pending purchase request for: ${pendingTitles}. Please wait for approval first.`
+        );
+      }
+
+      const couponDiscountTotal = discount;
+      const isFreeOrder = total === 0;
+
+      // 1. Create parent enrollment record first
+      const { data: parentEnrollment, error: parentError } = await supabase
+        .from('parent_enrollments')
+        .insert({
+          user_id: user.id,
+          total: total,
+          subtotal: subtotal,
+          discount: couponDiscountTotal,
+          coupon_id: couponData?.id || null,
+          coupon_code: couponData?.code || null,
+          coupon_discount: couponDiscountTotal,
+          payment_method: isFreeOrder ? 'free' : 'manual',
+          payment_status: isFreeOrder ? 'paid' : 'pending_manual_payment',
+          paid_at: isFreeOrder ? new Date().toISOString() : null,
+        })
+        .select('id')
+        .single();
+
+      if (parentError || !parentEnrollment) {
+        throw parentError || new Error('Failed to create order record.');
+      }
+
+      const parentEnrollmentId = parentEnrollment.id;
+
+      // 2. Loop through each item and insert request items or enrollments
+      for (const item of filteredItems) {
+        const itemPrice = getEffectiveCoursePrice(item);
+        
+        let itemCouponDiscount = 0;
+        if (itemPrice > 0 && subtotal > 0 && couponDiscountTotal > 0) {
+          itemCouponDiscount = Math.round((itemPrice / subtotal) * couponDiscountTotal);
+        }
+
+        if (!isFreeOrder) {
+          const { error: itemError } = await supabase
+            .from('manual_purchase_request_items')
+            .insert({
+              parent_enrollment_id: parentEnrollmentId,
+              user_id: user.id,
+              course_id: item.id,
+              instructor_id: item.instructor_id || null,
+              price: itemPrice,
+              original_price: item.price || 0,
+              discount: itemCouponDiscount,
+              pricing_option: null,
+            });
+
+          if (itemError) throw itemError;
+        } else {
+          const { error: enrollError } = await supabase
+            .from('enrollments')
+            .insert({
+              user_id: user.id,
+              course_id: item.id,
+              instructor_id: item.instructor_id || null,
+              parent_enrollment_id: parentEnrollmentId,
+              status: 'active',
+              progress_percentage: 0,
+              completed_lessons: 0,
+              price: itemPrice,
+              pricing_option: null,
+              discount: itemCouponDiscount,
+              total_watch_time: 0,
+              enrolled_at: new Date().toISOString(),
+            });
+
+          if (enrollError) throw enrollError;
+        }
+      }
+
+      if (couponData?.id) {
+        await supabase
+          .from('coupon_usages')
+          .insert({
+            coupon_id: couponData.id,
+            user_id: user.id,
+            enrollment_id: parentEnrollmentId,
+            discount_amount: couponDiscountTotal,
+          });
+
+        await supabase
+          .from('coupons')
+          .update({ usage_count: (couponData.usage_count || 0) + 1 })
+          .eq('id', couponData.id);
+      }
+
+      await clearCart();
+
+      sessionStorage.setItem('pending_parent_enrollment_id', parentEnrollmentId);
+      sessionStorage.removeItem('checkout_totals');
+      sessionStorage.removeItem('applied_coupon');
+
+      router.push(`/checkout/success?id=${parentEnrollmentId}`);
+    } catch (err: unknown) {
+      console.error('Checkout error:', err);
+      setSubmitError(err instanceof Error ? err.message : t.paymentFailed);
+      setSubmitting(false);
     }
   };
 
@@ -255,9 +480,9 @@ export default function CartPage() {
                   {lang === 'ar' ? item.title_ar : item.title_en}
                 </h3>
 
-                {(item.instructor_name_ar || item.instructor_name_en) && (
+                {item.instructor_name && (
                   <p className={styles.instructorName}>
-                    {lang === 'ar' ? item.instructor_name_ar : item.instructor_name_en}
+                    {item.instructor_name}
                   </p>
                 )}
 
@@ -272,8 +497,8 @@ export default function CartPage() {
                     <span className={styles.itemFree}>{t.free}</span>
                   ) : (
                     <PriceTag
-                      price={item.discount_price || item.price}
-                      originalPrice={item.discount_price ? item.price : undefined}
+                      price={getEffectiveCoursePrice(item)}
+                      originalPrice={hasCourseDiscount(item) ? getBaseCoursePrice(item) : undefined}
                       size="sm"
                     />
                   )}
@@ -374,9 +599,25 @@ export default function CartPage() {
               )}
             </div>
 
-            <button onClick={handleCheckout} className={`${styles.checkoutBtn} gradient-bg`}>
-              <span>{t.checkout}</span>
-              {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
+            {submitError && (
+              <div className={styles.couponMessageError}>
+                <ErrorIcon fontSize="small" />
+                <span>{submitError}</span>
+              </div>
+            )}
+
+            <button onClick={handleCheckout} disabled={submitting} className={`${styles.checkoutBtn} gradient-bg`}>
+              {submitting ? (
+                <>
+                  <Sync fontSize="small" className={styles.spin} />
+                  <span>{t.processing}</span>
+                </>
+              ) : (
+                <>
+                  <span>{lang === 'ar' ? `تقديم الطلب - ${NumberUtils.formatPrice(total, lang)}` : `Submit request - ${NumberUtils.formatPrice(total, lang)}`}</span>
+                  {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
+                </>
+              )}
             </button>
           </div>
         </div>

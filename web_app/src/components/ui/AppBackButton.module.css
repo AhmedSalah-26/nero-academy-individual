@@ -16,6 +16,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   border-inline-start: none;
+  margin-bottom: 22px;
 }
 
 .backButton:hover {
