@@ -343,6 +343,24 @@ export default function CourseDetailsPage() {
         <div className={styles.priceBannerLeft}>
           {isFree ? (
             <span className={styles.price}>{t.free}</span>
+          ) : hasMultiplePricing ? (
+            <div className={styles.pricingOptionsList}>
+              {course.pricing_options.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`${styles.pricingOptionCard} ${selectedPricingId === opt.id ? styles.pricingOptionSelected : ''}`}
+                  onClick={() => setSelectedPricingId(opt.id)}
+                >
+                  <span className={styles.pricingOptionLabel}>
+                    {lang === 'ar' ? opt.label_ar : opt.label_en}
+                  </span>
+                  <span className={styles.pricingOptionPrice}>
+                    {opt.isFree ? (lang === 'ar' ? 'مجاني' : 'Free') : `${opt.price} ${t.egp}`}
+                  </span>
+                </button>
+              ))}
+            </div>
           ) : (
             <div className={styles.prices}>
               {hasDiscount ? (
@@ -352,11 +370,6 @@ export default function CourseDetailsPage() {
                 </>
               ) : (
                 <span className={styles.price}>{effectivePrice} {t.egp}</span>
-              )}
-              {hasMultiplePricing && (
-                <button className={styles.viewPricingBtn} onClick={() => setShowPricingSheet(true)} type="button">
-                  {lang === 'ar' ? 'عرض الخيارات' : 'View options'}
-                </button>
               )}
             </div>
           )}
