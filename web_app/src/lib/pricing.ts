@@ -38,13 +38,12 @@ export function parsePricingOptions(options: CoursePricingLike['pricing_options'
 
 export function getBaseCoursePrice(course: CoursePricingLike): number {
   const directPrice = toNumber(course.price);
-  if (directPrice > 0) return directPrice;
-
   const optionPrices = parsePricingOptions(course.pricing_options)
     .map((option) => toNumber(option.price))
     .filter((price) => price > 0);
 
-  return optionPrices.length > 0 ? Math.min(...optionPrices) : 0;
+  if (directPrice > 0) return directPrice;
+  return optionPrices.length > 0 ? Math.max(...optionPrices) : 0;
 }
 
 export function getEffectiveCoursePrice(course: CoursePricingLike): number {
