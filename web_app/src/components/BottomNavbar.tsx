@@ -18,6 +18,8 @@ export function BottomNavbar() {
   const { lang, user, cart } = useApp();
   const pathname = usePathname();
 
+  if (!user) return null;
+
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
     if (path === '/courses') return pathname.startsWith('/courses') || pathname.startsWith('/search');
