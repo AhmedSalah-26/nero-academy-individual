@@ -16,6 +16,7 @@ import {
   Science,
   Calculate,
   FolderOpen,
+  Category,
 } from '@mui/icons-material';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
@@ -105,12 +106,17 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div ref={pageRef} className="container fade-in">
-      <div className={styles.header}>
-        <h1 className={styles.title}>{t.categories}</h1>
-        <p className={styles.subtitle}>
-          {lang === 'ar' ? 'استكشف الكورسات حسب التصنيف' : 'Explore courses by category'}
-        </p>
+    <main ref={pageRef} className={styles.page}>
+      <div className={styles.hero}>
+        <div className={styles.heroText}>
+          <h1>{t.categories}</h1>
+          <p>
+            {lang === 'ar' ? 'استكشف الكورسات حسب التصنيف' : 'Explore courses by category'}
+          </p>
+        </div>
+        <div className={styles.heroIcon}>
+          <Category />
+        </div>
       </div>
 
       <div className={styles.grid}>
@@ -138,6 +144,6 @@ export default function CategoriesPage() {
           );
         })}
       </div>
-    </div>
+    </main>
   );
 }
