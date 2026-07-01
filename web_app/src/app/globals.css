@@ -166,12 +166,12 @@ button, input, textarea, select { font-family: inherit; }
 .hidden { display: none !important; }
 
 [data-theme="dark"] {
-  --primary-rgb: 147, 197, 253;
-  --primary: #93C5FD;
-  --primary-dark: #2563EB;
-  --primary-light: #1E3A5F;
-  --primary-on-dark: #93C5FD;
-  --primary-glow: rgba(147, 197, 253, 0.15);
+  --primary-rgb: 59, 130, 246;
+  --primary: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --primary-light: #1e3a8a;
+  --primary-on-dark: #60a5fa;
+  --primary-glow: rgba(59, 130, 246, 0.15);
 
   --background: #0F172A;
   --surface: rgba(30, 41, 59, 0.86);
