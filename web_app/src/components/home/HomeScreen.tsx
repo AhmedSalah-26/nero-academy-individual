@@ -281,9 +281,6 @@ export function HomeScreen() {
                 <p>{lang === 'ar' ? 'أنت على الطريق الصحيح' : 'You are on the right track'}</p>
               </div>
             </div>
-            <div className={styles.heroVisual} aria-hidden="true">
-              <img src="/transparent_hero.png" alt="" />
-            </div>
           </section>
 
 

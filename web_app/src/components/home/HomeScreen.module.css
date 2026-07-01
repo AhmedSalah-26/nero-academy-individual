@@ -29,17 +29,13 @@
 .hero {
   position: relative;
   min-height: 370px;
-  display: grid;
-  grid-template-columns: minmax(260px, 0.86fr) minmax(0, 1fr);
-  align-items: stretch;
+  display: block;
   overflow: hidden;
   margin-bottom: 20px;
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at 24% 28%, rgba(255, 255, 255, 0.24), transparent 19%),
-    radial-gradient(circle at 70% 74%, rgba(255, 255, 255, 0.16), transparent 23%),
-    linear-gradient(135deg, #7667ff 0%, #4b39db 48%, #1d3fd1 100%);
+  background: linear-gradient(rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.35)), url('/COVER.png') no-repeat center center;
+  background-size: cover;
   box-shadow: 0 24px 56px rgba(49, 46, 129, 0.22);
   isolation: isolate;
 }
@@ -92,6 +88,7 @@
   gap: 16px;
   padding: 42px 42px 42px 26px;
   color: #fff;
+  max-width: 600px;
 }
 
 .heroEyebrow {
