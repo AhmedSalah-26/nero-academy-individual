@@ -173,18 +173,18 @@ export default function HomePage() {
           <div className={`${styles.heroText} animate-fade-up`}>
             <div className={styles.heroBadge}>
               <AutoAwesome fontSize="small" />
-              <span>{lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}</span>
+              <span>{lang === 'ar' ? 'برمجة مفهومة، خطوة بخطوة' : 'Programming, clearly explained'}</span>
             </div>
             
             <h1>
               {lang === 'ar' ? (
                 <>
-                  افهم الكيمياء.<br />
-                  <span>حقق الدرجة.</span>
+                  افهم البرمجة.<br />
+                  <span>حقق هدفك.</span>
                 </>
               ) : (
                 <>
-                  Understand chemistry.<br />
+                  Understand programming.<br />
                   <span>Earn the grade.</span>
                 </>
               )}
@@ -213,8 +213,8 @@ export default function HomePage() {
             <div className={styles.visualRing} />
             <div className={styles.teacherContainer}>
               <Image
-                src="/chemistry-teacher-v2.png"
-                alt={lang === 'ar' ? 'مدرس الكيمياء أحمد الشيخ' : 'Chemistry teacher Ahmed El-Sheikh'}
+                src="/logo2.png"
+                alt={lang === 'ar' ? 'المهندس شهاب غزال' : 'Eng Shehab Ghazal'}
                 fill
                 priority
                 sizes="(max-width: 760px) 78vw, 520px"
