@@ -86,7 +86,7 @@ export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, wid
         {course.instructor_name && <p className={styles.instructor}>{course.instructor_name}</p>}
         <div className={styles.stats}>
           <span className={styles.rating}>
-            <span className={styles.star}>★</span> {course.rating.toFixed(1)}
+            <span className={styles.star}>★</span> {(course.rating || 5.0).toFixed(1)}
             <span className={styles.ratingCount}>({formatCount(course.rating_count || 0)})</span>
           </span>
           <span className={styles.enrolled}>

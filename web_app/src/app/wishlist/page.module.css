@@ -16,11 +16,11 @@
   margin-top: 24px;
   margin-bottom: 32px;
   padding: 40px 44px;
-  background: linear-gradient(135deg, #E11D48 0%, #BE123C 55%, #9F1239 100%);
+  background: linear-gradient(135deg, #9f1239 0%, #881337 55%, #4c0519 100%);
   border-radius: var(--radius-xl);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(225, 29, 72, 0.25);
+  box-shadow: 0 16px 40px rgba(159, 18, 57, 0.25);
 }
 
 .hero::before {

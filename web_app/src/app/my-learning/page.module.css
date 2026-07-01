@@ -42,8 +42,8 @@
   padding: 44px 48px;
   overflow: hidden;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--primary) 0%, #1D4ED8 55%, #7C3AED 100%);
-  box-shadow: var(--shadow-primary);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #1e3a8a 60%, #0f172a 100%);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
 }
 
 .dashboardHeader::before {

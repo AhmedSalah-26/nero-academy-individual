@@ -346,7 +346,7 @@ function SearchContent() {
                   <h3>{lang === 'ar' ? course.title_ar : course.title_en}</h3>
                   <p>{lang === 'ar' ? course.subtitle_ar : course.subtitle_en}</p>
                   <div className={styles.metaRow}>
-                    <span className={styles.ratingVal}><Star fontSize="small" /> {Number(course.rating || 0).toFixed(1)}</span>
+                    <span className={styles.ratingVal}><Star fontSize="small" /> {Number(course.rating || 5.0).toFixed(1)}</span>
                     <span><Schedule fontSize="small" /> {course.total_duration || 0} {t.durationMinutes}</span>
                     <span><Groups fontSize="small" /> {course.enrolled_count || 0}</span>
                   </div>

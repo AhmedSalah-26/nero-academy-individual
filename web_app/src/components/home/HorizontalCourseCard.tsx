@@ -60,7 +60,7 @@ export function HorizontalCourseCard({ course, isWishlisted, onWishlistToggle }:
         )}
         <div className={styles.bottomRow}>
           <span className={styles.rating}>
-            <span className={styles.star}>★</span> {course.rating.toFixed(1)}
+            <span className={styles.star}>★</span> {(course.rating || 5.0).toFixed(1)}
           </span>
           {course.is_free ? (
             <span className={styles.freePrice}>{lang === 'ar' ? 'مجاني' : 'Free'}</span>
