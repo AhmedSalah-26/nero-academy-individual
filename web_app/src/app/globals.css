@@ -350,3 +350,9 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+@media (max-width: 720px) {
+  body {
+    padding-bottom: 64px !important;
+  }
+}

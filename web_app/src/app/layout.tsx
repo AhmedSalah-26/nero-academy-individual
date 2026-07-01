@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '../context/AppContext';
 import { Header } from '../components/Header';
+import { BottomNavbar } from '../components/BottomNavbar';
 import DynamicOfflineIndicator from '../components/DynamicOfflineIndicator';
 
 export const metadata: Metadata = {
@@ -30,10 +31,11 @@ export default function RootLayout({
             <Header />
             <DynamicOfflineIndicator />
             <main style={{ flex: 1 }}>{children}</main>
+            <BottomNavbar />
             <footer
               style={{
                 textAlign: 'center',
-                padding: '28px 20px',
+                padding: '28px 20px 92px',
                 borderTop: '1px solid var(--border)',
                 color: 'var(--text-secondary)',
                 fontSize: '0.72rem',
