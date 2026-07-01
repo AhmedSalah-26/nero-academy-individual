@@ -100,3 +100,34 @@
 .markCompleteBtn{border:1px solid var(--border)!important;background:var(--surface-card)!important;color:var(--primary)!important}
 
 .completionContent{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}.trophyIcon{font-size:48px;color:var(--rating)}.completionContent p{font-size:.82rem;color:var(--text-main);line-height:1.6} 
+
+.emptyStagePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  background: radial-gradient(circle at 14% 16%,color-mix(in srgb,var(--primary) 8%,transparent),transparent 12rem), var(--surface-card);
+  min-height: 280px;
+}
+
+.emptyStagePlaceholder h2 {
+  margin: 16px 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--primary);
+}
+
+.emptyStagePlaceholder p {
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.placeholderIcon {
+  font-size: 56px !important;
+  color: var(--primary);
+  opacity: 0.85;
+}

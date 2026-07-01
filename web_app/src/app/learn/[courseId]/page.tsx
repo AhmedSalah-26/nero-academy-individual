@@ -416,244 +416,252 @@ export default function CoursePlayerPage() {
 
         <main className={styles.main}>
           {activeLesson ? (
-            <>
-              <section className={styles.mediaStage} ref={mediaStageRef}>
-                <header className={styles.lessonHeader}>
-                  <div className={styles.stageHeading}>
-                    <span>{sectionTitle}</span>
-                    <h1>{title}</h1>
-                    <div>
-                      <span><CheckCircle fontSize="small" />{completedLessons.includes(activeLesson.id) ? (lang === 'ar' ? 'مكتمل' : 'Completed') : (lang === 'ar' ? 'ضع علامة مكتمل' : 'Mark completed')}</span>
-                      <span><Schedule fontSize="small" />{activeLesson.video_duration ? `${Math.round(activeLesson.video_duration / 60)} ${lang === 'ar' ? 'دقيقة' : 'min'}` : ''}</span>
-                    </div>
+            <section className={styles.mediaStage} ref={mediaStageRef}>
+              <header className={styles.lessonHeader}>
+                <div className={styles.stageHeading}>
+                  <span>{sectionTitle}</span>
+                  <h1>{title}</h1>
+                  <div>
+                    <span><CheckCircle fontSize="small" />{completedLessons.includes(activeLesson.id) ? (lang === 'ar' ? 'مكتمل' : 'Completed') : (lang === 'ar' ? 'ضع علامة مكتمل' : 'Mark completed')}</span>
+                    <span><Schedule fontSize="small" />{activeLesson.video_duration ? `${Math.round(activeLesson.video_duration / 60)} ${lang === 'ar' ? 'دقيقة' : 'min'}` : ''}</span>
                   </div>
-                  <div className={styles.stageButtons}>
-                    <button onClick={handleToggleBookmark} aria-label="Bookmark">
-                      {isBookmarked ? <Bookmark fontSize="small" /> : <BookmarkBorder fontSize="small" />}
-                    </button>
-                    <button onClick={() => setShowSpeedMenu(!showSpeedMenu)} aria-label="Speed">
-                      <Speed fontSize="small" />
-                    </button>
-                    <button onClick={handleToggleFullscreen} aria-label="Fullscreen">
-                      {isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
-                    </button>
-                  </div>
-                  {showSpeedMenu && (
-                    <div className={styles.speedMenu}>
-                      {SPEED_OPTIONS.map((s) => (
-                        <button key={s} className={playbackSpeed === s ? styles.speedActive : ''} onClick={() => { setPlaybackSpeed(s); setShowSpeedMenu(false); }}>
-                          {s}x
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </header>
-                <div className={styles.mediaContent}>
-                  {activeLesson.type === 'video' && activeLesson.video_url && (
-                    <VideoPlayer videoUrl={activeLesson.video_url} title={title} lessonId={activeLesson.id} startAt={lastPositions[activeLesson.id] || 0} onProgress={handleVideoProgress} onComplete={handleVideoComplete} playbackSpeed={playbackSpeed} />
-                  )}
-                  {activeLesson.type === 'article' && (
-                    <div className={styles.articleCard}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: sanitizeHtml(lang === 'ar' ? activeLesson.article_content_ar : activeLesson.article_content_en) }} /></div>
-                  )}
-                  {activeLesson.type === 'quiz' && (
-                    <div className={styles.fallback}>
-                      <AssignmentTurnedIn fontSize="large" />
-                      <h2>{title}</h2>
-                      {quizzesByLesson[activeLesson.id] && <Link href={`/quiz/${quizzesByLesson[activeLesson.id]}?enrollment=${enrollmentId}&courseId=${courseId}`}>{lang === 'ar' ? 'فتح الامتحان' : 'Open exam'}</Link>}
-                    </div>
-                  )}
-                  {!['video', 'article', 'quiz'].includes(activeLesson.type) && (
-                    <div className={styles.fallback}>
-                      <Description fontSize="large" />
-                      <h2>{title}</h2>
-                      {activeLesson.file_url && <a href={activeLesson.file_url} target="_blank" rel="noreferrer">{lang === 'ar' ? 'تحميل الملف' : 'Download file'}</a>}
-                    </div>
-                  )}
                 </div>
-              </section>
-
-              <div className={styles.infoGrid}>
-                <section className={styles.infoCard}>
-                  <div className={styles.tabs}>
-                    {(['lectures', 'more', 'qa', 'quizzes', 'rating'] as const).map((tab) => (
-                      <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? styles.activeTab : ''}>
-                        {lang === 'ar' ? tabLabels[tab].ar : tabLabels[tab].en}
+                <div className={styles.stageButtons}>
+                  <button onClick={handleToggleBookmark} aria-label="Bookmark">
+                    {isBookmarked ? <Bookmark fontSize="small" /> : <BookmarkBorder fontSize="small" />}
+                  </button>
+                  <button onClick={() => setShowSpeedMenu(!showSpeedMenu)} aria-label="Speed">
+                    <Speed fontSize="small" />
+                  </button>
+                  <button onClick={handleToggleFullscreen} aria-label="Fullscreen">
+                    {isFullscreen ? <FullscreenExit fontSize="small" /> : <Fullscreen fontSize="small" />}
+                  </button>
+                </div>
+                {showSpeedMenu && (
+                  <div className={styles.speedMenu}>
+                    {SPEED_OPTIONS.map((s) => (
+                      <button key={s} className={playbackSpeed === s ? styles.speedActive : ''} onClick={() => { setPlaybackSpeed(s); setShowSpeedMenu(false); }}>
+                        {s}x
                       </button>
                     ))}
                   </div>
-                  <div className={styles.tabPanel}>
-                    {activeTab === 'lectures' && (
-                      <div className={styles.lecturesTab}>
-                        {tabLoading && <p>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>}
-                        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml((lang === 'ar' ? activeLesson.description_ar || activeLesson.article_content_ar : activeLesson.description_en || activeLesson.article_content_en) || (course ? (lang === 'ar' ? course.description_ar : course.description_en) : '') || (lang === 'ar' ? 'محتوى الدرس' : 'Lesson content')) }} />
-                      </div>
-                    )}
+                )}
+              </header>
+              <div className={styles.mediaContent}>
+                {activeLesson.type === 'video' && activeLesson.video_url && (
+                  <VideoPlayer videoUrl={activeLesson.video_url} title={title} lessonId={activeLesson.id} startAt={lastPositions[activeLesson.id] || 0} onProgress={handleVideoProgress} onComplete={handleVideoComplete} playbackSpeed={playbackSpeed} />
+                )}
+                {activeLesson.type === 'article' && (
+                  <div className={styles.articleCard}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: sanitizeHtml(lang === 'ar' ? activeLesson.article_content_ar : activeLesson.article_content_en) }} /></div>
+                )}
+                {activeLesson.type === 'quiz' && (
+                  <div className={styles.fallback}>
+                    <AssignmentTurnedIn fontSize="large" />
+                    <h2>{title}</h2>
+                    {quizzesByLesson[activeLesson.id] && <Link href={`/quiz/${quizzesByLesson[activeLesson.id]}?enrollment=${enrollmentId}&courseId=${courseId}`}>{lang === 'ar' ? 'فتح الامتحان' : 'Open exam'}</Link>}
+                  </div>
+                )}
+                {!['video', 'article', 'quiz'].includes(activeLesson.type) && (
+                  <div className={styles.fallback}>
+                    <Description fontSize="large" />
+                    <h2>{title}</h2>
+                    {activeLesson.file_url && <a href={activeLesson.file_url} target="_blank" rel="noreferrer">{lang === 'ar' ? 'تحميل الملف' : 'Download file'}</a>}
+                  </div>
+                )}
+              </div>
+            </section>
+          ) : (
+            <section className={styles.mediaStage}>
+              <div className={styles.emptyStagePlaceholder}>
+                <VideoLibrary fontSize="large" className={styles.placeholderIcon} />
+                <h2>{course ? (lang === 'ar' ? course.title_ar : course.title_en) : (lang === 'ar' ? 'محتوى الكورس' : 'Course content')}</h2>
+                <p>{lang === 'ar' ? 'اختر درساً من القائمة للبدء في المشاهدة والتعلم.' : 'Select a lesson from the sidebar to start learning.'}</p>
+              </div>
+            </section>
+          )}
 
-                    {activeTab === 'more' && (
-                      <div>
-                        <div className={styles.moreSubTabs}>
-                          {(['notes', 'bookmarks', 'announcements', 'attachments'] as const).map((sub) => (
-                            <button key={sub} onClick={() => setMoreSubTab(sub)} className={moreSubTab === sub ? styles.moreSubTabActive : ''}>
-                              {lang === 'ar' ? moreSubTabLabels[sub].ar : moreSubTabLabels[sub].en}
-                            </button>
+          <div className={styles.infoGrid}>
+            <section className={styles.infoCard}>
+              <div className={styles.tabs}>
+                {(['lectures', 'more', 'qa', 'quizzes', 'rating'] as const).map((tab) => (
+                  <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? styles.activeTab : ''}>
+                    {lang === 'ar' ? tabLabels[tab].ar : tabLabels[tab].en}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.tabPanel}>
+                {activeTab === 'lectures' && (
+                  <div className={styles.lecturesTab}>
+                    {tabLoading && <p>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>}
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml((activeLesson ? (lang === 'ar' ? activeLesson.description_ar || activeLesson.article_content_ar : activeLesson.description_en || activeLesson.article_content_en) : '') || (course ? (lang === 'ar' ? course.description_ar : course.description_en) : '') || (lang === 'ar' ? 'محتوى الدرس' : 'Lesson content')) }} />
+                  </div>
+                )}
+
+                {activeTab === 'more' && (
+                  <div>
+                    <div className={styles.moreSubTabs}>
+                      {(['notes', 'bookmarks', 'announcements', 'attachments'] as const).map((sub) => (
+                        <button key={sub} onClick={() => setMoreSubTab(sub)} className={moreSubTab === sub ? styles.moreSubTabActive : ''}>
+                          {lang === 'ar' ? moreSubTabLabels[sub].ar : moreSubTabLabels[sub].en}
+                        </button>
+                      ))}
+                    </div>
+
+                    {moreSubTab === 'notes' && (
+                      <div className={styles.notesSection}>
+                        {activeLesson && (
+                          <div className={styles.noteForm}>
+                            <textarea className={styles.noteInput} value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder={lang === 'ar' ? 'اكتب ملاحظة...' : 'Write a note...'} rows={3} />
+                            <div className={styles.noteFormActions}>
+                              <input type="number" className={styles.timestampInput} value={noteTimestamp || ''} onChange={(e) => setNoteTimestamp(Number(e.target.value))} placeholder="0:00" min={0} />
+                              <AppButton size="small" onClick={handleAddNote} startIcon={<Add fontSize="small" />}>
+                                {lang === 'ar' ? 'إضافة' : 'Add'}
+                              </AppButton>
+                            </div>
+                          </div>
+                        )}
+                        <div className={styles.notesList}>
+                          {notes.length === 0 ? (
+                            <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد ملاحظات بعد' : 'No notes yet'}</p>
+                          ) : notes.map((note) => (
+                            <div key={note.id} className={styles.noteItem}>
+                              <div className={styles.noteContent}>
+                                {note.timestamp > 0 && <span className={styles.noteTimestamp}>{formatTimestamp(note.timestamp)}</span>}
+                                <p>{note.content}</p>
+                              </div>
+                              <button className={styles.noteDelete} onClick={() => handleDeleteNote(note.id)} aria-label="Delete note">
+                                <Delete fontSize="small" />
+                              </button>
+                            </div>
                           ))}
                         </div>
-
-                        {moreSubTab === 'notes' && (
-                          <div className={styles.notesSection}>
-                            <div className={styles.noteForm}>
-                              <textarea className={styles.noteInput} value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder={lang === 'ar' ? 'اكتب ملاحظة...' : 'Write a note...'} rows={3} />
-                              <div className={styles.noteFormActions}>
-                                <input type="number" className={styles.timestampInput} value={noteTimestamp || ''} onChange={(e) => setNoteTimestamp(Number(e.target.value))} placeholder="0:00" min={0} />
-                                <AppButton size="small" onClick={handleAddNote} startIcon={<Add fontSize="small" />}>
-                                  {lang === 'ar' ? 'إضافة' : 'Add'}
-                                </AppButton>
-                              </div>
-                            </div>
-                            <div className={styles.notesList}>
-                              {notes.length === 0 ? (
-                                <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد ملاحظات بعد' : 'No notes yet'}</p>
-                              ) : notes.map((note) => (
-                                <div key={note.id} className={styles.noteItem}>
-                                  <div className={styles.noteContent}>
-                                    {note.timestamp > 0 && <span className={styles.noteTimestamp}>{formatTimestamp(note.timestamp)}</span>}
-                                    <p>{note.content}</p>
-                                  </div>
-                                  <button className={styles.noteDelete} onClick={() => handleDeleteNote(note.id)} aria-label="Delete note">
-                                    <Delete fontSize="small" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {moreSubTab === 'bookmarks' && (
-                          <div className={styles.bookmarksList}>
-                            {bookmarks.length === 0 ? (
-                              <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد إشارات مرجعية' : 'No bookmarks yet'}</p>
-                            ) : bookmarks.map((bm) => (
-                              <button key={bm.id} className={styles.bookmarkItem} onClick={() => {
-                                const lesson = flatLessons.find(({ lesson }) => lesson.id === bm.lesson_id)?.lesson;
-                                if (lesson) selectLesson(lesson);
-                              }}>
-                                <Bookmark fontSize="small" />
-                                <span>{lang === 'ar' ? bm.lesson_title_ar || bm.lesson_title_en : bm.lesson_title_en || bm.lesson_title_ar}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {moreSubTab === 'announcements' && (
-                          <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد إعلانات حاليًا' : 'No announcements yet'}</p>
-                        )}
-
-                        {moreSubTab === 'attachments' && (
-                          <div className={styles.resourceList}>
-                            {allAttachments.length ? allAttachments.map((file) => (
-                              <a href={file.file_url} target="_blank" rel="noreferrer" className={styles.fileItem} key={file.id}>
-                                <Description fontSize="small" />
-                                <span><strong>{lang === 'ar' ? file.file_name_ar || file.file_name : file.file_name}</strong><small>{file.file_type || (lang === 'ar' ? 'ملف مرفق' : 'Attachment')}</small></span>
-                                <Download fontSize="small" />
-                              </a>
-                            )) : <p>{lang === 'ar' ? 'لا توجد ملفات مرفقة' : 'No attachments'}</p>}
-                          </div>
-                        )}
                       </div>
                     )}
 
-                    {activeTab === 'qa' && (
-                      <div className={styles.questionsBlock}>
-                        {tabLoading && <p>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>}
-                        {questions.length ? questions.slice(0, 5).map((question) => (
-                          <article className={styles.questionItem} key={question.id}>
-                            <HelpIcon fontSize="small" />
-                            <div>
-                              <strong>{question.title}</strong>
-                              <p>{question.content}</p>
-                              <small>{question.profiles?.name || (lang === 'ar' ? 'طالب' : 'Student')} · {question.is_answered ? (lang === 'ar' ? 'تمت الإجابة' : 'Answered') : `${question.answers_count || 0} ${lang === 'ar' ? 'إجابة' : 'answers'}`}</small>
-                            </div>
-                          </article>
-                        )) : <p>{lang === 'ar' ? 'لا توجد أسئلة على هذا الدرس حتى الآن.' : 'No questions for this lesson yet.'}</p>}
-                        <Link className={styles.qaLink} href={`/qa?courseId=${courseId}&lessonId=${activeLesson.id}`}>
-                          {lang === 'ar' ? 'عرض الأسئلة أو إضافة سؤال' : 'View questions or ask'}
-                          <ArrowBack fontSize="small" />
-                        </Link>
+                    {moreSubTab === 'bookmarks' && (
+                      <div className={styles.bookmarksList}>
+                        {bookmarks.length === 0 ? (
+                          <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد إشارات مرجعية' : 'No bookmarks yet'}</p>
+                        ) : bookmarks.map((bm) => (
+                          <button key={bm.id} className={styles.bookmarkItem} onClick={() => {
+                            const lesson = flatLessons.find(({ lesson }) => lesson.id === bm.lesson_id)?.lesson;
+                            if (lesson) selectLesson(lesson);
+                          }}>
+                            <Bookmark fontSize="small" />
+                            <span>{lang === 'ar' ? bm.lesson_title_ar || bm.lesson_title_en : bm.lesson_title_en || bm.lesson_title_ar}</span>
+                          </button>
+                        ))}
                       </div>
                     )}
 
-                    {activeTab === 'quizzes' && (
-                      <div className={styles.quizzesTab}>
-                        {courseQuizzes.length === 0 ? (
-                          <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد اختبارات لهذا الكورس' : 'No quizzes for this course'}</p>
-                        ) : courseQuizzes.map(([lessonId, quizId]) => {
-                          const lesson = flatLessons.find(({ lesson }) => lesson.id === lessonId)?.lesson;
-                          return (
-                            <Link key={quizId} href={`/quiz/${quizId}?enrollment=${enrollmentId}&courseId=${courseId}`} className={styles.quizItem}>
-                              <AssignmentTurnedIn fontSize="small" />
-                              <span>{lesson ? (lang === 'ar' ? lesson.title_ar : lesson.title_en) : (lang === 'ar' ? 'اختبار' : 'Quiz')}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
+                    {moreSubTab === 'announcements' && (
+                      <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد إعلانات حاليًا' : 'No announcements yet'}</p>
                     )}
 
-                    {activeTab === 'rating' && (
-                      <div className={styles.ratingTab}>
-                        {course && course.rating_count !== undefined && course.rating_count > 0 && (
-                          <div className={styles.ratingSummary}>
-                            <div className={styles.ratingBigScore}>
-                              <span className={styles.ratingBigNumber}>{course.rating ? Number(course.rating).toFixed(1) : '5.0'}</span>
-                              <RatingStars value={course.rating || 5} size="md" />
-                              <span className={styles.ratingTotalCount}>{course.rating_count} {lang === 'ar' ? 'تقييم' : 'ratings'}</span>
-                            </div>
-                            <div className={styles.ratingBars}>
-                              {ratingBuckets.map((b) => (
-                                <div key={b.stars} className={styles.ratingBarRow}>
-                                  <span>{b.stars}</span>
-                                  <Star fontSize="small" className={styles.starIcon} />
-                                  <div className={styles.ratingBarTrack}><div className={styles.ratingBarFill} style={{ width: `${b.percentage}%` }} /></div>
-                                  <span className={styles.ratingBarPct}>{b.percentage}%</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <div className={styles.writeReview}>
-                          <h4>{lang === 'ar' ? 'اكتب تقييمك' : 'Write your review'}</h4>
-                          <div className={styles.userRatingRow}>
-                            <RatingStars value={userRating} size="lg" interactive onChange={setUserRating} />
-                          </div>
-                          <textarea className={styles.reviewTextarea} value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder={lang === 'ar' ? 'شاركنا رأيك...' : 'Share your opinion...'} rows={3} />
-                          <AppButton size="small" disabled={userRating === 0}>{lang === 'ar' ? 'إرسال' : 'Submit'}</AppButton>
-                        </div>
+                    {moreSubTab === 'attachments' && (
+                      <div className={styles.resourceList}>
+                        {allAttachments.length ? allAttachments.map((file) => (
+                          <a href={file.file_url} target="_blank" rel="noreferrer" className={styles.fileItem} key={file.id}>
+                            <Description fontSize="small" />
+                            <span><strong>{lang === 'ar' ? file.file_name_ar || file.file_name : file.file_name}</strong><small>{file.file_type || (lang === 'ar' ? 'ملف مرفق' : 'Attachment')}</small></span>
+                            <Download fontSize="small" />
+                          </a>
+                        )) : <p>{lang === 'ar' ? 'لا توجد ملفات مرفقة' : 'No attachments'}</p>}
                       </div>
                     )}
                   </div>
-                </section>
+                )}
 
-                <aside className={styles.instructorCard}>
-                  <div className={styles.avatar}>{instructorAvatar ? <img src={instructorAvatar} alt={instructorName} /> : <Person fontSize="medium" />}</div>
-                  <div><strong>{instructorName}</strong><small>{instructorHeadline}</small></div>
-                  <Link href={`/courses/${courseId}`}>{lang === 'ar' ? 'عرض تفاصيل الكورس' : 'View course details'}</Link>
-                </aside>
+                {activeTab === 'qa' && (
+                  <div className={styles.questionsBlock}>
+                    {tabLoading && <p>{lang === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>}
+                    {questions.length ? questions.slice(0, 5).map((question) => (
+                      <article className={styles.questionItem} key={question.id}>
+                        <HelpIcon fontSize="small" />
+                        <div>
+                          <strong>{question.title}</strong>
+                          <p>{question.content}</p>
+                          <small>{question.profiles?.name || (lang === 'ar' ? 'طالب' : 'Student')} · {question.is_answered ? (lang === 'ar' ? 'تمت الإجابة' : 'Answered') : `${question.answers_count || 0} ${lang === 'ar' ? 'إجابة' : 'answers'}`}</small>
+                        </div>
+                      </article>
+                    )) : <p>{lang === 'ar' ? 'لا توجد أسئلة على هذا الدرس حتى الآن.' : 'No questions for this lesson yet.'}</p>}
+                    <Link className={styles.qaLink} href={`/qa?courseId=${courseId}${activeLesson ? `&lessonId=${activeLesson.id}` : ''}`}>
+                      {lang === 'ar' ? 'عرض الأسئلة أو إضافة سؤال' : 'View questions or ask'}
+                      <ArrowBack fontSize="small" />
+                    </Link>
+                  </div>
+                )}
+
+                {activeTab === 'quizzes' && (
+                  <div className={styles.quizzesTab}>
+                    {courseQuizzes.length === 0 ? (
+                      <p className={styles.emptyNotes}>{lang === 'ar' ? 'لا توجد اختبارات لهذا الكورس' : 'No quizzes for this course'}</p>
+                    ) : courseQuizzes.map(([lessonId, quizId]) => {
+                      const lesson = flatLessons.find(({ lesson }) => lesson.id === lessonId)?.lesson;
+                      return (
+                        <Link key={quizId} href={`/quiz/${quizId}?enrollment=${enrollmentId}&courseId=${courseId}`} className={styles.quizItem}>
+                          <AssignmentTurnedIn fontSize="small" />
+                          <span>{lesson ? (lang === 'ar' ? lesson.title_ar : lesson.title_en) : (lang === 'ar' ? 'اختبار' : 'Quiz')}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {activeTab === 'rating' && (
+                  <div className={styles.ratingTab}>
+                    {course && course.rating_count !== undefined && course.rating_count > 0 && (
+                      <div className={styles.ratingSummary}>
+                        <div className={styles.ratingBigScore}>
+                          <span className={styles.ratingBigNumber}>{course.rating ? Number(course.rating).toFixed(1) : '5.0'}</span>
+                          <RatingStars value={course.rating || 5} size="md" />
+                          <span className={styles.ratingTotalCount}>{course.rating_count} {lang === 'ar' ? 'تقييم' : 'ratings'}</span>
+                        </div>
+                        <div className={styles.ratingBars}>
+                          {ratingBuckets.map((b) => (
+                            <div key={b.stars} className={styles.ratingBarRow}>
+                              <span>{b.stars}</span>
+                              <Star fontSize="small" className={styles.starIcon} />
+                              <div className={styles.ratingBarTrack}><div className={styles.ratingBarFill} style={{ width: `${b.percentage}%` }} /></div>
+                              <span className={styles.ratingBarPct}>{b.percentage}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className={styles.writeReview}>
+                      <h4>{lang === 'ar' ? 'اكتب تقييمك' : 'Write your review'}</h4>
+                      <div className={styles.userRatingRow}>
+                        <RatingStars value={userRating} size="lg" interactive onChange={setUserRating} />
+                      </div>
+                      <textarea className={styles.reviewTextarea} value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder={lang === 'ar' ? 'شاركنا رأيك...' : 'Share your opinion...'} rows={3} />
+                      <AppButton size="small" disabled={userRating === 0}>{lang === 'ar' ? 'إرسال' : 'Submit'}</AppButton>
+                    </div>
+                  </div>
+                )}
               </div>
+            </section>
 
-              <nav className={styles.lessonNav}>
-                <button onClick={() => selectLesson(previousLesson)} disabled={!previousLesson}>
-                  <ArrowForward fontSize="small" />{lang === 'ar' ? 'السابق' : 'Previous'}
-                </button>
-                <button onClick={() => { if (activeLesson) void toggleCompleted(activeLesson.id); }} className={styles.markCompleteBtn}>
-                  <CheckCircle fontSize="small" />
-                  {completedLessons.includes(activeLesson?.id || '') ? (lang === 'ar' ? 'مكتمل' : 'Completed') : (lang === 'ar' ? 'اكتمال' : 'Complete')}
-                </button>
-                <button onClick={() => selectLesson(nextLesson)} disabled={!nextLesson}>
-                  {lang === 'ar' ? 'التالي' : 'Next'}<ArrowBack fontSize="small" />
-                </button>
-              </nav>
-            </>
-          ) : (
-            <div className={styles.empty}>{lang === 'ar' ? 'اختر درسًا للبدء' : 'Select a lesson to start'}</div>
+            <aside className={styles.instructorCard}>
+              <div className={styles.avatar}>{instructorAvatar ? <img src={instructorAvatar} alt={instructorName} /> : <Person fontSize="medium" />}</div>
+              <div><strong>{instructorName}</strong><small>{instructorHeadline}</small></div>
+              <Link href={`/courses/${courseId}`}>{lang === 'ar' ? 'عرض تفاصيل الكورس' : 'View course details'}</Link>
+            </aside>
+          </div>
+
+          {activeLesson && (
+            <nav className={styles.lessonNav}>
+              <button onClick={() => selectLesson(previousLesson)} disabled={!previousLesson}>
+                <ArrowForward fontSize="small" />{lang === 'ar' ? 'السابق' : 'Previous'}
+              </button>
+              <button onClick={() => { if (activeLesson) void toggleCompleted(activeLesson.id); }} className={styles.markCompleteBtn}>
+                <CheckCircle fontSize="small" />
+                {completedLessons.includes(activeLesson?.id || '') ? (lang === 'ar' ? 'مكتمل' : 'Completed') : (lang === 'ar' ? 'اكتمال' : 'Complete')}
+              </button>
+              <button onClick={() => selectLesson(nextLesson)} disabled={!nextLesson}>
+                {lang === 'ar' ? 'التالي' : 'Next'}<ArrowBack fontSize="small" />
+              </button>
+            </nav>
           )}
         </main>
       </div>
