@@ -46,13 +46,10 @@ interface Section {
 }
 
 interface PricingOption {
-  id: string;
-  label_ar: string;
-  label_en: string;
+  label: string;
   price: number;
+  duration_days?: number;
   originalPrice?: number;
-  isFree?: boolean;
-  features?: string[];
 }
 
 interface CourseDetails {
@@ -139,7 +136,7 @@ export default function CourseDetailsPage() {
           };
           setCourse(parsedCourse as CourseDetails);
           if (parsedOptions && parsedOptions.length > 0) {
-            setSelectedPricingId(parsedOptions[0].id);
+            setSelectedPricingId(parsedOptions[0].label);
           }
         }
 
@@ -347,29 +344,25 @@ export default function CourseDetailsPage() {
             <div className={styles.pricingOptionsList}>
               {course.pricing_options.map((opt) => (
                 <button
-                  key={opt.id}
+                  key={opt.label}
                   type="button"
-                  className={`${styles.pricingOptionCard} ${selectedPricingId === opt.id ? styles.pricingOptionSelected : ''}`}
-                  onClick={() => setSelectedPricingId(opt.id)}
+                  className={`${styles.pricingOptionCard} ${selectedPricingId === opt.label ? styles.pricingOptionSelected : ''}`}
+                  onClick={() => setSelectedPricingId(opt.label)}
                 >
-                  <span className={styles.pricingOptionLabel}>
-                    {lang === 'ar' ? opt.label_ar : opt.label_en}
-                  </span>
+                  <span className={styles.pricingOptionLabel}>{opt.label}</span>
                   <span className={styles.pricingOptionPrice}>
-                    {opt.isFree ? (lang === 'ar' ? 'مجاني' : 'Free') : `${opt.price} ${t.egp}`}
+                    {opt.price === 0 ? (lang === 'ar' ? 'مجاني' : 'Free') : `${opt.price} ${t.egp}`}
                     {opt.originalPrice && opt.originalPrice > opt.price && (
                       <span className={styles.pricingOptionOldPrice}>{opt.originalPrice} {t.egp}</span>
                     )}
                   </span>
-                  {opt.features && opt.features.length > 0 && (
-                    <ul className={styles.pricingOptionFeatures}>
-                      {opt.features.map((f, i) => (
-                        <li key={i}>
-                          <Check fontSize="inherit" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
+                  {opt.duration_days && (
+                    <span className={styles.pricingOptionDuration}>
+                      <Schedule fontSize="inherit" />
+                      {lang === 'ar'
+                        ? `مدة الوصول: ${opt.duration_days} يوم`
+                        : `Access for ${opt.duration_days} days`}
+                    </span>
                   )}
                 </button>
               ))}

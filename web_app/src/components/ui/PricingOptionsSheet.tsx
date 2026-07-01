@@ -6,13 +6,10 @@ import ResponsiveDialog from './ResponsiveDialog';
 import styles from './PricingOptionsSheet.module.css';
 
 interface PricingOption {
-  id: string;
-  label_ar: string;
-  label_en: string;
+  label: string;
   price: number;
+  duration_days?: number;
   originalPrice?: number;
-  isFree?: boolean;
-  features?: string[];
 }
 
 interface PricingOptionsSheetProps {
@@ -41,20 +38,19 @@ export default function PricingOptionsSheet({
     >
       <div className={styles.list}>
         {options.map((opt) => {
-          const isSelected = selectedId === opt.id;
-          const label = lang === 'ar' ? opt.label_ar : opt.label_en;
+          const isSelected = selectedId === opt.label;
 
           return (
             <button
-              key={opt.id}
+              key={opt.label}
               className={`${styles.option} ${isSelected ? styles.selected : ''}`}
-              onClick={() => onSelect?.(opt.id)}
+              onClick={() => onSelect?.(opt.label)}
               type="button"
             >
               <div className={styles.optionHeader}>
-                <span className={styles.optionLabel}>{label}</span>
+                <span className={styles.optionLabel}>{opt.label}</span>
                 <div className={styles.optionPrice}>
-                  {opt.isFree ? (
+                  {opt.price === 0 ? (
                     <span className={styles.free}>{t.free}</span>
                   ) : (
                     <>
@@ -67,12 +63,10 @@ export default function PricingOptionsSheet({
                 </div>
               </div>
 
-              {opt.features && opt.features.length > 0 && (
-                <ul className={styles.features}>
-                  {opt.features.map((feat, i) => (
-                    <li key={i}>{feat}</li>
-                  ))}
-                </ul>
+              {opt.duration_days && (
+                <p className={styles.duration}>
+                  {`مدة الوصول: ${opt.duration_days} يوم`}
+                </p>
               )}
 
               {isSelected && <div className={styles.checkmark} />}

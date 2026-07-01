@@ -457,8 +457,20 @@ export default function CartPage() {
   }
 
   return (
-    <div ref={pageRef} className="container fade-in">
-      <h1 className={styles.pageTitle}>{t.cart}</h1>
+    <main ref={pageRef} className={styles.page}>
+      {/* Hero Banner */}
+      <div className={styles.hero}>
+        <div className={styles.heroText}>
+          <p className={styles.heroEyebrow}>{lang === 'ar' ? 'مشترياتك' : 'YOUR CART'}</p>
+          <h1>{lang === 'ar' ? 'سلة المشتريات' : 'Shopping Cart'}</h1>
+          <p>
+            {lang === 'ar'
+              ? `لديك ${items.length} ${items.length === 1 ? 'كورس' : 'كورسات'} في السلة`
+              : `You have ${items.length} ${items.length === 1 ? 'course' : 'courses'} in your cart`}
+          </p>
+        </div>
+        <div className={styles.heroIcon}>🛒</div>
+      </div>
 
       <div className={styles.grid}>
         <div className={styles.itemsCol}>
@@ -622,6 +634,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
