@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star, Send, User } from 'lucide-react';
+import { Star, Send, Person } from '@mui/icons-material';
 import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import styles from './ReviewsSection.module.css';
@@ -113,7 +113,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
         </h2>
         {reviews.length > 0 && (
           <div className={styles.average}>
-            <Star size={18} fill="currentColor" />
+            <Star fontSize="small" fill="currentColor" />
             <strong>{averageRating}</strong>
             <span>({reviews.length})</span>
           </div>
@@ -133,7 +133,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
                 aria-label={`${star} stars`}
               >
                 <Star
-                  size={24}
+                  fontSize="large"
                   fill={star <= rating ? 'currentColor' : 'none'}
                   className={star <= rating ? styles.filledStar : styles.emptyStar}
                 />
@@ -153,7 +153,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
             disabled={rating === 0 || submitting}
             className={`${styles.submitBtn} gradient-bg`}
           >
-            <Send size={16} />
+            <Send fontSize="small" />
             {lang === 'ar' ? 'إرسال التقييم' : 'Submit Review'}
           </button>
         </form>
@@ -173,7 +173,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
                     <img src={review.profiles.avatar_url} alt="" className={styles.avatar} />
                   ) : (
                     <div className={styles.avatarPlaceholder}>
-                      <User size={16} />
+                      <Person fontSize="small" />
                     </div>
                   )}
                   <span>{review.profiles?.name || (lang === 'ar' ? 'طالب' : 'Student')}</span>
@@ -182,7 +182,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      size={14}
+                      fontSize="small"
                       fill={i < review.rating ? 'currentColor' : 'none'}
                       className={i < review.rating ? styles.filledStar : styles.emptyStar}
                     />

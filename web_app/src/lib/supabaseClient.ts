@@ -1,15 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Supabase environment variables are missing. Please check your .env.local configuration.'
-  );
+let supabaseInstance: SupabaseClient;
+
+if (supabaseUrl && supabaseAnonKey) {
+  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+} else {
+  if (typeof window !== 'undefined') {
+    console.warn('Supabase environment variables are missing. Please check your .env.local configuration.');
+  }
+  supabaseInstance = createClient('https://placeholder.supabase.co', 'placeholder-key');
 }
 
-export const supabase = createClient(
-  supabaseUrl || 'https://ubjhdafxmncfbaldfivd.supabase.co',
-  supabaseAnonKey || 'sb_publishable_wJvu57s6WvTFFi9JTZhBbg_mS3tYCE7'
-);
+export const supabase = supabaseInstance;

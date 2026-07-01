@@ -1,0 +1,61 @@
+.navBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.06);
+  z-index: 9990;
+  padding: 0 var(--spacing-sm);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  min-width: 0;
+  flex: 1;
+  position: relative;
+}
+
+.tabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.active .tabIcon {
+  background: var(--primary);
+  color: #fff;
+}
+
+.active {
+  color: var(--primary);
+  font-weight: var(--font-semibold);
+}
+
+.tabLabel {
+  line-height: 1;
+}

@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.fullPage {
+  min-height: 100vh;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.section {
+  padding: var(--spacing-xl) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+
+.compact {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+}
+
+.spinnerWrapper {
+  margin-bottom: var(--spacing-md);
+}
+
+.compact .spinnerWrapper {
+  margin-bottom: 0;
+}
+
+.message {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.compact .message {
+  font-size: var(--text-xs);
+}

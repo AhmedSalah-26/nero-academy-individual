@@ -1,0 +1,81 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.fullPage {
+  min-height: 100vh;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.section {
+  padding: var(--spacing-xl) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+}
+
+.compact {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.iconWrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--error-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--error);
+  margin-bottom: var(--spacing-md);
+}
+
+.section .iconWrapper,
+.compact .iconWrapper {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.section .iconWrapper svg,
+.compact .iconWrapper svg {
+  font-size: 28px;
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-main);
+  margin-bottom: var(--spacing-xs);
+}
+
+.section .title,
+.compact .title {
+  font-size: var(--text-base);
+}
+
+.message {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  max-width: 400px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.section .message,
+.compact .message {
+  font-size: var(--text-xs);
+  max-width: 280px;
+  margin-bottom: var(--spacing-md);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}

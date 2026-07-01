@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
-import { CreditCard, Smartphone, ShieldCheck } from 'lucide-react';
+import { CreditCard, Smartphone, VerifiedUser } from '@mui/icons-material';
+import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
 interface CheckoutTotals {
@@ -16,6 +17,7 @@ interface CheckoutTotals {
 }
 
 export default function CheckoutPage() {
+  const pageRef = usePageTransition();
   const { lang, t, user, profile, clearCart, loading: authLoading } = useApp();
   const router = useRouter();
 
@@ -136,7 +138,7 @@ export default function CheckoutPage() {
   if (!totals) return null;
 
   return (
-    <div className="container fade-in">
+    <div ref={pageRef} className="container fade-in">
       <div className={styles.grid}>
         
         {/* Billing details form */}
@@ -180,7 +182,7 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod('card')}
                     className={`${styles.selectorBtn} ${paymentMethod === 'card' ? styles.selectorActive : ''}`}
                   >
-                    <CreditCard size={18} />
+                    <CreditCard fontSize="small" />
                     <span>{t.creditCard}</span>
                   </button>
                   
@@ -189,7 +191,7 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod('wallet')}
                     className={`${styles.selectorBtn} ${paymentMethod === 'wallet' ? styles.selectorActive : ''}`}
                   >
-                    <Smartphone size={18} />
+                    <Smartphone fontSize="small" />
                     <span>{t.mobileWallet}</span>
                   </button>
                 </div>
@@ -218,7 +220,7 @@ export default function CheckoutPage() {
                 <span className={styles.spinner}></span>
               ) : (
                 <>
-                  <ShieldCheck size={20} />
+                  <VerifiedUser fontSize="medium" />
                   <span>{t.payNow}</span>
                 </>
               )}
@@ -249,7 +251,7 @@ export default function CheckoutPage() {
             </div>
             
             <div className={styles.securitySeal}>
-              <ShieldCheck size={16} className={styles.sealIcon} />
+              <VerifiedUser fontSize="small" className={styles.sealIcon} />
               <span>{lang === 'ar' ? 'معاملة آمنة ومحمية 100%' : '100% Secure Transaction'}</span>
             </div>
           </div>

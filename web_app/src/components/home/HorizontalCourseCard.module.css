@@ -1,0 +1,21 @@
+.card{display:flex;gap:0;border-radius:14px;overflow:hidden;border:1px solid rgba(var(--primary-rgb),.25);background:var(--surface);height:clamp(95px,6.5vw,120px);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.thumbnailLink{display:block;text-decoration:none;color:inherit;flex-shrink:0}
+.thumbnail{position:relative;width:clamp(85px,5.5vw,115px);height:100%;overflow:hidden}
+.img{width:100%;height:100%;object-fit:cover}
+.thumbnailFallback{width:100%;height:100%;display:grid;place-content:center;background:var(--surface-soft);color:var(--primary);font-size:18px;opacity:.5}
+.discountBadge{position:absolute;top:6px;inset-inline-start:6px;padding:2px 5px;border-radius:4px;background:var(--error);color:white;font-size:.5rem;font-weight:700}
+.wishlist{position:absolute;top:6px;inset-inline-end:6px;width:30px;height:30px;border-radius:50%;border:none;background:var(--glass-bg);backdrop-filter:blur(8px);font-size:14px;cursor:pointer;display:grid;place-content:center;transition:transform .15s}
+.wishlist:hover{transform:scale(1.15)}
+.wishlistActive{background:rgba(239,68,68,.15)}
+.body{flex:1;padding:clamp(8px,1.8vw,14px);display:flex;flex-direction:column;min-width:0}
+.titleRow{display:flex;align-items:flex-start;gap:6px}
+.title{font-size:.78rem;font-weight:700;color:var(--text-main);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.newBadge{padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.12);color:var(--success);font-size:.5rem;font-weight:700;flex-shrink:0;white-space:nowrap}
+.instructor{font-size:.63rem;font-weight:600;color:var(--text-muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bottomRow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px}
+.rating{display:inline-flex;align-items:center;gap:3px;padding:2px 5px;border-radius:4px;background:rgba(229,152,25,.12);font-size:.63rem;font-weight:600;color:var(--rating)}
+.star{font-size:.7rem}
+.freePrice{color:var(--success);font-size:.82rem;font-weight:700}
+.price{font-size:.82rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px}
+.del{color:var(--text-secondary);font-size:.6rem;font-weight:400;text-decoration:line-through}

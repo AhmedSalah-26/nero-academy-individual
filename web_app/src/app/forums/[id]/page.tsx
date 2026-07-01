@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { MessageCircle, Send, User } from 'lucide-react';
+import { Chat, Send, Person } from '@mui/icons-material';
 import { useApp } from '../../../context/AppContext';
 import { supabase } from '../../../lib/supabaseClient';
+import { usePageTransition } from '../../../lib/animations';
 import styles from '../../student-features.module.css';
 
 type ForumMessage = {
@@ -20,6 +21,7 @@ type ForumMessage = {
 export default function ForumPage() {
   const params = useParams<{ id: string }>();
   const courseId = params.id;
+  const pageRef = usePageTransition();
   const { user } = useApp();
   const [items, setItems] = useState<ForumMessage[]>([]);
   const [message, setMessage] = useState('');
@@ -87,11 +89,11 @@ export default function ForumPage() {
   };
 
   return (
-    <main className={`${styles.page} ${styles.forumPage}`}>
+    <main ref={pageRef} className={`${styles.page} ${styles.forumPage}`}>
       <header className={styles.forumHeader}>
         <span>LIVE DISCUSSION</span>
         <div>
-          <MessageCircle size={22} />
+          <Chat fontSize="medium" />
           <h1>مناقشة الكورس</h1>
         </div>
         <p>تواصل مع المدرس وزملائك في مساحة آمنة ومرتبة خاصة بالكورس.</p>
@@ -101,7 +103,7 @@ export default function ForumPage() {
         <div className={styles.forumMessages}>
           {items.length === 0 && (
             <div className={styles.forumEmpty}>
-              <MessageCircle size={25} />
+              <Chat fontSize="medium" />
               <strong>ابدأ أول نقاش</strong>
               <span>اكتب سؤالك أو شارك زملاءك فكرة مفيدة.</span>
             </div>
@@ -117,7 +119,7 @@ export default function ForumPage() {
                 <article className={styles.forumBubble}>
                   <div className={styles.forumAuthor}>
                     <span className={styles.forumAvatar}>
-                      <User size={13} />
+                      <Person fontSize="small" />
                     </span>
                     <strong>{mine ? 'أنت' : item.profiles?.name || 'طالب'}</strong>
                   </div>
@@ -153,7 +155,7 @@ export default function ForumPage() {
             onClick={() => void sendMessage()}
             disabled={!user || sending || !message.trim()}
           >
-            <Send size={16} />
+            <Send fontSize="small" />
             إرسال
           </button>
         </div>

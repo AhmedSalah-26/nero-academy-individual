@@ -1,0 +1,35 @@
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-soft) 25%,
+    var(--surface-hover) 50%,
+    var(--surface-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sm {
+  border-radius: var(--radius-sm);
+}
+
+.md {
+  border-radius: var(--radius-md);
+}
+
+.lg {
+  border-radius: var(--radius-lg);
+}
+
+.xl {
+  border-radius: var(--radius-xl);
+}
+
+.full {
+  border-radius: var(--radius-full);
+}

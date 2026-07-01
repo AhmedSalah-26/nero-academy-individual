@@ -1,0 +1,82 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--primary);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-soft);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.xs {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  border-width: 1px;
+}
+
+.sm {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
+  border-width: 1.5px;
+}
+
+.md {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+
+.lg {
+  width: 56px;
+  height: 56px;
+  font-size: 18px;
+}
+
+.xl {
+  width: 80px;
+  height: 80px;
+  font-size: 26px;
+}
+
+.initials {
+  font-weight: var(--font-bold);
+  color: var(--primary);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.verifiedBadge {
+  position: absolute;
+  bottom: 0;
+  inset-inline-end: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface-card);
+}
+
+.xs .verifiedBadge,
+.sm .verifiedBadge {
+  width: 10px;
+  height: 10px;
+}
+
+.xl .verifiedBadge {
+  width: 20px;
+  height: 20px;
+}

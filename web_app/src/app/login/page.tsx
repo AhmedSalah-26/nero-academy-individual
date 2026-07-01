@@ -1,32 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
-import { Mail, Lock, User, Phone, LogIn, UserPlus } from 'lucide-react';
+import { Validators } from '../../lib/validators';
+import { ToastUtils } from '../../lib/toast';
+import {
+  Mail,
+  Lock,
+  Person,
+  Phone,
+  Login as LoginIcon,
+  MarkEmailUnread,
+  ArrowBack,
+  ArrowForward,
+} from '@mui/icons-material';
 import styles from './page.module.css';
+import { usePageTransition } from '../../lib/animations';
 
 export default function LoginPage() {
+  const pageRef = usePageTransition();
   const { lang, t, refreshAuth, user } = useApp();
   const router = useRouter();
-  
-  const [isSignUp, setIsSignUp] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState<'student' | 'instructor'>('student');
-  
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [stage, setStage] = useState(1);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [showVerification, setShowVerification] = useState(false);
+  const [signedUpEmail, setSignedUpEmail] = useState('');
+  const [resending, setResending] = useState(false);
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   React.useEffect(() => {
     if (user) router.replace('/');
   }, [router, user]);
 
-  const handleSocialLogin = async (provider: 'google' | 'apple' | 'facebook') => {
+  const handleSocialLogin = async (provider: 'google') => {
     setLoading(true);
     setMessage(null);
     try {
@@ -44,45 +71,49 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateLoginStage = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+    const emailErr = Validators.email(email, { lang });
+    if (emailErr) newErrors.email = emailErr;
+    const passErr = Validators.password(password, { lang });
+    if (passErr) newErrors.password = passErr;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [email, password, lang]);
+
+  const validateRegStage = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (stage === 1) {
+      const nameErr = Validators.name(name, { lang });
+      if (nameErr) newErrors.name = nameErr;
+    } else if (stage === 2) {
+      const emailErr = Validators.email(email, { lang });
+      if (emailErr) newErrors.email = emailErr;
+      const phoneErr = Validators.phone(phone, { lang });
+      if (phoneErr) newErrors.phone = phoneErr;
+    } else if (stage === 3) {
+      const passErr = Validators.password(password, { lang });
+      if (passErr) newErrors.password = passErr;
+      const confirmErr = Validators.confirmPassword(password, confirmPassword, { lang });
+      if (confirmErr) newErrors.confirmPassword = confirmErr;
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [stage, name, email, phone, password, confirmPassword, lang]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateLoginStage()) return;
+
     setLoading(true);
     setMessage(null);
 
     try {
-      if (isSignUp) {
-        // Sign Up Flow
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name,
-              phone,
-              role,
-            },
-          },
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          void refreshAuth();
-          router.push('/interests');
-        }
-      } else {
-        // Sign In Flow
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          router.replace('/');
-          void refreshAuth();
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      if (data.user) {
+        router.replace('/');
+        void refreshAuth();
       }
     } catch (err: unknown) {
       console.error(err);
@@ -92,16 +123,152 @@ export default function LoginPage() {
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateRegStage()) return;
+
+    if (stage < 3) {
+      setStage((s) => s + 1);
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone,
+            role: 'student',
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.user && data.session === null) {
+        setSignedUpEmail(email);
+        setShowVerification(true);
+      } else if (data.user) {
+        void refreshAuth();
+        router.push('/interests');
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      setMessage({ text: err instanceof Error ? err.message : t.errorAuth, isError: true });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: signedUpEmail });
+      if (error) {
+        ToastUtils.showError(error.message);
+      } else {
+        ToastUtils.showSuccess(
+          lang === 'ar'
+            ? 'تم إعادة إرسال البريد الإلكتروني'
+            : 'Verification email resent'
+        );
+      }
+    } catch {
+      ToastUtils.showError(t.errorAuth);
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const goBack = () => {
+    if (stage > 1) {
+      setStage((s) => s - 1);
+      setErrors({});
+    }
+  };
+
+  const ArrowIcon = lang === 'ar' ? ArrowBack : ArrowForward;
+
+  if (showVerification) {
+    return (
+      <div className={`${styles.authContainer} fade-in`}>
+        <div className={`${styles.card} glass`}>
+          <div className={styles.verificationCard}>
+            <div className={styles.verificationIcon}>
+              <MarkEmailUnread fontSize="large" />
+            </div>
+            <h2 className={styles.verificationTitle}>{t.emailVerification}</h2>
+            <p className={styles.verificationEmail}>{signedUpEmail}</p>
+            <p className={styles.verificationText}>{t.verificationSent}</p>
+            <div className={styles.verificationActions}>
+              <Link href="/login">
+                <button
+                  type="button"
+                  className={`${styles.submitBtn} gradient-bg`}
+                  onClick={() => {
+                    setShowVerification(false);
+                    setActiveTab('login');
+                    setStage(1);
+                    setErrors({});
+                    setMessage(null);
+                  }}
+                >
+                  {t.doneGoToLogin}
+                </button>
+              </Link>
+              <button
+                type="button"
+                className={styles.resendBtn}
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? <span className={styles.spinner} /> : t.resendCode}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${styles.authContainer} fade-in`}>
+    <div ref={pageRef} className={`${styles.authContainer} fade-in`}>
       <div className={`${styles.card} glass`}>
         <div className={styles.header}>
-          <h1 className={`${styles.title} gradient-text`}>
-            {isSignUp ? t.signup : t.login}
+          <h1 className={`${styles.brandTitle} gradient-text`}>
+            {lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}
           </h1>
-          <p className={styles.subtitle}>
-            {isSignUp ? t.dontHaveAccount : t.alreadyHaveAccount}
-          </p>
+        </div>
+
+        <div className={styles.tabBar}>
+          <button
+            type="button"
+            className={`${styles.tab} ${activeTab === 'login' ? styles.tabActive : ''}`}
+            onClick={() => {
+              setActiveTab('login');
+              setErrors({});
+              setMessage(null);
+            }}
+          >
+            {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
+          </button>
+          <button
+            type="button"
+            className={`${styles.tab} ${activeTab === 'register' ? styles.tabActive : ''}`}
+            onClick={() => {
+              setActiveTab('register');
+              setStage(1);
+              setErrors({});
+              setMessage(null);
+            }}
+          >
+            {lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}
+          </button>
         </div>
 
         {message && (
@@ -110,127 +277,205 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {isSignUp && (
-            <>
+        {activeTab === 'login' ? (
+          <form onSubmit={handleLogin} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>{t.email}</label>
+              <div className={styles.inputWrapper}>
+                <Mail fontSize="small" className={styles.inputIcon} />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
+                  placeholder="you@example.com"
+                  className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                />
+              </div>
+              {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>{t.password}</label>
+              <div className={styles.inputWrapper}>
+                <Lock fontSize="small" className={styles.inputIcon} />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
+                  placeholder="••••••••"
+                  className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+                />
+              </div>
+              {errors.password && <span className={styles.fieldError}>{errors.password}</span>}
+            </div>
+
+            <div className={styles.forgotRow}>
+              <Link href="/forgot-password" className={styles.forgotLink}>
+                {t.forgotPassword}
+              </Link>
+            </div>
+
+            <button type="submit" disabled={loading} className={`${styles.submitBtn} gradient-bg`}>
+              {loading ? (
+                <span className={styles.spinner}></span>
+              ) : (
+                <>
+                  <LoginIcon fontSize="small" />
+                  <span>{t.login}</span>
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleRegister} className={styles.form}>
+            <div className={styles.stageDots}>
+              {[1, 2, 3, 4].map((dot) => (
+                <span
+                  key={dot}
+                  className={
+                    dot === stage
+                      ? styles.stageDotActive
+                      : dot < stage
+                        ? styles.stageDotCompleted
+                        : styles.stageDot
+                  }
+                />
+              ))}
+            </div>
+
+            {stage === 1 && (
               <div className={styles.inputGroup}>
                 <label className={styles.label}>{t.name}</label>
                 <div className={styles.inputWrapper}>
-                  <User size={18} className={styles.inputIcon} />
+                  <Person fontSize="small" className={styles.inputIcon} />
                   <input
                     type="text"
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => { setName(e.target.value); clearError('name'); }}
                     placeholder={lang === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
-                    className={styles.input}
+                    className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
                   />
                 </div>
+                {errors.name && <span className={styles.fieldError}>{errors.name}</span>}
               </div>
+            )}
 
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>{t.phone}</label>
-                <div className={styles.inputWrapper}>
-                  <Phone size={18} className={styles.inputIcon} />
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder={lang === 'ar' ? 'أدخل رقم الهاتف' : 'Enter phone number'}
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>
-                  {lang === 'ar' ? 'نوع الحساب' : 'Account Type'}
-                </label>
-                <div className={styles.roleSelection}>
-                  <button
-                    type="button"
-                    onClick={() => setRole('student')}
-                    className={`${styles.roleBtn} ${role === 'student' ? styles.roleBtnActive : ''}`}
-                  >
-                    {t.studentRole}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole('instructor')}
-                    className={`${styles.roleBtn} ${role === 'instructor' ? styles.roleBtnActive : ''}`}
-                  >
-                    {t.instructorRole}
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>{t.email}</label>
-            <div className={styles.inputWrapper}>
-              <Mail size={18} className={styles.inputIcon} />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className={styles.input}
-              />
-            </div>
-          </div>
-
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>{t.password}</label>
-            <div className={styles.inputWrapper}>
-              <Lock size={18} className={styles.inputIcon} />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className={styles.input}
-              />
-            </div>
-          </div>
-
-          {!isSignUp && (
-            <div className={styles.forgotRow}>
-              <Link href="/forgot-password" className={styles.forgotLink}>
-                {lang === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
-              </Link>
-            </div>
-          )}
-
-          <button type="submit" disabled={loading} className={`${styles.submitBtn} gradient-bg`}>
-            {loading ? (
-              <span className={styles.spinner}></span>
-            ) : isSignUp ? (
+            {stage === 2 && (
               <>
-                <UserPlus size={18} />
-                <span>{t.signup}</span>
-              </>
-            ) : (
-              <>
-                <LogIn size={18} />
-                <span>{t.login}</span>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>{t.email}</label>
+                  <div className={styles.inputWrapper}>
+                    <Mail fontSize="small" className={styles.inputIcon} />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
+                      placeholder="you@example.com"
+                      className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                    />
+                  </div>
+                  {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>{t.phone}</label>
+                  <div className={styles.countryCodeWrapper}>
+                    <span className={styles.countryCode}>+20</span>
+                    <div className={styles.inputWrapper}>
+                      <Phone fontSize="small" className={styles.inputIcon} />
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => { setPhone(e.target.value); clearError('phone'); }}
+                        placeholder={lang === 'ar' ? '01xxxxxxxxx' : '01xxxxxxxxx'}
+                        className={`${styles.input} ${styles.phoneInput} ${errors.phone ? styles.inputError : ''}`}
+                      />
+                    </div>
+                  </div>
+                  {errors.phone && <span className={styles.fieldError}>{errors.phone}</span>}
+                </div>
               </>
             )}
-          </button>
-        </form>
 
-        <div className={styles.toggleState}>
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className={styles.toggleBtn}
-          >
-            {isSignUp ? t.alreadyHaveAccount : t.dontHaveAccount}
-          </button>
-        </div>
+            {stage === 3 && (
+              <>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>{t.password}</label>
+                  <div className={styles.inputWrapper}>
+                    <Lock fontSize="small" className={styles.inputIcon} />
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
+                      placeholder="••••••••"
+                      className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+                    />
+                  </div>
+                  {errors.password && <span className={styles.fieldError}>{errors.password}</span>}
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>
+                    {lang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password'}
+                  </label>
+                  <div className={styles.inputWrapper}>
+                    <Lock fontSize="small" className={styles.inputIcon} />
+                    <input
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
+                      placeholder="••••••••"
+                      className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
+                    />
+                  </div>
+                  {errors.confirmPassword && (
+                    <span className={styles.fieldError}>{errors.confirmPassword}</span>
+                  )}
+                </div>
+              </>
+            )}
+
+            {stage === 4 && (
+              <button type="submit" disabled={loading} className={`${styles.submitBtn} gradient-bg`}>
+                {loading ? (
+                  <span className={styles.spinner}></span>
+                ) : (
+                  <>
+                    <span>{t.createAccount}</span>
+                    <ArrowIcon fontSize="small" />
+                  </>
+                )}
+              </button>
+            )}
+
+            <div className={styles.stageNav}>
+              {stage > 1 && (
+                <button type="button" className={styles.stageBackBtn} onClick={goBack}>
+                  {lang === 'ar' ? <ArrowForward fontSize="small" /> : <ArrowBack fontSize="small" />}
+                  {t.backStep}
+                </button>
+              )}
+              {stage < 3 && (
+                <button type="submit" className={styles.stageNextBtn}>
+                  {t.nextStep}
+                  {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
+                </button>
+              )}
+              {stage === 3 && (
+                <button type="submit" className={styles.stageNextBtn} disabled={loading}>
+                  {loading ? <span className={styles.spinner} /> : t.nextStep}
+                </button>
+              )}
+            </div>
+          </form>
+        )}
 
         <div className={styles.divider}>{t.continueWith}</div>
 
@@ -249,30 +494,6 @@ export default function LoginPage() {
               <path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.45-3.45C17.95 1.19 15.24 0 12 0 7.32 0 3.26 2.7 1.32 6.65l3.92 3.08c.95-2.86 3.61-4.98 6.76-4.98z" fill="#EA4335"/>
             </svg>
             Google
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialLogin('apple')}
-            disabled={loading}
-            className={styles.socialBtn}
-            aria-label="Apple"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.09-.48-3.24 0-1.44.62-2.21.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.06 1.87-2.54 6.98.22 8.13-.57 1.5-1.31 2.99-2.27 4.08zm-5.85-15.1c.07-2.04 1.76-3.79 3.74-3.94.29 2.32-1.91 4.96-3.74 3.94z"/>
-            </svg>
-            Apple
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSocialLogin('facebook')}
-            disabled={loading}
-            className={styles.socialBtn}
-            aria-label="Facebook"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.12 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/>
-            </svg>
-            Facebook
           </button>
         </div>
       </div>

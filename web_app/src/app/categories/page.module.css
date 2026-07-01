@@ -1,0 +1,106 @@
+.header {
+  margin-bottom: 32px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.categoryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  background: var(--surface-card);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.categoryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.iconContainer {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.iconContainer svg {
+  font-size: 28px !important;
+}
+
+.categoryName {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.courseCount {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .categoryCard {
+  background: var(--surface-card);
+}
+
+[data-theme='dark'] .categoryName {
+  color: #fff;
+}
+
+@media (max-width: 500px) {
+  .grid {
+    gap: 12px;
+  }
+  .categoryCard {
+    padding: 18px 12px;
+  }
+  .iconContainer {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+  .iconContainer svg {
+    font-size: 24px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

@@ -14,7 +14,7 @@
   border: 1px solid var(--glass-border);
   border-radius: 28px;
   background:
-    radial-gradient(circle at 10% 20%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 18rem),
+    radial-gradient(circle at 10% 20%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 18rem),
     linear-gradient(135deg, var(--surface-card), var(--surface-soft));
   box-shadow: var(--shadow-md);
 }
@@ -34,7 +34,7 @@
 .eyebrow { color: var(--primary); font-size: .62rem; font-weight: 900; letter-spacing: .08em; }
 .title { margin: 6px 0; color: var(--text-main); font-family: var(--font-display); font-size: clamp(1.75rem, 3.6vw, 3rem); line-height: 1.15; }
 .subtitle { max-width: 720px; color: var(--text-muted); font-size: .78rem; line-height: 1.8; }
-.heroIcon { position: relative; z-index: 1; width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 16px; color: var(--accent-ink); background: var(--accent); box-shadow: 0 14px 30px color-mix(in srgb, var(--accent) 24%, transparent); }
+.heroIcon { position: relative; z-index: 1; width: 48px; height: 48px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 16px; color: white; background: var(--primary); box-shadow: 0 14px 30px color-mix(in srgb, var(--primary) 24%, transparent); }
 
 .toolbar {
   margin: 22px 0;
@@ -99,7 +99,7 @@
 }
 
 .cardTop { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.cardIcon { width: 46px; height: 46px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 15px; color: var(--accent-ink); background: var(--accent); }
+.cardIcon { width: 46px; height: 46px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 15px; color: white; background: var(--primary); }
 .card h3 { position: relative; z-index: 1; margin: 13px 0 7px; font-family: var(--font-display); font-size: 1.08rem; }
 .card p { position: relative; z-index: 1; color: var(--text-muted); font-size: .78rem; line-height: 1.75; }
 .meta { position: relative; z-index: 1; margin-top: 16px; padding-top: 13px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--border-light); color: var(--text-secondary); font-size: .7rem; }
@@ -116,8 +116,8 @@
   gap: 7px;
   border: 0;
   border-radius: 14px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
   font: inherit;
   font-size: .7rem;
   font-weight: 900;
@@ -176,7 +176,7 @@
 .chatMessage { display: flex; justify-content: flex-start; }
 .chatMessage.myMessage { justify-content: flex-end; }
 .chatBubble { direction: rtl; max-width: min(72%, 620px); padding: 12px 15px; border: 1px solid var(--border); border-radius: 18px 18px 18px 6px; background: var(--surface-card); color: var(--text-main); }
-.myMessage .chatBubble { border-color: color-mix(in srgb, var(--primary) 50%, transparent); border-radius: 18px 18px 6px 18px; color: var(--accent-ink); background: var(--accent); }
+.myMessage .chatBubble { border-color: color-mix(in srgb, var(--primary) 50%, transparent); border-radius: 18px 18px 6px 18px; color: white; background: var(--primary); }
 .chatBubble small { display: block; margin-bottom: 4px; font-size: .66rem; opacity: .78; font-weight: 900; }
 .chatBubble p { margin: 0; font-size: .82rem; line-height: 1.65; overflow-wrap: anywhere; }
 .chatTime { display: block; margin-top: 6px; font-size: .6rem; opacity: .65; text-align: end; }
@@ -193,10 +193,10 @@
 .forumMessage { display: flex; justify-content: flex-start; }
 .forumMessageMine { justify-content: flex-end; }
 .forumBubble { direction: rtl; width: fit-content; max-width: min(72%, 620px); padding: 11px 14px; border: 1px solid var(--border); border-radius: 18px 18px 18px 6px; background: var(--surface-card); }
-.forumMessageMine .forumBubble { color: var(--accent-ink); border-color: var(--accent); border-radius: 18px 18px 6px 18px; background: var(--accent); }
+.forumMessageMine .forumBubble { color: white; border-color: var(--primary); border-radius: 18px 18px 6px 18px; background: var(--primary); }
 .forumAuthor { display: flex; align-items: center; gap: 7px; }
 .forumAvatar { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 10px; color: var(--primary); background: var(--primary-glow); }
-.forumMessageMine .forumAvatar { color: var(--accent-ink); background: rgba(0,0,0,.08); }
+.forumMessageMine .forumAvatar { color: white; background: rgba(0,0,0,.08); }
 .forumAuthor strong { font-size: .62rem; }
 .forumBubble p { margin: 5px 0 0; font-size: .78rem; line-height: 1.7; overflow-wrap: anywhere; }
 .forumBubble time { display: block; margin-top: 5px; opacity: .68; font-size: .5rem; text-align: left; direction: rtl; }
@@ -207,7 +207,7 @@
 .forumComposer { direction: rtl; padding: 12px; display: grid; grid-template-columns: 1fr auto; gap: 8px; border-top: 1px solid var(--border); background: var(--surface-card); }
 .forumComposer input { min-width: 0; height: 46px; padding: 0 15px; border: 1px solid var(--border); border-radius: 15px; color: var(--text-main); background: var(--surface-soft); outline: none; font: inherit; font-size: .7rem; }
 .forumComposer input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
-.forumComposer button { height: 46px; padding: 0 18px; display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 15px; color: var(--accent-ink); background: var(--accent); font: inherit; font-size: .66rem; font-weight: 900; cursor: pointer; }
+.forumComposer button { height: 46px; padding: 0 18px; display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 15px; color: white; background: var(--primary); font: inherit; font-size: .66rem; font-weight: 900; cursor: pointer; }
 .forumComposer button:disabled { cursor: not-allowed; opacity: .5; }
 
 [data-theme="dark"] .hero,

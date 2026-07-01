@@ -1,8 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Check, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import {
+  Search,
+  Check,
+  AutoAwesome,
+  ArrowForward,
+  ArrowBack,
+  Science,
+  Calculate,
+  Bolt,
+  Biotech,
+  Translate,
+  Language,
+  School,
+  MenuBook,
+  Palette,
+  MusicNote,
+  SportsSoccer,
+  Computer,
+  Psychology,
+  HistoryEdu,
+  Public,
+  Category,
+} from '@mui/icons-material';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
 import { useFadeIn, useStagger } from '../../lib/animations';
@@ -12,6 +34,56 @@ interface Category {
   id: string;
   name_ar: string;
   name_en: string;
+}
+
+const CATEGORY_ICON_MAP: Record<string, ReactNode> = {
+  كيمياء: <Science fontSize="small" />,
+  chemistry: <Science fontSize="small" />,
+  رياضيات: <Calculate fontSize="small" />,
+  math: <Calculate fontSize="small" />,
+  mathematics: <Calculate fontSize="small" />,
+  فيزياء: <Bolt fontSize="small" />,
+  physics: <Bolt fontSize="small" />,
+  أحياء: <Biotech fontSize="small" />,
+  biology: <Biotech fontSize="small" />,
+  عربي: <Translate fontSize="small" />,
+  arabic: <Translate fontSize="small" />,
+  انجليزي: <Language fontSize="small" />,
+  english: <Language fontSize="small" />,
+  فرنساوي: <Language fontSize="small" />,
+  french: <Language fontSize="small" />,
+  حاسب: <Computer fontSize="small" />,
+  كمبيوتر: <Computer fontSize="small" />,
+  computer: <Computer fontSize="small" />,
+  programming: <Computer fontSize="small" />,
+  برمجة: <Computer fontSize="small" />,
+  تعليم: <School fontSize="small" />,
+  education: <School fontSize="small" />,
+  قراءة: <MenuBook fontSize="small" />,
+  reading: <MenuBook fontSize="small" />,
+  فن: <Palette fontSize="small" />,
+  art: <Palette fontSize="small" />,
+  موسيقى: <MusicNote fontSize="small" />,
+  music: <MusicNote fontSize="small" />,
+  رياضة: <SportsSoccer fontSize="small" />,
+  sports: <SportsSoccer fontSize="small" />,
+  نفسية: <Psychology fontSize="small" />,
+  psychology: <Psychology fontSize="small" />,
+  تاريخ: <HistoryEdu fontSize="small" />,
+  history: <HistoryEdu fontSize="small" />,
+  جغرافيا: <Public fontSize="small" />,
+  geography: <Public fontSize="small" />,
+};
+
+function getCategoryIcon(nameAr: string, nameEn: string): ReactNode {
+  const keyAr = nameAr?.toLowerCase().trim();
+  const keyEn = nameEn?.toLowerCase().trim();
+  if (keyAr && CATEGORY_ICON_MAP[keyAr]) return CATEGORY_ICON_MAP[keyAr];
+  if (keyEn && CATEGORY_ICON_MAP[keyEn]) return CATEGORY_ICON_MAP[keyEn];
+  for (const key of Object.keys(CATEGORY_ICON_MAP)) {
+    if (keyAr?.includes(key) || keyEn?.includes(key)) return CATEGORY_ICON_MAP[key];
+  }
+  return <Category fontSize="small" />;
 }
 
 export default function InterestsPage() {
@@ -36,7 +108,6 @@ export default function InterestsPage() {
       return;
     }
 
-    // Users who already set interests can skip this page
     if (profile?.interests && profile.interests.length > 0) {
       router.push('/');
       return;
@@ -73,8 +144,8 @@ export default function InterestsPage() {
 
   const handleSave = async () => {
     if (!user) return;
-    if (selected.size === 0) {
-      setError(t.interestsMin);
+    if (selected.size < 3) {
+      setError(t.minInterests);
       return;
     }
     setSaving(true);
@@ -97,11 +168,16 @@ export default function InterestsPage() {
 
   if (authLoading || !user) return null;
 
+  const minReached = selected.size >= 3;
+  const countLabel = lang === 'ar'
+    ? `متابعة (${selected.size} محدد)`
+    : `Continue (${selected.size} selected)`;
+
   return (
     <main className={`${styles.page} fade-in`}>
       <section ref={heroRef} className={`${styles.hero} glass`}>
         <div className={styles.eyebrow}>
-          <Sparkles size={13} style={{ verticalAlign: 'middle', marginInlineEnd: 6 }} />
+          <AutoAwesome fontSize="small" style={{ verticalAlign: 'middle', marginInlineEnd: 6 }} />
           {lang === 'ar' ? 'خطوة واحدة تفصلك عن البدء' : 'One step away from getting started'}
         </div>
         <h1 className={`${styles.title} gradient-text`}>{t.interestsTitle}</h1>
@@ -109,7 +185,7 @@ export default function InterestsPage() {
       </section>
 
       <div className={styles.toolbar}>
-        <Search size={18} style={{ color: 'var(--text-muted)', marginInlineStart: 8, flexShrink: 0 }} />
+        <Search fontSize="small" style={{ color: 'var(--text-muted)', marginInlineStart: 8, flexShrink: 0 }} />
         <input
           type="search"
           value={query}
@@ -139,7 +215,10 @@ export default function InterestsPage() {
                 className={`${styles.chip} ${isSelected ? styles.selected : ''}`}
                 aria-pressed={isSelected}
               >
-                <span className={styles.check}>{isSelected && <Check size={14} />}</span>
+                <span className={styles.check}>{isSelected && <Check fontSize="small" />}</span>
+                <span className={styles.chipIcon}>
+                  {getCategoryIcon(category.name_ar, category.name_en)}
+                </span>
                 {lang === 'ar' ? category.name_ar : category.name_en}
               </button>
             );
@@ -159,18 +238,26 @@ export default function InterestsPage() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || selected.size === 0}
+          disabled={saving || !minReached}
           className={`${styles.saveBtn} gradient-bg`}
         >
           {saving ? (
             t.saving
           ) : (
             <>
-              {t.interestsSave}
-              {lang === 'ar' ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+              {countLabel}
+              {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
             </>
           )}
         </button>
+      </div>
+
+      <div className={styles.suggestTopic}>
+        <a href="mailto:support@shahab.tech">
+          {lang === 'ar'
+            ? 'اقترح موضوع غير موجود'
+            : 'Suggest a topic not listed'}
+        </a>
       </div>
     </main>
   );

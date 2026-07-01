@@ -4,33 +4,33 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+  ArrowBack,
+  ArrowForward,
   ArrowLeft,
   ArrowRight,
-  Atom,
-  BookOpen,
+  Science,
+  School,
+  MenuBook,
   Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock3,
-  Code2,
-  Heart,
-  MessageCircleQuestion,
-  NotebookPen,
-  Play,
-  Plus,
+  Schedule,
+  Favorite,
+  Help as HelpIcon,
+  EditNote,
+  PlayArrow,
+  Add,
   Search,
-  ShieldCheck,
-  Sparkles,
+  Security,
+  AutoAwesome,
   Star,
-  Terminal,
-  Trophy,
-  Users,
-  Video,
-} from 'lucide-react';
+  EmojiEvents,
+  Groups,
+  VideoLibrary,
+} from '@mui/icons-material';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { StudentHome } from '../components/StudentHome';
+import { HomeScreen } from '../components/home';
 import styles from './page.module.css';
 
 interface Course {
@@ -112,39 +112,39 @@ export default function HomePage() {
     );
   });
 
-  const arrow = lang === 'ar' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />;
+  const arrow = lang === 'ar' ? <ArrowLeft fontSize="small" /> : <ArrowRight fontSize="small" />;
 
-  if (user) return <StudentHome />;
+  if (user) return <HomeScreen />;
 
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <div className={styles.eyebrow}>
-            <Sparkles size={16} />
-            {lang === 'ar' ? 'برمجة مفهومة، خطوة بخطوة' : 'Programming, clearly explained'}
+            <AutoAwesome fontSize="inherit" />
+            {lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}
           </div>
           <h1>
             {lang === 'ar' ? (
               <>
-                ابدأ البرمجة.
-                <span>وابني أول مشروع.</span>
+                افهم الكيمياء.
+                <span>حقق الدرجة.</span>
               </>
             ) : (
               <>
-                Start coding.
-                <span>Build your first project.</span>
+                Understand chemistry.
+                <span>Earn the grade.</span>
               </>
             )}
           </h1>
           <p>
             {lang === 'ar'
-              ? 'شرح بسيط وتطبيق عملي يساعدك تفهم الأساسيات وتبدأ تكتب كود بنفسك.'
-              : 'Clear lessons and practical practice to help you understand the basics and start writing code yourself.'}
+              ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
+              : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
           </p>
           <div className={styles.heroActions}>
             <Link href={user ? '/my-learning' : '/login'} className={styles.primaryButton}>
-              <Play size={17} fill="currentColor" />
+              <PlayArrow fontSize="inherit" />
               {lang === 'ar' ? 'ابدأ التعلم الآن' : 'Start learning'}
             </Link>
             <a href="#courses" className={styles.textButton}>
@@ -152,52 +152,35 @@ export default function HomePage() {
               {arrow}
             </a>
           </div>
-          <p className={styles.teacherNote}>{lang === 'ar' ? 'شهاب اكاديمى • تعلم البرمجة من البداية' : 'Shehab Academy • Learn programming from the start'}</p>
+          <p className={styles.teacherNote}>{lang === 'ar' ? 'د/ أحمد الشيخ • مدرس الكيمياء للمرحلة الثانوية' : 'Dr. Ahmed El-Sheikh • High school chemistry teacher'}</p>
         </div>
 
         <div className={styles.heroVisual}>
           <div className={styles.teacherHalo} />
-
-          {/* Floating badge – Python lesson */}
-          <div className={`${styles.heroBadge} ${styles.heroBadgeLesson}`}>
-            <span><Terminal size={18} /></span>
-            <div>
-              <b>{lang === 'ar' ? 'Python • الدرس الأول' : 'Python • Lesson 1'}</b>
-              <small>{lang === 'ar' ? 'ابدأ من الصفر' : 'Start from scratch'}</small>
-            </div>
-          </div>
-
-          {/* Floating badge – challenge solved */}
-          <div className={`${styles.heroBadge} ${styles.heroBadgeChallenge}`}>
-            <span><CheckCircle2 size={18} /></span>
-            <div>
-              <b>{lang === 'ar' ? 'تحدي محلول ✓' : 'Challenge solved ✓'}</b>
-              <small>{lang === 'ar' ? 'أول كود بتكتبه' : 'Your first code'}</small>
-            </div>
-          </div>
-
-          {/* Decorative code dot top-right */}
-          <div className={`${styles.heroDot} ${styles.heroDotOne}`}><Code2 size={20} /></div>
-          {/* Decorative code dot bottom-left */}
-          <div className={`${styles.heroDot} ${styles.heroDotTwo}`}><Atom size={18} /></div>
-
           <div className={styles.teacherFrame}>
             <Image
-              src="/home_hero_cutout.png"
-              alt={lang === 'ar' ? 'شهاب اكاديمى' : 'Shehab Academy'}
+              src="/chemistry-teacher-v2.png"
+              alt={lang === 'ar' ? 'مدرس الكيمياء أحمد الشيخ' : 'Chemistry teacher Ahmed El-Sheikh'}
               fill
               priority
               sizes="(max-width: 760px) 78vw, 520px"
               className={styles.teacherImage}
             />
           </div>
+          <div className={styles.teacherBadge}>
+            <span><EmojiEvents fontSize="small" /></span>
+            <div>
+              <strong>{lang === 'ar' ? 'مدرس الكيمياء للمرحلة الثانوية' : 'High school chemistry teacher'}</strong>
+              <small>{lang === 'ar' ? 'خبرة أكثر من 10 سنوات' : 'More than 10 years of experience'}</small>
+            </div>
+          </div>
         </div>
 
         <div className={styles.heroStats}>
-          <div><span><Users size={24} /></span><strong>+15K</strong><small>{lang === 'ar' ? 'طالب سجل معنا' : 'students joined'}</small></div>
-          <div><span><Clock3 size={24} /></span><strong>+200</strong><small>{lang === 'ar' ? 'ساعة محتوى' : 'content hours'}</small></div>
-          <div><span><Star size={24} /></span><strong>+98%</strong><small>{lang === 'ar' ? 'نتائج مميزة' : 'great results'}</small></div>
-          <div><span><Code2 size={24} /></span><strong>0</strong><small>{lang === 'ar' ? 'لسه هنبدأ' : 'fresh start'}</small></div>
+          <div><span><Groups fontSize="small" /></span><strong>+15K</strong><small>{lang === 'ar' ? 'طالب سجل معنا' : 'students joined'}</small></div>
+          <div><span><Schedule fontSize="small" /></span><strong>+200</strong><small>{lang === 'ar' ? 'ساعة محتوى' : 'content hours'}</small></div>
+          <div><span><Star fontSize="small" sx={{ color: 'var(--warning)' }} /></span><strong>+98%</strong><small>{lang === 'ar' ? 'نتائج مميزة' : 'great results'}</small></div>
+          <div><span><EmojiEvents fontSize="small" /></span><strong>+10</strong><small>{lang === 'ar' ? 'سنوات خبرة' : 'years experience'}</small></div>
         </div>
       </section>
 
@@ -215,7 +198,7 @@ export default function HomePage() {
         </div>
 
         <label className={styles.searchBox}>
-          <Search size={19} />
+          <Search fontSize="small" />
           <input
             type="search"
             placeholder={lang === 'ar' ? 'ابحث باسم الكورس...' : 'Search courses...'}
@@ -229,7 +212,7 @@ export default function HomePage() {
           <div className={styles.emptyState}>{lang === 'ar' ? 'جاري تجهيز الكورسات...' : 'Preparing courses...'}</div>
         ) : filteredCourses.length === 0 ? (
           <div className={styles.emptyState}>
-            <BookOpen size={28} />
+            <MenuBook fontSize="small" />
             {lang === 'ar' ? 'لا توجد كورسات مطابقة حاليًا.' : 'No matching courses yet.'}
           </div>
         ) : (
@@ -248,7 +231,7 @@ export default function HomePage() {
                     {course.thumbnail_url ? (
                       <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
                     ) : (
-                      <div className={styles.coursePlaceholder}><Atom size={48} /></div>
+                      <div className={styles.coursePlaceholder}><Science fontSize="small" /></div>
                     )}
                     <span className={styles.courseNumber}>0{index + 1}</span>
                     <button
@@ -257,13 +240,13 @@ export default function HomePage() {
                       onClick={() => isWishlisted ? removeFromWishlist(course.id) : addToWishlist(course.id)}
                       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
-                      <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
+                      <Favorite fontSize="small" sx={{ color: isWishlisted ? 'var(--error)' : 'var(--text-muted)' }} />
                     </button>
                   </div>
                   <div className={styles.courseBody}>
                     <div className={styles.courseMeta}>
-                      <span><BookOpen size={14} /> {course.total_lessons || 0} {lang === 'ar' ? 'درس' : 'lessons'}</span>
-                      <span><Clock3 size={14} /> {course.total_duration || 0} {lang === 'ar' ? 'دقيقة' : 'min'}</span>
+                      <span><MenuBook fontSize="small" /> {course.total_lessons || 0} {lang === 'ar' ? 'درس' : 'lessons'}</span>
+                      <span><Schedule fontSize="small" /> {course.total_duration || 0} {lang === 'ar' ? 'دقيقة' : 'min'}</span>
                     </div>
                     <h3>{title}</h3>
                     <p>{subtitle}</p>
@@ -280,11 +263,11 @@ export default function HomePage() {
                       </div>
                       {isEnrolled ? (
                         <Link href={`/learn/${course.id}`} className={styles.cardAction}>
-                          <Play size={16} fill="currentColor" />
+                          <PlayArrow fontSize="inherit" />
                         </Link>
                       ) : (
                         <button className={styles.cardAction} onClick={() => addToCart(course.id)} disabled={inCart}>
-                          {inCart ? <Check size={17} /> : <Plus size={17} />}
+                          {inCart ? <Check fontSize="small" /> : <Add fontSize="small" />}
                         </button>
                       )}
                     </div>
@@ -323,12 +306,12 @@ export default function HomePage() {
           <p>{lang === 'ar' ? 'منظومة مذاكرة متكاملة تساعدك تفهم وتطبق وتتابع مستواك.' : 'A complete study system that helps you understand, practice, and track progress.'}</p>
         </div>
         <div className={styles.steps}>
-          <article><span><Video size={20} /></span><h3>شرح بسيط ومركز</h3><p>نفهم الفكرة من أساسها بأمثلة واضحة وتطبيق مباشر.</p></article>
-          <article><span><NotebookPen size={20} /></span><h3>خطة مذاكرة منظمة</h3><p>جدول واضح يساعدك تخلص المنهج من غير تشتت.</p></article>
-          <article><span><Trophy size={20} /></span><h3>نماذج امتحانات</h3><p>اختبارات بنفس النظام عشان تدخل الامتحان جاهز.</p></article>
-          <article><span><ShieldCheck size={20} /></span><h3>متابعة وتقييم مستمر</h3><p>تقارير دورية توضح مستواك ونقاط التحسن.</p></article>
-          <article><span><MessageCircleQuestion size={20} /></span><h3>تفاعل وإجابة للأسئلة</h3><p>اسأل في أي جزئية وخد الإجابة التي توضحها.</p></article>
-          <article><span><Atom size={20} /></span><h3>مراجعات ليلة الامتحان</h3><p>ملخصات مركزة لأهم الأفكار والنقاط المتوقعة.</p></article>
+          <article><span><VideoLibrary fontSize="small" /></span><h3>شرح بسيط ومركز</h3><p>نفهم الفكرة من أساسها بأمثلة واضحة وتطبيق مباشر.</p></article>
+          <article><span><EditNote fontSize="small" /></span><h3>خطة مذاكرة منظمة</h3><p>جدول واضح يساعدك تخلص المنهج من غير تشتت.</p></article>
+          <article><span><EmojiEvents fontSize="small" /></span><h3>نماذج امتحانات</h3><p>اختبارات بنفس النظام عشان تدخل الامتحان جاهز.</p></article>
+          <article><span><Security fontSize="small" /></span><h3>متابعة وتقييم مستمر</h3><p>تقارير دورية توضح مستواك ونقاط التحسن.</p></article>
+          <article><span><HelpIcon fontSize="small" /></span><h3>تفاعل وإجابة للأسئلة</h3><p>اسأل في أي جزئية وخد الإجابة التي توضحها.</p></article>
+          <article><span><Science fontSize="small" /></span><h3>مراجعات ليلة الامتحان</h3><p>ملخصات مركزة لأهم الأفكار والنقاط المتوقعة.</p></article>
         </div>
       </section>
 
@@ -339,8 +322,8 @@ export default function HomePage() {
             <h2>{lang === 'ar' ? 'طلاب فهموا، فتفوقوا' : 'Students who understood, then excelled'}</h2>
           </div>
           <div className={styles.reviewArrows}>
-            <button aria-label="Previous"><ChevronRight size={19} /></button>
-            <button aria-label="Next"><ChevronLeft size={19} /></button>
+            <button aria-label="Previous"><ChevronRight fontSize="small" /></button>
+            <button aria-label="Next"><ChevronLeft fontSize="small" /></button>
           </div>
         </div>
         <div className={styles.reviewGrid}>
@@ -351,7 +334,7 @@ export default function HomePage() {
                 <div><h3>{review.name}</h3><small>{review.grade}</small></div>
                 <b>0{index + 1}</b>
               </div>
-              <div className={styles.stars}>{Array.from({ length: 5 }).map((_, star) => <Star key={star} size={14} fill="currentColor" />)}</div>
+              <div className={styles.stars}>{Array.from({ length: 5 }).map((_, star) => <Star key={star} fontSize="small" sx={{ color: 'var(--warning)' }} />)}</div>
               <p>“{review.text}”</p>
             </article>
           ))}
@@ -360,8 +343,8 @@ export default function HomePage() {
 
       <section className={styles.cta}>
         <div>
-          <span><Users size={17} /> {lang === 'ar' ? 'انضم لطلابنا اليوم' : 'Join our students today'}</span>
-          <h2>{lang === 'ar' ? 'جاهز تبدأ رحلتك في البرمجة؟' : 'Ready to start your coding journey?'}</h2>
+          <span><Groups fontSize="small" /> {lang === 'ar' ? 'انضم لطلابنا اليوم' : 'Join our students today'}</span>
+          <h2>{lang === 'ar' ? 'جاهز تخلي الكيمياء أسهل مادة عندك؟' : 'Ready to make chemistry your easiest subject?'}</h2>
         </div>
         <Link href={user ? '/my-learning' : '/login'} className={styles.ctaButton}>
           {lang === 'ar' ? 'ابدأ مجانًا' : 'Start for free'}

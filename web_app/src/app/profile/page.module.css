@@ -1,0 +1,253 @@
+.page {
+  width: min(840px, calc(100% - 34px));
+  margin: 0 auto;
+  padding: 34px 0 100px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 20px;
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 16% 20%, color-mix(in srgb, var(--primary) 24%, transparent), transparent 16rem),
+    linear-gradient(135deg, var(--surface-card), var(--surface-soft));
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  inset-inline-end: -90px;
+  top: -110px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.avatarWrapper {
+  position: relative;
+  z-index: 1;
+  border: 4px solid var(--primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  width: 96px;
+  height: 96px;
+}
+
+.avatarWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarInitials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 36px;
+  font-weight: var(--font-bold);
+}
+
+.userName {
+  position: relative;
+  z-index: 1;
+  color: var(--text-main);
+  font-size: 22px;
+  font-weight: var(--font-bold);
+  text-align: center;
+}
+
+.userEmail {
+  position: relative;
+  z-index: 1;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.statsCard {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: var(--font-extrabold);
+  color: var(--primary);
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+.statDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+}
+
+.menuCard {
+  margin-top: 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.menuItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.16s ease;
+  text-decoration: none;
+}
+
+.menuItem:last-child {
+  border-bottom: 0;
+}
+
+.menuItem:hover {
+  background: var(--surface-hover);
+}
+
+.menuIcon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  color: var(--primary);
+  background: var(--primary-glow);
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.menuTitle {
+  flex: 1;
+  font-size: 15px;
+  font-weight: var(--font-medium);
+}
+
+.menuChevron {
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+
+.menuLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.16s ease;
+  text-decoration: none;
+}
+
+.menuLink:last-child {
+  border-bottom: 0;
+}
+
+.menuLink:hover {
+  background: var(--surface-hover);
+}
+
+.logoutSection {
+  margin-top: 18px;
+}
+
+.version {
+  margin-top: 20px;
+  display: block;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+[data-theme="dark"] .header,
+[data-theme="dark"] .statsCard,
+[data-theme="dark"] .menuCard {
+  background: var(--surface-card);
+}
+
+[data-theme="dark"] .userName {
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .page {
+    width: calc(100% - 20px);
+    padding-top: 14px;
+  }
+  .header {
+    padding: 24px 16px;
+    border-radius: 24px;
+  }
+  .avatarWrapper {
+    width: 80px;
+    height: 80px;
+  }
+  .userName {
+    font-size: 20px;
+  }
+  .statItem {
+    padding: 16px 12px;
+  }
+  .menuItem,
+  .menuLink {
+    padding: 12px 12px;
+    gap: 12px;
+  }
+  .menuIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
+    font-size: 20px;
+  }
+}

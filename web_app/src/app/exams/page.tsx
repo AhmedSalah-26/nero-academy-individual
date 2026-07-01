@@ -3,19 +3,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  ClipboardCheck,
-  Clock3,
-  FileQuestion,
-  LockKeyhole,
-  Play,
-  RotateCcw,
-  Trophy,
-} from 'lucide-react';
+  ArrowBack,
+  ArrowForward,
+  CheckCircle,
+  AssignmentTurnedIn,
+  Schedule,
+  Quiz,
+  Lock,
+  PlayArrow,
+  Replay,
+  EmojiEvents,
+} from '@mui/icons-material';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
+import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
 interface Enrollment {
@@ -48,6 +49,7 @@ interface Attempt {
 }
 
 export default function ExamsPage() {
+  const pageRef = usePageTransition();
   const { lang, user, loading: authLoading } = useApp();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -142,7 +144,7 @@ export default function ExamsPage() {
   };
 
   return (
-    <main className={styles.page}>
+    <main ref={pageRef} className={styles.page}>
       <section className={styles.hero}>
         <div>
           <span>{lang === 'ar' ? 'اختبارات كورساتك' : 'YOUR ASSESSMENTS'}</span>
@@ -159,7 +161,7 @@ export default function ExamsPage() {
         <div className={styles.stateCard}>{lang === 'ar' ? 'جاري تحميل الامتحانات...' : 'Loading exams...'}</div>
       ) : !user ? (
         <div className={styles.stateCard}>
-          <LockKeyhole size={34} />
+          <Lock fontSize="large" />
           <h2>{lang === 'ar' ? 'سجّل الدخول لعرض امتحاناتك' : 'Sign in to view your exams'}</h2>
           <p>{lang === 'ar' ? 'الامتحانات متاحة فقط داخل الكورسات المشترك بها.' : 'Exams are available for your enrolled courses.'}</p>
           <Link href="/login?redirect=/exams" className={styles.primaryAction}>
@@ -167,7 +169,7 @@ export default function ExamsPage() {
           </Link>
         </div>
       ) : error ? (
-        <div className={styles.stateCard}><FileQuestion size={34} /><h2>{error}</h2></div>
+        <div className={styles.stateCard}><Quiz fontSize="large" /><h2>{error}</h2></div>
       ) : enrollments.length === 0 ? (
         <div className={styles.stateCard}>
           <BookOpenState />
@@ -177,7 +179,7 @@ export default function ExamsPage() {
         </div>
       ) : quizzes.length === 0 ? (
         <div className={styles.stateCard}>
-          <FileQuestion size={34} />
+          <Quiz fontSize="large" />
           <h2>{lang === 'ar' ? 'لا توجد امتحانات منشورة في كورساتك' : 'No published exams in your courses'}</h2>
           <p>{lang === 'ar' ? 'ستظهر هنا فور نشرها من المدرس.' : 'They will appear as soon as the instructor publishes them.'}</p>
         </div>
@@ -196,7 +198,7 @@ export default function ExamsPage() {
             return (
               <article className={styles.card} key={quiz.id}>
                 <div className={styles.cardHeader}>
-                  <div className={styles.cardIcon}><FileQuestion size={21} /></div>
+                  <div className={styles.cardIcon}><Quiz fontSize="small" /></div>
                   <span className={bestAttempt?.passed ? styles.passedBadge : styles.scoreBadge}>
                     {bestAttempt
                       ? `${Math.round(Number(bestAttempt.percentage))}%`
@@ -207,17 +209,17 @@ export default function ExamsPage() {
                 <h2>{lang === 'ar' ? quiz.title_ar : quiz.title_en || quiz.title_ar}</h2>
                 <p>{lang === 'ar' ? quiz.description_ar : quiz.description_en || quiz.description_ar}</p>
                 <div className={styles.metaGrid}>
-                  <span><Clock3 size={15} /><b>{quiz.time_limit || '∞'}</b><small>{lang === 'ar' ? 'دقيقة' : 'minutes'}</small></span>
-                  <span><FileQuestion size={15} /><b>{questionCount}</b><small>{lang === 'ar' ? 'سؤال' : 'questions'}</small></span>
-                  <span><RotateCcw size={15} /><b>{remaining ?? '∞'}</b><small>{lang === 'ar' ? 'محاولة متبقية' : 'attempts left'}</small></span>
-                  <span><Trophy size={15} /><b>{quizAttempts.length}</b><small>{lang === 'ar' ? 'نتيجة سابقة' : 'past results'}</small></span>
+                  <span><Schedule fontSize="small" /><b>{quiz.time_limit || '∞'}</b><small>{lang === 'ar' ? 'دقيقة' : 'minutes'}</small></span>
+                  <span><Quiz fontSize="small" /><b>{questionCount}</b><small>{lang === 'ar' ? 'سؤال' : 'questions'}</small></span>
+                  <span><Replay fontSize="small" /><b>{remaining ?? '∞'}</b><small>{lang === 'ar' ? 'محاولة متبقية' : 'attempts left'}</small></span>
+                  <span><EmojiEvents fontSize="small" /><b>{quizAttempts.length}</b><small>{lang === 'ar' ? 'نتيجة سابقة' : 'past results'}</small></span>
                 </div>
                 <Link href={makeQuizHref(quiz)} className={`${styles.startAction} ${unavailable ? styles.reviewAction : ''}`}>
-                  {unavailable ? <CheckCircle2 size={16} /> : <Play size={16} fill="currentColor" />}
+                  {unavailable ? <CheckCircle fontSize="small" /> : <PlayArrow fontSize="small" />}
                   {unavailable
                     ? (lang === 'ar' ? 'عرض النتائج' : 'View results')
                     : (lang === 'ar' ? 'تفاصيل وبدء الامتحان' : 'Details & start')}
-                  {lang === 'ar' ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
+                  {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
                 </Link>
               </article>
             );
@@ -229,5 +231,5 @@ export default function ExamsPage() {
 }
 
 function BookOpenState() {
-  return <ClipboardCheck size={34} />;
+  return <AssignmentTurnedIn fontSize="large" />;
 }

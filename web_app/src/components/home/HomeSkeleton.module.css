@@ -1,0 +1,10 @@
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.page{padding:16px;animation:fadeIn .3s ease}
+.bannerShimmer{height:155px;border-radius:14px;background:linear-gradient(90deg,var(--border-light) 25%,var(--surface-soft) 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;margin-bottom:12px}
+.chipsRow{display:flex;gap:8px;margin-bottom:20px;overflow:hidden}
+.chipShimmer{width:80px;height:36px;border-radius:22px;flex-shrink:0;background:linear-gradient(90deg,var(--border-light) 25%,var(--surface-soft) 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+.sectionShimmer{height:18px;width:35%;border-radius:4px;margin-bottom:12px;background:linear-gradient(90deg,var(--border-light) 25%,var(--surface-soft) 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+.horizontalRow{display:flex;gap:12px;margin-bottom:24px;overflow:hidden}
+.verticalCardShimmer{width:170px;height:220px;flex-shrink:0;border-radius:8px;background:linear-gradient(90deg,var(--border-light) 25%,var(--surface-soft) 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+.verticalList{display:flex;flex-direction:column;gap:12px}
+.horizontalCardShimmer{height:100px;border-radius:12px;background:linear-gradient(90deg,var(--border-light) 25%,var(--surface-soft) 50%,var(--border-light) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}

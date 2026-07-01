@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
-import { Mail, User, Activity } from 'lucide-react';
+import { Mail as MailIcon, Person, TrendingUp } from '@mui/icons-material';
+import { usePageTransition } from '../../lib/animations';
 import styles from './page.module.css';
 
 interface StudentProfile {
@@ -25,6 +26,7 @@ interface StudentEnrollment {
 }
 
 export default function ParentPortalPage() {
+  const pageRef = usePageTransition();
   const { lang, t } = useApp();
 
   const [studentEmail, setStudentEmail] = useState('');
@@ -96,7 +98,7 @@ export default function ParentPortalPage() {
   };
 
   return (
-    <div className="container fade-in">
+    <div ref={pageRef} className="container fade-in">
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>{t.parentPortalTitle}</h1>
         <p className={styles.subtitle}>{t.parentDescription}</p>
@@ -106,7 +108,7 @@ export default function ParentPortalPage() {
       <div className={`${styles.searchCard} glass`}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <div className={styles.inputWrapper}>
-            <Mail className={styles.mailIcon} size={18} />
+            <MailIcon fontSize="small" className={styles.mailIcon} />
             <input
               type="email"
               required
@@ -134,7 +136,7 @@ export default function ParentPortalPage() {
               <div className={`${styles.reportCard} glass`}>
                 <div className={styles.studentInfo}>
                   <div className={styles.avatarPlaceholder}>
-                    <User size={32} />
+                    <Person fontSize="large" />
                   </div>
                   <div>
                     <h2 className={styles.studentName}>{student.name}</h2>
@@ -177,7 +179,7 @@ export default function ParentPortalPage() {
                         </div>
 
                         <div className={styles.footerRow}>
-                          <Activity size={12} className={styles.footerIcon} />
+                          <TrendingUp fontSize="small" className={styles.footerIcon} />
                           <span>
                             {t.lastAccessed}: {enroll.last_accessed_at ? new Date(enroll.last_accessed_at).toLocaleDateString() : 'N/A'}
                           </span>

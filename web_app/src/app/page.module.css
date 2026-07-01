@@ -3,7 +3,7 @@
   --muted: #6e687b;
   --brand: #2563eb;
   --brand-dark: #1d4ed8;
-  --lime: #c9f64a;
+  --lime: var(--primary-light);
   width: min(1240px, calc(100% - 40px));
   margin: 0 auto;
   padding: 24px 0 70px;
@@ -30,7 +30,7 @@
   position: absolute;
   inset: 24px;
   pointer-events: none;
-  border: 1px solid rgba(109, 50, 232, .09);
+  border: 1px solid rgba(37, 99, 235, .09);
   border-radius: 28px;
 }
 
@@ -40,8 +40,8 @@
   filter: blur(2px);
   pointer-events: none;
 }
-.heroOrbOne { width: 420px; height: 420px; top: -220px; left: 35%; background: rgba(201, 246, 74, .3); }
-.heroOrbTwo { width: 460px; height: 460px; bottom: -260px; right: -120px; background: rgba(109, 50, 232, .16); }
+.heroOrbOne { width: 420px; height: 420px; top: -220px; left: 35%; background: rgba(37, 99, 235, .3); }
+.heroOrbTwo { width: 460px; height: 460px; bottom: -260px; right: -120px; background: rgba(37, 99, 235, .16); }
 
 .heroCopy { position: relative; z-index: 3; max-width: 580px; }
 .eyebrow, .sectionHeading span, .journeyIntro > span {
@@ -56,7 +56,7 @@
 }
 .eyebrow {
   padding: 9px 14px;
-  border: 1px solid rgba(109, 50, 232, .16);
+  border: 1px solid rgba(37, 99, 235, .16);
   border-radius: 99px;
   background: rgba(255, 255, 255, .62);
 }
@@ -91,7 +91,7 @@
   padding: 0 23px;
   color: white;
   background: var(--brand);
-  box-shadow: 0 14px 30px rgba(109, 50, 232, .26);
+  box-shadow: 0 14px 30px rgba(37, 99, 235, .26);
 }
 .primaryButton:hover, .darkButton:hover, .ctaButton:hover { transform: translateY(-3px); }
 .textButton { color: var(--ink); background: transparent; }
@@ -127,13 +127,13 @@
   transform: translateX(-50%);
   border-radius: 50%;
   background: var(--brand);
-  box-shadow: inset 0 0 0 22px rgba(255,255,255,.07), 0 34px 60px rgba(83, 40, 176, .25);
+  box-shadow: inset 0 0 0 22px rgba(255,255,255,.07), 0 34px 60px rgba(37, 99, 235, .25);
 }
 .visualHalo::before, .visualHalo::after {
   content: '';
   position: absolute;
   inset: -28px;
-  border: 1px solid rgba(109, 50, 232, .15);
+  border: 1px solid rgba(37, 99, 235, .15);
   border-radius: 50%;
 }
 .visualHalo::after { inset: -60px; border-style: dashed; animation: spin 30s linear infinite; }
@@ -154,7 +154,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  border: 1px solid rgba(109, 50, 232, .1);
+  border: 1px solid rgba(37, 99, 235, .1);
   border-radius: 14px;
   background: rgba(255, 255, 255, .91);
   box-shadow: 0 16px 38px rgba(41, 25, 73, .15);
@@ -174,7 +174,7 @@
   place-items: center;
   border-radius: 50%;
   color: var(--brand);
-  background: var(--lime);
+  background: var(--primary);
 }
 .atomOne { width: 47px; height: 47px; top: 36px; right: 16px; }
 .atomTwo { width: 38px; height: 38px; bottom: 34px; left: 20px; }
@@ -246,7 +246,7 @@
 .cardAction { width: 36px; height: 36px; border-radius: 11px; color: white; background: var(--brand); transition: transform .2s ease, background .2s ease; }
 .cardAction:hover { transform: rotate(-6deg) scale(1.05); background: var(--brand-dark); }
 .cardAction:disabled { color: var(--brand); background: #dbeafe; }
-.emptyState { min-height: 180px; display: grid; place-items: center; align-content: center; gap: 10px; border: 1px dashed rgba(109, 50, 232, .22); border-radius: 20px; color: var(--muted); background: white; font-size: .8rem; font-weight: 700; }
+.emptyState { min-height: 180px; display: grid; place-items: center; align-content: center; gap: 10px; border: 1px dashed rgba(37, 99, 235, .22); border-radius: 20px; color: var(--muted); background: white; font-size: .8rem; font-weight: 700; }
 
 .journey {
   padding: 66px;
@@ -256,15 +256,15 @@
   border-radius: 30px;
   background: var(--ink);
 }
-.journeyIntro > span { color: var(--lime); }
+.journeyIntro > span { color: var(--primary); }
 .journeyIntro h2 { color: white; }
 .journeyIntro p { color: #aaa2b8; }
-.darkButton { min-height: 46px; margin-top: 24px; padding: 0 18px; color: var(--ink); background: var(--lime); font-size: .73rem; }
+.darkButton { min-height: 46px; margin-top: 24px; padding: 0 18px; color: var(--ink); background: var(--primary); font-size: .73rem; }
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .steps article { position: relative; min-height: 240px; padding: 22px; display: flex; flex-direction: column; justify-content: end; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(255,255,255,.04); transition: transform .22s ease, background .22s ease; }
 .steps article:hover { transform: translateY(-5px); background: rgba(255,255,255,.08); }
 .steps article > b { position: absolute; top: 15px; left: 17px; color: rgba(255,255,255,.16); font-size: 2.6rem; }
-.steps article > span { width: 42px; height: 42px; margin-bottom: 18px; display: grid; place-items: center; border-radius: 12px; color: var(--ink); background: var(--lime); }
+.steps article > span { width: 42px; height: 42px; margin-bottom: 18px; display: grid; place-items: center; border-radius: 12px; color: var(--ink); background: var(--primary); }
 .steps h3 { margin-bottom: 7px; color: white; font-size: .85rem; }
 .steps p { color: #aaa2b8; font-size: .63rem; font-weight: 600; line-height: 1.7; }
 
@@ -294,9 +294,9 @@
   background: var(--brand);
   box-shadow: 0 25px 60px rgba(37, 99, 235, .24);
 }
-.cta span { display: flex; align-items: center; gap: 7px; color: var(--lime); font-size: .68rem; font-weight: 800; }
+.cta span { display: flex; align-items: center; gap: 7px; color: var(--primary); font-size: .68rem; font-weight: 800; }
 .cta h2 { max-width: 700px; margin-bottom: 0; color: white; }
-.ctaButton { min-height: 49px; padding: 0 20px; flex: 0 0 auto; color: var(--ink); background: var(--lime); font-size: .74rem; }
+.ctaButton { min-height: 49px; padding: 0 20px; flex: 0 0 auto; color: var(--ink); background: var(--primary); font-size: .74rem; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -385,7 +385,7 @@
 }
 
 .floatingCard > span {
-  border: 1px solid rgba(109, 50, 232, .16);
+  border: 1px solid rgba(37, 99, 235, .16);
   background: color-mix(in srgb, var(--background) 84%, transparent);
 }
 
@@ -456,7 +456,7 @@
 
 .steps article:last-child { border-inline-end: 0; }
 .steps article:hover { transform: none; background: transparent; }
-.steps article > span { background: transparent; border: 1px solid rgba(201, 246, 74, .35); color: var(--lime); }
+.steps article > span { background: transparent; border: 1px solid rgba(37, 99, 235, .35); color: var(--primary); }
 
 .reviews { border-top: 0; }
 
@@ -546,13 +546,13 @@
   overflow: hidden;
   border-radius: 24px;
   color: white;
-  background: linear-gradient(135deg, #5720bd 0%, #7330e8 100%);
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
 }
 
 .heroCopy { max-width: 610px; align-self: center; padding-bottom: 58px; }
-.eyebrow { color: var(--lime); border: 0; background: transparent; padding: 0; }
+.eyebrow { color: var(--primary); border: 0; background: transparent; padding: 0; }
 .hero h1 { margin-top: 18px; color: white; font-size: clamp(3rem, 5vw, 5.4rem); }
-.hero h1 span { color: var(--lime); }
+.hero h1 span { color: var(--primary); }
 .heroCopy > p { color: rgba(255,255,255,.78); }
 .heroActions { margin-top: 26px; }
 .hero .primaryButton { color: var(--brand-dark); background: white; box-shadow: none; }
@@ -601,16 +601,16 @@
   overflow: hidden;
   border-radius: 14px;
   color: white;
-  background: linear-gradient(145deg, #4f1da9, #7433e8);
+  background: linear-gradient(145deg, #1D4ED8, #2563EB);
   transition: transform .22s ease;
 }
-.gradeItem:nth-child(2) { background: linear-gradient(145deg, #6530cc, #9259f1); }
-.gradeItem:nth-child(3) { background: linear-gradient(145deg, #2a2140, #49356e); }
+.gradeItem:nth-child(2) { background: linear-gradient(145deg, #2563EB, #60A5FA); }
+.gradeItem:nth-child(3) { background: linear-gradient(145deg, #0F172A, #334155); }
 .gradeItem:hover { transform: translateY(-5px); }
-.gradeItem b { color: var(--lime); font-size: 2.4rem; opacity: .75; }
+.gradeItem b { color: var(--primary); font-size: 2.4rem; opacity: .75; }
 .gradeItem h3 { margin-bottom: 4px; font-size: .82rem; }
 .gradeItem p { color: rgba(255,255,255,.7); font-size: .58rem; font-weight: 600; line-height: 1.6; }
-.gradeItem > svg { color: var(--lime); }
+.gradeItem > svg { color: var(--primary); }
 
 .journey {
   width: auto;
@@ -760,7 +760,7 @@
   transform: translateX(-50%);
   border-radius: 50%;
   background:
-    radial-gradient(circle at center, rgba(109,50,232,.08) 0 49%, transparent 50%),
+    radial-gradient(circle at center, rgba(37, 99, 235,.08) 0 49%, transparent 50%),
     linear-gradient(145deg, #e9defb, #f7f3fe);
   box-shadow: inset 0 0 0 55px rgba(255,255,255,.35);
 }
@@ -782,7 +782,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid rgba(109,50,232,.08);
+  border: 1px solid rgba(37, 99, 235,.08);
   border-radius: 12px;
   background: rgba(255,255,255,.94);
   box-shadow: 0 16px 35px rgba(51,31,88,.1);
@@ -805,13 +805,13 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   align-items: center;
-  border: 1px solid rgba(109,50,232,.08);
+  border: 1px solid rgba(37, 99, 235,.08);
   border-radius: 18px;
   background: rgba(255,255,255,.94);
   box-shadow: 0 18px 45px rgba(51,31,88,.1);
   backdrop-filter: blur(15px);
 }
-.heroStats > div { min-width: 0; display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 2px 12px; border-inline-end: 1px solid rgba(109,50,232,.12); }
+.heroStats > div { min-width: 0; display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 2px 12px; border-inline-end: 1px solid rgba(37, 99, 235,.12); }
 .heroStats > div:last-child { border: 0; }
 .heroStats span { grid-row: span 2; color: var(--brand); }
 .heroStats strong { color: var(--brand); font-size: 1.2rem; }
@@ -820,31 +820,31 @@
 [data-theme="dark"] .hero {
   margin-top: 18px;
   overflow: visible;
-  border: 1px solid rgba(160,95,255,.45);
+  border: 1px solid rgba(147, 197, 253,.45);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 24% 50%, rgba(126,50,230,.38), transparent 31%),
-    radial-gradient(circle at 84% 20%, rgba(101,30,194,.18), transparent 27%),
+    radial-gradient(circle at 24% 50%, rgba(37, 99, 235,.38), transparent 31%),
+    radial-gradient(circle at 84% 20%, rgba(37, 99, 235,.18), transparent 27%),
     linear-gradient(135deg, #140725, #0e061d 66%, #190a32);
-  box-shadow: 0 0 80px rgba(96,37,185,.18);
+  box-shadow: 0 0 80px rgba(37, 99, 235,.18);
 }
 [data-theme="dark"] .hero h1 { color: #fff; text-shadow: 0 0 24px rgba(255,255,255,.12); }
-[data-theme="dark"] .hero h1 span { color: var(--lime); }
+[data-theme="dark"] .hero h1 span { color: var(--primary); }
 [data-theme="dark"] .heroCopy > p { color: #c7bdd7; }
-[data-theme="dark"] .eyebrow { color: var(--lime); border: 1px solid rgba(190,255,69,.25); background: rgba(104,36,195,.16); }
-[data-theme="dark"] .hero .primaryButton { color: #160925; background: var(--lime); box-shadow: 0 0 28px rgba(201,246,74,.2); }
+[data-theme="dark"] .eyebrow { color: var(--primary); border: 1px solid rgba(37, 99, 235,.25); background: rgba(104,36,195,.16); }
+[data-theme="dark"] .hero .primaryButton { color: #160925; background: var(--primary); box-shadow: 0 0 28px rgba(37, 99, 235,.2); }
 [data-theme="dark"] .hero .textButton { color: #fff; }
 [data-theme="dark"] .teacherHalo {
   background:
-    radial-gradient(circle at center, rgba(115,45,223,.1) 0 47%, transparent 48%),
-    radial-gradient(circle at center, rgba(131,54,235,.24), rgba(82,25,158,.08) 60%, transparent 70%);
-  border: 2px solid rgba(159,87,255,.5);
-  box-shadow: 0 0 55px rgba(137,55,241,.38), inset 0 0 55px rgba(121,45,218,.25);
+    radial-gradient(circle at center, rgba(37, 99, 235,.1) 0 47%, transparent 48%),
+    radial-gradient(circle at center, rgba(37, 99, 235,.24), rgba(37, 99, 235,.08) 60%, transparent 70%);
+  border: 2px solid rgba(147, 197, 253,.5);
+  box-shadow: 0 0 55px rgba(37, 99, 235,.38), inset 0 0 55px rgba(37, 99, 235,.25);
 }
 [data-theme="dark"] .teacherImage { filter: drop-shadow(0 28px 20px rgba(0,0,0,.36)); }
 [data-theme="dark"] .teacherBadge,
 [data-theme="dark"] .heroStats {
-  border-color: rgba(160,95,255,.38);
+  border-color: rgba(147, 197, 253,.38);
   background: rgba(35,12,66,.78);
   box-shadow: 0 12px 38px rgba(0,0,0,.26);
 }
@@ -853,8 +853,8 @@
 [data-theme="dark"] .teacherBadge small,
 [data-theme="dark"] .heroStats small { color: #b9aecb; }
 [data-theme="dark"] .teacherBadge > span,
-[data-theme="dark"] .heroStats span { color: var(--lime); background: transparent; }
-[data-theme="dark"] .heroStats > div { border-color: rgba(160,95,255,.3); }
+[data-theme="dark"] .heroStats span { color: var(--primary); background: transparent; }
+[data-theme="dark"] .heroStats > div { border-color: rgba(147, 197, 253,.3); }
 
 @media (max-width: 900px) {
   .hero { padding-inline: 28px; }
@@ -897,7 +897,7 @@
   --muted: var(--text-muted);
   --brand: var(--primary);
   --brand-dark: var(--primary-dark);
-  --lime: var(--accent);
+  
   width: min(1380px, calc(100% - 36px));
   padding: 34px 0 90px;
 }
@@ -914,7 +914,7 @@
   border-radius: 36px;
   color: var(--text-main);
   background:
-    radial-gradient(circle at 14% 22%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 18rem),
+    radial-gradient(circle at 14% 22%, color-mix(in srgb, var(--primary) 24%, transparent), transparent 18rem),
     radial-gradient(circle at 80% 26%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 26rem),
     linear-gradient(135deg, color-mix(in srgb, var(--surface-card) 90%, transparent), rgba(239,232,219,.58));
   box-shadow: var(--shadow-lg);
@@ -980,7 +980,7 @@
   width: fit-content;
   margin-inline-start: auto;
   color: var(--primary);
-  background: linear-gradient(90deg, var(--primary), var(--plasma));
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -999,9 +999,9 @@
   min-height: 54px;
   padding: 0 25px;
   border-radius: 17px;
-  color: var(--accent-ink);
-  background: var(--accent);
-  box-shadow: 0 18px 38px color-mix(in srgb, var(--accent) 28%, transparent);
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
 .textButton {
@@ -1011,9 +1011,9 @@
 }
 
 .hero .primaryButton {
-  color: var(--accent-ink);
-  background: var(--accent);
-  box-shadow: 0 18px 38px color-mix(in srgb, var(--accent) 28%, transparent);
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 18px 38px color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
 .heroVisual {
@@ -1027,7 +1027,7 @@
   background:
     radial-gradient(circle at 50% 54%, color-mix(in srgb, var(--primary) 10%, transparent) 0 45%, transparent 45.5%),
     radial-gradient(circle at 50% 54%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 64%),
-    linear-gradient(145deg, rgba(255,255,255,.26), color-mix(in srgb, var(--accent) 16%, transparent));
+    linear-gradient(145deg, rgba(255,255,255,.26), color-mix(in srgb, var(--primary) 16%, transparent));
   box-shadow:
     inset 0 0 0 58px rgba(255,255,255,.24),
     0 40px 80px rgba(23,16,36,.13);
@@ -1048,8 +1048,8 @@
 }
 
 .teacherBadge > span {
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
 }
 
 .heroStats {
@@ -1113,14 +1113,14 @@
   inset: auto 18px -1px 18px;
   height: 3px;
   border-radius: 99px;
-  background: linear-gradient(90deg, transparent, var(--accent), var(--primary), transparent);
+  background: linear-gradient(90deg, transparent, var(--primary), var(--primary), transparent);
   opacity: .75;
 }
 
 .courseMedia {
   border-radius: 22px 22px 10px 10px;
   background:
-    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 35%),
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 35%),
     var(--surface-soft);
 }
 
@@ -1131,8 +1131,8 @@
 
 .cardAction {
   border-radius: 14px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
 }
 
 .gradesSection {
@@ -1145,8 +1145,8 @@
   border: 1px solid rgba(255,255,255,.13);
   border-radius: 26px;
   background:
-    radial-gradient(circle at 12% 8%, rgba(216,255,74,.18), transparent 28%),
-    linear-gradient(145deg, #171024, #35137e);
+    radial-gradient(circle at 12% 8%, rgba(37, 99, 235,.18), transparent 28%),
+    linear-gradient(145deg, #171024, #1E3A5F);
   animation: gradeFloat 6.5s ease-in-out infinite;
   will-change: transform;
 }
@@ -1155,16 +1155,16 @@
   --grade-float: 16px;
   animation-delay: -2.1s;
   background:
-    radial-gradient(circle at 80% 12%, rgba(216,255,74,.16), transparent 25%),
-    linear-gradient(145deg, #2e145d, #6c2ff2);
+    radial-gradient(circle at 80% 12%, rgba(37, 99, 235,.16), transparent 25%),
+    linear-gradient(145deg, #172554, #3B82F6);
 }
 
 .gradeItem:nth-child(3) {
   --grade-float: -10px;
   animation-delay: -4.2s;
   background:
-    radial-gradient(circle at 34% 14%, rgba(216,255,74,.16), transparent 24%),
-    linear-gradient(145deg, #120b20, #4c3187);
+    radial-gradient(circle at 34% 14%, rgba(37, 99, 235,.16), transparent 24%),
+    linear-gradient(145deg, #120b20, #1E3A5F);
 }
 
 .gradeItem:nth-child(1) {
@@ -1176,7 +1176,7 @@
   border: 1px solid var(--glass-border);
   border-radius: 34px;
   background:
-    radial-gradient(circle at 18% 20%, rgba(216,255,74,.12), transparent 20rem),
+    radial-gradient(circle at 18% 20%, rgba(37, 99, 235,.12), transparent 20rem),
     radial-gradient(circle at 88% 70%, rgba(108,47,242,.22), transparent 24rem),
     linear-gradient(135deg, #171024, #08050f);
 }
@@ -1187,7 +1187,7 @@
 }
 
 .journeyIntro p { color: rgba(255,255,255,.66); }
-.journeyIntro > span { color: var(--accent); }
+.journeyIntro > span { color: var(--primary); }
 
 .steps {
   gap: 14px;
@@ -1202,8 +1202,8 @@
 }
 
 .steps article > span {
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
 }
 
 .steps h3 { color: #fff; }
@@ -1213,19 +1213,19 @@
   border: 1px solid var(--glass-border);
   border-radius: 32px;
   background:
-    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 18rem),
+    radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 18rem),
     linear-gradient(135deg, var(--surface-card), var(--surface-soft));
   box-shadow: var(--shadow-md);
 }
 
 .cta h2 { color: var(--text-main); }
 .cta span { color: var(--primary); }
-.ctaButton { color: var(--accent-ink); background: var(--accent); }
+.ctaButton { color: white; background: var(--primary); }
 
 [data-theme="dark"] .hero {
   background:
-    radial-gradient(circle at 14% 22%, rgba(216,255,74,.1), transparent 18rem),
-    radial-gradient(circle at 80% 26%, rgba(155,77,255,.3), transparent 26rem),
+    radial-gradient(circle at 14% 22%, rgba(37, 99, 235,.1), transparent 18rem),
+    radial-gradient(circle at 80% 26%, rgba(147, 197, 253,.3), transparent 26rem),
     linear-gradient(135deg, #12091f, #07040f);
 }
 
@@ -1237,7 +1237,7 @@
 }
 
 [data-theme="dark"] .hero h1 span {
-  background: linear-gradient(90deg, var(--accent), var(--plasma));
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1252,8 +1252,8 @@
 
 [data-theme="dark"] .teacherHalo {
   background:
-    radial-gradient(circle at 50% 54%, rgba(216,255,74,.08) 0 45%, transparent 45.5%),
-    radial-gradient(circle at 50% 54%, rgba(155,77,255,.24), transparent 64%);
+    radial-gradient(circle at 50% 54%, rgba(37, 99, 235,.08) 0 45%, transparent 45.5%),
+    radial-gradient(circle at 50% 54%, rgba(147, 197, 253,.24), transparent 64%);
 }
 
 @media (max-width: 1040px) {
@@ -1303,7 +1303,7 @@
   }
 }
 
-/* Headline clipping fix: Changa is wide at large desktop sizes, so keep it bold without letting it exceed the hero column. */
+/* Headline clipping fix: keep bold headlines from exceeding the hero column. */
 .heroCopy {
   min-width: 0;
   width: 100%;
@@ -1344,7 +1344,7 @@
   z-index: 8;
   color: var(--text-main);
   background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 16rem),
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 16rem),
     color-mix(in srgb, var(--surface-card) 94%, white);
   border-color: color-mix(in srgb, var(--primary) 16%, transparent);
 }
@@ -1356,7 +1356,7 @@
 .journey {
   color: var(--text-main);
   background:
-    radial-gradient(circle at 14% 18%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 21rem),
+    radial-gradient(circle at 14% 18%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 21rem),
     radial-gradient(circle at 86% 72%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 24rem),
     linear-gradient(135deg, color-mix(in srgb, var(--surface-card) 96%, white), color-mix(in srgb, var(--surface-soft) 86%, white));
   box-shadow: var(--shadow-md);
@@ -1390,7 +1390,7 @@
 
 [data-theme="dark"] .journey {
   background:
-    radial-gradient(circle at 18% 20%, rgba(216,255,74,.12), transparent 20rem),
+    radial-gradient(circle at 18% 20%, rgba(37, 99, 235,.12), transparent 20rem),
     radial-gradient(circle at 88% 70%, rgba(108,47,242,.22), transparent 24rem),
     linear-gradient(135deg, #171024, #08050f);
 }
@@ -1406,7 +1406,7 @@
 }
 
 [data-theme="dark"] .journeyIntro > span {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 [data-theme="dark"] .steps article {
@@ -1419,7 +1419,7 @@
   color: var(--text-main);
   border: 1px solid rgba(64, 44, 92, .12);
   background:
-    radial-gradient(circle at 13% 18%, rgba(216, 255, 74, .26), transparent 22rem),
+    radial-gradient(circle at 13% 18%, rgba(37, 99, 235, .26), transparent 22rem),
     radial-gradient(circle at 86% 72%, rgba(108, 47, 242, .11), transparent 25rem),
     linear-gradient(135deg, rgba(255, 253, 248, .96), rgba(245, 240, 229, .9));
   box-shadow: 0 22px 60px rgba(25, 15, 51, .1);
@@ -1450,8 +1450,8 @@
 }
 
 :global(html:not([data-theme="dark"])) .steps article > span {
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
   border: 0;
 }
 
@@ -1497,10 +1497,10 @@
 .hero .primaryButton {
   min-height: 56px;
   padding-inline: 28px;
-  border: 1px solid color-mix(in srgb, var(--accent) 48%, white);
+  border: 1px solid color-mix(in srgb, var(--primary) 48%, white);
   border-radius: 18px;
   box-shadow:
-    0 18px 34px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 18px 34px color-mix(in srgb, var(--primary) 30%, transparent),
     inset 0 1px 0 rgba(255,255,255,.58);
 }
 
@@ -1514,8 +1514,8 @@
 .teacherHalo {
   background:
     radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--primary) 12%, transparent) 0 43%, transparent 43.8%),
-    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--plasma) 15%, transparent), transparent 63%),
-    linear-gradient(145deg, rgba(255,255,255,.34), color-mix(in srgb, var(--accent) 12%, transparent));
+    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--primary-light) 15%, transparent), transparent 63%),
+    linear-gradient(145deg, rgba(255,255,255,.34), color-mix(in srgb, var(--primary) 12%, transparent));
   box-shadow:
     inset 0 0 0 50px rgba(255,255,255,.22),
     0 32px 70px rgba(25, 15, 51, .12);
@@ -1626,8 +1626,8 @@
   overflow: hidden;
   color: var(--primary);
   background:
-    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 28%),
-    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--plasma) 28%, transparent), transparent 32%),
+    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--primary) 40%, transparent), transparent 28%),
+    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--primary-light) 28%, transparent), transparent 32%),
     linear-gradient(145deg, #f7f2ff, #efe6ff 48%, #fffdf8);
 }
 
@@ -1649,10 +1649,10 @@
 .coursePlaceholder::after {
   width: 9px;
   height: 9px;
-  background: var(--accent);
+  background: var(--primary);
   box-shadow:
     44px 28px 0 color-mix(in srgb, var(--primary) 70%, white),
-    -38px 38px 0 color-mix(in srgb, var(--plasma) 72%, white);
+    -38px 38px 0 color-mix(in srgb, var(--primary-light) 72%, white);
 }
 
 .coursePlaceholder svg {
@@ -1701,7 +1701,7 @@
   width: 42px;
   height: 42px;
   border-radius: 15px;
-  box-shadow: 0 12px 22px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 12px 22px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .gradesSection {
@@ -1726,7 +1726,7 @@
 }
 
 .gradeItem b {
-  color: var(--accent);
+  color: var(--primary);
   font-size: 2.15rem;
   opacity: .92;
   line-height: 1;
@@ -1759,9 +1759,9 @@
 
 [data-theme="dark"] .teacherHalo {
   background:
-    radial-gradient(circle at 50% 54%, rgba(216,255,74,.08) 0 43%, transparent 43.8%),
-    radial-gradient(circle at 50% 54%, rgba(155,77,255,.22), transparent 62%);
-  box-shadow: 0 0 46px rgba(137,55,241,.25), inset 0 0 44px rgba(121,45,218,.18);
+    radial-gradient(circle at 50% 54%, rgba(37, 99, 235,.08) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 50% 54%, rgba(147, 197, 253,.22), transparent 62%);
+  box-shadow: 0 0 46px rgba(37, 99, 235,.25), inset 0 0 44px rgba(37, 99, 235,.18);
 }
 
 [data-theme="dark"] .heroStats {
@@ -1782,7 +1782,7 @@
 }
 
 [data-theme="dark"] .price strong {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 @media (max-width: 1040px) {
@@ -1827,7 +1827,7 @@
 .hero {
   background:
     radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 25rem),
-    radial-gradient(circle at 14% 82%, color-mix(in srgb, var(--plasma) 7%, transparent), transparent 22rem),
+    radial-gradient(circle at 14% 82%, color-mix(in srgb, var(--primary-light) 7%, transparent), transparent 22rem),
     linear-gradient(135deg, rgba(255,255,255,.9), rgba(244,243,250,.76));
 }
 
@@ -1848,14 +1848,14 @@
 
 .hero .primaryButton {
   box-shadow:
-    0 16px 30px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 16px 30px color-mix(in srgb, var(--primary) 18%, transparent),
     inset 0 1px 0 rgba(255,255,255,.58);
 }
 
 .teacherHalo {
   background:
     radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--primary) 10%, transparent) 0 43%, transparent 43.8%),
-    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--plasma) 12%, transparent), transparent 63%),
+    radial-gradient(circle at 48% 52%, color-mix(in srgb, var(--primary-light) 12%, transparent), transparent 63%),
     linear-gradient(145deg, rgba(255,255,255,.42), color-mix(in srgb, var(--primary) 5%, transparent));
   box-shadow:
     inset 0 0 0 50px rgba(255,255,255,.2),
@@ -1868,13 +1868,13 @@
 
 .coursePlaceholder {
   background:
-    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 28%),
-    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--plasma) 22%, transparent), transparent 32%),
+    radial-gradient(circle at 78% 16%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 28%),
+    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--primary-light) 22%, transparent), transparent 32%),
     linear-gradient(145deg, #fbfbff, #f1effb 48%, #ffffff);
 }
 
 .coursePlaceholder::after {
-  background: color-mix(in srgb, var(--accent) 82%, white);
+  background: color-mix(in srgb, var(--primary) 82%, white);
 }
 
 .courseMedia {
@@ -1889,26 +1889,26 @@
 }
 
 .cardAction {
-  box-shadow: 0 12px 22px color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: 0 12px 22px color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
 .gradeItem,
 .gradeItem:nth-child(2),
 .gradeItem:nth-child(3) {
   background:
-    radial-gradient(circle at 78% 10%, rgba(216,255,74,.055), transparent 24%),
-    linear-gradient(145deg, #171024, #35137e);
+    radial-gradient(circle at 78% 10%, rgba(37, 99, 235,.055), transparent 24%),
+    linear-gradient(145deg, #171024, #1E3A5F);
 }
 
 .gradeItem:nth-child(2) {
   background:
-    radial-gradient(circle at 80% 12%, rgba(216,255,74,.05), transparent 22%),
-    linear-gradient(145deg, #2b1458, #6c2ff2);
+    radial-gradient(circle at 80% 12%, rgba(37, 99, 235,.05), transparent 22%),
+    linear-gradient(145deg, #2b1458, #3B82F6);
 }
 
 .gradeItem:nth-child(3) {
   background:
-    radial-gradient(circle at 34% 14%, rgba(216,255,74,.045), transparent 22%),
+    radial-gradient(circle at 34% 14%, rgba(37, 99, 235,.045), transparent 22%),
     linear-gradient(145deg, #120b20, #473080);
 }
 
@@ -1930,14 +1930,14 @@
 
 [data-theme="dark"] .hero {
   background:
-    radial-gradient(circle at 80% 26%, rgba(155,77,255,.22), transparent 26rem),
+    radial-gradient(circle at 80% 26%, rgba(147, 197, 253,.22), transparent 26rem),
     linear-gradient(135deg, #12091f, #07040f);
 }
 
 [data-theme="dark"] .teacherHalo {
   background:
-    radial-gradient(circle at 50% 54%, rgba(155,77,255,.08) 0 43%, transparent 43.8%),
-    radial-gradient(circle at 50% 54%, rgba(155,77,255,.22), transparent 62%);
+    radial-gradient(circle at 50% 54%, rgba(147, 197, 253,.08) 0 43%, transparent 43.8%),
+    radial-gradient(circle at 50% 54%, rgba(147, 197, 253,.22), transparent 62%);
 }
 
 [data-theme="dark"] .journey {
@@ -1970,8 +1970,8 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: white;
+  background: var(--primary);
 }
 
 .heroBadge div { display: grid; gap: 2px; }
@@ -1997,7 +1997,7 @@
   place-items: center;
   border-radius: 50%;
   color: var(--primary);
-  background: color-mix(in srgb, var(--accent) 18%, var(--surface-card));
+  background: color-mix(in srgb, var(--primary) 18%, var(--surface-card));
   box-shadow: 0 8px 22px rgba(23,16,36,.12);
   animation: float 6s ease-in-out infinite;
 }
@@ -2020,13 +2020,13 @@
 
 [data-theme="dark"] .heroBadge {
   background: rgba(22,12,44,.82);
-  border-color: rgba(155,77,255,.3);
+  border-color: rgba(147, 197, 253,.3);
   box-shadow: 0 18px 42px rgba(0,0,0,.28);
 }
 [data-theme="dark"] .heroBadge b { color: #fff; }
 [data-theme="dark"] .heroBadge small { color: #b9aecb; }
 [data-theme="dark"] .heroBadge > span { color: #0f0a1c; }
-[data-theme="dark"] .heroDot { background: rgba(109,50,232,.22); color: var(--accent); }
+[data-theme="dark"] .heroDot { background: rgba(37, 99, 235,.22); color: var(--primary); }
 
 @media (max-width: 900px) {
   .heroBadgeLesson { left: -6px; }

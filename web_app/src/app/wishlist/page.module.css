@@ -1,0 +1,327 @@
+.page {
+  width: min(1320px, calc(100% - 34px));
+  margin: 28px auto 80px;
+}
+
+.filterRow {
+  margin: 18px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 90px;
+}
+
+.card {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  color: var(--text-main);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  inset-inline-end: -60px;
+  top: -70px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+  box-shadow: var(--shadow-md);
+}
+
+.cardMedia {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--primary) 20%, transparent), transparent 36%),
+    var(--surface-soft);
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.placeholderIcon {
+  color: var(--border);
+}
+
+.favBtn {
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 10px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  background: rgba(239, 68, 68, 0.85);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.favBtn:hover {
+  transform: scale(1.1);
+  background: var(--error);
+}
+
+.priceDropBadge {
+  position: absolute;
+  top: 10px;
+  inset-inline-start: 10px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: white;
+  background: var(--success);
+}
+
+.cardBody {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.instructorName {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardSubtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+}
+
+.cardPricing {
+  margin-top: 4px;
+}
+
+.freeLabel {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.cardActions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionCart {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  color: white;
+  background: var(--primary);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.actionCart:hover {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 24%, transparent);
+  transform: translateY(-1px);
+}
+
+.actionInCart {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: var(--success);
+  background: var(--success-light);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.actionPurchased {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--primary-glow);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.actionPurchased:hover {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.timeAgo {
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.valueBar {
+  position: fixed;
+  bottom: 0;
+  inset-inline: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.valueInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.valueLabel {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.valueAmount {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.valueCount {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.emptyWrap {
+  padding: 60px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.noResults {
+  padding: 40px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.shimmerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.shimmerCard {
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--surface-card);
+}
+
+.shimmerBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 650px) {
+  .page {
+    width: calc(100% - 20px);
+    margin-top: 14px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .valueBar {
+    padding: 10px 16px;
+  }
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .shimmerCard {
+  background: var(--surface-card);
+}
+
+[data-theme="dark"] .valueBar {
+  background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+}

@@ -1,0 +1,22 @@
+.page{width:min(768px,100% - 32px);margin:0 auto;padding:16px 0 80px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.header h1{font-size:1.25rem;font-weight:800;color:var(--text-main);margin:0}
+.unreadBadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--primary);color:white;font-size:.68rem;font-weight:700}
+.toolbar{margin-bottom:16px}
+.markAllBtn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.markAllBtn:hover{background:var(--primary-glow)}
+.shimmerGrid{display:grid;gap:12px}
+.groups{display:grid;gap:20px}
+.groupLabel{font-size:.72rem;font-weight:800;color:var(--text-secondary);margin-bottom:8px;padding-inline:2px;letter-spacing:.03em}
+.card{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer;transition:background .15s,transform .15s,opacity .3s;animation:slideIn .4s ease both}
+.card:hover{background:var(--surface-hover);transform:translateY(-1px)}
+.cardUnread{background:rgba(var(--primary-rgb),.06);border-color:rgba(var(--primary-rgb),.2)}
+.iconWrap{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;flex-shrink:0}
+.cardBody{min-width:0}
+.cardBody h3{font-size:.82rem;font-weight:700;color:var(--text-main);line-height:1.3;margin:0 0 3px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.cardBody p{font-size:.72rem;color:var(--text-secondary);line-height:1.4;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cardMeta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.timeAgo{font-size:.58rem;color:var(--text-muted);white-space:nowrap;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:560px){.card{grid-template-columns:38px 1fr auto;gap:10px;padding:12px}.iconWrap{width:38px;height:38px;border-radius:10px}}

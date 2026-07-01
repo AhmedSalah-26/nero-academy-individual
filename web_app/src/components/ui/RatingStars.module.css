@@ -1,0 +1,54 @@
+.container {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.star {
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+  color: var(--rating);
+  transition: transform var(--transition-fast);
+}
+
+.interactive .star {
+  cursor: pointer;
+}
+
+.interactive .star:hover {
+  transform: scale(1.15);
+}
+
+.xs {
+  font-size: 12px;
+}
+
+.sm {
+  font-size: 16px;
+}
+
+.md {
+  font-size: 20px;
+}
+
+.lg {
+  font-size: 24px;
+}
+
+.empty {
+  color: var(--border);
+}
+
+.value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-main);
+  margin-inline-start: var(--spacing-xs);
+}
+
+.count {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-inline-start: 2px;
+}

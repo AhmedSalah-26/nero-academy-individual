@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState, Suspense } from 'react';
+import { useEffect, useMemo, useState, Suspense, useCallback } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, Star, Clock, Users, X } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Search, Tune, Star, Schedule, Groups, Close, History } from '@mui/icons-material';
 import { useApp } from '../../context/AppContext';
 import { supabase } from '../../lib/supabaseClient';
 import { useFadeIn, useStagger } from '../../lib/animations';
+import { CourseFilterSheet, type CourseFilterState } from '../../components/ui';
 import styles from './page.module.css';
 
 interface Course {
@@ -33,24 +34,53 @@ interface Category {
   name_en: string;
 }
 
+const RECENT_SEARCHES_KEY = 'nero_recent_searches';
+const MAX_RECENT = 8;
+
+function getRecentSearches(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearch(query: string) {
+  const recent = getRecentSearches().filter((s) => s !== query);
+  recent.unshift(query);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+}
+
+function clearRecentSearches() {
+  localStorage.removeItem(RECENT_SEARCHES_KEY);
+}
+
 function SearchContent() {
   const { lang, t, cart, addToCart, enrolledCourseIds } = useApp();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialQuery = searchParams.get('q') || '';
+  const initialCategory = searchParams.get('category') || '';
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState(initialQuery);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const [filters, setFilters] = useState({
-    category: 'all',
-    price: 'all',
-    level: 'all',
+  const [filters, setFilters] = useState<CourseFilterState>({
+    categories: initialCategory ? [initialCategory] : [],
+    priceMin: 0,
+    priceMax: 500,
+    levels: [],
     rating: 'all',
+    sort: 'popular',
+  });
+
+  const [legacyFilters, setLegacyFilters] = useState({
     duration: 'all',
     language: 'all',
-    sort: 'popular',
   });
 
   const heroRef = useFadeIn<HTMLDivElement>();
@@ -69,6 +99,38 @@ function SearchContent() {
     load();
   }, []);
 
+  useEffect(() => {
+    setRecentSearches(getRecentSearches());
+  }, []);
+
+  useEffect(() => {
+    if (initialCategory && !filters.categories.includes(initialCategory)) {
+      setFilters((prev) => ({ ...prev, categories: [initialCategory] }));
+    }
+  }, [initialCategory]);
+
+  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed) {
+      saveRecentSearch(trimmed);
+      setRecentSearches(getRecentSearches());
+    }
+  }, [query]);
+
+  const handleRecentClick = useCallback((term: string) => {
+    setQuery(term);
+  }, []);
+
+  const handleClearRecent = useCallback(() => {
+    clearRecentSearches();
+    setRecentSearches([]);
+  }, []);
+
+  const handleFilterApply = useCallback((newFilters: CourseFilterState) => {
+    setFilters(newFilters);
+  }, []);
+
   const normalizedQuery = query.trim().toLowerCase();
 
   const filtered = useMemo(() => {
@@ -80,27 +142,30 @@ function SearchContent() {
         title?.toLowerCase().includes(normalizedQuery) ||
         subtitle?.toLowerCase().includes(normalizedQuery);
 
-      const matchesCategory = filters.category === 'all' || c.category_id === filters.category;
-      const matchesLevel = filters.level === 'all' || c.level === filters.level;
-      const matchesLanguage = filters.language === 'all' || c.language === filters.language;
+      const matchesCategory = filters.categories.length === 0 || filters.categories.includes(c.category_id);
+      const matchesLevel = filters.levels.length === 0 || filters.levels.includes(c.level);
+      const matchesLanguage = legacyFilters.language === 'all' || c.language === legacyFilters.language;
 
       let matchesPrice = true;
-      if (filters.price === 'free') matchesPrice = c.is_free;
-      else if (filters.price === 'paid') matchesPrice = !c.is_free;
-      else if (filters.price === 'under100') matchesPrice = (c.discount_price || c.price) < 100;
-      else if (filters.price === '100to300')
-        matchesPrice = (c.discount_price || c.price) >= 100 && (c.discount_price || c.price) <= 300;
-      else if (filters.price === 'over300') matchesPrice = (c.discount_price || c.price) > 300;
+      const effectivePrice = c.discount_price || c.price;
+      if (filters.priceMin > 0 || filters.priceMax < 500) {
+        if (c.is_free) {
+          matchesPrice = filters.priceMin === 0;
+        } else {
+          matchesPrice = effectivePrice >= filters.priceMin && effectivePrice <= filters.priceMax;
+        }
+      }
 
       let matchesRating = true;
       if (filters.rating === '4plus') matchesRating = (c.rating || 0) >= 4;
       else if (filters.rating === '3plus') matchesRating = (c.rating || 0) >= 3;
+      else if (filters.rating === '2plus') matchesRating = (c.rating || 0) >= 2;
 
       let matchesDuration = true;
-      if (filters.duration === 'short') matchesDuration = (c.total_duration || 0) < 60;
-      else if (filters.duration === 'medium')
+      if (legacyFilters.duration === 'short') matchesDuration = (c.total_duration || 0) < 60;
+      else if (legacyFilters.duration === 'medium')
         matchesDuration = (c.total_duration || 0) >= 60 && (c.total_duration || 0) <= 180;
-      else if (filters.duration === 'long') matchesDuration = (c.total_duration || 0) > 180;
+      else if (legacyFilters.duration === 'long') matchesDuration = (c.total_duration || 0) > 180;
 
       return (
         matchesQuery &&
@@ -114,7 +179,7 @@ function SearchContent() {
     });
 
     list = [...list].sort((a, b) => {
-      if (filters.sort === 'newest') return new Date(b.id).getTime() - new Date(a.id).getTime();
+      if (filters.sort === 'newest') return 0;
       if (filters.sort === 'rating') return (b.rating || 0) - (a.rating || 0);
       if (filters.sort === 'priceLow') return (a.discount_price || a.price) - (b.discount_price || b.price);
       if (filters.sort === 'priceHigh') return (b.discount_price || b.price) - (a.discount_price || a.price);
@@ -122,16 +187,23 @@ function SearchContent() {
     });
 
     return list;
-  }, [courses, filters, lang, normalizedQuery]);
+  }, [courses, filters, legacyFilters, lang, normalizedQuery]);
 
-  const activeFiltersCount = Object.values(filters).filter((v) => v !== 'all').length;
+  const activeFiltersCount = [
+    ...filters.categories,
+    ...filters.levels,
+    filters.rating !== 'all' ? filters.rating : null,
+    (filters.priceMin > 0 || filters.priceMax < 500) ? 'price' : null,
+  ].filter(Boolean).length;
+
+  const hasQuery = normalizedQuery.length > 0;
 
   return (
     <div className="container">
       <div ref={heroRef} className={`${styles.hero} glass`}>
         <h1>{lang === 'ar' ? 'ابحث عن كورسك' : 'Find your course'}</h1>
-        <div className={styles.searchBox}>
-          <Search size={20} />
+        <form className={styles.searchBox} onSubmit={handleSearchSubmit}>
+          <Search fontSize="small" />
           <input
             type="search"
             value={query}
@@ -140,89 +212,69 @@ function SearchContent() {
           />
           <button
             className={styles.filterToggle}
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => setShowFilters(true)}
+            type="button"
             data-active={activeFiltersCount > 0}
           >
-            <SlidersHorizontal size={18} />
+            <Tune fontSize="small" />
             {activeFiltersCount > 0 && <span>{activeFiltersCount}</span>}
           </button>
-        </div>
+        </form>
       </div>
 
-      {showFilters && (
-        <div className={`${styles.filters} glass`}>
-          <div className={styles.filterGrid}>
-            <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
-              <option value="all">{t.allCategories}</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {lang === 'ar' ? c.name_ar : c.name_en}
-                </option>
-              ))}
-            </select>
-
-            <select value={filters.price} onChange={(e) => setFilters({ ...filters, price: e.target.value })}>
-              <option value="all">{lang === 'ar' ? 'أي سعر' : 'Any price'}</option>
-              <option value="free">{t.free}</option>
-              <option value="paid">{lang === 'ar' ? 'مدفوع' : 'Paid'}</option>
-              <option value="under100">{lang === 'ar' ? 'أقل من 100 ج' : 'Under 100 EGP'}</option>
-              <option value="100to300">{lang === 'ar' ? '100 - 300 ج' : '100 - 300 EGP'}</option>
-              <option value="over300">{lang === 'ar' ? 'أكثر من 300 ج' : 'Over 300 EGP'}</option>
-            </select>
-
-            <select value={filters.level} onChange={(e) => setFilters({ ...filters, level: e.target.value })}>
-              <option value="all">{lang === 'ar' ? 'أي مستوى' : 'Any level'}</option>
-              <option value="beginner">{lang === 'ar' ? 'مبتدئ' : 'Beginner'}</option>
-              <option value="intermediate">{lang === 'ar' ? 'متوسط' : 'Intermediate'}</option>
-              <option value="advanced">{lang === 'ar' ? 'متقدم' : 'Advanced'}</option>
-            </select>
-
-            <select value={filters.rating} onChange={(e) => setFilters({ ...filters, rating: e.target.value })}>
-              <option value="all">{lang === 'ar' ? 'أي تقييم' : 'Any rating'}</option>
-              <option value="4plus">{lang === 'ar' ? '4 نجوم فأكثر' : '4+ stars'}</option>
-              <option value="3plus">{lang === 'ar' ? '3 نجوم فأكثر' : '3+ stars'}</option>
-            </select>
-
-            <select value={filters.duration} onChange={(e) => setFilters({ ...filters, duration: e.target.value })}>
-              <option value="all">{lang === 'ar' ? 'أي مدة' : 'Any duration'}</option>
-              <option value="short">{lang === 'ar' ? 'أقل من ساعة' : 'Under 1 hour'}</option>
-              <option value="medium">{lang === 'ar' ? '1 - 3 ساعات' : '1 - 3 hours'}</option>
-              <option value="long">{lang === 'ar' ? 'أكثر من 3 ساعات' : 'Over 3 hours'}</option>
-            </select>
-
-            <select value={filters.language} onChange={(e) => setFilters({ ...filters, language: e.target.value })}>
-              <option value="all">{lang === 'ar' ? 'أي لغة' : 'Any language'}</option>
-              <option value="ar">{lang === 'ar' ? 'العربية' : 'Arabic'}</option>
-              <option value="en">{lang === 'ar' ? 'الإنجليزية' : 'English'}</option>
-            </select>
-
-            <select value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })}>
-              <option value="popular">{lang === 'ar' ? 'الأكثر شهرة' : 'Most popular'}</option>
-              <option value="newest">{lang === 'ar' ? 'الأحدث' : 'Newest'}</option>
-              <option value="rating">{lang === 'ar' ? 'الأعلى تقييماً' : 'Highest rated'}</option>
-              <option value="priceLow">{lang === 'ar' ? 'السعر: الأقل' : 'Price: low to high'}</option>
-              <option value="priceHigh">{lang === 'ar' ? 'السعر: الأعلى' : 'Price: high to low'}</option>
-            </select>
-          </div>
-
-          {activeFiltersCount > 0 && (
-            <button
-              className={styles.clearBtn}
-              onClick={() =>
-                setFilters({
-                  category: 'all',
-                  price: 'all',
-                  level: 'all',
-                  rating: 'all',
-                  duration: 'all',
-                  language: 'all',
-                  sort: 'popular',
-                })
-              }
-            >
-              <X size={14} /> {lang === 'ar' ? 'مسح الفلاتر' : 'Clear filters'}
+      {!hasQuery && recentSearches.length > 0 && (
+        <div className={styles.recentSection}>
+          <div className={styles.recentHeader}>
+            <div className={styles.recentTitle}>
+              <History fontSize="small" />
+              <span>{t.recentSearches}</span>
+            </div>
+            <button className={styles.clearRecentBtn} onClick={handleClearRecent} type="button">
+              {t.clearAll}
             </button>
-          )}
+          </div>
+          <div className={styles.recentChips}>
+            {recentSearches.map((term) => (
+              <button
+                key={term}
+                className={styles.recentChip}
+                onClick={() => handleRecentClick(term)}
+                type="button"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!hasQuery && categories.length > 0 && (
+        <div className={styles.categoriesSection}>
+          <div className={styles.categoriesHeader}>
+            <span className={styles.categoriesTitle}>{t.categories}</span>
+            <Link href="/categories" className={styles.viewAllLink}>
+              {lang === 'ar' ? 'عرض الكل' : 'View All'}
+            </Link>
+          </div>
+          <div className={styles.categoryChips}>
+            {categories.slice(0, 8).map((cat) => (
+              <button
+                key={cat.id}
+                className={`${styles.categoryChip} ${filters.categories.includes(cat.id) ? styles.categoryChipActive : ''}`}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    categories: prev.categories.includes(cat.id)
+                      ? prev.categories.filter((c) => c !== cat.id)
+                      : [...prev.categories, cat.id],
+                  }))
+                }
+                type="button"
+              >
+                {lang === 'ar' ? cat.name_ar : cat.name_en}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -230,13 +282,32 @@ function SearchContent() {
         <span>
           {filtered.length} {lang === 'ar' ? 'نتيجة' : 'result'}{filtered.length !== 1 && lang === 'en' ? 's' : ''}
         </span>
+        {activeFiltersCount > 0 && (
+          <button
+            className={styles.clearBtn}
+            onClick={() => {
+              setFilters({
+                categories: [],
+                priceMin: 0,
+                priceMax: 500,
+                levels: [],
+                rating: 'all',
+                sort: 'popular',
+              });
+              setLegacyFilters({ duration: 'all', language: 'all' });
+            }}
+            type="button"
+          >
+            <Close fontSize="small" /> {lang === 'ar' ? 'مسح الفلاتر' : 'Clear filters'}
+          </button>
+        )}
       </div>
 
       {loading ? (
         <div className={styles.loading}>{t.loading}</div>
       ) : filtered.length === 0 ? (
         <div className={styles.emptyState}>
-          <Search size={48} />
+          <Search fontSize="large" />
           <strong>{lang === 'ar' ? 'لا توجد نتائج مطابقة' : 'No matching courses'}</strong>
           <span>{lang === 'ar' ? 'جرّب تغيير البحث أو الفلاتر' : 'Try changing your search or filters'}</span>
         </div>
@@ -260,9 +331,9 @@ function SearchContent() {
                   <h3>{lang === 'ar' ? course.title_ar : course.title_en}</h3>
                   <p>{lang === 'ar' ? course.subtitle_ar : course.subtitle_en}</p>
                   <div className={styles.metaRow}>
-                    <span><Star size={13} fill="currentColor" /> {Number(course.rating || 0).toFixed(1)}</span>
-                    <span><Clock size={13} /> {course.total_duration || 0} {t.durationMinutes}</span>
-                    <span><Users size={13} /> {course.enrolled_count || 0}</span>
+                    <span><Star fontSize="small" fill="currentColor" /> {Number(course.rating || 0).toFixed(1)}</span>
+                    <span><Schedule fontSize="small" /> {course.total_duration || 0} {t.durationMinutes}</span>
+                    <span><Groups fontSize="small" /> {course.enrolled_count || 0}</span>
                   </div>
                   <div className={styles.cardFooter}>
                     <div className={styles.price}>
@@ -297,6 +368,14 @@ function SearchContent() {
           })}
         </div>
       )}
+
+      <CourseFilterSheet
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        onApply={handleFilterApply}
+        categories={categories}
+        initialFilters={filters}
+      />
     </div>
   );
 }

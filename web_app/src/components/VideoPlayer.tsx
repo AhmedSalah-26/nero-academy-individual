@@ -42,6 +42,7 @@ interface VideoPlayerProps {
   startAt?: number;
   onProgress: (position: number, duration: number) => void;
   onComplete?: () => void;
+  playbackSpeed?: number;
 }
 
 function getYoutubeVideoId(url: string): string | null {
@@ -91,6 +92,7 @@ export function VideoPlayer({
   startAt = 0,
   onProgress,
   onComplete,
+  playbackSpeed = 1,
 }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const htmlVideoRef = useRef<HTMLVideoElement>(null);
@@ -223,6 +225,14 @@ export function VideoPlayer({
       </div>
     );
   }
+
+  useEffect(() => {
+    if (isYoutube) return;
+    const video = htmlVideoRef.current;
+    if (video && playbackSpeed !== video.playbackRate) {
+      video.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, isYoutube]);
 
   return (
     <div className={styles.videoContainer}>

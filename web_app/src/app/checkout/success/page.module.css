@@ -71,5 +71,20 @@
 
 .dashboardBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(127, 19, 236, 0.5);
+  box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.4);
+  background: var(--primary);
 }
+
+.iconCircle{width:112px;height:112px;display:grid;place-items:center;border-radius:50%;background:var(--surface-soft);margin-bottom:8px}
+.iconSuccess{background:rgba(34,197,94,.12);color:var(--success)}
+.iconError{background:rgba(239,68,68,.12);color:var(--error)}
+
+.orderIdRow{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 20px;border:1px solid var(--border);border-radius:14px;background:var(--surface-soft);width:100%}
+.orderIdLabel{font-size:.72rem;font-weight:700;color:var(--text-muted)}
+.orderIdValue{display:flex;align-items:center;gap:8px}
+.orderIdValue span{font-size:1.05rem;font-weight:800;color:var(--primary);letter-spacing:.03em}
+.copyBtn{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:background .15s}
+.copyBtn:hover{background:var(--surface-hover);color:var(--primary)}
+
+.whatsappBtn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;background:#25D366;color:white;font-size:.88rem;font-weight:700;text-decoration:none;transition:opacity .15s;box-shadow:0 4px 14px rgba(37,211,102,.3)}
+.whatsappBtn:hover{opacity:.85}

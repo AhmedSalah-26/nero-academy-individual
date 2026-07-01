@@ -1,0 +1,26 @@
+.card{width:170px;flex-shrink:0;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;border:1px solid rgba(var(--primary-rgb),.25);background:var(--surface);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.thumbnailLink{display:block;text-decoration:none;color:inherit}
+.thumbnail{position:relative;width:100%;height:0;padding-bottom:56%;overflow:hidden;background:var(--surface-soft)}
+.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.thumbnailFallback{position:absolute;inset:0;display:grid;place-content:center;background:linear-gradient(to bottom right,#E7D7FF,#F7F0FF)}
+.playIcon{font-size:24px;color:var(--primary);opacity:.6}
+.badge{position:absolute;top:8px;inset-inline-start:8px;padding:2px 6px;border-radius:4px;font-size:.56rem;font-weight:700;color:white;line-height:1.5}
+.badgeCustom{background:linear-gradient(135deg,#FF512F,#DD2476)}
+.badgeFree{background:var(--success)}
+.badgeDiscount{background:var(--error)}
+.wishlist{position:absolute;top:4px;inset-inline-end:4px;width:32px;height:32px;border-radius:50%;border:none;background:var(--glass-bg);backdrop-filter:blur(8px);font-size:15px;cursor:pointer;display:grid;place-content:center;transition:transform .15s}
+.wishlist:hover{transform:scale(1.15)}
+.wishlistActive{background:rgba(239,68,68,.15)}
+.body{padding:8px 8px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.title{font-size:.72rem;font-weight:700;color:var(--text-main);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.instructor{font-size:.61rem;font-weight:600;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;align-items:center;justify-content:space-between;font-size:.63rem;color:var(--text-secondary);margin-top:auto;padding-top:4px}
+.rating{display:inline-flex;align-items:center;gap:3px}
+.star{color:var(--rating);font-size:.7rem}
+.ratingCount{color:var(--text-secondary);margin-inline-start:2px}
+.enrolled{display:inline-flex;align-items:center;gap:2px}
+.priceRow{margin-top:4px}
+.freePrice{color:var(--success);font-weight:700;font-size:.82rem}
+.price{font-size:.82rem;font-weight:700;color:var(--primary);display:inline-flex;align-items:center;gap:4px}
+.origPrice{color:var(--text-secondary);font-size:.6rem;font-weight:400;text-decoration:line-through}

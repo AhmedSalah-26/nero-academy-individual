@@ -1,0 +1,68 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.price {
+  font-weight: var(--font-bold);
+  color: var(--text-main);
+}
+
+.free {
+  color: var(--success);
+  font-weight: var(--font-bold);
+}
+
+.sm .price {
+  font-size: var(--text-sm);
+}
+
+.md .price {
+  font-size: var(--text-base);
+}
+
+.lg .price {
+  font-size: var(--text-lg);
+}
+
+.sm .free {
+  font-size: var(--text-sm);
+}
+
+.md .free {
+  font-size: var(--text-base);
+}
+
+.lg .free {
+  font-size: var(--text-lg);
+}
+
+.originalPrice {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-decoration: line-through;
+  font-weight: var(--font-normal);
+}
+
+.discountBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--success-light);
+  color: var(--success);
+  font-size: 11px;
+  font-weight: var(--font-bold);
+}
+
+.sm .discountBadge {
+  font-size: 10px;
+  padding: 1px 6px;
+}
+
+.lg .discountBadge {
+  font-size: var(--text-xs);
+  padding: 2px 10px;
+}

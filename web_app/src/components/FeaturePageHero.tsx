@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import styles from '../app/student-features.module.css';
 
 export function FeaturePageHero({
@@ -6,7 +5,7 @@ export function FeaturePageHero({
   title,
   subtitle,
 }: {
-  icon: LucideIcon;
+  icon: React.ElementType;
   eyebrow: string;
   title: string;
   subtitle: string;

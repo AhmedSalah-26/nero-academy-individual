@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '../context/AppContext';
 import { Header } from '../components/Header';
+import DynamicOfflineIndicator from '../components/DynamicOfflineIndicator';
 
 export const metadata: Metadata = {
-  title: 'الأستاذ أحمد الشيخ | منصة الكيمياء للثانوية',
+  title: 'شهاب Tech | منصة التعليم',
   description:
     'منصة تعليمية متكاملة لتقديم الكورسات التدريبية، الكويزات، المنتديات، والمتابعة الأبوية للطلاب.',
-  keywords: ['تعليم', 'كورسات', 'دراسة', 'مدرسة', 'امتحانات', 'كيمياء', 'علوم'],
+  keywords: ['تعليم', 'كورسات', 'دراسة', 'مدرسة', 'امتحانات', 'تعلم', 'شهاب'],
 };
 
 export default function RootLayout({
@@ -18,7 +19,6 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <div className="ambient-background" aria-hidden="true" />
         <AppProvider>
           <div
             style={{
@@ -28,6 +28,7 @@ export default function RootLayout({
             }}
           >
             <Header />
+            <DynamicOfflineIndicator />
             <main style={{ flex: 1 }}>{children}</main>
             <footer
               style={{
@@ -39,8 +40,7 @@ export default function RootLayout({
               }}
             >
               <p>
-                &copy; {new Date().getFullYear()} منصة الأستاذ أحمد الشيخ. جميع الحقوق
-                محفوظة.
+                &copy; {new Date().getFullYear()} شهاب Tech. جميع الحقوق محفوظة.
               </p>
             </footer>
           </div>

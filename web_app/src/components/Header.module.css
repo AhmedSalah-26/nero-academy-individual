@@ -16,12 +16,11 @@
   align-items: center;
   gap: clamp(20px, 4vw, 58px);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--surface-soft) 80%, transparent)),
-    radial-gradient(circle at 16% 50%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 30%);
-  box-shadow: 0 16px 44px rgba(23, 16, 36, .075);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-md);
   backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
 }
 
 .logo, .actions, .nav, .userCard, .userProfile, .actionButton, .squareButton, .loginButton {
@@ -36,12 +35,10 @@
   height: 46px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
-  border-radius: 16px;
-  color: var(--accent);
-  background:
-    radial-gradient(circle at 28% 18%, rgba(255,255,255,.18), transparent 34%),
-    linear-gradient(145deg, var(--primary-dark), var(--primary));
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, transparent);
+  border-radius: var(--radius-lg);
+  color: white;
+  background: linear-gradient(145deg, var(--primary-dark), var(--primary));
   box-shadow: 0 12px 28px rgba(var(--primary-rgb), .28);
 }
 
@@ -73,9 +70,9 @@
   width: 0;
   height: 3px;
   transform: translateX(50%);
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), var(--primary));
-  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  box-shadow: 0 0 18px var(--primary-glow);
   transition: width .22s ease;
 }
 
@@ -88,7 +85,7 @@
   justify-content: center;
   height: 38px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
   background: transparent;
   cursor: pointer;
@@ -115,9 +112,9 @@
   display: grid;
   place-items: center;
   border: 2px solid var(--surface-card);
-  border-radius: 99px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  border-radius: var(--radius-full);
+  color: white;
+  background: var(--primary);
   font-size: .43rem;
   font-weight: 900;
 }
@@ -129,7 +126,7 @@
   padding: 0 7px;
   border: 1px solid var(--border-light);
   border-radius: 14px;
-  background: color-mix(in srgb, var(--surface-soft) 86%, transparent);
+  background: var(--surface-soft);
 }
 
 .userProfile { gap: 7px; color: inherit; min-width: 0; }
@@ -141,7 +138,7 @@
   place-items: center;
   overflow: hidden;
   border-radius: 10px;
-  color: var(--accent);
+  color: white;
   background: var(--primary-dark);
 }
 
@@ -155,14 +152,14 @@
   padding: 0 22px;
   justify-content: center;
   gap: 7px;
-  border: 1px solid color-mix(in srgb, var(--accent) 58%, white);
-  border-radius: 16px;
-  color: var(--accent-ink);
-  background: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--primary) 58%, white);
+  border-radius: var(--radius-lg);
+  color: white;
+  background: var(--primary);
   font-size: .68rem;
   font-weight: 900;
   box-shadow:
-    0 14px 28px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 14px 28px color-mix(in srgb, var(--primary) 16%, transparent),
     inset 0 1px 0 rgba(255,255,255,.58);
   transition: transform .2s ease, box-shadow .2s ease;
 }
@@ -170,10 +167,9 @@
 .loginButton:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 18px 38px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 18px 38px color-mix(in srgb, var(--primary) 22%, transparent),
     inset 0 1px 0 rgba(255,255,255,.68);
 }
-.mobileNav { display: none; }
 
 @media (max-width: 960px) {
   .container { gap: 16px; }
@@ -185,7 +181,7 @@
 @media (max-width: 720px) {
   .header { padding: 8px 10px 0; }
   .container { min-height: 54px; padding: 0 9px; display: flex; gap: 8px; border-radius: 16px; }
-  .nav, .userCard, .actionButton, .actions .squareButton { display: none; }
+  .nav, .userCard, .actionButton { display: none; }
   .logoIcon { width: 34px; height: 34px; border-radius: 12px; }
   .logoIcon svg { width: 18px; }
   .logoText b { font-size: .7rem; }
@@ -193,57 +189,10 @@
   .actions { margin-inline-start: auto; }
   .loginButton { height: 34px; padding: 0 11px; border-radius: 11px; font-size: .54rem; }
   .loginButton svg:last-child { display: none; }
-
-  .mobileNav {
-    position: fixed;
-    z-index: 200;
-    left: 12px;
-    right: 12px;
-    bottom: 10px;
-    height: 60px;
-    padding: 5px;
-    display: grid;
-    gap: 4px;
-    border: 1px solid var(--glass-border);
-    border-radius: 19px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 16px 42px rgba(23,16,36,.16);
-  }
-
-  .mobileNavLoggedIn { grid-template-columns: repeat(5, 1fr); }
-  .mobileNavGuest { grid-template-columns: repeat(3, 1fr); }
-
-  .mobileNavItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    border-radius: 14px;
-    color: var(--text-secondary);
-    font-size: .48rem;
-    font-weight: 900;
-    transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
-  }
-
-  .mobileActive {
-    transform: translateY(-2px);
-    color: var(--accent-ink);
-    background: var(--accent);
-    box-shadow:
-      0 10px 22px color-mix(in srgb, var(--accent) 24%, transparent),
-      inset 0 1px 0 rgba(255,255,255,.55);
-  }
-
-  .mobileActive svg {
-    stroke-width: 2.5;
-  }
 }
 
 [data-theme="dark"] .container {
-  background:
-    linear-gradient(135deg, rgba(20,12,36,.9), rgba(11,7,20,.84));
+  background: var(--glass-bg);
   box-shadow: 0 14px 42px rgba(0,0,0,.28);
 }
 

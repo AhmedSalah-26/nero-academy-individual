@@ -1,77 +1,207 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Mail, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, MarkEmailUnread, ArrowForward } from '@mui/icons-material';
 import { supabase } from '../../lib/supabaseClient';
 import { useApp } from '../../context/AppContext';
+import { Validators } from '../../lib/validators';
+import { ToastUtils } from '../../lib/toast';
+import AppBackButton from '../../components/ui/AppBackButton';
 import styles from '../login/page.module.css';
+import { usePageTransition } from '../../lib/animations';
 
 export default function ForgotPasswordPage() {
-  const { lang } = useApp();
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
+  const pageRef = usePageTransition();
+  const { lang, t } = useApp();
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phase, setPhase] = useState<1 | 2>(1);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [resending, setResending] = useState(false);
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const validatePhase1 = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+    const emailErr = Validators.email(email, { lang });
+    if (emailErr) newErrors.email = emailErr;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [email, lang]);
+
+  const validatePhase2 = useCallback((): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (!otp.trim()) {
+      newErrors.otp = lang === 'ar' ? 'الكود مطلوب' : 'Code is required';
+    }
+    const passErr = Validators.password(newPassword, { lang });
+    if (passErr) newErrors.newPassword = passErr;
+    const confirmErr = Validators.confirmPassword(newPassword, confirmPassword, { lang });
+    if (confirmErr) newErrors.confirmPassword = confirmErr;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [otp, newPassword, confirmPassword, lang]);
+
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validatePhase1()) return;
+
     setLoading(true);
     setError('');
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
 
-    if (resetError) {
-      setError(resetError.message);
-    } else {
-      setSent(true);
+      if (otpError) {
+        setError(otpError.message);
+      } else {
+        setPhase(2);
+        ToastUtils.showSuccess(
+          lang === 'ar'
+            ? 'تم إرسال كود التحقق لبريدك الإلكتروني'
+            : 'Verification code sent to your email'
+        );
+      }
+    } catch {
+      setError(t.errorAuth);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const handleVerifyAndReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validatePhase2()) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email',
+      });
+
+      if (verifyError) {
+        setError(verifyError.message);
+        return;
+      }
+
+      if (verifyData.user) {
+        const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+        if (updateError) {
+          setError(updateError.message);
+          return;
+        }
+
+        await supabase.auth.signOut();
+
+        ToastUtils.showSuccess(
+          lang === 'ar'
+            ? 'تم تغيير كلمة المرور بنجاح'
+            : 'Password changed successfully'
+        );
+        router.push('/login');
+      }
+    } catch {
+      setError(t.errorAuth);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      const { error: resendError } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
+      if (resendError) {
+        ToastUtils.showError(resendError.message);
+      } else {
+        ToastUtils.showSuccess(
+          lang === 'ar' ? 'تم إعادة إرسال الكود' : 'Code resent'
+        );
+      }
+    } catch {
+      ToastUtils.showError(t.errorAuth);
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
-    <div className={`${styles.authContainer} fade-in`}>
+    <div ref={pageRef} className={`${styles.authContainer} fade-in`}>
       <div className={`${styles.card} glass`}>
+        <AppBackButton
+          label={lang === 'ar' ? 'رجوع' : 'Back'}
+          onClick={() => {
+            if (phase === 2) {
+              setPhase(1);
+              setErrors({});
+              setError('');
+            } else {
+              router.back();
+            }
+          }}
+        />
+
+        <div className={styles.resetIconCircle}>
+          <MarkEmailUnread fontSize="large" />
+        </div>
+
         <div className={styles.header}>
-          <h1 className={`${styles.title} gradient-text`}>
+          <h1 className={`${styles.brandTitle} gradient-text`}>
             {lang === 'ar' ? 'استعادة كلمة المرور' : 'Reset Password'}
           </h1>
           <p className={styles.subtitle}>
-            {lang === 'ar'
-              ? 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة التعيين.'
-              : 'Enter your email and we will send you a reset link.'}
+            {phase === 1
+              ? lang === 'ar'
+                ? 'أدخل بريدك الإلكتروني وسنرسل لك كود التحقق.'
+                : 'Enter your email and we will send you a verification code.'
+              : lang === 'ar'
+                ? 'أدخل الكود المرسل لبريدك وكلمة المرور الجديدة.'
+                : 'Enter the code sent to your email and your new password.'}
           </p>
         </div>
 
-        {sent ? (
-          <div className={styles.successAlert}>
-            <CheckCircle size={24} />
-            <span>
-              {lang === 'ar'
-                ? 'تم إرسال رابط إعادة التعيين. راجع بريدك الإلكتروني.'
-                : 'Reset link sent. Please check your email.'}
-            </span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {error && <div className={styles.errorAlert}>{error}</div>}
+        {error && <div className={styles.errorAlert}>{error}</div>}
 
+        {phase === 1 ? (
+          <form onSubmit={handleSendCode} className={styles.form}>
             <div className={styles.inputGroup}>
-              <label className={styles.label}>{lang === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+              <label className={styles.label}>{t.email}</label>
               <div className={styles.inputWrapper}>
-                <Mail size={18} className={styles.inputIcon} />
+                <Mail fontSize="small" className={styles.inputIcon} />
                 <input
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                   placeholder="you@example.com"
-                  className={styles.input}
+                  className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                 />
               </div>
+              {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
             </div>
 
             <button type="submit" disabled={loading} className={`${styles.submitBtn} gradient-bg`}>
@@ -79,20 +209,84 @@ export default function ForgotPasswordPage() {
                 <span className={styles.spinner}></span>
               ) : (
                 <>
-                  {lang === 'ar' ? 'إرسال الرابط' : 'Send Link'}
-                  {lang === 'ar' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+                  {t.sendResetCode}
+                  <ArrowForward fontSize="small" />
                 </>
               )}
             </button>
           </form>
-        )}
+        ) : (
+          <form onSubmit={handleVerifyAndReset} className={styles.form}>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>{t.enterOtp}</label>
+              <input
+                type="text"
+                required
+                value={otp}
+                onChange={(e) => { setOtp(e.target.value); clearError('otp'); }}
+                placeholder="123456"
+                className={`${styles.input} ${styles.otpInput} ${errors.otp ? styles.inputError : ''}`}
+                style={{ padding: '14px 16px', letterSpacing: '8px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 700 }}
+              />
+              {errors.otp && <span className={styles.fieldError}>{errors.otp}</span>}
+            </div>
 
-        <div className={styles.toggleState}>
-          <Link href="/login" className={styles.toggleBtn}>
-            {lang === 'ar' ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-            {lang === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to login'}
-          </Link>
-        </div>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>
+                {lang === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
+              </label>
+              <div className={styles.inputWrapper}>
+                <Lock fontSize="small" className={styles.inputIcon} />
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); clearError('newPassword'); }}
+                  placeholder="••••••••"
+                  className={`${styles.input} ${errors.newPassword ? styles.inputError : ''}`}
+                />
+              </div>
+              {errors.newPassword && <span className={styles.fieldError}>{errors.newPassword}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>
+                {lang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password'}
+              </label>
+              <div className={styles.inputWrapper}>
+                <Lock fontSize="small" className={styles.inputIcon} />
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
+                  placeholder="••••••••"
+                  className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
+                />
+              </div>
+              {errors.confirmPassword && (
+                <span className={styles.fieldError}>{errors.confirmPassword}</span>
+              )}
+            </div>
+
+            <button type="submit" disabled={loading} className={`${styles.submitBtn} gradient-bg`}>
+              {loading ? (
+                <span className={styles.spinner}></span>
+              ) : (
+                t.verifyAndReset
+              )}
+            </button>
+
+            <button
+              type="button"
+              className={styles.resendBtn}
+              onClick={handleResend}
+              disabled={resending}
+            >
+              {resending ? <span className={styles.spinner} /> : t.resendCode}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

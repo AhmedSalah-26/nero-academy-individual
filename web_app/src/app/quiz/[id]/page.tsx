@@ -4,22 +4,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
-  ArrowLeft,
-  ArrowRight,
+  ArrowBack,
+  ArrowForward,
   Check,
-  CheckCircle2,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
-  ClipboardCheck,
-  Clock3,
-  FileQuestion,
-  LockKeyhole,
-  RotateCcw,
+  AssignmentTurnedIn,
+  Schedule,
+  Quiz,
+  Lock,
+  Replay,
   Send,
-  Trophy,
-  X,
-  XCircle,
-} from 'lucide-react';
+  EmojiEvents,
+  Close,
+  Cancel,
+} from '@mui/icons-material';
 import { useApp } from '../../../context/AppContext';
 import { supabase } from '../../../lib/supabaseClient';
 import styles from './page.module.css';
@@ -323,7 +323,7 @@ export default function QuizPage() {
     return (
       <main className={styles.page}>
         <div className={styles.stateCard}>
-          <LockKeyhole size={36} />
+          <Lock fontSize="large" />
           <h1>{lang === 'ar' ? 'سجّل الدخول لبدء الامتحان' : 'Sign in to start the exam'}</h1>
           <Link href={`/login?redirect=/quiz/${id}`} className={styles.primaryButton}>{lang === 'ar' ? 'تسجيل الدخول' : 'Sign in'}</Link>
         </div>
@@ -335,7 +335,7 @@ export default function QuizPage() {
     return (
       <main className={styles.page}>
         <div className={styles.stateCard}>
-          <FileQuestion size={36} />
+          <Quiz fontSize="large" />
           <h1>{error || (lang === 'ar' ? 'الامتحان غير متاح' : 'Exam unavailable')}</h1>
           <Link href="/my-learning" className={styles.primaryButton}>{lang === 'ar' ? 'العودة لتعليمي' : 'Back to My Learning'}</Link>
         </div>
@@ -347,14 +347,14 @@ export default function QuizPage() {
     return (
       <main className={styles.examPage}>
         <header className={styles.examHeader}>
-          <button type="button" onClick={returnToInfo} className={styles.iconButton} aria-label="Close"><X size={19} /></button>
+          <button type="button" onClick={returnToInfo} className={styles.iconButton} aria-label="Close"><Close fontSize="small" /></button>
           <div>
             <span>{courseTitle}</span>
             <h1>{lang === 'ar' ? quiz.title_ar : quiz.title_en || quiz.title_ar}</h1>
           </div>
           {remainingSeconds !== null ? (
-            <strong className={`${styles.timer} ${remainingSeconds < 60 ? styles.timerDanger : ''}`}><Clock3 size={16} />{formatTime(remainingSeconds)}</strong>
-          ) : <span className={styles.timer}><Clock3 size={16} />∞</span>}
+            <strong className={`${styles.timer} ${remainingSeconds < 60 ? styles.timerDanger : ''}`}><Schedule fontSize="small" />{formatTime(remainingSeconds)}</strong>
+           ) : <span className={styles.timer}><Schedule fontSize="small" />∞</span>}
         </header>
 
         <div className={styles.progressTrack}><div style={{ width: `${progress}%` }} /></div>
@@ -402,7 +402,7 @@ export default function QuizPage() {
                       onClick={() => selectOption(currentQuestion, option.id)}
                       className={`${styles.option} ${selected ? styles.selectedOption : ''}`}
                     >
-                      <span>{selected ? <Check size={15} /> : String.fromCharCode(65 + index)}</span>
+                      <span>{selected ? <Check fontSize="small" /> : String.fromCharCode(65 + index)}</span>
                       <strong>{lang === 'ar' ? option.text_ar : option.text_en || option.text_ar}</strong>
                     </button>
                   );
@@ -421,17 +421,17 @@ export default function QuizPage() {
 
         <footer className={styles.examFooter}>
           <button type="button" onClick={() => setCurrentIndex((value) => Math.max(0, value - 1))} disabled={currentIndex === 0} className={styles.secondaryButton}>
-            {lang === 'ar' ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}
+            {lang === 'ar' ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
             {lang === 'ar' ? 'السابق' : 'Previous'}
           </button>
           {currentIndex < questions.length - 1 ? (
             <button type="button" onClick={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))} className={styles.primaryButton}>
               {lang === 'ar' ? 'التالي' : 'Next'}
-              {lang === 'ar' ? <ChevronLeft size={17} /> : <ChevronRight size={17} />}
+              {lang === 'ar' ? <ChevronLeft fontSize="small" /> : <ChevronRight fontSize="small" />}
             </button>
           ) : (
             <button type="button" onClick={confirmSubmit} disabled={submitting} className={styles.submitButton}>
-              <Send size={16} />
+              <Send fontSize="small" />
               {submitting ? (lang === 'ar' ? 'جاري الإرسال...' : 'Submitting...') : (lang === 'ar' ? 'إرسال الامتحان' : 'Submit exam')}
             </button>
           )}
@@ -446,19 +446,19 @@ export default function QuizPage() {
       <main className={styles.page}>
         <section className={styles.resultCard}>
           <div className={`${styles.resultIcon} ${passed ? styles.resultPassed : styles.resultFailed}`}>
-            {passed ? <Trophy size={42} /> : <RotateCcw size={42} />}
+            {passed ? <EmojiEvents fontSize="large" /> : <Replay fontSize="large" />}
           </div>
           <span>{lang === 'ar' ? 'نتيجة الامتحان' : 'EXAM RESULT'}</span>
           <h1>{Math.round(Number(completedAttempt.percentage))}%</h1>
           <h2>{passed ? (lang === 'ar' ? 'أحسنت، اجتزت الامتحان' : 'Great work, you passed') : (lang === 'ar' ? 'راجع الدروس وحاول مرة أخرى' : 'Review and try again')}</h2>
           <div className={styles.resultStats}>
-            <div><CheckCircle2 size={18} /><strong>{completedAttempt.score}/{completedAttempt.total_points}</strong><small>{lang === 'ar' ? 'الدرجة' : 'Score'}</small></div>
-            <div><Clock3 size={18} /><strong>{formatTime(completedAttempt.time_spent || 0)}</strong><small>{lang === 'ar' ? 'الوقت' : 'Time'}</small></div>
-            <div><Trophy size={18} /><strong>{quiz.passing_score}%</strong><small>{lang === 'ar' ? 'درجة النجاح' : 'Pass score'}</small></div>
+            <div><CheckCircle fontSize="small" /><strong>{completedAttempt.score}/{completedAttempt.total_points}</strong><small>{lang === 'ar' ? 'الدرجة' : 'Score'}</small></div>
+            <div><Schedule fontSize="small" /><strong>{formatTime(completedAttempt.time_spent || 0)}</strong><small>{lang === 'ar' ? 'الوقت' : 'Time'}</small></div>
+            <div><EmojiEvents fontSize="small" /><strong>{quiz.passing_score}%</strong><small>{lang === 'ar' ? 'درجة النجاح' : 'Pass score'}</small></div>
           </div>
           {error && <div className={styles.errorBanner}>{error}</div>}
           <div className={styles.resultActions}>
-            {!passed && canStart && <button type="button" onClick={returnToInfo} className={styles.secondaryButton}><RotateCcw size={16} />{lang === 'ar' ? 'إعادة المحاولة' : 'Try again'}</button>}
+            {!passed && canStart && <button type="button" onClick={returnToInfo} className={styles.secondaryButton}><Replay fontSize="small" />{lang === 'ar' ? 'إعادة المحاولة' : 'Try again'}</button>}
             <Link href="/exams" className={styles.primaryButton}>{lang === 'ar' ? 'العودة للامتحانات' : 'Back to exams'}</Link>
           </div>
         </section>
@@ -472,7 +472,7 @@ export default function QuizPage() {
               const isCorrect = selected.length === correct.length && selected.every((value) => correct.includes(value));
               return (
                 <article className={styles.reviewCard} key={question.id}>
-                  <div className={isCorrect ? styles.reviewCorrect : styles.reviewWrong}>{isCorrect ? <CheckCircle2 size={18} /> : <XCircle size={18} />}</div>
+                  <div className={isCorrect ? styles.reviewCorrect : styles.reviewWrong}>{isCorrect ? <CheckCircle fontSize="small" /> : <Cancel fontSize="small" />}</div>
                   <div>
                     <h3>{index + 1}. {lang === 'ar' ? question.question_ar : question.question_en || question.question_ar}</h3>
                     <p>{lang === 'ar' ? question.explanation_ar : question.explanation_en || question.explanation_ar}</p>
@@ -499,10 +499,10 @@ export default function QuizPage() {
       {error && <div className={styles.errorBanner}>{error}</div>}
 
       <section className={styles.infoGrid}>
-        <div><Clock3 size={20} /><span>{lang === 'ar' ? 'الوقت' : 'Time'}</span><strong>{quiz.time_limit ? `${quiz.time_limit} ${lang === 'ar' ? 'دقيقة' : 'min'}` : (lang === 'ar' ? 'بدون حد' : 'Unlimited')}</strong></div>
-        <div><FileQuestion size={20} /><span>{lang === 'ar' ? 'الأسئلة' : 'Questions'}</span><strong>{questionCount}</strong></div>
-        <div><Trophy size={20} /><span>{lang === 'ar' ? 'درجة النجاح' : 'Pass score'}</span><strong>{quiz.passing_score}%</strong></div>
-        <div><RotateCcw size={20} /><span>{lang === 'ar' ? 'المحاولات المتبقية' : 'Attempts left'}</span><strong>{remainingAttempts ?? (lang === 'ar' ? 'غير محدودة' : 'Unlimited')}</strong></div>
+        <div><Schedule fontSize="small" /><span>{lang === 'ar' ? 'الوقت' : 'Time'}</span><strong>{quiz.time_limit ? `${quiz.time_limit} ${lang === 'ar' ? 'دقيقة' : 'min'}` : (lang === 'ar' ? 'بدون حد' : 'Unlimited')}</strong></div>
+        <div><Quiz fontSize="small" /><span>{lang === 'ar' ? 'الأسئلة' : 'Questions'}</span><strong>{questionCount}</strong></div>
+        <div><Replay fontSize="small" /><span>{lang === 'ar' ? 'المحاولات المتبقية' : 'Attempts left'}</span><strong>{remainingAttempts ?? (lang === 'ar' ? 'غير محدودة' : 'Unlimited')}</strong></div>
+        <div><EmojiEvents fontSize="small" /><span>{lang === 'ar' ? 'درجة النجاح' : 'Pass score'}</span><strong>{quiz.passing_score}%</strong></div>
       </section>
 
       {attempts.length > 0 && (
@@ -514,7 +514,7 @@ export default function QuizPage() {
           <div className={styles.attemptsList}>
             {attempts.map((attempt, index) => (
               <div className={styles.attemptRow} key={attempt.id}>
-                <span className={attempt.passed ? styles.attemptPassed : styles.attemptFailed}>{attempt.passed ? <CheckCircle2 size={17} /> : <XCircle size={17} />}</span>
+                <span className={attempt.passed ? styles.attemptPassed : styles.attemptFailed}>{attempt.passed ? <CheckCircle fontSize="small" /> : <Cancel fontSize="small" />}</span>
                 <strong>{lang === 'ar' ? `المحاولة ${attempts.length - index}` : `Attempt ${attempts.length - index}`}</strong>
                 <small>{attempt.completed_at ? new Date(attempt.completed_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US') : ''}</small>
                 <b>{Math.round(Number(attempt.percentage))}%</b>
@@ -526,13 +526,13 @@ export default function QuizPage() {
 
       <div className={styles.infoActions}>
         <Link href="/exams" className={styles.secondaryButton}>
-          {lang === 'ar' ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+          {lang === 'ar' ? <ArrowForward fontSize="small" /> : <ArrowBack fontSize="small" />}
           {lang === 'ar' ? 'العودة للامتحانات' : 'Back to exams'}
         </Link>
         <button type="button" onClick={startQuiz} disabled={!canStart || loading} className={styles.primaryButton}>
-          {canStart ? <ClipboardCheck size={17} /> : <LockKeyhole size={17} />}
+          {canStart ? <AssignmentTurnedIn fontSize="small" /> : <Lock fontSize="small" />}
           {canStart ? (lang === 'ar' ? 'ابدأ الامتحان' : 'Start exam') : (lang === 'ar' ? 'لا توجد محاولات متبقية' : 'No attempts left')}
-          {lang === 'ar' ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+          {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
         </button>
       </div>
     </main>

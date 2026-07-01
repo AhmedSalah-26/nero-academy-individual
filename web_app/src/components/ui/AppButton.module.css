@@ -1,0 +1,128 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-glow), 0 0 0 1px var(--primary);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.small {
+  height: 36px;
+  padding: 0 14px;
+  font-size: var(--text-xs);
+}
+
+.medium {
+  height: 44px;
+  padding: 0 20px;
+  font-size: var(--text-sm);
+}
+
+.large {
+  height: 52px;
+  padding: 0 26px;
+  font-size: var(--text-base);
+}
+
+.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.secondary {
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.outline {
+  background: transparent;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.outline:hover:not(:disabled) {
+  background: var(--primary-glow);
+}
+
+.text {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+}
+
+.text:hover:not(:disabled) {
+  background: var(--primary-glow);
+}
+
+.success {
+  background: var(--success);
+  color: #fff;
+}
+
+.success:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.error {
+  background: var(--error);
+  color: #fff;
+}
+
+.error:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.loadingSpinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.125em;
+}
+
+.startIcon {
+  margin-inline-end: calc(var(--spacing-xs) * -1);
+}
+
+.endIcon {
+  margin-inline-start: calc(var(--spacing-xs) * -1);
+}

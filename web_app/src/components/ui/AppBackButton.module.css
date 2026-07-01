@@ -1,0 +1,39 @@
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-main);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-inline-start: none;
+}
+
+.backButton:hover {
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.backButton:active {
+  transform: scale(0.97);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}

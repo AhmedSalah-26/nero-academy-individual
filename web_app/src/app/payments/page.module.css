@@ -1,0 +1,31 @@
+.page{width:min(768px,100% - 32px);margin:0 auto;padding:16px 0 80px}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.header h1{font-size:1.25rem;font-weight:800;color:var(--text-main);margin:0}
+.filterRow{margin-bottom:20px;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.filterRow::-webkit-scrollbar{display:none}
+.shimmerGrid{display:grid;gap:12px}
+.list{display:grid;gap:12px}
+.card{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer;transition:background .15s,transform .15s}
+.card:hover{background:var(--surface-hover);transform:translateY(-1px)}
+.iconWrap{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;flex-shrink:0}
+.cardBody{min-width:0}
+.titleRow{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.titleRow h3{font-size:.92rem;font-weight:800;color:var(--text-main);margin:0}
+.statusChip{display:inline-flex;padding:3px 10px;border-radius:8px;font-size:.66rem;font-weight:700;white-space:nowrap}
+.orderNumber{font-size:.72rem;color:var(--text-muted);margin:2px 0}
+.meta{display:flex;align-items:center;gap:5px;font-size:.66rem;color:var(--text-secondary)}
+.expandIcon{color:var(--text-secondary);font-size:18px}
+
+.sheetOverlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:grid;place-items:end;animation:fadeIn .2s ease}
+.sheet{width:100%;max-width:480px;max-height:70vh;margin:0 auto;border-radius:24px 24px 0 0;background:var(--surface);box-shadow:0 -4px 32px rgba(0,0,0,.2);overflow:auto;animation:slideUp .3s ease}
+.sheetHeader{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+.sheetHeader h2{font-size:1rem;font-weight:800;color:var(--text-main);margin:0}
+.sheetClose{width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:8px;background:var(--surface-soft);color:var(--text-secondary);cursor:pointer}
+.sheetBody{padding:16px 20px 24px;display:grid;gap:12px}
+.sheetRow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:.82rem;color:var(--text-main)}
+.sheetRow span{color:var(--text-secondary)}
+.sheetRow strong{color:var(--primary)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@media(max-width:560px){.card{grid-template-columns:38px 1fr auto;gap:10px;padding:12px}.iconWrap{width:38px;height:38px;border-radius:10px}}

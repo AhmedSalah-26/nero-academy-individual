@@ -1,0 +1,33 @@
+.card {
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  transition: all var(--transition-fast);
+}
+
+.elevated {
+  background: var(--surface-card);
+  box-shadow: var(--shadow-md);
+}
+
+.outlined {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+}
+
+.filled {
+  background: var(--surface-soft);
+  border: none;
+}
+
+.pressable {
+  cursor: pointer;
+}
+
+.pressable:hover {
+  transform: scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+.pressable:active {
+  transform: scale(0.98);
+}

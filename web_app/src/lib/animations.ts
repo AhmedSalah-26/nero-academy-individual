@@ -123,3 +123,44 @@ export function animateIn(
     }
   );
 }
+
+export function useSlideFadeIn(delay = 0) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, delay, ease: 'power3.out' });
+    return () => { gsap.killTweensOf(el); };
+  }, [delay]);
+
+  return ref;
+}
+
+export function useScaleIn(delay = 0) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    gsap.fromTo(el, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, delay, ease: 'back.out(1.7)' });
+    return () => { gsap.killTweensOf(el); };
+  }, [delay]);
+
+  return ref;
+}
+
+export function useStaggeredList(count: number, stagger = 0.05) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const children = el.children;
+    if (!children.length) return;
+    gsap.fromTo(children, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger, ease: 'power3.out', delay: 0.1 });
+    return () => { gsap.killTweensOf(children); };
+  }, [count, stagger]);
+
+  return ref;
+}
