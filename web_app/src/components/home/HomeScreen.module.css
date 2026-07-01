@@ -34,8 +34,10 @@
   margin-bottom: 20px;
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 24px;
-  background: #0f112a url('/COVER.png') no-repeat right center;
-  background-size: contain;
+  background: 
+    linear-gradient(to right, #111324 45%, rgba(17, 19, 36, 0.95) 55%, rgba(17, 19, 36, 0.7) 70%, transparent 95%),
+    #111324 url('/COVER.png') no-repeat right center;
+  background-size: 100% 100%, contain;
   box-shadow: 0 24px 56px rgba(49, 46, 129, 0.22);
   isolation: isolate;
 }
