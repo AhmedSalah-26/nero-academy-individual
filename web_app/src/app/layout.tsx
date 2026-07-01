@@ -41,8 +41,17 @@ export default function RootLayout({
                 fontSize: '0.72rem',
               }}
             >
-              <p>
-                &copy; {new Date().getFullYear()} شهاب Tech. جميع الحقوق محفوظة.
+              <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', margin: 0 }}>
+                <span>&copy; {new Date().getFullYear()} شهاب Tech. جميع الحقوق محفوظة.</span>
+                <span>•</span>
+                <a
+                  href="https://AhmedSalah-26.github.io/shehabtech-privacy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold' }}
+                >
+                  سياسة الخصوصية / Privacy Policy
+                </a>
               </p>
             </footer>
           </div>
