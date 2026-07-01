@@ -279,66 +279,112 @@ export default function CourseDetailsPage() {
 
   return (
     <div ref={pageRef} className="container fade-in">
-      <div className={styles.courseHeader}>
-        <div className={styles.headerMain}>
+      {/* ── Top Hero: image + info card side by side ── */}
+      <div className={styles.topHero}>
+        {/* Left: media */}
+        <div className={`${styles.topMedia} glass`}>
+          {course.preview_video_url ? (
+            <div className={styles.videoWrapper}>
+              <iframe
+                src={course.preview_video_url.replace('watch?v=', 'embed/')}
+                title="Course Preview"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className={styles.videoIframe}
+              ></iframe>
+            </div>
+          ) : course.thumbnail_url ? (
+            <img src={course.thumbnail_url} alt={course.title_ar} className={styles.courseImg} />
+          ) : (
+            <div className={styles.imagePlaceholder}>
+              <MenuBook fontSize="large" className={styles.placeholderIcon} />
+            </div>
+          )}
+        </div>
+
+        {/* Right: info card */}
+        <div className={`${styles.topInfo} glass`}>
           <h1 className={styles.title}>
             {lang === 'ar' ? course.title_ar : course.title_en}
           </h1>
           <p className={styles.subtitle}>
             {lang === 'ar' ? course.subtitle_ar : course.subtitle_en}
           </p>
-
-          <div className={styles.headerRow}>
-            <div className={styles.statsRow}>
-              <div className={styles.statItem}>
-                <Star fontSize="small" className={styles.starIcon} />
-                <span>{course.rating ? Number(course.rating).toFixed(1) : '5.0'}</span>
-              </div>
-              <div className={styles.statItem}>
-                <MenuBook fontSize="small" />
-                <span>{course.total_lessons || 0} {t.lessonsCount}</span>
-              </div>
-              <div className={styles.statItem}>
-                <Schedule fontSize="small" />
-                <span>{totalHours} {t.hours}</span>
-              </div>
+          <div className={styles.statsRow}>
+            <div className={styles.statItem}>
+              <Star fontSize="small" className={styles.starIcon} />
+              <span>{course.rating ? Number(course.rating).toFixed(1) : '5.0'}</span>
             </div>
-            <div className={styles.headerActions}>
-              <button className={styles.iconActionBtn} onClick={handleShare} type="button" aria-label={t.share}>
-                <Share fontSize="small" />
-                <span>{copied ? t.copied : t.share}</span>
-              </button>
-              <button className={styles.iconActionBtn} type="button" aria-label={t.report}>
-                <Flag fontSize="small" />
-                <span>{t.report}</span>
-              </button>
+            <div className={styles.statItem}>
+              <MenuBook fontSize="small" />
+              <span>{course.total_lessons || 0} {t.lessonsCount}</span>
+            </div>
+            <div className={styles.statItem}>
+              <Schedule fontSize="small" />
+              <span>{Math.round((course.total_duration || 0) / 60 * 10) / 10} {t.hours}</span>
             </div>
           </div>
+          <div className={styles.headerActions}>
+            <button className={styles.iconActionBtn} onClick={handleShare} type="button">
+              <Share fontSize="small" />
+              <span>{copied ? t.copied : t.share}</span>
+            </button>
+            <button className={styles.iconActionBtn} type="button">
+              <Flag fontSize="small" />
+              <span>{t.report}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Price + CTA bar below ── */}
+      <div className={`${styles.priceBanner} glass`}>
+        <div className={styles.priceBannerLeft}>
+          {isFree ? (
+            <span className={styles.price}>{t.free}</span>
+          ) : (
+            <div className={styles.prices}>
+              {hasDiscount ? (
+                <>
+                  <span className={styles.price}>{effectivePrice} {t.egp}</span>
+                  <span className={styles.oldPrice}>{basePrice} {t.egp}</span>
+                </>
+              ) : (
+                <span className={styles.price}>{effectivePrice} {t.egp}</span>
+              )}
+              {hasMultiplePricing && (
+                <button className={styles.viewPricingBtn} onClick={() => setShowPricingSheet(true)} type="button">
+                  {lang === 'ar' ? 'عرض الخيارات' : 'View options'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+        <div className={styles.priceBannerActions}>
+          {ctaState === 'continueLearning' && (
+            <Link href={`/learn/${course.id}`} className={`${styles.primaryBtn} gradient-bg`}>{t.continueLearning}</Link>
+          )}
+          {ctaState === 'getForFree' && (
+            <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>{lang === 'ar' ? 'احصل عليه مجاناً' : 'Get for Free'}</button>
+          )}
+          {ctaState === 'goToCart' && (
+            <Link href="/cart" className={`${styles.primaryBtn} gradient-bg`}>{lang === 'ar' ? 'الذهاب للسلة' : 'Go to Cart'}</Link>
+          )}
+          {ctaState === 'addToCart' && (
+            <>
+              <button onClick={() => addToCart(course.id)} className={styles.cartBtn}>
+                <ShoppingCart fontSize="small" />
+                <span>{t.addToCart}</span>
+              </button>
+              <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>{t.buyNow}</button>
+            </>
+          )}
         </div>
       </div>
 
       <div className={styles.contentGrid}>
         <div className={styles.leftCol}>
-          <div className={`${styles.mediaSection} glass`}>
-            {course.preview_video_url ? (
-              <div className={styles.videoWrapper}>
-                <iframe
-                  src={course.preview_video_url.replace('watch?v=', 'embed/')}
-                  title="Course Preview"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className={styles.videoIframe}
-                ></iframe>
-              </div>
-            ) : course.thumbnail_url ? (
-              <img src={course.thumbnail_url} alt={course.title_ar} className={styles.courseImg} />
-            ) : (
-              <div className={styles.imagePlaceholder}>
-                <MenuBook fontSize="large" className={styles.placeholderIcon} />
-              </div>
-            )}
-          </div>
 
           <div className={`${styles.statsGridCard} glass`}>
             <div className={styles.statsGrid}>
@@ -480,87 +526,6 @@ export default function CourseDetailsPage() {
 
           <div className={`${styles.cardSection} glass`}>
             <ReviewsSection courseId={id as string} isEnrolled={isEnrolled} />
-          </div>
-        </div>
-
-        <div className={styles.rightCol}>
-          <div className={`${styles.sidebarCard} glass`}>
-            <div className={styles.pricingContainer}>
-              {isFree ? (
-                <span className={styles.price}>{t.free}</span>
-              ) : (
-                <div className={styles.prices}>
-                  {hasDiscount ? (
-                    <>
-                      <span className={styles.price}>
-                        {effectivePrice} {t.egp}
-                      </span>
-                      <span className={styles.oldPrice}>
-                        {basePrice} {t.egp}
-                      </span>
-                    </>
-                  ) : (
-                    <span className={styles.price}>
-                      {effectivePrice} {t.egp}
-                    </span>
-                  )}
-                  {hasMultiplePricing && (
-                    <button
-                      className={styles.viewPricingBtn}
-                      onClick={() => setShowPricingSheet(true)}
-                      type="button"
-                    >
-                      {lang === 'ar' ? 'عرض الخيارات' : 'View options'}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className={styles.sidebarActions}>
-              {ctaState === 'continueLearning' && (
-                <Link href={`/learn/${course.id}`} className={`${styles.primaryBtn} gradient-bg`}>
-                  {t.continueLearning}
-                </Link>
-              )}
-              {ctaState === 'getForFree' && (
-                <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>
-                  {lang === 'ar' ? 'احصل عليه مجاناً' : 'Get for Free'}
-                </button>
-              )}
-              {ctaState === 'goToCart' && (
-                <Link href="/cart" className={`${styles.primaryBtn} gradient-bg`}>
-                  {lang === 'ar' ? 'الذهاب للسلة' : 'Go to Cart'}
-                </Link>
-              )}
-              {ctaState === 'addToCart' && (
-                <>
-                  <button
-                    onClick={() => addToCart(course.id)}
-                    className={styles.cartBtn}
-                  >
-                    <ShoppingCart fontSize="small" />
-                    <span>{t.addToCart}</span>
-                  </button>
-                  <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>
-                    {t.buyNow}
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className={styles.sidebarSpecs}>
-              {course.requirements && course.requirements.length > 0 && (
-                <div className={styles.specGroup}>
-                  <h4 className={styles.specTitle}>{t.requirements}</h4>
-                  <ul className={styles.specList}>
-                    {course.requirements.map((req, i) => (
-                      <li key={i}>{req}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
