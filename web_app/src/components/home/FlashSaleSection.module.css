@@ -1,0 +1,8 @@
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:10px}
+.headerLeft{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px;background:linear-gradient(to right,#DC2626,#EF4444);box-shadow:0 3px 10px rgba(220,38,38,.4),0 0 20px rgba(220,38,38,.15)}
+.flashIcon{font-size:16px;line-height:1}
+.headerTitle{color:white;font-size:.82rem;font-weight:700}
+.countdown{display:inline-flex;align-items:center;gap:4px}
+.timerIcon{font-size:14px}
+.countdownText{color:var(--error);font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums}
+.list{margin-top:8px}

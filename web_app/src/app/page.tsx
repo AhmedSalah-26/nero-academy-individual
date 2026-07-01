@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { supabase } from '../lib/supabaseClient';
-import { StudentHome } from '../components/StudentHome';
+import { HomeScreen } from '../components/home';
 import styles from './page.module.css';
 
 interface Course {
@@ -112,7 +112,7 @@ export default function HomePage() {
 
   const arrow = lang === 'ar' ? <ArrowLeft size={18} /> : <ArrowRight size={18} />;
 
-  if (user) return <StudentHome />;
+  if (user) return <HomeScreen />;
 
   return (
     <div className={styles.page}>

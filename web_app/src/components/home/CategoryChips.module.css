@@ -1,0 +1,7 @@
+.scroll{display:flex;gap:8px;overflow-x:auto;padding:0 16px 8px;scrollbar-width:none;-ms-overflow-style:none}
+.scroll::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:22px;border:1px solid var(--border);background:var(--surface);color:var(--text-main);font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s ease;flex-shrink:0;font-family:inherit}
+.chip:hover{border-color:rgba(var(--primary-rgb),.35)}
+.active{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 2px 8px rgba(var(--primary-rgb),.3)}
+.chipIcon{font-size:15px;line-height:1}
+.chipLabel{line-height:1.2}
