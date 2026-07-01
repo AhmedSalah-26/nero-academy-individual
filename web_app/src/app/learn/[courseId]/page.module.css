@@ -76,7 +76,30 @@
 .stageButtons button{border-color:var(--glass-border);border-radius:14px;background:var(--surface-card)}.stageHeading h1{font-family:var(--font-display);font-size:1.7rem;color:var(--primary)}.mediaContent{height:clamp(360px,42vw,520px)}
 .tabs{height:56px;border-bottom-color:var(--border-light)}.tabs .activeTab{color:var(--primary);border-color:var(--primary)}.tabPanel{font-size:.72rem}.fileItem,.assignmentItem,.questionItem{border-color:var(--glass-border);border-radius:16px;background:var(--surface-soft)}
 .avatar{border-radius:18px;color:white;background:var(--primary)}.instructorCard a,.qaLink{border-radius:14px;color:var(--primary);background:var(--primary-glow)}
-.lessonNav button{min-height:48px;border-radius:16px;background:var(--surface-card)}.lessonNav button:last-child{color:white;border-color:var(--primary);background:var(--primary)}
+.lessonNav button {
+  min-height: 48px;
+  border-radius: 16px;
+  background: var(--surface-card);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.lessonNav button:hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--primary) 35%, transparent);
+  transform: translateY(-2px);
+}
+.lessonNav button:last-child {
+  color: white;
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+.lessonNav button:last-child:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 90%, #fff);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 55%, transparent);
+}
 [data-theme=dark] .progressCard,[data-theme=dark] .curriculumCard,[data-theme=dark] .infoCard,[data-theme=dark] .instructorCard,[data-theme=dark] .mediaStage{background:var(--surface-card)}
 [data-theme=dark] .stageHeading h1,[data-theme=dark] .cardTitle,[data-theme=dark] .instructorCard strong{color:#fff}
 @media(max-width:900px){.page{width:min(100% - 20px,760px)}.sidebar{background:var(--surface-card);border:1px solid var(--glass-border)}.sidebarToggle{color:white;background:var(--primary)}}

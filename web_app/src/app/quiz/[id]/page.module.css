@@ -137,7 +137,14 @@
 .primaryButton,
 .submitButton { color: white; background: linear-gradient(135deg, var(--primary-dark), var(--primary)); box-shadow: var(--shadow-primary); }
 .secondaryButton { color: var(--primary); background: var(--primary-glow); border-color: color-mix(in srgb, var(--primary) 25%, var(--border)); }
-.primaryButton:hover, .submitButton:hover, .secondaryButton:hover { transform: translateY(-1px); }
+.primaryButton:hover, .submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.secondaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--primary) 35%, transparent);
+}
 .primaryButton:disabled, .secondaryButton:disabled, .submitButton:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
 .iconButton { width: 42px; padding: 0; color: var(--text-muted); background: var(--surface-soft); border-color: var(--border); }
 

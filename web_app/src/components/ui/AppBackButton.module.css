@@ -21,7 +21,8 @@
 
 .backButton:hover {
   background: var(--surface-hover);
-  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 35%, transparent);
 }
 
 .backButton:active {
