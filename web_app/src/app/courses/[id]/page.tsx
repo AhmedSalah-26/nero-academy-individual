@@ -357,7 +357,20 @@ export default function CourseDetailsPage() {
                   </span>
                   <span className={styles.pricingOptionPrice}>
                     {opt.isFree ? (lang === 'ar' ? 'مجاني' : 'Free') : `${opt.price} ${t.egp}`}
+                    {opt.originalPrice && opt.originalPrice > opt.price && (
+                      <span className={styles.pricingOptionOldPrice}>{opt.originalPrice} {t.egp}</span>
+                    )}
                   </span>
+                  {opt.features && opt.features.length > 0 && (
+                    <ul className={styles.pricingOptionFeatures}>
+                      {opt.features.map((f, i) => (
+                        <li key={i}>
+                          <Check fontSize="inherit" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </button>
               ))}
             </div>
@@ -385,13 +398,10 @@ export default function CourseDetailsPage() {
             <Link href="/cart" className={`${styles.primaryBtn} gradient-bg`}>{lang === 'ar' ? 'الذهاب للسلة' : 'Go to Cart'}</Link>
           )}
           {ctaState === 'addToCart' && (
-            <>
-              <button onClick={() => addToCart(course.id)} className={styles.cartBtn}>
-                <ShoppingCart fontSize="small" />
-                <span>{t.addToCart}</span>
-              </button>
-              <button onClick={handleBuyNow} className={`${styles.primaryBtn} gradient-bg`}>{t.buyNow}</button>
-            </>
+            <button onClick={() => addToCart(course.id)} className={`${styles.primaryBtn} gradient-bg`}>
+              <ShoppingCart fontSize="small" />
+              <span>{t.addToCart}</span>
+            </button>
           )}
         </div>
       </div>

@@ -122,11 +122,9 @@
 /* ── Price Banner ── */
 .priceBanner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding: 20px 28px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 28px;
   border-radius: var(--radius-lg);
   margin-top: 16px;
   margin-bottom: 32px;
@@ -137,6 +135,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .priceBannerActions {
@@ -144,51 +143,103 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 /* ── Inline Pricing Options ── */
 .pricingOptionsList {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 14px;
+  width: 100%;
 }
 
 .pricingOptionCard {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding: 10px 18px;
+  gap: 8px;
+  padding: 18px 20px;
+  min-width: 180px;
+  flex: 1;
   border: 2px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-soft);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   cursor: pointer;
   font: inherit;
   text-align: start;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 .pricingOptionCard:hover {
   border-color: var(--primary);
-  background: var(--primary-glow);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 15%, transparent);
 }
 
 .pricingOptionSelected {
   border-color: var(--primary);
-  background: var(--primary-glow);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent), var(--shadow-md);
 }
 
 .pricingOptionLabel {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pricingOptionSelected .pricingOptionLabel {
+  color: var(--primary);
 }
 
 .pricingOptionPrice {
-  font-size: 1.1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 1.4rem;
   font-weight: 900;
-  color: var(--primary);
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.pricingOptionOldPrice {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+
+.pricingOptionFeatures {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 10px;
+  width: 100%;
+}
+
+.pricingOptionFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pricingOptionFeatures svg {
+  color: var(--success);
+  font-size: 0.85rem !important;
+  flex-shrink: 0;
 }
 
 .contentGrid {
