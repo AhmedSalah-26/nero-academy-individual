@@ -164,21 +164,38 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
   Widget _buildCoursesList(
       BuildContext context, InstructorCoursesState state, bool isArabic) {
     if (state.isLoading && state.courses.isEmpty) {
-      return _buildLoadingSkeleton();
+      return RefreshIndicator(
+        onRefresh: () => context
+            .read<InstructorCoursesCubit>()
+            .loadCourses(status: state.currentStatus, refresh: true),
+        color: AppColors.primary,
+        child: _buildLoadingSkeleton(),
+      );
     }
 
     if (state.courses.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              isArabic ? 'لا توجد كورسات' : 'No courses found',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+      return RefreshIndicator(
+        onRefresh: () => context
+            .read<InstructorCoursesCubit>()
+            .loadCourses(status: state.currentStatus, refresh: true),
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  isArabic ? 'لا توجد كورسات' : 'No courses found',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       );
     }
@@ -187,8 +204,10 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
       onRefresh: () => context
           .read<InstructorCoursesCubit>()
           .loadCourses(status: state.currentStatus, refresh: true),
+      color: AppColors.primary,
       child: ListView.builder(
         controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: state.courses.length + (state.isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
