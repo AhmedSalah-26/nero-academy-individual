@@ -6,6 +6,7 @@ import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
 import '../../../../../core/shared_widgets/loading_skeleton.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/entities/instructor_entities.dart';
+import '../../../data/models/instructor_course_model.dart';
 import '../../cubit/instructor_courses_cubit.dart';
 import 'instructor_course_list_item.dart';
 
@@ -39,6 +40,47 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       context.read<InstructorCoursesCubit>().loadMoreCourses();
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, InstructorCourseModel course) async {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final cubit = context.read<InstructorCoursesCubit>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            isArabic ? 'حذف الكورس نهائياً' : 'Delete Course Permanently',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            isArabic
+                ? 'هل أنت متأكد من حذف كورس (${course.getTitle(true)})؟\n\n⚠️ سيتم حذف الكورس بجميع دروسه، أقسامه، ملفاته، ومحتوياته بالكامل نهائياً من النظام!'
+                : 'Are you sure you want to delete the course (${course.getTitle(false)})?\n\n⚠️ This will permanently delete the course, along with all its lessons, sections, attachments, and content from the system!',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(isArabic ? 'إلغاء' : 'Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(isArabic ? 'حذف نهائي' : 'Delete Permanently'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await cubit.deleteCourse(course.id);
     }
   }
 
@@ -244,6 +286,9 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
               );
             },
             onPreview: () => _openPreviewCourse(course.id),
+            onDelete: course.enrollmentCount == 0
+                ? () => _showDeleteConfirmation(context, course)
+                : null,
           );
         },
       ),
