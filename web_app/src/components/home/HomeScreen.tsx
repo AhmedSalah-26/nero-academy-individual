@@ -5,8 +5,6 @@ import Link from 'next/link';
 import {
   ArrowForward,
   AutoAwesome,
-  CardMembership,
-  EmojiEvents,
   FavoriteBorder,
   Forum,
   History,
@@ -36,7 +34,7 @@ import { BannerCarousel } from './BannerCarousel';
 function getCategoryConfig(iconName?: string) {
   switch (iconName?.toLowerCase()) {
     case 'code':
-      return { icon: <Code fontSize="medium" />, color: '#2563EB' };
+      return { icon: <Code fontSize="medium" />, color: '#6F7A3A' };
     case 'design':
       return { icon: <DesignServices fontSize="medium" />, color: '#8B5CF6' };
     case 'business':
@@ -100,7 +98,6 @@ export function HomeScreen() {
   const { lang, user, profile, addToWishlist, removeFromWishlist, wishlist } = useApp();
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [featuredCourses, setFeaturedCourses] = useState<CourseData[]>([]);
   const [popularCourses, setPopularCourses] = useState<CourseData[]>([]);
   const [newCourses, setNewCourses] = useState<CourseData[]>([]);
@@ -199,9 +196,6 @@ export function HomeScreen() {
     : 0;
   const level = Math.max(1, Math.ceil((completedLessons + enrollments.length) / 5));
   const points = completedLessons * 25 + enrollments.length * 100;
-  const nextLevelTarget = Math.max((level + 1) * 250, 250);
-  const levelProgress = Math.min(100, Math.round((points / nextLevelTarget) * 100));
-  const primaryEnrollment = enrollments[0];
   const continueHref = '/my-learning';
   const heroProgress = Math.max(averageProgress, activeEnrollments.length ? 12 : 0);
   const profileInitial = (firstName || user?.email || 'S').trim().charAt(0).toUpperCase();
@@ -249,6 +243,7 @@ export function HomeScreen() {
       <div className={styles.dashboardShell}>
         <div className={styles.mainColumn}>
           <section className={styles.hero}>
+            <div className={styles.heroBgImage} />
             <div className={styles.heroContent}>
               <span className={styles.heroEyebrow}>
                 <AutoAwesome fontSize="small" />
@@ -474,7 +469,7 @@ export function HomeScreen() {
 
           <section className={styles.communityCard}>
             <Forum />
-            <h2>{lang === 'ar' ? 'انضم إلى مجتمع شهاب Tech' : 'Join Sehap Tech community'}</h2>
+            <h2>{lang === 'ar' ? 'انضم إلى مجتمع Dr UneXpected' : 'Join Dr UneXpected community'}</h2>
             <p>{lang === 'ar' ? 'تفاعل، اسأل، شارك وتعلم مع الآخرين.' : 'Ask, share, and learn with other students.'}</p>
             <Link href="/forums">{lang === 'ar' ? 'دخول المنتدى' : 'Open forum'}</Link>
           </section>
@@ -485,3 +480,6 @@ export function HomeScreen() {
     </main>
   );
 }
+
+
+

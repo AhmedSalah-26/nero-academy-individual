@@ -94,7 +94,7 @@ class _HeroVisual extends StatelessWidget {
           bottom: 0,
           width: w * 0.65,
           child: Image.asset(
-            'assets/transparent_hero.png',
+            'assets/dr_unexpected_final.png',
             fit: BoxFit.contain,
             alignment: Alignment.bottomCenter,
           ),
@@ -540,11 +540,11 @@ class _HeroCopy extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'مرحباً بك في',
+                  'مرحبا بك في',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.textMainDark
-                        : const Color(0xFF0F2A5F),
+                        : AppColors.primaryDark,
                     fontSize: (w * 0.03).clamp(11.0, 14.0),
                     fontWeight: FontWeight.w800,
                     height: 1.25,
@@ -552,11 +552,11 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.012),
                 Text(
-                  'شهاب تك',
+                  'Dr UneXpected',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.primaryOnDark
-                        : const Color(0xFF0F2A5F),
+                        : AppColors.primaryDark,
                     fontSize: (w * 0.078).clamp(27.0, 39.0),
                     fontWeight: FontWeight.w900,
                     height: 1.08,
@@ -573,7 +573,7 @@ class _HeroCopy extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    'برمجة للمبتدئين',
+                    'كيمياء بشكل مختلف',
                     style: TextStyle(
                       color: AppColors.white,
                       fontSize: (w * 0.021).clamp(8.5, 11.0),
@@ -584,7 +584,7 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.014),
                 Text(
-                  'لسه هنبدأ خطوة بخطوة',
+                  'تجارب، شرح، وتدريب لحد الامتحان',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.textMutedDark

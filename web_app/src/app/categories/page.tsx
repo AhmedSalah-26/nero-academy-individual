@@ -33,7 +33,7 @@ interface CategoryData {
 function getCategoryConfig(iconName?: string) {
   switch (iconName?.toLowerCase()) {
     case 'code':
-      return { icon: <Code fontSize="medium" />, color: '#2563EB' };
+      return { icon: <Code fontSize="medium" />, color: '#6F7A3A' };
     case 'design':
       return { icon: <DesignServices fontSize="medium" />, color: '#8B5CF6' };
     case 'business':
@@ -147,3 +147,5 @@ export default function CategoriesPage() {
     </main>
   );
 }
+
+

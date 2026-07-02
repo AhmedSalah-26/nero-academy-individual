@@ -54,9 +54,9 @@ Future<Either<Failure, User>> login(String email, String password) async {
 
 ```dart
 // Primary
-AppColors.primary        // #2563EB - الأزرق الأساسي
-AppColors.primaryLight   // #BFDBFE - الأزرق الفاتح
-AppColors.primaryDark    // #1D4ED8 - الأزرق الداكن
+AppColors.primary        // #6F7A3A - الذهبي الأساسي
+AppColors.primaryLight   // #8C8B4A - الذهبي الهادئ
+AppColors.primaryDark    // #4F5A28 - الذهبي الداكن
 
 // Background
 AppColors.backgroundLight  // #F7F6F8 - خلفية Light Mode
@@ -156,3 +156,4 @@ AppDateUtils.getRelativeTime(date)  // "منذ 5 دقائق"
 // Duration
 AppDateUtils.formatDuration(90)  // "1س 30د"
 ```
+

@@ -173,27 +173,27 @@ export default function HomePage() {
           <div className={`${styles.heroText} animate-fade-up`}>
             <div className={styles.heroBadge}>
               <AutoAwesome fontSize="small" />
-              <span>{lang === 'ar' ? 'برمجة مفهومة، خطوة بخطوة' : 'Programming, clearly explained'}</span>
+              <span>{lang === 'ar' ? 'كيمياء غير متوقعة، خطوة بخطوة' : 'Unexpected chemistry, clearly explained'}</span>
             </div>
             
             <h1>
               {lang === 'ar' ? (
                 <>
-                  افهم البرمجة.<br />
-                  <span>حقق هدفك.</span>
+                  افهم الكيمياء.<br />
+                  <span>بطريقة غير متوقعة.</span>
                 </>
               ) : (
                 <>
-                  Understand programming.<br />
-                  <span>Earn the grade.</span>
+                  Understand chemistry.<br />
+                  <span>The unexpected way.</span>
                 </>
               )}
             </h1>
             
             <p>
               {lang === 'ar'
-                ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
-                : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
+                ? 'تجارب ذهنية، شرح مركز، وتدريب ذكي يخليك تدخل الامتحان فاهم مش حافظ.'
+                : 'Focused lessons, smart practice, and a chemistry-first learning path built for confidence.'}
             </p>
             
             <div className={styles.heroButtons}>
@@ -213,8 +213,8 @@ export default function HomePage() {
             <div className={styles.visualRing} />
             <div className={styles.teacherContainer}>
               <Image
-                src="/logo2.png"
-                alt={lang === 'ar' ? 'المهندس شهاب غزال' : 'Eng Shehab Ghazal'}
+                src="/dr_unexpected_final.png"
+                alt="Dr UneXpected"
                 fill
                 priority
                 sizes="(max-width: 760px) 78vw, 520px"
@@ -443,7 +443,7 @@ export default function HomePage() {
                   <Star key={star} fontSize="small" sx={{ color: 'var(--warning)' }} />
                 ))}
               </div>
-              <p>"{review.text}"</p>
+              <p>&quot;{review.text}&quot;</p>
             </article>
           ))}
         </div>

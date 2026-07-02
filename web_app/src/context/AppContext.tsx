@@ -93,10 +93,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('nero_theme', nextTheme);
   };
 
-  // Main Auth Refresh Flow
   const refreshAuth = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.warn('Session retrieval error:', error.message);
+        if (error.message?.toLowerCase().includes('refresh token') || error.message?.toLowerCase().includes('refresh_token')) {
+          // If refresh token is invalid, clear client storage and session state
+          await supabase.auth.signOut().catch(() => {});
+          setUser(null);
+          setProfile(null);
+          setEnrolledCourseIds([]);
+          setCart(JSON.parse(localStorage.getItem('nero_cart') || '[]'));
+          setWishlist(JSON.parse(localStorage.getItem('nero_wishlist') || '[]'));
+          setLoading(false);
+          return;
+        }
+      }
+
+      const session = data?.session;
       if (session?.user) {
         setUser(session.user);
         // Auth is ready once the session is known. Profile/cart queries should

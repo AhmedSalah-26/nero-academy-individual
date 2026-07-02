@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  School,
   Person,
   Notifications,
   ShoppingCart,
@@ -48,12 +47,14 @@ export function Header() {
         <div className={styles.container}>
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>
-              <span className={styles.logoIcon}>
-                <img src="/logo2.png" alt="Logo" className={styles.logoImg} />
+              <span className={styles.logoIcon} aria-hidden="true">
+                <span className={styles.logoNumber}>92</span>
+                <span className={styles.logoSymbol}>U</span>
+                <span className={styles.logoMass}>238.03</span>
               </span>
               <span className={styles.logoText}>
-                <b>{lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}</b>
-                <small>{lang === 'ar' ? 'منصة التعليم' : 'Learning Platform'}</small>
+                <b>Dr UneXpected</b>
+                <small>{lang === 'ar' ? 'منصة الكيمياء' : 'Chemistry Platform'}</small>
               </span>
             </Link>
 
@@ -118,3 +119,4 @@ export function Header() {
     </header>
   );
 }
+

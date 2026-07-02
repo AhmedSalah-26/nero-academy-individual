@@ -1,6 +1,6 @@
 {
-  "app_name": "شهاب تك",
-  "splash_slogan": "معاك هنكمل المشوار",
+  "app_name": "Dr UneXpected",
+  "splash_slogan": "كيمياء بشكل غير متوقع",
   "clear_all": "مسح الكل",
   "common": {
     "loading": "جاري التحميل...",
@@ -998,3 +998,5 @@
     "validation_lesson_availability": "وقت إتاحة {lesson} داخل {section} غير صحيح"
   }
 }
+
+

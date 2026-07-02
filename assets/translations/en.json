@@ -1,6 +1,6 @@
 {
-  "app_name": "Shahab Tech",
-  "splash_slogan": "We will continue the journey together",
+  "app_name": "Dr UneXpected",
+  "splash_slogan": "Chemistry, the unexpected way",
   "clear_all": "Clear All",
   "common": {
     "loading": "Loading...",
@@ -325,7 +325,7 @@
     "instructor_whatsapp": "Instructor WhatsApp",
     "instructor_whatsapp_unavailable": "Instructor phone is not available right now",
     "contact_whatsapp": "Contact on WhatsApp",
-    "whatsapp_message": "Hello, I want to complete my Shahab Tech payment. Operation ID: {orderId}",
+    "whatsapp_message": "Hello, I want to complete my Dr UneXpected payment. Operation ID: {orderId}",
     "copied": "Copied"
   },
   "my_learning": {
@@ -988,3 +988,5 @@
     "validation_lesson_availability": "{lesson} availability in {section} is invalid"
   }
 }
+
+

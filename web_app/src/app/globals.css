@@ -22,28 +22,28 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 8px 10px rgba(0, 0, 0, 0.04);
-  --shadow-primary: 0 16px 34px rgba(37, 99, 235, 0.18);
+  --shadow-primary: 0 16px 34px rgba(111, 122, 58, 0.20);
 
-  --primary: #2563EB;
-  --primary-rgb: 37, 99, 235;
-  --primary-light: #DBEAFE;
-  --primary-dark: #1D4ED8;
-  --primary-on-dark: #93C5FD;
-  --primary-glow: rgba(37, 99, 235, 0.10);
+  --primary: #6F7A3A;
+  --primary-rgb: 111, 122, 58;
+  --primary-light: #8C8B4A;
+  --primary-dark: #4F5A28;
+  --primary-on-dark: #8C8B4A;
+  --primary-glow: rgba(111, 122, 58, 0.16);
 
-  --background: #F7F6F8;
-  --surface: #FFFFFF;
-  --surface-card: #FFFFFF;
-  --surface-hover: rgba(37, 99, 235, 0.04);
-  --surface-soft: #F3F4F6;
-  --card-dark: #172033;
-  --surface-dark: #0F172A;
+  --background: #EEF0E4;
+  --surface: #F7F8EE;
+  --surface-card: #FBFCF3;
+  --surface-hover: rgba(111, 122, 58, 0.10);
+  --surface-soft: #E2E6D2;
+  --card-dark: #172414;
+  --surface-dark: #101B10;
 
-  --text-main: #111827;
-  --text-muted: #6B7280;
-  --text-secondary: #9CA3AF;
-  --border: rgba(0, 0, 0, 0.10);
-  --border-light: rgba(0, 0, 0, 0.05);
+  --text-main: #182012;
+  --text-muted: #5F674C;
+  --text-secondary: #78805F;
+  --border: rgba(79, 82, 45, 0.18);
+  --border-light: rgba(79, 82, 45, 0.09);
 
   --success: #22C55E;
   --success-light: rgba(34, 197, 94, 0.10);
@@ -51,12 +51,12 @@
   --error-light: rgba(239, 68, 68, 0.10);
   --warning: #F59E0B;
   --warning-light: rgba(245, 158, 11, 0.10);
-  --info: #3B82F6;
-  --info-light: rgba(59, 130, 246, 0.10);
+  --info: #86A35A;
+  --info-light: rgba(134, 163, 90, 0.12);
   --rating: #B47D00;
 
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(251, 252, 243, 0.76);
+  --glass-border: rgba(105, 111, 63, 0.16);
 
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -166,36 +166,36 @@ button, input, textarea, select { font-family: inherit; }
 .hidden { display: none !important; }
 
 [data-theme="dark"] {
-  --primary-rgb: 59, 130, 246;
-  --primary: #3b82f6;
-  --primary-dark: #1d4ed8;
-  --primary-light: #1e3a8a;
-  --primary-on-dark: #60a5fa;
-  --primary-glow: rgba(59, 130, 246, 0.15);
+  --primary-rgb: 140, 139, 74;
+  --primary: #8C8B4A;
+  --primary-dark: #80671F;
+  --primary-light: #3A3B19;
+  --primary-on-dark: #A7A35A;
+  --primary-glow: rgba(140, 139, 74, 0.18);
 
-  --background: #0F172A;
-  --surface: rgba(30, 41, 59, 0.86);
-  --surface-card: #1E293B;
-  --surface-hover: rgba(37, 99, 235, 0.12);
-  --surface-soft: #1E293B;
-  --card-dark: #172033;
-  --surface-dark: #0F172A;
+  --background: #071008;
+  --surface: rgba(16, 27, 16, 0.88);
+  --surface-card: #101B10;
+  --surface-hover: rgba(140, 139, 74, 0.10);
+  --surface-soft: #182617;
+  --card-dark: #172414;
+  --surface-dark: #071008;
 
-  --text-main: #F1F5F9;
-  --text-muted: #94A3B8;
-  --text-secondary: #64748B;
-  --border: rgba(148, 163, 184, 0.15);
-  --border-light: rgba(148, 163, 184, 0.08);
+  --text-main: #F1F2E6;
+  --text-muted: #B8BEA2;
+  --text-secondary: #8F966F;
+  --border: rgba(111, 122, 58, 0.18);
+  --border-light: rgba(111, 122, 58, 0.09);
 
-  --glass-bg: rgba(15, 23, 42, 0.72);
-  --glass-border: rgba(148, 163, 184, 0.12);
+  --glass-bg: rgba(7, 16, 8, 0.74);
+  --glass-border: rgba(111, 122, 58, 0.16);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.15);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.35), 0 8px 10px rgba(0, 0, 0, 0.15);
-  --shadow-primary: 0 16px 34px rgba(147, 197, 253, 0.12);
+  --shadow-primary: 0 16px 34px rgba(111, 122, 58, 0.14);
 }
 
 [data-theme="dark"] body {
@@ -264,8 +264,8 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 @keyframes premiumGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(37,99,235,0.2), 0 0 10px rgba(37,99,235,0.1); }
-  50% { box-shadow: 0 0 15px rgba(37,99,235,0.4), 0 0 30px rgba(37,99,235,0.2), 0 0 45px rgba(37,99,235,0.1); }
+  0%, 100% { box-shadow: 0 0 5px rgba(111,122,58,0.18), 0 0 10px rgba(111,122,58,0.08); }
+  50% { box-shadow: 0 0 15px rgba(111,122,58,0.28), 0 0 30px rgba(111,122,58,0.14), 0 0 45px rgba(111,122,58,0.08); }
 }
 
 @keyframes gradientFlow {

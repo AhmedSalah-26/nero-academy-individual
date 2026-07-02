@@ -142,7 +142,7 @@ export function StudentHome() {
           <div className={styles.teacherGlow} />
           <div className={styles.teacherImage}>
             <Image
-              src="/transparent_hero.png"
+              src="/dr_unexpected_final.png"
               alt=""
               fill
               sizes="(max-width: 900px) 260px, 360px"

@@ -23,7 +23,7 @@ interface Notice {
 }
 
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string }> = {
-  instructorMessage: { icon: Message, color: '#2563EB' },
+  instructorMessage: { icon: Message, color: '#6F7A3A' },
   courseUpdate: { icon: School, color: '#059669' },
   quizResult: { icon: QuizIcon, color: '#D97706' },
   certificateIssued: { icon: WorkspacePremium, color: '#7C3AED' },
@@ -166,3 +166,5 @@ export default function NotificationsPage() {
     </main>
   );
 }
+
+

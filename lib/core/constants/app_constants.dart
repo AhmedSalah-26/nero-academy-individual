@@ -5,8 +5,8 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'منصة التعليم';
-  static const String appNameEn = 'Learning Platform';
+  static const String appName = 'Dr UneXpected';
+  static const String appNameEn = 'Dr UneXpected';
   static const String appVersion = '1.0.0';
 
   // Supabase Configuration

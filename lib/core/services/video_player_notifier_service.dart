@@ -146,7 +146,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
 
     try {
       await _channel.invokeMethod<void>('show', {
-        'title': _safeText(lessonTitle, fallback: courseTitle ?? 'Shahab Tech'),
+        'title': _safeText(lessonTitle, fallback: courseTitle ?? 'Dr UneXpected'),
         'subtitle': _safeText(courseTitle, fallback: ''),
         'continueLabel': 'كمّل الدرس',
         'ongoing': !_isPlayerScreenActive,
@@ -178,3 +178,4 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     super.dispose();
   }
 }
+

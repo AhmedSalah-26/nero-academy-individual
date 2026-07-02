@@ -1,11 +1,11 @@
 {
-    "name": "Shehab Academy",
-    "short_name": "Shehab Academy",
+    "name": "Dr UneXpected",
+    "short_name": "Dr UneXpected",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Yalla Course - Online Learning Platform",
+    "background_color": "#071008",
+    "theme_color": "#071008",
+    "description": "Dr UneXpected Chemistry Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

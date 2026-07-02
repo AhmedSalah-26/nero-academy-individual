@@ -161,22 +161,66 @@ class _LogoMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 190,
-      height: 190,
-      child: Image.asset(
-        'assets/logo2.png',
-        fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => const Center(
-          child: Text(
-            'ش',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 72,
-              fontWeight: FontWeight.w900,
+    return Container(
+      width: 154,
+      height: 154,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryOnDark, width: 2),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryOnDark.withValues(alpha: 0.18),
+            AppColors.primaryDark.withValues(alpha: 0.08),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryOnDark.withValues(alpha: 0.26),
+            blurRadius: 28,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: const Stack(
+        children: [
+          Positioned(
+            top: 14,
+            right: 16,
+            child: Text(
+              '92',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-        ),
+          Center(
+            child: Text(
+              'U',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 86,
+                fontWeight: FontWeight.w900,
+                height: 1,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 15,
+            bottom: 14,
+            child: Text(
+              '238.03',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -237,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _titleSection(bool d, bool isArabic) => Column(
         children: [
-          _brandNameText(isArabic, d),
+          _brandNameText(d),
           const SizedBox(height: 14),
           Text(
             _isLogin ? 'auth.login'.tr() : 'auth.join_community'.tr(),
@@ -260,8 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       );
 
-  Widget _brandNameText(bool isArabic, bool isDark) {
-    final brandName = isArabic ? 'شهاب تك' : 'Shahab Tech';
+  Widget _brandNameText(bool isDark) {
     final gradient = isDark
         ? const LinearGradient(
             colors: [
@@ -286,10 +285,10 @@ class _LoginScreenState extends State<LoginScreen> {
       shaderCallback: (bounds) => gradient.createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: Text(
-        brandName,
+      child: const Text(
+        'Dr UneXpected',
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Almarai',
           fontSize: 22,
           fontWeight: FontWeight.w800,
@@ -623,3 +622,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

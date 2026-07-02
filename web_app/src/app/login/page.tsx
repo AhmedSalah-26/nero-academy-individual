@@ -261,7 +261,7 @@ function LoginContent() {
       <div className={`${styles.card} glass`}>
         <div className={styles.header}>
           <h1 className={`${styles.brandTitle} gradient-text`}>
-            {lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}
+            Dr UneXpected
           </h1>
         </div>
 
@@ -535,3 +535,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

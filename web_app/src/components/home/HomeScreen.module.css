@@ -32,37 +32,25 @@
   display: block;
   overflow: hidden;
   margin-bottom: 20px;
-  border: 1px solid rgba(99, 102, 241, 0.22);
+  border: 1px solid rgba(111, 122, 58, 0.26);
   border-radius: 24px;
-  background: 
-    linear-gradient(to right, #111324 55%, rgba(17, 19, 36, 0.6) 70%, transparent 82%),
-    #111324 url('/COVER.png') no-repeat right center;
-  background-size: 100% 100%, contain;
-  box-shadow: 0 24px 56px rgba(49, 46, 129, 0.22);
+  background-color: #071008;
+  box-shadow: 0 24px 56px rgba(7, 16, 8, 0.30);
   isolation: isolate;
 }
 
-.hero::before,
-.hero::after {
-  content: "";
+.heroBgImage {
   position: absolute;
-  border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.16);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(to right, #071008 48%, rgba(7, 16, 8, 0.72) 68%, transparent 86%),
+    url('/COVER_ltr.png') no-repeat right center;
+  background-size: 100% 100%, cover;
   z-index: -1;
-}
-
-.hero::before {
-  width: 310px;
-  height: 310px;
-  inset-inline-start: -68px;
-  top: -48px;
-}
-
-.hero::after {
-  width: 190px;
-  height: 190px;
-  inset-inline-end: 18%;
-  bottom: -76px;
+  pointer-events: none;
 }
 
 .heroVisual {
@@ -147,8 +135,8 @@
 }
 
 .primaryHeroButton {
-  color: #2441d8;
-  background: #fff;
+  color: #182012;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
 }
 
@@ -207,7 +195,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #fff, #b8c8ff);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
 }
 
 .heroProgressCard p {
@@ -226,7 +214,7 @@
   margin-bottom: 20px;
   padding: 0 20px;
   background: color-mix(in srgb, var(--surface-card) 92%, white);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(111, 122, 58, 0.12);
   border-radius: 20px;
   text-decoration: none;
   transition: all 0.22s ease;
@@ -235,8 +223,8 @@
 
 .searchBar:hover {
   transform: translateY(-2px);
-  border-color: rgba(37, 99, 235, 0.26);
-  box-shadow: 0 20px 50px rgba(37, 99, 235, 0.1);
+  border-color: rgba(111, 122, 58, 0.26);
+  box-shadow: 0 20px 50px rgba(111, 122, 58, 0.1);
 }
 
 .searchIcon,
@@ -245,7 +233,7 @@
   height: 42px;
   padding: 9px;
   color: var(--primary);
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(111, 122, 58, 0.08);
   border-radius: 14px;
 }
 
@@ -336,8 +324,8 @@
 }
 
 .blue .statIcon {
-  color: #2563eb;
-  background: #eaf1ff;
+  color: #8d7a2e;
+  background: #f4ecd0;
 }
 
 /* ========================================
@@ -414,7 +402,7 @@
   margin-bottom: 14px;
   padding: 5px;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.18), rgba(14, 165, 233, 0.12));
+  background: linear-gradient(135deg, rgba(111, 122, 58, 0.24), rgba(134, 163, 90, 0.14));
 }
 
 .avatarWrap img,
@@ -425,7 +413,7 @@
   place-items: center;
   border-radius: inherit;
   background: linear-gradient(135deg, #eef2ff, #dbeafe);
-  color: #1d4ed8;
+  color: #8d7a2e;
   font-size: 2rem;
   font-weight: 950;
   object-fit: cover;
@@ -519,8 +507,8 @@
   align-items: center;
   padding: 18px;
   background:
-    radial-gradient(circle at top left, rgba(244, 114, 182, 0.16), transparent 34%),
-    linear-gradient(135deg, #ffffff, #f7f4ff);
+    radial-gradient(circle at top left, rgba(111, 122, 58, 0.18), transparent 34%),
+    linear-gradient(135deg, #fffdf2, #f0e8c5);
 }
 
 .giftIcon {
@@ -560,7 +548,7 @@
   align-items: center;
   border-radius: 13px;
   color: #fff;
-  background: linear-gradient(135deg, var(--primary), #6d5dfc);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   font-size: 0.86rem;
   font-weight: 900;
   text-decoration: none;
@@ -600,7 +588,7 @@
 
 .quickLinks a:hover {
   color: var(--primary);
-  background: rgba(37, 99, 235, 0.06);
+  background: rgba(111, 122, 58, 0.06);
   transform: translateX(-2px);
 }
 
@@ -623,7 +611,7 @@
   margin-bottom: 14px;
   color: var(--primary);
   border-radius: 16px;
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(var(--primary-rgb), 0.12);
 }
 
 .communityCard p {
@@ -640,10 +628,10 @@
   justify-content: center;
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(var(--primary-rgb), 0.24);
   border-radius: 999px;
   color: var(--primary);
-  background: rgba(37, 99, 235, 0.04);
+  background: rgba(var(--primary-rgb), 0.10);
   font-size: 0.82rem;
   font-weight: 900;
   text-decoration: none;
@@ -686,7 +674,7 @@
 [data-theme="dark"] .quickPanel,
 [data-theme="dark"] .communityCard {
   background: var(--surface-card);
-  border-color: rgba(147, 197, 253, 0.14);
+  border-color: rgba(134, 163, 90, 0.14);
 }
 
 [data-theme="dark"] .offerCard {
@@ -896,3 +884,19 @@
   font-weight: 700;
   color: var(--text-main);
 }
+
+/* ========================================
+   RTL Specific Overrides
+   ======================================== */
+:global(html[dir="rtl"]) .heroBgImage {
+  background:
+    linear-gradient(to left, #071008 48%, rgba(7, 16, 8, 0.72) 68%, transparent 86%),
+    url('/COVER_rtl.png') no-repeat left center;
+  background-size: 100% 100%, cover;
+}
+
+:global(html[dir="rtl"]) .primaryHeroButton svg {
+  transform: scaleX(-1);
+}
+
+

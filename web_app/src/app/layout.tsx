@@ -6,10 +6,9 @@ import { BottomNavbar } from '../components/BottomNavbar';
 import DynamicOfflineIndicator from '../components/DynamicOfflineIndicator';
 
 export const metadata: Metadata = {
-  title: 'شهاب Tech | منصة التعليم',
-  description:
-    'منصة تعليمية متكاملة لتقديم الكورسات التدريبية، الكويزات، المنتديات، والمتابعة الأبوية للطلاب.',
-  keywords: ['تعليم', 'كورسات', 'دراسة', 'مدرسة', 'امتحانات', 'تعلم', 'شهاب'],
+  title: 'Dr UneXpected | Chemistry Platform',
+  description: 'A chemistry learning platform with courses, quizzes, community, and progress tracking.',
+  keywords: ['chemistry', 'education', 'courses', 'quizzes', 'Dr UneXpected'],
 };
 
 export default function RootLayout({
@@ -42,10 +41,10 @@ export default function RootLayout({
               }}
             >
               <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', margin: 0 }}>
-                <span>&copy; {new Date().getFullYear()} شهاب Tech. جميع الحقوق محفوظة.</span>
+                <span>&copy; {new Date().getFullYear()} Dr UneXpected. جميع الحقوق محفوظة.</span>
                 <span>•</span>
                 <a
-                  href="https://AhmedSalah-26.github.io/shehabtech-privacy/"
+                  href="https://AhmedSalah-26.github.io/dr-unexpected-privacy/"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 'bold' }}
@@ -60,3 +59,4 @@ export default function RootLayout({
     </html>
   );
 }
+
