@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -45,26 +46,26 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
 
   Future<void> _showDeleteConfirmation(
       BuildContext context, InstructorCourseModel course) async {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final cubit = context.read<InstructorCoursesCubit>();
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            isArabic ? 'حذف الكورس نهائياً' : 'Delete Course Permanently',
+            'instructor.delete_course_title'.tr(),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Text(
-            isArabic
-                ? 'هل أنت متأكد من حذف كورس (${course.getTitle(true)})؟\n\n⚠️ سيتم حذف الكورس بجميع دروسه، أقسامه، ملفاته، ومحتوياته بالكامل نهائياً من النظام!'
-                : 'Are you sure you want to delete the course (${course.getTitle(false)})?\n\n⚠️ This will permanently delete the course, along with all its lessons, sections, attachments, and content from the system!',
+            'instructor.delete_course_confirm'.tr(namedArgs: {
+              'title': course.getTitle(isArabic),
+            }),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(isArabic ? 'إلغاء' : 'Cancel'),
+              child: Text('common.cancel'.tr()),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -72,7 +73,7 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
                 backgroundColor: AppColors.error,
                 foregroundColor: Colors.white,
               ),
-              child: Text(isArabic ? 'حذف نهائي' : 'Delete Permanently'),
+              child: Text('common.delete'.tr()),
             ),
           ],
         );

@@ -96,14 +96,14 @@ class InstructorCourseListItem extends StatelessWidget {
                   top: 8,
                   left: 8,
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
                       icon: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Colors.redAccent,
+                        Icons.delete_rounded,
+                        color: Colors.red,
                         size: 20,
                       ),
                       onPressed: onDelete,

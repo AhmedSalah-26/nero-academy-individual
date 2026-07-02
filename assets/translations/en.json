@@ -893,7 +893,9 @@
       "create_quiz": "Create Quiz",
       "edit_quiz": "Edit Quiz",
       "quiz_attempts": "Quiz Attempts",
-      "preview_quiz": "Preview Quiz"
+      "preview_quiz": "Preview Quiz",
+      "delete_course_title": "Delete Course Permanently",
+      "delete_course_confirm": "Are you sure you want to delete the course ({title})?\n\n⚠️ This will permanently delete the course, along with all its lessons, sections, attachments, and content from the system!"
     },
     "common": {
       "search": "Search...",
