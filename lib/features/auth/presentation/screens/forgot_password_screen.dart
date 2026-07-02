@@ -60,8 +60,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state.isError && state.errorMessage != null) {
-            ToastUtils.showError(state.errorMessage!);
-            context.read<AuthCubit>().clearError();
+            final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+            if (isCurrent) {
+              ToastUtils.showError(state.errorMessage!);
+              context.read<AuthCubit>().clearError();
+            }
           }
         },
         child: SafeArea(

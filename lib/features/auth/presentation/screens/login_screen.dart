@@ -85,8 +85,11 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (ctx, state) {
           if (state.isError && state.errorMessage != null) {
-            ToastUtils.showError(state.errorMessage!);
-            ctx.read<AuthCubit>().clearError();
+            final isCurrent = ModalRoute.of(ctx)?.isCurrent ?? false;
+            if (isCurrent) {
+              ToastUtils.showError(state.errorMessage!);
+              ctx.read<AuthCubit>().clearError();
+            }
           }
           if (state.isAwaitingEmailVerification) {
             setState(() {
