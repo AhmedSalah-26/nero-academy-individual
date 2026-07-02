@@ -62,7 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           if (state.isError && state.errorMessage != null) {
             final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
             if (isCurrent) {
-              ToastUtils.showError(state.errorMessage!);
+              ToastUtils.showError(state.errorMessage!.tr());
               context.read<AuthCubit>().clearError();
             }
           }

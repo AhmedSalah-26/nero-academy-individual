@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state.isError && state.errorMessage != null) {
             final isCurrent = ModalRoute.of(ctx)?.isCurrent ?? false;
             if (isCurrent) {
-              ToastUtils.showError(state.errorMessage!);
+              ToastUtils.showError(state.errorMessage!.tr());
               ctx.read<AuthCubit>().clearError();
             }
           }

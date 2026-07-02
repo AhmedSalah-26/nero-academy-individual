@@ -25,7 +25,7 @@ mixin AuthProfileMixin {
 
       if (profile == null) {
         throw const app_exceptions.AuthException(
-          'البريد الإلكتروني غير مسجل في النظام. يرجى التحقق من البريد أو إنشاء حساب جديد.',
+          'auth.errors.email_not_registered',
           code: 'email_not_registered',
         );
       }

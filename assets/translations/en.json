@@ -135,7 +135,8 @@
       "email_not_confirmed": "Please confirm your email first",
       "session_expired": "Session expired, please login again",
       "user_banned": "Your account is banned",
-      "user_inactive": "Your account is inactive. Contact support"
+      "user_inactive": "Your account is inactive. Contact support",
+      "email_not_registered": "This email is not registered in the system. Please verify or create a new account."
     },
     "login_required": "Please login first",
     "login_with_phone": "Login with Phone",
