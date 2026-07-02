@@ -55,7 +55,7 @@ export 'presentation/screens/course_player_screen.dart';
 
 // Widgets
 export 'presentation/widgets/course_player/video_player_section.dart';
-export 'presentation/widgets/course_player/video_controls.dart';
+
 export 'presentation/widgets/course_player/lesson_header.dart';
 export 'presentation/widgets/course_player/content_tabs.dart';
 export 'presentation/widgets/course_player/curriculum_list.dart';
