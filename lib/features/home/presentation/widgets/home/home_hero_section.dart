@@ -76,27 +76,38 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    
+
     return Stack(
       fit: StackFit.expand,
       clipBehavior: Clip.none,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color:
-                isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.diagonal3Values(-1, 1, 1),
+          child: Image.asset(
+            'assets/COVER_rtl.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            alignment: const Alignment(-0.4, 0),
           ),
         ),
-        _AnimatedProgrammingShapes(isDark: isDark),
-        Positioned(
-          right: -w * 0.05,
-          bottom: 0,
-          width: w * 0.65,
-          child: Image.asset(
-            'assets/dr_unexpected_final.png',
-            fit: BoxFit.contain,
-            alignment: Alignment.bottomCenter,
+        // Gradient fade top & bottom
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                  Colors.transparent,
+                  Colors.transparent,
+                  isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                ],
+                stops: const [0.0, 0.20, 0.70, 1.0],
+              ),
+            ),
           ),
         ),
         _HeroCopy(isDark: isDark),
