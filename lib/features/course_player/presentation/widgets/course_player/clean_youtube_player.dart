@@ -1,27 +1,13 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flex_video_player/flex_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../data/services/youtube_stream_service.dart';
 import '../../cubit/course_player_cubit.dart';
 import '../../screens/fullscreen_player_screen.dart';
 
-/// Native YouTube video player that uses [youtube_explode_dart] to fetch
-/// direct muxed stream URLs (MP4) and plays them via [flex_video_player].
-///
-/// **No iframes or WebViews** — renders through a native Surface/Texture.
-///
-/// Features:
-/// - Quality fallback: muxed → video-only
-/// - Auto-retry on transient network failures (up to [_maxRetries] attempts)
-/// - Progress saving every 30 s via [CoursePlayerCubit]
-/// - Fullscreen mode via [FullscreenPlayerScreen]
-/// - FlexVideoPlayer native controls with speed, seek, fullscreen
 class YouTubePlayerWidget extends StatefulWidget {
   final String videoUrl;
   final bool isDark;
@@ -44,187 +30,119 @@ class YouTubePlayerWidget extends StatefulWidget {
 
 class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
     with AutomaticKeepAliveClientMixin {
-  // ──────────────── Constants ────────────────
-  static const int _maxRetries = 2;
-  static const Duration _retryDelay = Duration(seconds: 2);
   static const Duration _progressInterval = Duration(seconds: 30);
 
-  // ──────────────── State ────────────────
-  YouTubeStreamService? _streamService;
-  FlexVideoController? _flexController;
-  StreamSubscription<FlexVideoProgress>? _progressSub;
-
-  bool _isLoading = true;
-  String? _errorMessage;
+  YoutubePlayerController? _controller;
   String? _currentVideoId;
+  String? _errorMessage;
   int _lastSavedPosition = 0;
-  int _retryCount = 0;
+  DateTime _lastSaveTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   bool get wantKeepAlive => true;
 
-  // ══════════════════════════════════════════════════════════════
-  //  Lifecycle
-  // ══════════════════════════════════════════════════════════════
-
   @override
   void initState() {
     super.initState();
-    _streamService = YouTubeStreamService();
     _initializePlayer();
   }
 
   @override
   void didUpdateWidget(YouTubePlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoUrl != widget.videoUrl) {
-      final newVideoId = YouTubeStreamService.extractVideoId(widget.videoUrl);
-      if (newVideoId != null && newVideoId != _currentVideoId) {
-        AppLogger.i('[YouTubePlayer] Switching to video: $newVideoId');
-        _disposeControllers();
-        _lastSavedPosition = 0;
-        _retryCount = 0;
-        setState(() {
-          _isLoading = true;
-          _errorMessage = null;
-        });
-        _initializePlayer();
-      }
+    if (oldWidget.videoUrl == widget.videoUrl) return;
+
+    final newVideoId = _extractVideoId(widget.videoUrl);
+    if (newVideoId == null) {
+      _controller?.dispose();
+      _controller = null;
+      _currentVideoId = null;
+      setState(() => _errorMessage = 'course_player.video_unavailable'.tr());
+      return;
+    }
+
+    if (newVideoId != _currentVideoId) {
+      _currentVideoId = newVideoId;
+      _lastSavedPosition = 0;
+      _lastSaveTime = DateTime.fromMillisecondsSinceEpoch(0);
+      _errorMessage = null;
+      _controller?.load(newVideoId, startAt: widget.initialPosition ?? 0);
     }
   }
 
   @override
   void dispose() {
-    _progressSub?.cancel();
-    _disposeControllers();
-    _streamService?.dispose();
-    _streamService = null;
+    _controller?.removeListener(_onPlayerChanged);
+    _controller?.dispose();
     super.dispose();
   }
 
-  void _disposeControllers() {
-    _progressSub?.cancel();
-    _progressSub = null;
-    _flexController?.dispose();
-    _flexController = null;
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  //  Initialization
-  // ══════════════════════════════════════════════════════════════
-
-  Future<void> _initializePlayer() async {
-    _currentVideoId = YouTubeStreamService.extractVideoId(widget.videoUrl);
+  void _initializePlayer() {
+    _currentVideoId = _extractVideoId(widget.videoUrl);
 
     if (_currentVideoId == null) {
       AppLogger.e('[YouTubePlayer] Invalid YouTube URL: ${widget.videoUrl}');
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'course_player.video_unavailable'.tr();
-          _isLoading = false;
-        });
-      }
+      _errorMessage = 'course_player.video_unavailable'.tr();
       return;
     }
 
-    try {
-      // 1) Resolve stream URL via youtube_explode_dart
-      final result = await _streamService!.resolveStreamUrl(widget.videoUrl);
-      if (!mounted) return;
+    _controller = YoutubePlayerController(
+      initialVideoId: _currentVideoId!,
+      flags: YoutubePlayerFlags(
+        autoPlay: true,
+        enableCaption: false,
+        forceHD: true,
+        hideThumbnail: true,
+        startAt: widget.initialPosition ?? 0,
+      ),
+    )..addListener(_onPlayerChanged);
 
-      // 2) Build FlexVideoController with the resolved MP4 URL
-      _flexController = FlexVideoController(
-        source: FlexVideoSource.network(result.streamUrl.toString()),
-        config: FlexVideoConfig(
-          autoPlay: true,
-          wakelock: const FlexWakelockConfig(enabled: true),
-          retry: const FlexRetryConfig(enabled: true, maxRetries: 2),
-          // Disable built-in fullscreen — we use our own FullscreenPlayerScreen
-          fullscreen: const FlexFullscreenConfig(enabled: false),
-          controls: const FlexControlsConfig(
-            showFullscreen: false, // hide built-in button; custom button used
-            showSpeed: true,
-            autoHide: true,
-          ),
-        ),
-      );
+    AppLogger.i(
+      '[YouTubePlayer] Initialized video: $_currentVideoId, '
+      'resumeAt: ${widget.initialPosition ?? 0}s',
+    );
+  }
 
-      // 3) Initialize — FlexVideoPlayer auto-initializes when mounted,
-      //    but we still need to call it here so we can seekTo() reliably.
-      await _flexController!.initialize();
-      if (!mounted) return;
+  static String? _extractVideoId(String url) {
+    final trimmed = url.trim();
+    final packageResult = YoutubePlayer.convertUrlToId(trimmed);
+    if (packageResult != null) return packageResult;
 
-      // 4) Seek to saved position if resuming
-      final initialPos = widget.initialPosition ?? 0;
-      if (initialPos > 0) {
-        await _flexController!.seekTo(Duration(seconds: initialPos));
-      }
+    final rawIdMatch = RegExp(r'^([A-Za-z0-9_-]{11})$').firstMatch(trimmed);
+    return rawIdMatch?.group(1);
+  }
 
-      // 5) Wire up progress saving via progressStream
-      _progressSub = _flexController!.progressStream.listen((progress) {
-        if (!mounted) return;
-        final seconds = progress.position.inSeconds;
-        if (seconds > _lastSavedPosition) {
-          _lastSavedPosition = seconds;
-          _saveProgressThrottled(seconds);
-        }
-      });
+  void _onPlayerChanged() {
+    final controller = _controller;
+    if (controller == null || !mounted) return;
 
-      _retryCount = 0;
+    final value = controller.value;
+    if (value.hasError) {
+      AppLogger.e('[YouTubePlayer] Playback error: ${value.errorCode}');
+      setState(() => _errorMessage = 'course_player.video_unavailable'.tr());
+      return;
+    }
 
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-
-      AppLogger.i(
-        '[YouTubePlayer] Initialized — video: $_currentVideoId, '
-        'resumeAt: ${initialPos}s',
-      );
-    } on YouTubeStreamException catch (e) {
-      AppLogger.e('[YouTubePlayer] Stream error: $e');
-      if (mounted) {
-        setState(() {
-          _errorMessage = _mapErrorMessage(e.type);
-          _isLoading = false;
-        });
-      }
-    } catch (e, stack) {
-      AppLogger.e('[YouTubePlayer] Unexpected error', e, stack);
-      if (_retryCount < _maxRetries) {
-        _retryCount++;
-        AppLogger.i(
-          '[YouTubePlayer] Retrying... attempt $_retryCount/$_maxRetries',
-        );
-        await Future.delayed(_retryDelay);
-        if (mounted) {
-          _disposeControllers();
-          _initializePlayer();
-        }
-        return;
-      }
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'course_player.video_unavailable'.tr();
-          _isLoading = false;
-        });
-      }
+    final seconds = value.position.inSeconds;
+    if (seconds > _lastSavedPosition) {
+      _lastSavedPosition = seconds;
+      _saveProgressThrottled(seconds);
     }
   }
 
-  String _mapErrorMessage(YouTubeStreamErrorType type) {
-    switch (type) {
-      case YouTubeStreamErrorType.invalidUrl:
-      case YouTubeStreamErrorType.noStreams:
-      case YouTubeStreamErrorType.network:
-        return 'course_player.video_unavailable'.tr();
-    }
+  void _handleVideoEnded() {
+    final controller = _controller;
+    if (controller == null) return;
+
+    AppLogger.i('[YouTubePlayer] Video completed');
+    _lastSavedPosition = 0;
+
+    controller.pause();
+    controller.seekTo(Duration.zero);
+    _saveProgressReset();
+
+    if (mounted) setState(() {});
   }
-
-  // ══════════════════════════════════════════════════════════════
-  //  Progress saving
-  // ══════════════════════════════════════════════════════════════
-
-  DateTime _lastSaveTime = DateTime.fromMillisecondsSinceEpoch(0);
 
   void _saveProgressThrottled(int seconds) {
     final now = DateTime.now();
@@ -235,16 +153,15 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
 
   void _saveProgress(int seconds) {
     if (seconds <= 0 || !mounted) return;
+
     CoursePlayerCubit? cubit;
     try {
       cubit = context.read<CoursePlayerCubit>();
     } catch (_) {
       return;
     }
+
     if (cubit.state.currentLesson != null && cubit.state.enrollmentId != null) {
-      if (seconds % 60 == 0) {
-        AppLogger.i('[YouTubePlayer] Saving watch time: ${seconds}s');
-      }
       cubit.updateProgress(
         watchedSeconds: seconds,
         lastPosition: seconds,
@@ -252,69 +169,86 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
     }
   }
 
-  // ══════════════════════════════════════════════════════════════
-  //  Fullscreen
-  // ══════════════════════════════════════════════════════════════
+  void _saveProgressReset() {
+    if (!mounted) return;
+
+    CoursePlayerCubit? cubit;
+    try {
+      cubit = context.read<CoursePlayerCubit>();
+    } catch (_) {
+      return;
+    }
+
+    if (cubit.state.currentLesson != null && cubit.state.enrollmentId != null) {
+      final watchedSeconds = cubit.state.currentProgress?.watchedSeconds ?? 0;
+      cubit.updateProgress(
+        watchedSeconds:
+            watchedSeconds > _lastSavedPosition ? watchedSeconds : 0,
+        lastPosition: 0,
+      );
+    }
+  }
 
   Future<void> _openFullscreen() async {
-    final ctrl = _flexController;
-    if (ctrl == null) return;
+    final controller = _controller;
+    if (controller == null) return;
 
-    // Cache navigator before async gap to avoid BuildContext warning
     final navigator = Navigator.of(context, rootNavigator: true);
-
-    await ctrl.pause();
-    final currentPos = ctrl.position.inSeconds;
+    final currentPosition = controller.value.position.inSeconds;
+    controller.pause();
 
     final result = await navigator.push<int>(
       MaterialPageRoute(
         builder: (_) => FullscreenPlayerScreen(
           videoUrl: widget.videoUrl,
-          initialPosition: currentPos,
+          initialPosition: currentPosition,
           courseTitle: widget.courseTitle,
           lessonTitle: widget.lessonTitle,
         ),
       ),
     );
 
-    if (result != null && mounted && _flexController != null) {
-      await _flexController!.seekTo(Duration(seconds: result));
-      await _flexController!.play();
+    if (!mounted || result == null) return;
+    controller.seekTo(Duration(seconds: result));
+    if (result <= 0) {
+      controller.pause();
+      _saveProgressReset();
+      setState(() {});
+      return;
     }
+    controller.play();
   }
-
-  // ══════════════════════════════════════════════════════════════
-  //  Build
-  // ══════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    if (_isLoading) return _buildLoadingWidget();
+    final controller = _controller;
     if (_errorMessage != null) return _buildErrorWidget();
-    if (_flexController == null) return _buildLoadingWidget();
+    if (controller == null) return _buildLoadingWidget();
 
     return RepaintBoundary(
       child: AspectRatio(
         aspectRatio: 16 / 9,
         child: Stack(
           children: [
-            FlexVideoPlayer(
-              controller: _flexController!,
-              onCompleted: () {
-                AppLogger.i('[YouTubePlayer] Video completed');
-              },
-              onError: (error) {
-                AppLogger.e('[YouTubePlayer] Playback error: ${error.message}');
-                if (mounted) {
-                  setState(() {
-                    _errorMessage = 'course_player.video_unavailable'.tr();
-                  });
-                }
-              },
+            YoutubePlayer(
+              controller: controller,
+              showVideoProgressIndicator: true,
+              progressIndicatorColor: AppColors.primary,
+              progressColors: const ProgressBarColors(
+                playedColor: AppColors.primary,
+                handleColor: AppColors.primary,
+              ),
+              topActions: const [],
+              bottomActions: const [
+                CurrentPosition(),
+                ProgressBar(isExpanded: true),
+                RemainingDuration(),
+                PlaybackSpeedButton(),
+              ],
+              onEnded: (_) => _handleVideoEnded(),
             ),
-            // Fullscreen button overlay (top-right)
             Positioned(
               top: 8,
               right: 8,
@@ -343,8 +277,6 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
       ),
     );
   }
-
-  // ──────────────── Loading ────────────────
 
   Widget _buildLoadingWidget() {
     return AspectRatio(
@@ -384,8 +316,6 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
       ),
     );
   }
-
-  // ──────────────── Error ────────────────
 
   Widget _buildErrorWidget() {
     return AspectRatio(
