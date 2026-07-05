@@ -57,7 +57,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
     final text = _jsonController.text.trim();
     if (text.isEmpty) {
       setState(() {
-        _parseError = LocaleKeys.ai_import_err_empty.tr();
+        _parseError = LocaleKeys.course_editor_ai_import_err_empty.tr();
         _parsedQuestions = [];
       });
       return;
@@ -75,7 +75,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       final dynamic decoded = json.decode(cleaned);
       if (decoded is! List) {
         setState(() {
-          _parseError = LocaleKeys.ai_import_err_not_array.tr();
+          _parseError = LocaleKeys.course_editor_ai_import_err_not_array.tr();
           _parsedQuestions = [];
         });
         return;
@@ -105,7 +105,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
 
       if (questions.isEmpty) {
         setState(() {
-          _parseError = LocaleKeys.ai_import_err_no_questions.tr();
+          _parseError = LocaleKeys.course_editor_ai_import_err_no_questions.tr();
           _parsedQuestions = [];
         });
         return;
@@ -119,7 +119,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       _tabController.animateTo(1);
     } catch (e) {
       setState(() {
-        _parseError = LocaleKeys.ai_import_err_invalid.tr(namedArgs: {'msg': e.toString().split('\n').first});
+        _parseError = LocaleKeys.course_editor_ai_import_err_invalid.tr(namedArgs: {'msg': e.toString().split('\n').first});
         _parsedQuestions = [];
       });
     }
@@ -161,7 +161,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       widget.onImported();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(LocaleKeys.ai_import_success.tr(namedArgs: {
+          content: Text(LocaleKeys.course_editor_ai_import_success.tr(namedArgs: {
             'count': '$successCount',
             'total': '${_parsedQuestions.length}'
           })),
@@ -266,7 +266,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  LocaleKeys.ai_import_title.tr(),
+                  LocaleKeys.course_editor_ai_import_title.tr(),
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
@@ -326,7 +326,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
               children: [
                 const Icon(Icons.content_copy_rounded, size: 15),
                 const SizedBox(width: 6),
-                Text(LocaleKeys.ai_import_tab_prompt.tr()),
+                Text(LocaleKeys.course_editor_ai_import_tab_prompt.tr()),
               ],
             ),
           ),
@@ -336,7 +336,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
               children: [
                 const Icon(Icons.preview_rounded, size: 15),
                 const SizedBox(width: 6),
-                Text(LocaleKeys.ai_import_tab_paste.tr()),
+                Text(LocaleKeys.course_editor_ai_import_tab_paste.tr()),
                 if (_parsedQuestions.isNotEmpty) ...[
                   const SizedBox(width: 6),
                   Container(
@@ -393,8 +393,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
               : const Icon(Icons.add_task_rounded, size: 20),
           label: Text(
             _isSaving
-                ? LocaleKeys.ai_import_adding.tr()
-                : LocaleKeys.ai_import_add_btn.tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
+                ? LocaleKeys.course_editor_ai_import_adding.tr()
+                : LocaleKeys.course_editor_ai_import_add_btn.tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
             style: const TextStyle(
                 fontSize: 15, fontWeight: FontWeight.w800),
           ),

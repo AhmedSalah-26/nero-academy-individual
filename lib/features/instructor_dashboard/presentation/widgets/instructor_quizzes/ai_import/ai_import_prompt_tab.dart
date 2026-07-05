@@ -109,7 +109,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                         color: Color(0xFF4F46E5), size: 16),
                     const SizedBox(width: 6),
                     Text(
-                      LocaleKeys.ai_import_how_title.tr(),
+                      LocaleKeys.course_editor_ai_import_how_title.tr(),
                       style: const TextStyle(
                         color: Color(0xFF4F46E5),
                         fontWeight: FontWeight.w700,
@@ -119,11 +119,11 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                _buildStep(isArabic ? '١' : '1', LocaleKeys.ai_import_step1.tr()),
-                _buildStep(isArabic ? '٢' : '2', LocaleKeys.ai_import_step2.tr()),
-                _buildStep(isArabic ? '٣' : '3', LocaleKeys.ai_import_step3.tr()),
-                _buildStep(isArabic ? '٤' : '4', LocaleKeys.ai_import_step4.tr()),
-                _buildStep(isArabic ? '٥' : '5', LocaleKeys.ai_import_step5.tr()),
+                _buildStep(isArabic ? '١' : '1', LocaleKeys.course_editor_ai_import_step1.tr()),
+                _buildStep(isArabic ? '٢' : '2', LocaleKeys.course_editor_ai_import_step2.tr()),
+                _buildStep(isArabic ? '٣' : '3', LocaleKeys.course_editor_ai_import_step3.tr()),
+                _buildStep(isArabic ? '٤' : '4', LocaleKeys.course_editor_ai_import_step4.tr()),
+                _buildStep(isArabic ? '٥' : '5', LocaleKeys.course_editor_ai_import_step5.tr()),
               ],
             ),
           ),
@@ -168,8 +168,8 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
               ),
               label: Text(
                 _promptCopied
-                    ? LocaleKeys.ai_import_copied.tr()
-                    : LocaleKeys.ai_import_copy_prompt.tr(),
+                    ? LocaleKeys.course_editor_ai_import_copied.tr()
+                    : LocaleKeys.course_editor_ai_import_copy_prompt.tr(),
                 style: const TextStyle(
                     fontSize: 14, fontWeight: FontWeight.w700),
               ),
@@ -188,7 +188,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
           const SizedBox(height: 12),
           Center(
             child: Text(
-              LocaleKeys.ai_import_hint.tr(),
+              LocaleKeys.course_editor_ai_import_hint.tr(),
               style: TextStyle(
                 fontSize: 12,
                 color: widget.isDark

@@ -34,7 +34,7 @@ class AiImportPreviewTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            LocaleKeys.ai_import_paste_label.tr(),
+            LocaleKeys.course_editor_ai_import_paste_label.tr(),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -56,7 +56,7 @@ class AiImportPreviewTab extends StatelessWidget {
                   : AppColors.textMainLight,
             ),
             decoration: InputDecoration(
-              hintText: LocaleKeys.ai_import_paste_hint.tr(),
+              hintText: LocaleKeys.course_editor_ai_import_paste_hint.tr(),
               hintStyle: TextStyle(
                 color: isDark
                     ? AppColors.textMutedDark
@@ -123,7 +123,7 @@ class AiImportPreviewTab extends StatelessWidget {
               onPressed: onParseTriggered,
               icon: const Icon(Icons.read_more_rounded, size: 18),
               label: Text(
-                LocaleKeys.ai_import_preview_btn.tr(),
+                LocaleKeys.course_editor_ai_import_preview_btn.tr(),
                 style:
                     const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
@@ -146,7 +146,7 @@ class AiImportPreviewTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                LocaleKeys.ai_import_ready.tr(namedArgs: {'count': '${parsedQuestions.length}'}),
+                LocaleKeys.course_editor_ai_import_ready.tr(namedArgs: {'count': '${parsedQuestions.length}'}),
                 style: const TextStyle(
                   color: AppColors.success,
                   fontSize: 12,

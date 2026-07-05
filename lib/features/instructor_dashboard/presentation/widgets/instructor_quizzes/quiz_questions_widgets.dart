@@ -449,13 +449,13 @@ class QuizQuestionsFabRow extends StatelessWidget {
                 leading: const Icon(Icons.auto_awesome_rounded,
                     color: Color(0xFF7C3AED)),
                 title: Text(
-                  LocaleKeys.ai_import_fab_label.tr(),
+                  LocaleKeys.course_editor_ai_import_fab_label.tr(),
                   style: const TextStyle(
                       color: Color(0xFF7C3AED),
                       fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
-                  LocaleKeys.ai_import_fab_subtitle.tr(),
+                  LocaleKeys.course_editor_ai_import_fab_subtitle.tr(),
                   style: const TextStyle(fontSize: 12),
                 ),
                 onTap: () {

@@ -88,7 +88,7 @@ class AiPreviewQuestionCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                LocaleKeys.ai_import_points.tr(namedArgs: {'n': '${question.points}'}),
+                LocaleKeys.course_editor_ai_import_points.tr(namedArgs: {'n': '${question.points}'}),
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark
@@ -177,13 +177,13 @@ class AiPreviewQuestionCard extends StatelessWidget {
   String _typeLabel(String type) {
     switch (type) {
       case 'single':
-        return LocaleKeys.ai_import_type_single.tr();
+        return LocaleKeys.course_editor_ai_import_type_single.tr();
       case 'multiple':
-        return LocaleKeys.ai_import_type_multiple.tr();
+        return LocaleKeys.course_editor_ai_import_type_multiple.tr();
       case 'true_false':
-        return LocaleKeys.ai_import_type_tf.tr();
+        return LocaleKeys.course_editor_ai_import_type_tf.tr();
       case 'text':
-        return LocaleKeys.ai_import_type_text.tr();
+        return LocaleKeys.course_editor_ai_import_type_text.tr();
       default:
         return type;
     }
