@@ -23,6 +23,17 @@ class AiPreviewQuestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final typeLabel = _typeLabel(question.type);
     final typeColor = _typeColor(question.type);
+    final isArabic = context.locale.languageCode == 'ar';
+
+    final primaryQuestion = isArabic
+        ? (question.questionAr.isNotEmpty ? question.questionAr : question.questionEn)
+        : (question.questionEn.isNotEmpty ? question.questionEn : question.questionAr);
+
+    final secondaryQuestion = isArabic
+        ? (question.questionAr.isNotEmpty ? question.questionEn : '')
+        : (question.questionEn.isNotEmpty ? question.questionAr : '');
+
+    final showSecondary = secondaryQuestion.isNotEmpty && secondaryQuestion != primaryQuestion;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -88,9 +99,9 @@ class AiPreviewQuestionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          if (question.questionAr.isNotEmpty)
+          if (primaryQuestion.isNotEmpty)
             Text(
-              question.questionAr,
+              primaryQuestion,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -100,11 +111,10 @@ class AiPreviewQuestionCard extends StatelessWidget {
                     : AppColors.textMainLight,
               ),
             ),
-          if (question.questionEn.isNotEmpty &&
-              question.questionEn != question.questionAr) ...[
+          if (showSecondary) ...[
             const SizedBox(height: 4),
             Text(
-              question.questionEn,
+              secondaryQuestion,
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -117,41 +127,46 @@ class AiPreviewQuestionCard extends StatelessWidget {
           if (question.options.isNotEmpty) ...[
             const SizedBox(height: 10),
             ...question.options.map(
-              (opt) => Padding(
-                padding: const EdgeInsets.only(bottom: 5),
-                child: Row(
-                  children: [
-                    Icon(
-                      opt.isCorrect
-                          ? Icons.check_circle_rounded
-                          : Icons.radio_button_unchecked_rounded,
-                      size: 16,
-                      color: opt.isCorrect
-                          ? AppColors.success
-                          : (isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        opt.textAr.isNotEmpty ? opt.textAr : opt.textEn,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: opt.isCorrect
-                              ? AppColors.success
-                              : (isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondary),
-                          fontWeight: opt.isCorrect
-                              ? FontWeight.w600
-                              : FontWeight.normal,
+              (opt) {
+                final optText = isArabic
+                    ? (opt.textAr.isNotEmpty ? opt.textAr : opt.textEn)
+                    : (opt.textEn.isNotEmpty ? opt.textEn : opt.textAr);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Row(
+                    children: [
+                      Icon(
+                        opt.isCorrect
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        size: 16,
+                        color: opt.isCorrect
+                            ? AppColors.success
+                            : (isDark
+                                ? AppColors.textMutedDark
+                                : AppColors.textMutedLight),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          optText,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: opt.isCorrect
+                                ? AppColors.success
+                                : (isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondary),
+                            fontWeight: opt.isCorrect
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ],

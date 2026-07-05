@@ -22,7 +22,7 @@ class AiImportPromptTab extends StatefulWidget {
 class _AiImportPromptTabState extends State<AiImportPromptTab> {
   bool _promptCopied = false;
 
-  static const String _promptTemplate =
+  static const String _promptTemplateAr =
       'أنت مساعد تعليمي. أنشئ أسئلة اختبار للموضوع المطلوب وأرجعها بتنسيق JSON فقط، بدون أي نص إضافي.\n\n'
       'الصيغة المطلوبة بالضبط:\n'
       '[\n'
@@ -47,8 +47,35 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
       'الموضوع: [اكتب موضوع الاختبار هنا]\n'
       'عدد الأسئلة: [اكتب العدد المطلوب]';
 
+  static const String _promptTemplateEn =
+      'You are an educational assistant. Create quiz questions for the requested topic and return them in JSON format only, without any additional text.\n\n'
+      'Exact required format:\n'
+      '[\n'
+      '  {\n'
+      '    "question_ar": "نص السؤال بالعربية",\n'
+      '    "question_en": "Question text in English",\n'
+      '    "type": "single",\n'
+      '    "points": 1,\n'
+      '    "options": [\n'
+      '      { "text_ar": "الخيار الأول", "text_en": "Option A", "is_correct": true },\n'
+      '      { "text_ar": "الخيار الثاني", "text_en": "Option B", "is_correct": false },\n'
+      '      { "text_ar": "الخيار الثالث", "text_en": "Option C", "is_correct": false },\n'
+      '      { "text_ar": "الخيار الرابع", "text_en": "Option D", "is_correct": false }\n'
+      '    ]\n'
+      '  }\n'
+      ']\n\n'
+      'Important notes:\n'
+      '- type must be: "single" (single choice) or "multiple" (multiple choice) or "true_false" (true/false)\n'
+      '- For true/false questions, options contain only two choices: True and False\n'
+      '- Each question must have at least one correct option (is_correct: true)\n'
+      '- Return JSON only without ``` or any other text\n\n'
+      'Topic: [Write the quiz topic here]\n'
+      'Number of questions: [Write the required count]';
+
   Future<void> _copyPrompt() async {
-    await Clipboard.setData(const ClipboardData(text: _promptTemplate));
+    final isArabic = context.locale.languageCode == 'ar';
+    final template = isArabic ? _promptTemplateAr : _promptTemplateEn;
+    await Clipboard.setData(ClipboardData(text: template));
     setState(() => _promptCopied = true);
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) setState(() => _promptCopied = false);
@@ -56,6 +83,9 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.locale.languageCode == 'ar';
+    final promptTemplate = isArabic ? _promptTemplateAr : _promptTemplateEn;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -89,11 +119,11 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                _buildStep('١', LocaleKeys.ai_import_step1.tr()),
-                _buildStep('٢', LocaleKeys.ai_import_step2.tr()),
-                _buildStep('٣', LocaleKeys.ai_import_step3.tr()),
-                _buildStep('٤', LocaleKeys.ai_import_step4.tr()),
-                _buildStep('٥', LocaleKeys.ai_import_step5.tr()),
+                _buildStep(isArabic ? '١' : '1', LocaleKeys.ai_import_step1.tr()),
+                _buildStep(isArabic ? '٢' : '2', LocaleKeys.ai_import_step2.tr()),
+                _buildStep(isArabic ? '٣' : '3', LocaleKeys.ai_import_step3.tr()),
+                _buildStep(isArabic ? '٤' : '4', LocaleKeys.ai_import_step4.tr()),
+                _buildStep(isArabic ? '٥' : '5', LocaleKeys.ai_import_step5.tr()),
               ],
             ),
           ),
@@ -114,7 +144,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
               ),
             ),
             child: SelectableText(
-              _promptTemplate,
+              promptTemplate,
               style: TextStyle(
                 fontSize: 11.5,
                 height: 1.7,
