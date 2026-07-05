@@ -68,7 +68,8 @@ class CurriculumStep extends StatelessWidget {
       itemCount: state.sections.length,
       // ignore: deprecated_member_use
       onReorder: (oldIndex, newIndex) {
-        cubit.reorderSections(oldIndex, newIndex);
+        // reorderSectionsAndSave → updates state locally + persists to database
+        cubit.reorderSectionsAndSave(oldIndex, newIndex);
       },
       itemBuilder: (context, index) {
         final section = state.sections[index];
@@ -87,8 +88,9 @@ class CurriculumStep extends StatelessWidget {
               index, lessonIndex, section.lessons[lessonIndex], isArabic),
           onDeleteLesson: (lessonIndex) =>
               confirmDeleteLesson(context, cubit, index, lessonIndex, isArabic),
+          // reorderLessonsAndSave → updates state locally + persists to database
           onReorderLessons: (oldIndex, newIndex) =>
-              cubit.reorderLessons(index, oldIndex, newIndex),
+              cubit.reorderLessonsAndSave(index, oldIndex, newIndex),
         );
       },
     );

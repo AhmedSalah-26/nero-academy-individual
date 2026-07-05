@@ -380,6 +380,11 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                           courseTitle: state.courseTitle,
                           sectionIndex: sectionIndex,
                           lessonIndex: lessonIndex,
+                          // For document/resource lessons, open the file URL
+                          onOpenFile: state.currentLesson!.fileUrl != null &&
+                                  state.currentLesson!.fileUrl!.isNotEmpty
+                              ? () => _openUrl(state.currentLesson!.fileUrl!)
+                              : null,
                         ),
                       if (state.currentLesson != null)
                         _buildLessonHeader(state, isDark),

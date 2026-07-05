@@ -98,7 +98,7 @@ class LessonItem extends StatelessWidget {
                             if (hasQuiz) _buildQuizBadge(),
                             Text(
                               isCurrentLesson
-                                  ? 'تمت المشاهدة 35%'
+                                  ? _currentLessonSubtitle()
                                   : _subtitleText(),
                               style: TextStyle(
                                 color: isCurrentLesson
@@ -147,12 +147,17 @@ class LessonItem extends StatelessWidget {
   }
 
   Widget _buildLeadingIcon() {
+    final bool isFileLessonType = lesson.type == LessonType.document ||
+        lesson.type == LessonType.resource;
+
     final icon = isLocked
         ? Icons.lock_outline_rounded
         : isCompleted
             ? Icons.check_rounded
             : isCurrentLesson
-                ? Icons.play_arrow_rounded
+                ? (isFileLessonType
+                    ? Icons.open_in_new_rounded
+                    : Icons.play_arrow_rounded)
                 : _getLessonTypeIcon();
 
     final color = isLocked
@@ -197,15 +202,18 @@ class LessonItem extends StatelessWidget {
   }
 
   Widget _buildPlayingBadge() {
+    final bool isFileLessonType = lesson.type == LessonType.document ||
+        lesson.type == LessonType.resource;
+    final label = isFileLessonType ? 'الملف' : 'قيد التشغيل';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Text(
-        'قيد التشغيل',
-        style: TextStyle(
+      child: Text(
+        label,
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 10.5,
           fontWeight: FontWeight.w800,
@@ -237,8 +245,20 @@ class LessonItem extends StatelessWidget {
     );
   }
 
+  String _currentLessonSubtitle() {
+    if (lesson.type == LessonType.document ||
+        lesson.type == LessonType.resource) {
+      return 'اضغط لفتح الملف';
+    }
+    return 'تمت المشاهدة 35%';
+  }
+
   String _subtitleText() {
     if (isLocked) return 'غير متاح الآن';
+    if (lesson.type == LessonType.document ||
+        lesson.type == LessonType.resource) {
+      return isCompleted ? 'تم الفتح' : 'اضغط لفتح الملف';
+    }
     if (lesson.durationInMinutes > 0) {
       return '${lesson.durationInMinutes} ${'course_player.min'.tr()}';
     }

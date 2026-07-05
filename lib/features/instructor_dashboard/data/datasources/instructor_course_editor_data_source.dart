@@ -98,7 +98,9 @@ class InstructorCourseEditorDataSource {
             fileType: l['file_type'] as String?,
             quizId: lessonId == null ? null : quizIdsByLessonId[lessonId],
           );
-        }).toList();
+        }).toList()
+          // Sort lessons by sort_order (Supabase nested select may not honor order)
+          ..sort((a, b) => a.order.compareTo(b.order));
 
         return SectionDto(
           id: s['id'] as String?,
@@ -108,7 +110,9 @@ class InstructorCourseEditorDataSource {
           isPublished: s['is_published'] as bool? ?? true,
           lessons: lessons,
         );
-      }).toList();
+      }).toList()
+        // Sort sections by sort_order as extra safety guarantee
+        ..sort((a, b) => a.order.compareTo(b.order));
 
       AppLogger.success(
           '[$_tag] getCourseForEdit: ${sections.length} sections');

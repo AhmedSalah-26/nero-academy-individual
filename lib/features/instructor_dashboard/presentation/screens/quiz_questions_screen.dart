@@ -4,6 +4,7 @@ import '../../../../core/shared_widgets/loading_state.dart';
 import '../../../../core/shared_widgets/responsive_dialog.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/instructor_quizzes_cubit.dart';
+import '../widgets/instructor_quizzes/ai_import/ai_import_dialog.dart';
 import '../widgets/instructor_quizzes/quiz_questions_widgets.dart';
 import 'bulk_image_questions_screen.dart';
 import 'question_editor_screen.dart';
@@ -83,6 +84,7 @@ class _QuizQuestionsScreenState extends State<QuizQuestionsScreen> {
         isArabic: isArabic,
         onAddImageQuestions: () => _showBulkImageQuestionsDialog(context),
         onAddQuestion: () => _navigateToAddQuestion(context),
+        onAddFromAi: () => _showAiImportDialog(context),
       ),
     );
   }
@@ -235,6 +237,20 @@ class _QuizQuestionsScreenState extends State<QuizQuestionsScreen> {
           cubit: widget.cubit,
           onSaved: _loadQuestions,
         ),
+      ),
+    );
+  }
+
+  void _showAiImportDialog(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) => AiImportQuestionsDialog(
+        quizId: widget.quiz.id,
+        quizTitle: isArabic ? widget.quiz.titleAr : widget.quiz.titleEn,
+        cubit: widget.cubit,
+        onImported: _loadQuestions,
       ),
     );
   }

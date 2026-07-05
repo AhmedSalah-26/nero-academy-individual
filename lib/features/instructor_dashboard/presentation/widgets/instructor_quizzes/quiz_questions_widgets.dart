@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../generated/locale_keys.g.dart';
 import '../../cubit/instructor_quizzes_cubit.dart';
 
 class QuizQuestionsEmptyState extends StatelessWidget {
@@ -401,12 +403,14 @@ class QuizQuestionsFabRow extends StatelessWidget {
   final bool isArabic;
   final VoidCallback onAddImageQuestions;
   final VoidCallback onAddQuestion;
+  final VoidCallback onAddFromAi;
 
   const QuizQuestionsFabRow({
     super.key,
     required this.isArabic,
     required this.onAddImageQuestions,
     required this.onAddQuestion,
+    required this.onAddFromAi,
   });
 
   @override
@@ -439,6 +443,24 @@ class QuizQuestionsFabRow extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onAddQuestion();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.auto_awesome_rounded,
+                    color: Color(0xFF7C3AED)),
+                title: Text(
+                  LocaleKeys.ai_import_fab_label.tr(),
+                  style: const TextStyle(
+                      color: Color(0xFF7C3AED),
+                      fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  LocaleKeys.ai_import_fab_subtitle.tr(),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onAddFromAi();
                 },
               ),
               ListTile(
