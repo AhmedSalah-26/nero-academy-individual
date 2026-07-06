@@ -11,6 +11,17 @@ class NotificationsRemoteDataSource {
 
   String get _userId => _client.auth.currentUser!.id;
 
+  Future<DateTime?> _getCurrentProfileCreatedAt() async {
+    final response = await _client
+        .from('profiles')
+        .select('created_at')
+        .eq('id', _userId)
+        .maybeSingle();
+    final createdAt = response?['created_at'];
+    if (createdAt == null) return null;
+    return DateTime.tryParse(createdAt.toString());
+  }
+
   /// Get all notifications for current user
   Future<List<NotificationModel>> getNotifications({
     int page = 1,
@@ -19,7 +30,14 @@ class NotificationsRemoteDataSource {
   }) async {
     AppLogger.d('[$_tag] getNotifications: page=$page, limit=$limit');
     try {
+      final profileCreatedAt = await _getCurrentProfileCreatedAt();
       var query = _client.from('notifications').select().eq('user_id', _userId);
+      if (profileCreatedAt != null) {
+        query = query.gte(
+          'created_at',
+          profileCreatedAt.toUtc().toIso8601String(),
+        );
+      }
 
       if (unreadOnly == true) {
         query = query.eq('is_read', false);
@@ -42,22 +60,25 @@ class NotificationsRemoteDataSource {
   Future<int> getUnreadCount() async {
     AppLogger.d('[$_tag] getUnreadCount');
     try {
-      final response = await _client.rpc('get_unread_notifications_count');
-      AppLogger.success('[$_tag] getUnreadCount: $response');
-      return response as int? ?? 0;
+      final profileCreatedAt = await _getCurrentProfileCreatedAt();
+      var query = _client
+          .from('notifications')
+          .select('id')
+          .eq('user_id', _userId)
+          .eq('is_read', false);
+      if (profileCreatedAt != null) {
+        query = query.gte(
+          'created_at',
+          profileCreatedAt.toUtc().toIso8601String(),
+        );
+      }
+      final response = await query;
+      final count = (response as List).length;
+      AppLogger.success('[$_tag] getUnreadCount: $count');
+      return count;
     } catch (e, s) {
       AppLogger.e('[$_tag] getUnreadCount error', e, s);
-      // Fallback: count manually
-      try {
-        final response = await _client
-            .from('notifications')
-            .select('id')
-            .eq('user_id', _userId)
-            .eq('is_read', false);
-        return (response as List).length;
-      } catch (_) {
-        return 0;
-      }
+      return 0;
     }
   }
 
@@ -87,29 +108,24 @@ class NotificationsRemoteDataSource {
   Future<int> markAllAsRead() async {
     AppLogger.d('[$_tag] markAllAsRead');
     try {
-      // Try using RPC function first
-      final response = await _client.rpc('mark_all_notifications_read');
-      AppLogger.success(
-          '[$_tag] markAllAsRead: $response notifications updated');
-      return response as int? ?? 0;
-    } catch (e) {
-      AppLogger.w('[$_tag] markAllAsRead RPC failed, using fallback');
-      // Fallback: update directly
-      try {
-        await _client
-            .from('notifications')
-            .update({
-              'is_read': true,
-              'read_at': DateTime.now().toIso8601String(),
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('user_id', _userId)
-            .eq('is_read', false);
-        return 0;
-      } catch (e2, s2) {
-        AppLogger.e('[$_tag] markAllAsRead fallback error', e2, s2);
-        rethrow;
+      final profileCreatedAt = await _getCurrentProfileCreatedAt();
+      var query = _client.from('notifications').update({
+        'is_read': true,
+        'read_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('user_id', _userId).eq('is_read', false);
+      if (profileCreatedAt != null) {
+        query = query.gte(
+          'created_at',
+          profileCreatedAt.toUtc().toIso8601String(),
+        );
       }
+      await query;
+      AppLogger.success('[$_tag] markAllAsRead success');
+      return 0;
+    } catch (e, s) {
+      AppLogger.e('[$_tag] markAllAsRead error', e, s);
+      rethrow;
     }
   }
 
