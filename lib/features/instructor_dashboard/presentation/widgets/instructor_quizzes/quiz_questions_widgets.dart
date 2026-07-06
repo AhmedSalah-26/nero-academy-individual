@@ -7,13 +7,11 @@ import '../../cubit/instructor_quizzes_cubit.dart';
 class QuizQuestionsEmptyState extends StatelessWidget {
   final bool isArabic;
   final bool isDark;
-  final VoidCallback onAddQuestion;
 
   const QuizQuestionsEmptyState({
     super.key,
     required this.isArabic,
     required this.isDark,
-    required this.onAddQuestion,
   });
 
   @override
@@ -53,17 +51,6 @@ class QuizQuestionsEmptyState extends StatelessWidget {
               color: isDark
                   ? AppColors.textSecondaryDark
                   : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: onAddQuestion,
-            icon: const Icon(Icons.add),
-            label: Text(isArabic ? 'إضافة سؤال' : 'Add Question'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             ),
           ),
         ],
@@ -446,13 +433,9 @@ class QuizQuestionsFabRow extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.auto_awesome_rounded,
-                    color: Color(0xFF7C3AED)),
+                leading: const Icon(Icons.auto_awesome_rounded),
                 title: Text(
                   LocaleKeys.course_editor_ai_import_fab_label.tr(),
-                  style: const TextStyle(
-                      color: Color(0xFF7C3AED),
-                      fontWeight: FontWeight.w600),
                 ),
                 subtitle: Text(
                   LocaleKeys.course_editor_ai_import_fab_subtitle.tr(),

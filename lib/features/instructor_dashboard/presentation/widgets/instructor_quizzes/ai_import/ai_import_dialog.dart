@@ -384,22 +384,22 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
   Widget _buildFooter(bool isDark) {
     if (_parsedQuestions.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.white,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-        border: Border(
-          top: BorderSide(
-              color: isDark ? AppColors.borderDark : AppColors.borderLight),
+    return Material(
+      color: isDark ? AppColors.surfaceDark : AppColors.white,
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight),
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: CheckboxListTile(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CheckboxListTile(
               value: _replaceExistingQuestions,
               onChanged: _isSaving
                   ? null
@@ -430,41 +430,41 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isSaving ? null : _importQuestions,
-              icon: _isSaving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.add_task_rounded, size: 20),
-              label: Text(
-                _isSaving
-                    ? LocaleKeys.course_editor_ai_import_adding.tr()
-                    : LocaleKeys.course_editor_ai_import_add_btn
-                        .tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isSaving ? null : _importQuestions,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.add_task_rounded, size: 20),
+                label: Text(
+                  _isSaving
+                      ? LocaleKeys.course_editor_ai_import_adding.tr()
+                      : LocaleKeys.course_editor_ai_import_add_btn
+                          .tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
+                  style:
+                      const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

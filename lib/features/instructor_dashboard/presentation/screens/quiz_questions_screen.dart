@@ -99,7 +99,6 @@ class _QuizQuestionsScreenState extends State<QuizQuestionsScreen> {
       return QuizQuestionsEmptyState(
         isArabic: isArabic,
         isDark: isDark,
-        onAddQuestion: () => _navigateToAddQuestion(context),
       );
     }
 
