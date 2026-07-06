@@ -38,6 +38,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
   List<AiPreviewQuestion> _parsedQuestions = [];
   String? _parseError;
   bool _isSaving = false;
+  bool _replaceExistingQuestions = true;
 
   @override
   void initState() {
@@ -86,8 +87,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
         final q = item as Map<String, dynamic>;
         final options = (q['options'] as List? ?? [])
             .map((o) => AiPreviewOption(
-                  textAr: (o as Map<String, dynamic>)['text_ar'] as String? ??
-                      '',
+                  textAr:
+                      (o as Map<String, dynamic>)['text_ar'] as String? ?? '',
                   textEn: o['text_en'] as String? ?? '',
                   isCorrect: o['is_correct'] as bool? ?? false,
                 ))
@@ -105,7 +106,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
 
       if (questions.isEmpty) {
         setState(() {
-          _parseError = LocaleKeys.course_editor_ai_import_err_no_questions.tr();
+          _parseError =
+              LocaleKeys.course_editor_ai_import_err_no_questions.tr();
           _parsedQuestions = [];
         });
         return;
@@ -119,7 +121,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       _tabController.animateTo(1);
     } catch (e) {
       setState(() {
-        _parseError = LocaleKeys.course_editor_ai_import_err_invalid.tr(namedArgs: {'msg': e.toString().split('\n').first});
+        _parseError = LocaleKeys.course_editor_ai_import_err_invalid
+            .tr(namedArgs: {'msg': e.toString().split('\n').first});
         _parsedQuestions = [];
       });
     }
@@ -130,8 +133,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
     if (_parsedQuestions.isEmpty) return;
     setState(() => _isSaving = true);
 
-    int successCount = 0;
-    for (final q in _parsedQuestions) {
+    final questions = _parsedQuestions.map((q) {
       final options = q.options
           .asMap()
           .entries
@@ -143,35 +145,53 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
               })
           .toList();
 
-      final success = await widget.cubit.addQuestion(
-        quizId: widget.quizId,
-        questionAr: q.questionAr,
-        questionEn: q.questionEn,
-        type: q.type,
-        points: q.points,
-        options: options,
-        correctAnswer: q.correctAnswer,
-      );
-      if (success) successCount++;
-    }
+      return {
+        'question_ar': q.questionAr,
+        'question_en': q.questionEn,
+        'question_type': q.type,
+        'points': q.points,
+        'options': options,
+        'correct_answer': q.correctAnswer,
+      };
+    }).toList();
+
+    final success = await widget.cubit.addQuestionsBulk(
+      quizId: widget.quizId,
+      questions: questions,
+      replaceExisting: _replaceExistingQuestions,
+    );
 
     if (mounted) {
       setState(() => _isSaving = false);
-      Navigator.pop(context);
-      widget.onImported();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(LocaleKeys.course_editor_ai_import_success.tr(namedArgs: {
-            'count': '$successCount',
-            'total': '${_parsedQuestions.length}'
-          })),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      if (success) {
+        Navigator.pop(context);
+        widget.onImported();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(LocaleKeys.course_editor_ai_import_success.tr(
+                namedArgs: {
+                  'count': '${_parsedQuestions.length}',
+                  'total': '${_parsedQuestions.length}'
+                })),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.cubit.state.errorMessage ??
+                'Failed to import questions'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
     }
   }
 
@@ -189,8 +209,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
           maxWidth: 600,
         ),
         decoration: BoxDecoration(
-          color:
-              isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+          color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -317,8 +336,7 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
             isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
         indicatorColor: const Color(0xFF7C3AED),
         indicatorWeight: 2.5,
-        labelStyle:
-            const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         tabs: [
           Tab(
             child: Row(
@@ -340,8 +358,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                 if (_parsedQuestions.isNotEmpty) ...[
                   const SizedBox(width: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 1),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
                       color: AppColors.success,
                       borderRadius: BorderRadius.circular(10),
@@ -370,43 +388,79 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : AppColors.white,
-        borderRadius:
-            const BorderRadius.vertical(bottom: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
         border: Border(
           top: BorderSide(
               color: isDark ? AppColors.borderDark : AppColors.borderLight),
         ),
       ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: _isSaving ? null : _importQuestions,
-          icon: _isSaving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.add_task_rounded, size: 20),
-          label: Text(
-            _isSaving
-                ? LocaleKeys.course_editor_ai_import_adding.tr()
-                : LocaleKeys.course_editor_ai_import_add_btn.tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.w800),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CheckboxListTile(
+            value: _replaceExistingQuestions,
+            onChanged: _isSaving
+                ? null
+                : (value) {
+                    setState(() {
+                      _replaceExistingQuestions = value ?? true;
+                    });
+                  },
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(
+              'امسح الأسئلة الحالية قبل إضافة JSON',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color:
+                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
+              ),
+            ),
+            subtitle: Text(
+              'لو الإضافة فشلت سيتم إرجاع الأسئلة القديمة تلقائيا',
+              style: TextStyle(
+                fontSize: 11,
+                color:
+                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              ),
+            ),
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.success,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            elevation: 0,
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isSaving ? null : _importQuestions,
+              icon: _isSaving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.add_task_rounded, size: 20),
+              label: Text(
+                _isSaving
+                    ? LocaleKeys.course_editor_ai_import_adding.tr()
+                    : LocaleKeys.course_editor_ai_import_add_btn
+                        .tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

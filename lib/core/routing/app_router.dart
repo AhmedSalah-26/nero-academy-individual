@@ -938,12 +938,15 @@ class AppRouter {
       GoRoute(
         path: '/instructor/quiz/create',
         name: 'create-quiz',
-        builder: (context, state) => BlocProvider.value(
-          value: sl<InstructorQuizzesCubit>(),
-          child: CreateQuizScreen(
-            cubit: sl<InstructorQuizzesCubit>(),
-          ),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final cubit = extra?['cubit'] as InstructorQuizzesCubit? ??
+              sl<InstructorQuizzesCubit>();
+          return BlocProvider.value(
+            value: cubit,
+            child: CreateQuizScreen(cubit: cubit),
+          );
+        },
       ),
 
       // Quiz Questions Management
@@ -1384,8 +1387,14 @@ class AppRouter {
     });
   }
 
-  static void goToCreateQuiz(BuildContext context) {
-    context.pushNamed('create-quiz');
+  static Future<T?> goToCreateQuiz<T>(
+    BuildContext context, {
+    InstructorQuizzesCubit? cubit,
+  }) {
+    return context.pushNamed<T>(
+      'create-quiz',
+      extra: cubit == null ? null : {'cubit': cubit},
+    );
   }
 
   static void goToManageQuizQuestions(

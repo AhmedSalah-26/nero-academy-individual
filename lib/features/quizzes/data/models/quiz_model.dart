@@ -4,6 +4,7 @@ import '../../domain/entities/quiz_entity.dart';
 class QuizModel extends QuizEntity {
   const QuizModel({
     required super.id,
+    super.sectionId,
     super.lessonId,
     required super.titleAr,
     super.titleEn,
@@ -16,6 +17,7 @@ class QuizModel extends QuizEntity {
     super.shuffleAnswers,
     super.showCorrectAnswers,
     super.isMandatory,
+    super.isPublished,
     super.totalQuestions,
     super.availableFrom,
     super.availableUntil,
@@ -26,6 +28,7 @@ class QuizModel extends QuizEntity {
   factory QuizModel.fromJson(Map<String, dynamic> json) {
     return QuizModel(
       id: json['id'] as String,
+      sectionId: json['section_id'] as String?,
       lessonId: json['lesson_id'] as String?,
       titleAr: json['title_ar'] as String,
       titleEn: json['title_en'] as String?,
@@ -38,6 +41,7 @@ class QuizModel extends QuizEntity {
       shuffleAnswers: json['shuffle_answers'] as bool? ?? false,
       showCorrectAnswers: json['show_correct_answers'] as bool? ?? true,
       isMandatory: json['is_mandatory'] as bool? ?? false,
+      isPublished: json['is_published'] as bool? ?? true,
       totalQuestions: json['total_questions'] as int? ?? 0,
       availableFrom: json['available_from'] != null
           ? DateTime.parse(json['available_from'] as String)
@@ -55,6 +59,7 @@ class QuizModel extends QuizEntity {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'section_id': sectionId,
       'lesson_id': lessonId,
       'title_ar': titleAr,
       'title_en': titleEn,
@@ -67,6 +72,7 @@ class QuizModel extends QuizEntity {
       'shuffle_answers': shuffleAnswers,
       'show_correct_answers': showCorrectAnswers,
       'is_mandatory': isMandatory,
+      'is_published': isPublished,
       'total_questions': totalQuestions,
       'available_from': availableFrom?.toUtc().toIso8601String(),
       'available_until': availableUntil?.toUtc().toIso8601String(),

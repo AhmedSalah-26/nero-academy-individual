@@ -92,6 +92,7 @@ class QuizzesRemoteDataSourceImpl implements QuizzesRemoteDataSource {
           .from('quizzes')
           .select('*, quiz_questions(count)')
           .eq('lesson_id', lessonId)
+          .eq('is_published', true)
           .maybeSingle();
 
       if (response == null) return null;

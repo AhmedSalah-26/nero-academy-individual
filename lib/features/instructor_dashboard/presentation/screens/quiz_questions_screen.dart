@@ -39,6 +39,7 @@ class _QuizQuestionsScreenState extends State<QuizQuestionsScreen> {
       '[QuizQuestionsScreen] Loading questions for quiz: ${widget.quiz.id}',
     );
     final questions = await widget.cubit.getQuizQuestions(widget.quiz.id);
+    await widget.cubit.loadQuizzes(refresh: true);
     AppLogger.d('[QuizQuestionsScreen] Loaded ${questions.length} questions');
 
     if (mounted) {

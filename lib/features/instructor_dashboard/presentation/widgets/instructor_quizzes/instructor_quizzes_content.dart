@@ -85,8 +85,14 @@ class _InstructorQuizzesContentState extends State<InstructorQuizzesContent> {
     );
   }
 
-  void _showCreateQuizDialog(BuildContext context, bool isArabic) {
-    AppRouter.goToCreateQuiz(context);
+  Future<void> _showCreateQuizDialog(BuildContext context, bool isArabic) async {
+    final created = await AppRouter.goToCreateQuiz<bool>(
+      context,
+      cubit: context.read<InstructorQuizzesCubit>(),
+    );
+    if (created == true && context.mounted) {
+      await context.read<InstructorQuizzesCubit>().loadQuizzes(refresh: true);
+    }
   }
 
   Widget _buildQuizzesList(
@@ -152,6 +158,9 @@ class _InstructorQuizzesContentState extends State<InstructorQuizzesContent> {
                 _showAttemptsDialog(context, state.quizzes[index], isArabic),
             onDelete: () =>
                 _confirmDelete(context, state.quizzes[index], isArabic),
+            onPublishChanged: (value) => context
+                .read<InstructorQuizzesCubit>()
+                .toggleQuizPublished(state.quizzes[index].id, value),
           );
         },
       ),
@@ -251,6 +260,7 @@ class _QuizListItem extends StatelessWidget {
   final VoidCallback onManageQuestions;
   final VoidCallback onViewAttempts;
   final VoidCallback onDelete;
+  final ValueChanged<bool> onPublishChanged;
 
   const _QuizListItem({
     required this.quiz,
@@ -259,6 +269,7 @@ class _QuizListItem extends StatelessWidget {
     required this.onManageQuestions,
     required this.onViewAttempts,
     required this.onDelete,
+    required this.onPublishChanged,
   });
 
   @override
@@ -320,6 +331,30 @@ class _QuizListItem extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    quiz.isPublished
+                        ? (isArabic ? 'Ù…Ù†Ø´ÙˆØ±' : 'Published')
+                        : (isArabic ? 'ØºÙŠØ± Ù…Ù†Ø´ÙˆØ±' : 'Unpublished'),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: quiz.isPublished
+                          ? AppColors.success
+                          : (isDark
+                              ? AppColors.textMutedDark
+                              : AppColors.textMutedLight),
+                    ),
+                  ),
+                  Switch(
+                    value: quiz.isPublished,
+                    activeThumbColor: AppColors.success,
+                    onChanged: onPublishChanged,
+                  ),
+                ],
               ),
               PopupMenuButton<String>(
                 onSelected: (value) {
