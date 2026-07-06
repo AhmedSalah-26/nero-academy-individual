@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
@@ -7,6 +9,21 @@ import '../../../../../core/shared_widgets/loading_state.dart';
 import '../../../domain/entities/section_entity.dart';
 import '../../../../quizzes/domain/entities/quiz_entity.dart';
 import '../../../../quizzes/domain/repositories/quizzes_repository.dart';
+
+final _mojibakePattern = RegExp(r'[ØÙÃÅâ]');
+
+String _cleanDisplayText(String value) {
+  if (!_mojibakePattern.hasMatch(value)) return value;
+
+  try {
+    final decoded = utf8.decode(latin1.encode(value));
+    if (decoded.trim().isNotEmpty) return decoded;
+  } catch (_) {
+    // Keep the original string if it was not Latin-1 mojibake.
+  }
+
+  return value;
+}
 
 /// Quizzes Section Widget - Shows all quizzes for the course
 class QuizzesSection extends StatefulWidget {
@@ -305,7 +322,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ),
           ),
           title: Text(
-            group.section.getTitle(locale),
+            _cleanDisplayText(group.section.getTitle(locale)),
             style: TextStyle(
               color: widget.isDark ? AppColors.white : AppColors.textMainLight,
               fontSize: 14,
@@ -366,7 +383,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ),
           ),
           title: Text(
-            group.getLessonTitle(locale),
+            _cleanDisplayText(group.getLessonTitle(locale)),
             style: TextStyle(
               color: widget.isDark ? AppColors.white : AppColors.textMainLight,
               fontSize: 14,
@@ -449,7 +466,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          quiz.titleAr,
+          _cleanDisplayText(quiz.titleAr),
           style: TextStyle(
             color: widget.isDark ? AppColors.white : AppColors.textMainLight,
             fontWeight: FontWeight.w600,

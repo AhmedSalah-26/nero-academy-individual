@@ -397,33 +397,37 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CheckboxListTile(
-            value: _replaceExistingQuestions,
-            onChanged: _isSaving
-                ? null
-                : (value) {
-                    setState(() {
-                      _replaceExistingQuestions = value ?? true;
-                    });
-                  },
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            title: Text(
-              'امسح الأسئلة الحالية قبل إضافة JSON',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color:
-                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
+          Material(
+            color: Colors.transparent,
+            child: CheckboxListTile(
+              value: _replaceExistingQuestions,
+              onChanged: _isSaving
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _replaceExistingQuestions = value ?? true;
+                      });
+                    },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              title: Text(
+                'امسح الأسئلة الحالية قبل إضافة JSON',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color:
+                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                ),
               ),
-            ),
-            subtitle: Text(
-              'لو الإضافة فشلت سيتم إرجاع الأسئلة القديمة تلقائيا',
-              style: TextStyle(
-                fontSize: 11,
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              subtitle: Text(
+                'لو الإضافة فشلت سيتم إرجاع الأسئلة القديمة تلقائيا',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
               ),
             ),
           ),
