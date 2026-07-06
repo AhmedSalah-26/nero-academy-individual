@@ -85,7 +85,8 @@ class _InstructorQuizzesContentState extends State<InstructorQuizzesContent> {
     );
   }
 
-  Future<void> _showCreateQuizDialog(BuildContext context, bool isArabic) async {
+  Future<void> _showCreateQuizDialog(
+      BuildContext context, bool isArabic) async {
     final created = await AppRouter.goToCreateQuiz<bool>(
       context,
       cubit: context.read<InstructorQuizzesCubit>(),
@@ -337,8 +338,8 @@ class _QuizListItem extends StatelessWidget {
                 children: [
                   Text(
                     quiz.isPublished
-                        ? (isArabic ? 'Ù…Ù†Ø´ÙˆØ±' : 'Published')
-                        : (isArabic ? 'ØºÙŠØ± Ù…Ù†Ø´ÙˆØ±' : 'Unpublished'),
+                        ? (isArabic ? 'منشور' : 'Published')
+                        : (isArabic ? 'غير منشور' : 'Unpublished'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,

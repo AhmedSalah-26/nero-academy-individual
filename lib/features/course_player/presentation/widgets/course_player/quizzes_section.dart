@@ -90,8 +90,8 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           children: [
             if (sectionQuizzes.isNotEmpty) ...[
               _buildSectionHeader(
-                title: 'Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª Ø§Ù„Ø³ÙŠÙƒØ´Ù†Ø§Øª',
-                subtitle: 'Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª Ù…Ø±ØªØ¨Ø·Ø© Ø¨Ø³ÙŠÙƒØ´Ù† ÙƒØ§Ù…Ù„',
+                title: 'اختبارات السيكشنات',
+                subtitle: 'اختبارات مرتبطة بسيكشن كامل',
                 icon: Icons.view_agenda_outlined,
               ),
               const SizedBox(height: 12),
@@ -251,7 +251,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
         section: SectionEntity(
           id: entry.key,
           courseId: widget.courseId,
-          titleAr: 'Ø³ÙŠÙƒØ´Ù† ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯',
+          titleAr: 'سيكشن غير موجود',
           titleEn: 'Missing section',
         ),
         quizzes: entry.value,
@@ -263,7 +263,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
         section: SectionEntity(
           id: 'unassigned',
           courseId: widget.courseId,
-          titleAr: 'Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª ØºÙŠØ± Ù…Ø±ØªØ¨Ø·Ø©',
+          titleAr: 'اختبارات غير مرتبطة',
           titleEn: 'Unassigned quizzes',
         ),
         quizzes: orphanQuizzes,
@@ -317,7 +317,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '$quizCount ${quizCount == 1 ? 'Ø§Ø®ØªØ¨Ø§Ø±' : 'Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª'}',
+              '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}',
               style: TextStyle(
                 color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                 fontSize: 12,
@@ -467,7 +467,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
               ),
               const SizedBox(width: 4),
               Text(
-                'Ø§Ø®ØªØ¨Ø§Ø± Ø³ÙŠÙƒØ´Ù†',
+                'اختبار سيكشن',
                 style: TextStyle(
                   color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                   fontSize: 12,
