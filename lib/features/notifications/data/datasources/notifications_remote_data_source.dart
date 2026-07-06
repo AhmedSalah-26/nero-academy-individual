@@ -90,8 +90,6 @@ class NotificationsRemoteDataSource {
           .from('notifications')
           .update({
             'is_read': true,
-            'read_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', notificationId)
           .eq('user_id', _userId);
@@ -109,11 +107,13 @@ class NotificationsRemoteDataSource {
     AppLogger.d('[$_tag] markAllAsRead');
     try {
       final profileCreatedAt = await _getCurrentProfileCreatedAt();
-      var query = _client.from('notifications').update({
-        'is_read': true,
-        'read_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('user_id', _userId).eq('is_read', false);
+      var query = _client
+          .from('notifications')
+          .update({
+            'is_read': true,
+          })
+          .eq('user_id', _userId)
+          .eq('is_read', false);
       if (profileCreatedAt != null) {
         query = query.gte(
           'created_at',

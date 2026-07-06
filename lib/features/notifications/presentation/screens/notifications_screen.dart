@@ -121,32 +121,85 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           // Mark all as read button
           BlocBuilder<NotificationsCubit, NotificationsState>(
             builder: (context, state) {
-              if (state is NotificationsLoaded && state.unreadCount > 0) {
-                return Tooltip(
-                  message: 'notifications.mark_all_read'.tr(),
-                  child: IconButton.filledTonal(
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.12),
-                      foregroundColor: AppColors.primary,
+              if (state is! NotificationsLoaded ||
+                  state.notifications.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (state.unreadCount > 0)
+                    Tooltip(
+                      message: 'notifications.mark_all_read'.tr(),
+                      child: IconButton.filledTonal(
+                        visualDensity: VisualDensity.compact,
+                        style: IconButton.styleFrom(
+                          backgroundColor:
+                              AppColors.primary.withValues(alpha: 0.12),
+                          foregroundColor: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          context.read<NotificationsCubit>().markAllAsRead();
+                        },
+                        icon: const Icon(
+                          Icons.done_all_rounded,
+                          size: 20,
+                        ),
+                      ),
                     ),
-                    onPressed: () {
-                      context.read<NotificationsCubit>().markAllAsRead();
-                    },
-                    icon: const Icon(
-                      Icons.done_all_rounded,
-                      size: 20,
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: isArabic ? 'حذف الكل' : 'Delete all',
+                    child: IconButton.filledTonal(
+                      visualDensity: VisualDensity.compact,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.error.withValues(alpha: 0.1),
+                        foregroundColor: AppColors.error,
+                      ),
+                      onPressed: () => _confirmDeleteAll(context, isArabic),
+                      icon: const Icon(
+                        Icons.delete_sweep_rounded,
+                        size: 20,
+                      ),
                     ),
                   ),
-                );
-              }
-              return const SizedBox.shrink();
+                ],
+              );
             },
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDeleteAll(BuildContext context, bool isArabic) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isArabic ? 'حذف كل الإشعارات' : 'Delete all notifications'),
+        content: Text(
+          isArabic
+              ? 'هل تريد حذف كل الإشعارات من الصندوق؟'
+              : 'Do you want to delete all notifications from your inbox?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(isArabic ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(isArabic ? 'حذف الكل' : 'Delete all'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await context.read<NotificationsCubit>().deleteAllNotifications();
+    }
   }
 
   Widget _buildLoadingState() {
