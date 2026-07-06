@@ -302,8 +302,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               ButtonSegment<_QuizScope>(
                 value: _QuizScope.section,
                 icon: const Icon(Icons.view_agenda_outlined),
-                label:
-                    Text(isArabic ? 'Ø§Ø®ØªØ¨Ø§Ø± Ø³ÙŠÙƒØ´Ù†' : 'Section quiz'),
+                label: Text(isArabic ? 'اختبار سيكشن' : 'Section quiz'),
               ),
               ButtonSegment<_QuizScope>(
                 value: _QuizScope.lesson,
@@ -353,8 +352,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 isExpanded: true,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
-                  hintText:
-                      isArabic ? 'Ø§Ø®ØªØ± Ø§Ù„Ø³ÙŠÙƒØ´Ù†' : 'Select section',
+                  hintText: isArabic ? 'اختر السيكشن' : 'Select section',
                   prefixIcon: const Icon(Icons.view_agenda_outlined),
                 ),
                 items: _sections.map((section) {
@@ -377,7 +375,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 validator: (value) {
                   if (!_isCourseLevelQuiz && value == null) {
                     return isArabic
-                        ? 'ÙŠØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ø³ÙŠÙƒØ´Ù†'
+                        ? 'يرجى اختيار السيكشن'
                         : 'Please select a section';
                   }
                   return null;
@@ -385,39 +383,40 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               ),
               if (_quizScope == _QuizScope.lesson) ...[
                 const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedLessonId,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
-                  prefixIcon: const Icon(Icons.play_lesson_outlined),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedLessonId,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
+                    prefixIcon: const Icon(Icons.play_lesson_outlined),
+                  ),
+                  items: _lessons
+                      .where((lesson) =>
+                          _selectedSectionId == null ||
+                          lesson['section_id'] == _selectedSectionId)
+                      .map((lesson) {
+                    return DropdownMenuItem<String>(
+                      value: lesson['id'] as String,
+                      child: Text(
+                        isArabic
+                            ? lesson['title_ar'] ?? ''
+                            : lesson['title_en'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedLessonId = value),
+                  validator: (value) {
+                    if (!_isCourseLevelQuiz && value == null) {
+                      return isArabic
+                          ? 'يرجى اختيار الدرس'
+                          : 'Please select a lesson';
+                    }
+                    return null;
+                  },
                 ),
-                items: _lessons
-                    .where((lesson) =>
-                        _selectedSectionId == null ||
-                        lesson['section_id'] == _selectedSectionId)
-                    .map((lesson) {
-                  return DropdownMenuItem<String>(
-                    value: lesson['id'] as String,
-                    child: Text(
-                      isArabic
-                          ? lesson['title_ar'] ?? ''
-                          : lesson['title_en'] ?? '',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() => _selectedLessonId = value),
-                validator: (value) {
-                  if (!_isCourseLevelQuiz && value == null) {
-                    return isArabic
-                        ? 'يرجى اختيار الدرس'
-                        : 'Please select a lesson';
-                  }
-                  return null;
-                },
-              ),
               ],
             ],
           ],
