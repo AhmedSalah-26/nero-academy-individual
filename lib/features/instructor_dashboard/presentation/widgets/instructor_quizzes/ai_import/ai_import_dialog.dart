@@ -399,38 +399,193 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CheckboxListTile(
-              value: _replaceExistingQuestions,
-              onChanged: _isSaving
-                  ? null
-                  : (value) {
-                      setState(() {
-                        _replaceExistingQuestions = value ?? true;
-                      });
-                    },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              title: Text(
-                'امسح الأسئلة الحالية قبل إضافة JSON',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
+            // ─── Import Mode Toggle ────────────────────────────────────────
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.backgroundDark
+                    : const Color(0xFFF5F3FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.borderDark
+                      : const Color(0xFF7C3AED).withValues(alpha: 0.2),
                 ),
               ),
-              subtitle: Text(
-                'لو الإضافة فشلت سيتم إرجاع الأسئلة القديمة تلقائيا',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.textMutedDark
-                      : AppColors.textMutedLight,
-                ),
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  // Append option
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isSaving
+                          ? null
+                          : () => setState(
+                              () => _replaceExistingQuestions = false),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: !_replaceExistingQuestions
+                              ? AppColors.success
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.playlist_add_rounded,
+                              size: 16,
+                              color: !_replaceExistingQuestions
+                                  ? Colors.white
+                                  : (isDark
+                                      ? AppColors.textMutedDark
+                                      : AppColors.textMutedLight),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'أضف للموجود',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: !_replaceExistingQuestions
+                                      ? Colors.white
+                                      : (isDark
+                                          ? AppColors.textMutedDark
+                                          : AppColors.textMutedLight),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Replace option
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isSaving
+                          ? null
+                          : () =>
+                              setState(() => _replaceExistingQuestions = true),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: _replaceExistingQuestions
+                              ? AppColors.error
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.find_replace_rounded,
+                              size: 16,
+                              color: _replaceExistingQuestions
+                                  ? Colors.white
+                                  : (isDark
+                                      ? AppColors.textMutedDark
+                                      : AppColors.textMutedLight),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'استبدل الكل',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: _replaceExistingQuestions
+                                      ? Colors.white
+                                      : (isDark
+                                          ? AppColors.textMutedDark
+                                          : AppColors.textMutedLight),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
+            // ─── Warning when replacing ───────────────────────────────────
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: _replaceExistingQuestions
+                  ? Padding(
+                      key: const ValueKey('replace-warning'),
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: AppColors.error.withValues(alpha: 0.25)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.warning_amber_rounded,
+                                color: AppColors.error, size: 15),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'سيتم حذف جميع الأسئلة الحالية واستبدالها. لو فشلت الإضافة سيتم الاسترجاع تلقائياً.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.error,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      key: const ValueKey('append-info'),
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: AppColors.success.withValues(alpha: 0.25)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline_rounded,
+                                color: AppColors.success, size: 15),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'سيتم إضافة الأسئلة الجديدة بجانب الأسئلة الحالية دون حذف أي شيء.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -444,7 +599,11 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                           color: Colors.white,
                         ),
                       )
-                    : const Icon(Icons.add_task_rounded, size: 20),
+                    : Icon(
+                        _replaceExistingQuestions
+                            ? Icons.find_replace_rounded
+                            : Icons.playlist_add_rounded,
+                        size: 20),
                 label: Text(
                   _isSaving
                       ? LocaleKeys.course_editor_ai_import_adding.tr()
@@ -454,7 +613,9 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                       const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
+                  backgroundColor: _replaceExistingQuestions
+                      ? AppColors.error
+                      : AppColors.success,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
