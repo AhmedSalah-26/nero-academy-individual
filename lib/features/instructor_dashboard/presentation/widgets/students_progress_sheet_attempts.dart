@@ -72,7 +72,8 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
         question_ar,
         question_en,
         image_url,
-        explanation,
+        explanation_ar,
+        explanation_en,
         options
       ''').inFilter('quiz_id', quizIds);
 
@@ -132,7 +133,7 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
             selectedOptionId: selectedOptionId,
             correctOptionId: correctOptionId,
             isCorrect: isCorrect,
-            explanation: q['explanation'] as String?,
+            explanation: q['explanation_ar'] as String? ?? q['explanation_en'] as String?,
           ));
         }
 
