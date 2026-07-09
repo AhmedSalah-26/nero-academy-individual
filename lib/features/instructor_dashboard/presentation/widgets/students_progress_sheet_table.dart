@@ -12,6 +12,7 @@ class StudentsProgressTable extends StatelessWidget {
   final bool sortAscending;
   final Function(String) onSort;
   final Function(String) onCopy;
+  final Function(StudentRow) onQuizAttemptsTap;
 
   const StudentsProgressTable({
     super.key,
@@ -22,6 +23,7 @@ class StudentsProgressTable extends StatelessWidget {
     required this.sortAscending,
     required this.onSort,
     required this.onCopy,
+    required this.onQuizAttemptsTap,
   });
 
   Color _progressColor(double v) {
@@ -161,7 +163,22 @@ class StudentsProgressTable extends StatelessWidget {
                   DataCell(ProgressCell(progress: r.avgProgress, color: _progressColor(r.avgProgress))),
                   DataCell(NumberCell(value: '${r.completedLessons}/${r.totalLessons}', color: mutedColor, fontSize: 11)),
                   DataCell(Text(_formatWatch(r.watchSeconds), style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600))),
-                  DataCell(NumberCell(value: '${r.quizCount}', color: AppColors.warning)),
+                  DataCell(
+                    r.quizCount > 0
+                        ? InkWell(
+                            onTap: () => onQuizAttemptsTap(r),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.warning.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                              ),
+                              child: NumberCell(value: '${r.quizCount}', color: AppColors.warning),
+                            ),
+                          )
+                        : NumberCell(value: '0', color: mutedColor),
+                  ),
                   DataCell(
                     Row(
                       mainAxisSize: MainAxisSize.min,

@@ -14,6 +14,7 @@ import '../widgets/instructor_quizzes/download_helper.dart';
 import '../widgets/students_progress_sheet_models.dart';
 import '../widgets/students_progress_sheet_widgets.dart';
 import '../widgets/students_progress_sheet_table.dart';
+import '../widgets/students_progress_sheet_attempts.dart';
 
 class StudentsProgressSheetScreen extends StatefulWidget {
   final String? courseId;
@@ -228,6 +229,17 @@ class _StudentsProgressSheetScreenState
                               onCopy: (val) {
                                 Clipboard.setData(ClipboardData(text: val));
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Copied: $val'), duration: const Duration(seconds: 1)));
+                              },
+                              onQuizAttemptsTap: (student) {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => StudentAttemptsDialog(
+                                    studentId: student.uid,
+                                    studentName: student.name,
+                                    studentEmail: student.email,
+                                    studentPhone: student.phone,
+                                  ),
+                                );
                               },
                             ),
                     ),

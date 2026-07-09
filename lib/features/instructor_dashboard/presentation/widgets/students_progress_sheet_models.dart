@@ -1,3 +1,27 @@
+String sanitizeString(String text) {
+  final buffer = StringBuffer();
+  for (int i = 0; i < text.length; i++) {
+    final unit = text.codeUnitAt(i);
+    if (unit >= 0xD800 && unit <= 0xDBFF) {
+      if (i + 1 < text.length) {
+        final nextUnit = text.codeUnitAt(i + 1);
+        if (nextUnit >= 0xDC00 && nextUnit <= 0xDFFF) {
+          buffer.writeCharCode(unit);
+          buffer.writeCharCode(nextUnit);
+          i++;
+          continue;
+        }
+      }
+      buffer.write('?');
+    } else if (unit >= 0xDC00 && unit <= 0xDFFF) {
+      buffer.write('?');
+    } else {
+      buffer.writeCharCode(unit);
+    }
+  }
+  return buffer.toString();
+}
+
 class StudentRow {
   final String uid;
   final String name;
@@ -83,11 +107,15 @@ class StudentRowBuilder {
                 .reduce((a, b) => a + b) /
             quizzes.length;
 
+    final rawName = profile['name'] as String? ?? 'Unknown';
+    final rawEmail = profile['email'] as String?;
+    final rawPhone = profile['phone'] as String?;
+
     return StudentRow(
       uid: uid,
-      name: profile['name'] as String? ?? 'Unknown',
-      email: profile['email'] as String?,
-      phone: profile['phone'] as String?,
+      name: sanitizeString(rawName),
+      email: rawEmail != null ? sanitizeString(rawEmail) : null,
+      phone: rawPhone != null ? sanitizeString(rawPhone) : null,
       avatarUrl: profile['avatar_url'] as String?,
       joinedAt: profile['created_at'] != null
           ? DateTime.tryParse(profile['created_at'] as String)

@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/user_role_service.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/shared_widgets/loading_state.dart';
 import '../../../../core/shared_widgets/responsive_dialog.dart';
@@ -236,6 +237,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     context.read<SettingsCubit>().toggleNotifications(v),
                 activeTrackColor: AppColors.primary,
               ),
+            ),
+            // Learning Profile for students
+            FutureBuilder<String?>(
+              future: UserRoleService.getCurrentUserRole(),
+              builder: (context, snapshot) {
+                final isArabic = context.locale.languageCode == 'ar';
+                if (snapshot.data == 'student') {
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.analytics_outlined,
+                      size: 22,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(
+                      isArabic ? 'ملف التعلم' : 'Learning Profile',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: isDark ? AppColors.grey600 : AppColors.grey400,
+                    ),
+                    onTap: () => AppRouter.goToStudentProfile(context),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ],
