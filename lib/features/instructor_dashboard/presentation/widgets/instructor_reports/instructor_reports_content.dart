@@ -156,10 +156,24 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
                             child: ChoiceChip(
                               label: Text(
                                 isArabic ? 'محلول' : 'Resolved',
-                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                                style: TextStyle(
+                                  fontFamily: 'Almarai',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: selectedStatus == 'resolved'
+                                      ? AppColors.success
+                                      : (isDark ? Colors.white70 : Colors.black87),
+                                ),
                               ),
                               selected: selectedStatus == 'resolved',
-                              selectedColor: AppColors.success.withValues(alpha: 0.2),
+                              selectedColor: AppColors.success.withValues(alpha: 0.15),
+                              backgroundColor: isDark ? AppColors.surfaceDark : Colors.grey[100],
+                              side: BorderSide(
+                                color: selectedStatus == 'resolved'
+                                    ? AppColors.success
+                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                              ),
+                              showCheckmark: false,
                               onSelected: (selected) {
                                 if (selected) setDialogState(() => selectedStatus = 'resolved');
                               },
@@ -170,10 +184,24 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
                             child: ChoiceChip(
                               label: Text(
                                 isArabic ? 'مرفوض' : 'Rejected',
-                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                                style: TextStyle(
+                                  fontFamily: 'Almarai',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: selectedStatus == 'rejected'
+                                      ? AppColors.error
+                                      : (isDark ? Colors.white70 : Colors.black87),
+                                ),
                               ),
                               selected: selectedStatus == 'rejected',
-                              selectedColor: AppColors.error.withValues(alpha: 0.2),
+                              selectedColor: AppColors.error.withValues(alpha: 0.15),
+                              backgroundColor: isDark ? AppColors.surfaceDark : Colors.grey[100],
+                              side: BorderSide(
+                                color: selectedStatus == 'rejected'
+                                    ? AppColors.error
+                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                              ),
+                              showCheckmark: false,
                               onSelected: (selected) {
                                 if (selected) setDialogState(() => selectedStatus = 'rejected');
                               },
@@ -183,11 +211,25 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
                           Expanded(
                             child: ChoiceChip(
                               label: Text(
-                                isArabic ? 'تمت المراجعة' : 'Reviewed',
-                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                                isArabic ? 'مراجعة' : 'Reviewed',
+                                style: TextStyle(
+                                  fontFamily: 'Almarai',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: selectedStatus == 'reviewed'
+                                      ? AppColors.info
+                                      : (isDark ? Colors.white70 : Colors.black87),
+                                ),
                               ),
                               selected: selectedStatus == 'reviewed',
-                              selectedColor: AppColors.info.withValues(alpha: 0.2),
+                              selectedColor: AppColors.info.withValues(alpha: 0.15),
+                              backgroundColor: isDark ? AppColors.surfaceDark : Colors.grey[100],
+                              side: BorderSide(
+                                color: selectedStatus == 'reviewed'
+                                    ? AppColors.info
+                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                              ),
+                              showCheckmark: false,
                               onSelected: (selected) {
                                 if (selected) setDialogState(() => selectedStatus = 'reviewed');
                               },
@@ -214,9 +256,17 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
                           return ActionChip(
                             label: Text(
                               template,
-                              style: const TextStyle(fontSize: 11, fontFamily: 'Almarai'),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontFamily: 'Almarai',
+                                color: isDark ? Colors.white70 : Colors.black87,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                            ),
+                            backgroundColor: isDark ? AppColors.surfaceDark : Colors.grey[100],
+                            side: BorderSide(
+                              color: isDark ? AppColors.borderDark : AppColors.borderLight,
                             ),
                             onPressed: () {
                               setDialogState(() {
