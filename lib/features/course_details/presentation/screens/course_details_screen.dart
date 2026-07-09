@@ -307,25 +307,12 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             icon: const Icon(Icons.more_vert_rounded),
             onSelected: (value) {
               switch (value) {
-                case 'share':
-                  _shareCourse(course);
-                  break;
                 case 'report':
                   _reportCourse(course, locale);
                   break;
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'share',
-                child: Row(
-                  children: [
-                    const Icon(Icons.share_rounded, size: 20),
-                    const SizedBox(width: 12),
-                    Text(locale == 'ar' ? 'مشاركة' : 'Share'),
-                  ],
-                ),
-              ),
               PopupMenuItem(
                 value: 'report',
                 child: Row(

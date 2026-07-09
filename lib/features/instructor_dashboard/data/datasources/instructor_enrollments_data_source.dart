@@ -247,8 +247,13 @@ class InstructorEnrollmentsDataSource {
 
       await _client.from('enrollments').delete().eq('id', enrollmentId);
 
-      await _client
-          .rpc('decrement_enrolled_count', params: {'p_course_id': courseId});
+      // Decrement enrolled_count on the course (non-fatal if function missing)
+      try {
+        await _client
+            .rpc('decrement_enrolled_count', params: {'p_course_id': courseId});
+      } catch (rpcError) {
+        AppLogger.w('[$_tag] decrement_enrolled_count RPC failed (non-fatal): $rpcError');
+      }
 
       AppLogger.success('[$_tag] unenrollStudent success');
       return true;
