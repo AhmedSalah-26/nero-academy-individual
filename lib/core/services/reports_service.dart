@@ -144,12 +144,12 @@ class ReportsRemoteDataSource {
     try {
       final courseReports = await _client
           .from('course_reports')
-          .select('*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(full_name, avatar_url)')
+          .select('*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       final reviewReports = await _client
           .from('review_reports')
-          .select('*, reporter:profiles!review_reports_user_id_fkey(full_name, avatar_url)')
+          .select('*, reporter:profiles!review_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       return {
@@ -162,12 +162,20 @@ class ReportsRemoteDataSource {
     }
   }
 
-  /// Update report status (pending → reviewed / resolved / dismissed)
-  Future<bool> updateCourseReportStatus(String reportId, String status) async {
+  /// Update report status (pending → reviewed / resolved / rejected)
+  Future<bool> updateCourseReportStatus(String reportId, String status, {String? response}) async {
     try {
       await _client
           .from('course_reports')
-          .update({'status': status})
+          .update({
+            'status': status,
+            'admin_response': response,
+            'admin_id': _userId,
+            'resolved_at': status == 'resolved' || status == 'rejected'
+                ? DateTime.now().toIso8601String()
+                : null,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .eq('id', reportId);
       return true;
     } catch (e, s) {
@@ -176,11 +184,19 @@ class ReportsRemoteDataSource {
     }
   }
 
-  Future<bool> updateReviewReportStatus(String reportId, String status) async {
+  Future<bool> updateReviewReportStatus(String reportId, String status, {String? response}) async {
     try {
       await _client
           .from('review_reports')
-          .update({'status': status})
+          .update({
+            'status': status,
+            'admin_response': response,
+            'admin_id': _userId,
+            'resolved_at': status == 'resolved' || status == 'rejected'
+                ? DateTime.now().toIso8601String()
+                : null,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .eq('id', reportId);
       return true;
     } catch (e, s) {

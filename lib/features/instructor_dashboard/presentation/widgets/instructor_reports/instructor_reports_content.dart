@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/services/reports_service.dart';
+import '../../../../../core/shared_widgets/error_state.dart';
 import '../../../../../core/animations/widgets/feedback/animated_snackbar.dart';
 
 /// Instructor Reports Content — shows course & review reports
@@ -61,26 +63,247 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
   }
 
   Future<void> _updateStatus(
-      String reportId, String status, bool isCourse) async {
+      String reportId, String status, String? response, bool isCourse) async {
     final service = ReportsRemoteDataSource(Supabase.instance.client);
     final success = isCourse
-        ? await service.updateCourseReportStatus(reportId, status)
-        : await service.updateReviewReportStatus(reportId, status);
+        ? await service.updateCourseReportStatus(reportId, status, response: response)
+        : await service.updateReviewReportStatus(reportId, status, response: response);
 
     if (mounted) {
       if (success) {
         AnimatedSnackbar.showSuccess(
           context: context,
-          message: 'تم تحديث الحالة',
+          message: context.locale.languageCode == 'ar'
+              ? 'تم تحديث حالة البلاغ بنجاح'
+              : 'Report status updated successfully',
         );
         _loadReports();
       } else {
         AnimatedSnackbar.showError(
           context: context,
-          message: 'فشل تحديث الحالة',
+          message: context.locale.languageCode == 'ar'
+              ? 'فشل تحديث الحالة'
+              : 'Failed to update status',
         );
       }
     }
+  }
+
+  void _showActionDialog(Map<String, dynamic> report, bool isCourse) {
+    final isArabic = context.locale.languageCode == 'ar';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final reportId = report['id'] as String;
+    String selectedStatus = 'resolved'; // resolved, rejected, reviewed
+    final responseController = TextEditingController();
+
+    // Default template responses based on localization keys
+    final templates = [
+      isArabic
+          ? 'تم إزالة المحتوى المخالف. شكراً لإبلاغك.'
+          : 'The violating content has been removed. Thank you for reporting.',
+      isArabic
+          ? 'تم إرسال تحذير للمستخدم المخالف.'
+          : 'A warning has been issued to the violating user.',
+      isArabic
+          ? 'لم نجد انتهاكاً لسياسات المنصة في هذا المحتوى.'
+          : 'We did not find any policy violation in this content.',
+      isArabic
+          ? 'تم الإبلاغ بالفعل واتخاذ الإجراء.'
+          : 'This has already been reported and actioned.',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Dialog Title
+                      Text(
+                        isArabic ? 'اتخاذ إجراء بشأن البلاغ' : 'Take Action on Report',
+                        style: const TextStyle(
+                          fontFamily: 'Almarai',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Status Select
+                      Text(
+                        isArabic ? 'تحديث الحالة إلى:' : 'Update Status to:',
+                        style: TextStyle(
+                          fontFamily: 'Almarai',
+                          fontSize: 13,
+                          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ChoiceChip(
+                              label: Text(
+                                isArabic ? 'محلول' : 'Resolved',
+                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                              ),
+                              selected: selectedStatus == 'resolved',
+                              selectedColor: AppColors.success.withValues(alpha: 0.2),
+                              onSelected: (selected) {
+                                if (selected) setDialogState(() => selectedStatus = 'resolved');
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ChoiceChip(
+                              label: Text(
+                                isArabic ? 'مرفوض' : 'Rejected',
+                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                              ),
+                              selected: selectedStatus == 'rejected',
+                              selectedColor: AppColors.error.withValues(alpha: 0.2),
+                              onSelected: (selected) {
+                                if (selected) setDialogState(() => selectedStatus = 'rejected');
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ChoiceChip(
+                              label: Text(
+                                isArabic ? 'تمت المراجعة' : 'Reviewed',
+                                style: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                              ),
+                              selected: selectedStatus == 'reviewed',
+                              selectedColor: AppColors.info.withValues(alpha: 0.2),
+                              onSelected: (selected) {
+                                if (selected) setDialogState(() => selectedStatus = 'reviewed');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Templates
+                      Text(
+                        isArabic ? 'الردود الجاهزة:' : 'Template Responses:',
+                        style: TextStyle(
+                          fontFamily: 'Almarai',
+                          fontSize: 13,
+                          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: templates.map((template) {
+                          return ActionChip(
+                            label: Text(
+                              template,
+                              style: const TextStyle(fontSize: 11, fontFamily: 'Almarai'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () {
+                              setDialogState(() {
+                                responseController.text = template;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Text Field
+                      Text(
+                        isArabic ? 'الرد التفصيلي:' : 'Detailed Response:',
+                        style: TextStyle(
+                          fontFamily: 'Almarai',
+                          fontSize: 13,
+                          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: responseController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: isArabic ? 'اكتب ردك هنا...' : 'Write your response here...',
+                          hintStyle: const TextStyle(fontFamily: 'Almarai', fontSize: 13),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.all(12),
+                        ),
+                        style: const TextStyle(fontSize: 13, fontFamily: 'Almarai'),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              isArabic ? 'إلغاء' : 'Cancel',
+                              style: const TextStyle(fontFamily: 'Almarai'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _updateStatus(
+                                reportId,
+                                selectedStatus,
+                                responseController.text.trim().isEmpty
+                                    ? null
+                                    : responseController.text.trim(),
+                                isCourse,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: selectedStatus == 'resolved'
+                                  ? AppColors.success
+                                  : selectedStatus == 'rejected'
+                                      ? AppColors.error
+                                      : AppColors.info,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              isArabic ? 'تأكيد' : 'Confirm',
+                              style: const TextStyle(fontFamily: 'Almarai', fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -228,32 +451,13 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
   }
 
   Widget _buildError(bool isDark) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.error, size: 48),
-          const SizedBox(height: 12),
-          Text(
-            'حدث خطأ في تحميل البلاغات',
-            style: TextStyle(
-              fontFamily: 'Almarai',
-              color: isDark ? AppColors.white : AppColors.textMainLight,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _loadReports,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('إعادة المحاولة',
-                style: TextStyle(fontFamily: 'Almarai')),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white),
-          ),
-        ],
-      ),
+    final isArabic = context.locale.languageCode == 'ar';
+    return ErrorState(
+      type: ErrorType.server,
+      display: ErrorStateDisplay.section,
+      message: _error,
+      retryText: isArabic ? 'إعادة المحاولة' : 'Retry',
+      onRetry: _loadReports,
     );
   }
 
@@ -299,7 +503,8 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
     final description = report['description'] as String?;
     final createdAt = report['created_at'] as String?;
     final reporter = report['reporter'] as Map<String, dynamic>?;
-    final reporterName = reporter?['full_name'] as String? ?? 'مجهول';
+    final reporterName = reporter?['name'] as String? ?? 'مجهول';
+    final adminResponse = report['admin_response'] as String?;
 
     // Course-specific
     final course = report['course'] as Map<String, dynamic>?;
@@ -522,48 +727,64 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
                   ),
                 ],
 
-                // Action buttons (only for pending)
+                // Display Admin Response if present
+                if (adminResponse != null && adminResponse.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.15)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.locale.languageCode == 'ar' ? 'رد الإدارة:' : 'Admin Response:',
+                          style: TextStyle(
+                            fontFamily: 'Almarai',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          adminResponse,
+                          style: TextStyle(
+                            fontFamily: 'Almarai',
+                            fontSize: 12,
+                            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Action button (only for pending)
                 if (status == 'pending') ...[
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _updateStatus(
-                              report['id'] as String, 'resolved', isCourse),
-                          icon: const Icon(Icons.check_rounded, size: 14),
-                          label: const Text('تم الحل',
-                              style: TextStyle(
-                                  fontFamily: 'Almarai', fontSize: 12)),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.success,
-                            side: const BorderSide(color: AppColors.success),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showActionDialog(report, isCourse),
+                      icon: const Icon(Icons.gavel_rounded, size: 14),
+                      label: Text(
+                        context.locale.languageCode == 'ar' ? 'اتخاذ إجراء' : 'Take Action',
+                        style: const TextStyle(fontFamily: 'Almarai', fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _updateStatus(
-                              report['id'] as String, 'dismissed', isCourse),
-                          icon: const Icon(Icons.close_rounded, size: 14),
-                          label: const Text('رفض',
-                              style: TextStyle(
-                                  fontFamily: 'Almarai', fontSize: 12)),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.textMutedLight,
-                            side:
-                                const BorderSide(color: AppColors.borderLight),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ],
@@ -578,10 +799,12 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
     switch (status) {
       case 'pending':
         return AppColors.warning;
+      case 'reviewed':
+        return AppColors.info;
       case 'resolved':
         return AppColors.success;
-      case 'dismissed':
-        return AppColors.textMutedLight;
+      case 'rejected':
+        return AppColors.error;
       default:
         return AppColors.info;
     }
@@ -591,9 +814,11 @@ class _InstructorReportsContentState extends State<InstructorReportsContent>
     switch (status) {
       case 'pending':
         return '⏳ معلق';
+      case 'reviewed':
+        return 'ℹ️ تمت المراجعة';
       case 'resolved':
         return '✅ تم الحل';
-      case 'dismissed':
+      case 'rejected':
         return '❌ مرفوض';
       default:
         return status;
