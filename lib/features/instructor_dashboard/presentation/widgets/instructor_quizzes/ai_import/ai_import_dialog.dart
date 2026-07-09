@@ -534,11 +534,11 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                           border: Border.all(
                               color: AppColors.error.withValues(alpha: 0.25)),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Icon(Icons.warning_amber_rounded,
+                            Icon(Icons.warning_amber_rounded,
                                 color: AppColors.error, size: 15),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'سيتم حذف جميع الأسئلة الحالية واستبدالها. لو فشلت الإضافة سيتم الاسترجاع تلقائياً.',
@@ -565,11 +565,11 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                           border: Border.all(
                               color: AppColors.success.withValues(alpha: 0.25)),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Icon(Icons.info_outline_rounded,
+                            Icon(Icons.info_outline_rounded,
                                 color: AppColors.success, size: 15),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'سيتم إضافة الأسئلة الجديدة بجانب الأسئلة الحالية دون حذف أي شيء.',

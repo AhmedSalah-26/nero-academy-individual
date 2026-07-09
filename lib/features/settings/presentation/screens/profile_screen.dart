@@ -243,6 +243,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   );
                 }
+                // Student learning profile
+                if (role == 'student') {
+                  return Column(
+                    children: [
+                      _buildMenuItem(
+                        icon: Icons.analytics_outlined,
+                        title: isArabic ? 'ملف التعلم' : 'Learning Profile',
+                        onTap: () => AppRouter.goToStudentProfile(context),
+                        isDark: isDark,
+                      ),
+                      _buildDivider(isDark),
+                    ],
+                  );
+                }
                 return const SizedBox.shrink();
               },
             ),

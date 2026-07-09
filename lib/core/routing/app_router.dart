@@ -53,6 +53,8 @@ import '../../features/settings/presentation/screens/help_support_screen.dart';
 import '../../features/settings/presentation/screens/edit_profile_screen.dart';
 import '../../features/settings/presentation/screens/terms_of_service_screen.dart';
 import '../../features/settings/presentation/cubit/profile_cubit.dart';
+import '../../features/settings/presentation/screens/student_profile_screen.dart';
+import '../../features/instructor_dashboard/presentation/screens/students_progress_sheet_screen.dart';
 // Course Search
 import '../../features/course_search/presentation/cubit/course_search_cubit.dart';
 import '../../features/course_search/presentation/screens/course_search_screen.dart';
@@ -545,6 +547,13 @@ class AppRouter {
         builder: (context, state) => const TermsOfServiceScreen(),
       ),
 
+      // Student Profile
+      GoRoute(
+        path: '/student-profile',
+        name: 'student-profile',
+        builder: (context, state) => const StudentProfileScreen(),
+      ),
+
       // Quiz Info
       GoRoute(
         path: '/quiz/:quizId',
@@ -913,6 +922,19 @@ class AppRouter {
           create: (_) => sl<InstructorEarningsCubit>(),
           child: const EarningsHistoryScreen(),
         ),
+      ),
+
+      // Students Progress Sheet
+      GoRoute(
+        path: '/instructor/students-progress-sheet',
+        name: 'students-progress-sheet',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return StudentsProgressSheetScreen(
+            courseId: extra?['courseId'] as String?,
+            courseTitle: extra?['courseTitle'] as String?,
+          );
+        },
       ),
 
       // Quiz Editor
@@ -1447,6 +1469,17 @@ class AppRouter {
     context.pushNamed('banner-editor', extra: {
       'banner': banner,
       'onSave': onSave,
+    });
+  }
+
+  static void goToStudentProfile(BuildContext context) {
+    context.pushNamed('student-profile');
+  }
+
+  static void goToStudentsProgressSheet(BuildContext context, {String? courseId, String? courseTitle}) {
+    context.pushNamed('students-progress-sheet', extra: {
+      'courseId': courseId,
+      'courseTitle': courseTitle,
     });
   }
 
