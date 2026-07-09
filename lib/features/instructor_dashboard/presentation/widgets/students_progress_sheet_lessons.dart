@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/loading_state.dart';
+import 'students_progress_sheet_models.dart' show sanitizeString;
 
 class _CourseData {
   final String courseId;
@@ -115,8 +116,8 @@ class _StudentLessonsProgressDialogState
           final lessonId = lesson['id'] as String;
           final prog = progressMap[lessonId];
           return _LessonData(
-            titleAr: lesson['title_ar'] as String? ?? '',
-            titleEn: lesson['title_en'] as String? ?? '',
+            titleAr: sanitizeString(lesson['title_ar'] as String? ?? ''),
+            titleEn: sanitizeString(lesson['title_en'] as String? ?? ''),
             isCompleted: prog?['is_completed'] as bool? ?? false,
             watchSeconds: prog?['watch_time'] as int? ?? 0,
             completedAt: prog?['completed_at'] != null
@@ -138,8 +139,8 @@ class _StudentLessonsProgressDialogState
 
         return _CourseData(
           courseId: courseId,
-          titleAr: course['title_ar'] as String? ?? '',
-          titleEn: course['title_en'] as String? ?? '',
+          titleAr: sanitizeString(course['title_ar'] as String? ?? ''),
+          titleEn: sanitizeString(course['title_en'] as String? ?? ''),
           completedLessons: completedCount,
           totalLessons: totalLessons,
           realProgress: realProgress,
