@@ -16,6 +16,7 @@ import '../widgets/instructor_quizzes/instructor_quizzes_content.dart';
 import '../widgets/instructor_settings/instructor_settings_content.dart';
 import '../widgets/instructor_categories/instructor_categories_content.dart';
 import '../widgets/instructor_banners/instructor_banners_content.dart';
+import '../widgets/instructor_reports/instructor_reports_content.dart';
 import 'manual_purchase_requests_screen.dart';
 
 /// Instructor Dashboard Screen
@@ -87,6 +88,11 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
       icon: Icons.star_rounded,
     ),
     DashboardNavItem(
+      label: 'Reports',
+      labelAr: 'البلاغات',
+      icon: Icons.flag_rounded,
+    ),
+    DashboardNavItem(
       label: 'Categories',
       labelAr: 'التصنيفات',
       icon: Icons.category_rounded,
@@ -148,12 +154,15 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
         content = const InstructorReviewsContent();
         break;
       case 11:
-        content = const InstructorCategoriesContent();
+        content = const InstructorReportsContent();
         break;
       case 12:
-        content = const InstructorBannersContent();
+        content = const InstructorCategoriesContent();
         break;
       case 13:
+        content = const InstructorBannersContent();
+        break;
+      case 14:
         content = const InstructorSettingsContent();
         break;
       default:
