@@ -15,6 +15,7 @@ import '../widgets/students_progress_sheet_models.dart';
 import '../widgets/students_progress_sheet_widgets.dart';
 import '../widgets/students_progress_sheet_table.dart';
 import '../widgets/students_progress_sheet_attempts.dart';
+import '../widgets/students_progress_sheet_lessons.dart';
 
 class StudentsProgressSheetScreen extends StatefulWidget {
   final String? courseId;
@@ -240,6 +241,15 @@ class _StudentsProgressSheetScreenState
                                     studentPhone: student.phone,
                                   ),
                                 );
+                              },
+                              onLessonProgressTap: (student) {
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => StudentLessonsProgressDialog(
+                                    studentId: student.uid,
+                                    studentName: student.name,
+                                  ),
+                                ).then((_) => _loadData());
                               },
                             ),
                     ),

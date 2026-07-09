@@ -13,6 +13,7 @@ class StudentsProgressTable extends StatelessWidget {
   final Function(String) onSort;
   final Function(String) onCopy;
   final Function(StudentRow) onQuizAttemptsTap;
+  final Function(StudentRow) onLessonProgressTap;
 
   const StudentsProgressTable({
     super.key,
@@ -24,6 +25,7 @@ class StudentsProgressTable extends StatelessWidget {
     required this.onSort,
     required this.onCopy,
     required this.onQuizAttemptsTap,
+    required this.onLessonProgressTap,
   });
 
   Color _progressColor(double v) {
@@ -160,8 +162,26 @@ class StudentsProgressTable extends StatelessWidget {
                   ),
                   DataCell(NumberCell(value: '${r.coursesCount}', color: AppColors.info)),
                   DataCell(NumberCell(value: '${r.completedCourses}', color: AppColors.success)),
-                  DataCell(ProgressCell(progress: r.avgProgress, color: _progressColor(r.avgProgress))),
-                  DataCell(NumberCell(value: '${r.completedLessons}/${r.totalLessons}', color: mutedColor, fontSize: 11)),
+                  DataCell(
+                    InkWell(
+                      onTap: () => onLessonProgressTap(r),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Tooltip(
+                        message: isArabic ? 'اضغط لعرض تفاصيل الدروس' : 'Tap to view lesson details',
+                        child: ProgressCell(progress: r.avgProgress, color: _progressColor(r.avgProgress)),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    InkWell(
+                      onTap: () => onLessonProgressTap(r),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Tooltip(
+                        message: isArabic ? 'اضغط لعرض تفاصيل الدروس' : 'Tap to view lesson details',
+                        child: NumberCell(value: '${r.completedLessons}/${r.totalLessons}', color: AppColors.info, fontSize: 11),
+                      ),
+                    ),
+                  ),
                   DataCell(Text(_formatWatch(r.watchSeconds), style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600))),
                   DataCell(
                     r.quizCount > 0
