@@ -672,6 +672,17 @@
 }
 
 @media (max-width: 992px) {
+  .topHero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .topMedia {
+    min-height: auto;
+    aspect-ratio: 16/9;
+  }
+  .topInfo {
+    padding: 16px;
+  }
   .contentGrid {
     grid-template-columns: 1fr;
   }
@@ -746,6 +757,24 @@
 }
 
 @media (max-width: 700px) {
+  .topHero {
+    margin-top: 8px;
+    gap: 12px;
+  }
+  .title {
+    font-size: 1.2rem;
+  }
+  .subtitle {
+    font-size: 0.8rem;
+  }
+  .priceBanner {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+  }
+  .primaryBtn {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
   .courseHeader { padding: 24px 20px; border-radius: 25px; }
   .statsRow { gap: 8px; }
   .cardSection, .sidebarCard { padding: 20px; border-radius: 22px; }
