@@ -1,6 +1,6 @@
 {
-  "app_name": "Shehab Academy",
-  "splash_slogan": "We will continue the journey together",
+  "app_name": "Ahmed Yahia",
+  "splash_slogan": "LAB COAT in Chemistry",
   "clear_all": "Clear All",
   "common": {
     "loading": "Loading...",
@@ -117,7 +117,7 @@
     "bio": "Bio",
     "bio_placeholder": "Write about yourself and your experience...",
     "expertise": "Areas of Expertise",
-    "expertise_placeholder": "e.g. Programming, Design, Marketing",
+    "expertise_placeholder": "e.g. Chemistry, Reviews, Exams",
     "expertise_hint": "Separate areas with commas",
     "student_email": "Student Email",
     "student_email_placeholder": "Enter student email to link",

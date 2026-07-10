@@ -39,7 +39,7 @@
   margin: 0 auto;
   padding: 0 18px 0 22px;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
   align-items: center;
   gap: clamp(20px, 4vw, 58px);
   border: 1px solid var(--glass-border);
@@ -62,10 +62,11 @@
 }
 
 .logoWrapper {
+  min-width: 0;
   gap: 16px;
 }
 
-.logo { gap: 10px; white-space: nowrap; }
+.logo { min-width: 0; gap: 12px; white-space: nowrap; }
 
 .headerSearch {
   display: flex;
@@ -103,32 +104,37 @@
 }
 
 .logoIcon {
-  width: 46px;
-  height: 46px;
+  width: 128px;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   box-shadow: none;
+  color: var(--text-main);
+  flex: 0 0 128px;
 }
 
-.logoImg {
+.logoMark {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  display: block;
+  background: currentColor;
+  mask: url('/lab-coat-logo-mask.png') center / contain no-repeat;
+  -webkit-mask: url('/lab-coat-logo-mask.png') center / contain no-repeat;
 }
 
 .logoText { display: grid; gap: 0; line-height: 1.15; }
 .logoText b {
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: .92rem;
+  font-size: 1.04rem;
   letter-spacing: -.02em;
 }
-.logoText small { color: var(--text-secondary); font-size: .52rem; font-weight: 800; }
+.logoText small { color: var(--text-secondary); font-size: .62rem; font-weight: 800; }
 
-.nav { justify-content: center; gap: clamp(22px, 3.35vw, 48px); }
+.nav { min-width: 0; justify-content: center; gap: clamp(18px, 2.6vw, 48px); }
 
 .navLink {
   position: relative;
@@ -156,7 +162,7 @@
 .navLink:hover, .active { color: var(--text-main); }
 .navLink:hover::after, .active::after { width: 30px; }
 
-.actions { gap: 6px; direction: ltr; }
+.actions { min-width: 0; gap: 6px; direction: ltr; }
 
 .actionButton, .squareButton {
   justify-content: center;
@@ -204,6 +210,8 @@
   border: 1px solid var(--border-light);
   border-radius: 14px;
   background: var(--surface-soft);
+  max-width: 210px;
+  min-width: 0;
 }
 
 .userProfile { gap: 7px; color: inherit; min-width: 0; }
@@ -220,7 +228,7 @@
 }
 
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-.userName { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .58rem; font-weight: 900; }
+.userName { max-width: 116px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .58rem; font-weight: 900; }
 .logout { display: grid; place-items: center; border: 0; color: var(--text-secondary); background: transparent; cursor: pointer; }
 .logout:hover { color: var(--error); }
 .settings { display: grid; place-items: center; border: 0; color: var(--text-secondary); background: transparent; cursor: pointer; }
@@ -250,11 +258,71 @@
     inset 0 1px 0 rgba(255,255,255,.68);
 }
 
+@media (max-width: 1120px) {
+  .container {
+    gap: 10px;
+    padding-inline: 14px;
+  }
+  .logoIcon {
+    width: 112px;
+    height: 50px;
+    flex-basis: 112px;
+  }
+  .logoText b {
+    font-size: .94rem;
+  }
+  .headerSearch {
+    display: none;
+  }
+  .nav {
+    gap: 18px;
+  }
+  .navLink {
+    font-size: .72rem;
+  }
+  .actions {
+    gap: 4px;
+  }
+  .squareButton {
+    width: 34px;
+    height: 34px;
+  }
+  .userCard {
+    max-width: 190px;
+  }
+}
+
 @media (max-width: 960px) {
-  .container { gap: 16px; }
-  .nav { gap: 16px; }
+  .container { gap: 12px; }
+  .nav { gap: 14px; }
   .logoText small, .userName, .actionButton span { display: none; }
+  .logoIcon {
+    width: 96px;
+    height: 44px;
+    flex-basis: 96px;
+  }
+  .logoText b { font-size: .9rem; }
+  .headerSearch { display: none; }
+  .headerSearchText { display: none; }
   .actionButton { width: 38px; padding: 0; }
+}
+
+@media (max-width: 840px) {
+  .container {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .nav {
+    display: none;
+  }
+  .logoIcon {
+    width: 86px;
+    height: 40px;
+    flex-basis: 86px;
+  }
+  .actions {
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 720px) {
@@ -278,9 +346,9 @@
     gap: 7px;
   }
   .logoIcon {
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
+    width: 82px;
+    height: 38px;
+    flex: 0 0 82px;
     background: transparent;
     border: none;
     box-shadow: none;

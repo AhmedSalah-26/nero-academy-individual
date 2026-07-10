@@ -474,7 +474,7 @@ export function HomeScreen() {
 
           <section className={styles.communityCard}>
             <Forum />
-            <h2>{lang === 'ar' ? 'انضم إلى مجتمع شهاب Tech' : 'Join Sehap Tech community'}</h2>
+            <h2>{lang === 'ar' ? 'انضم إلى مجتمع أحمد يحيى' : 'Join Ahmed Yahia community'}</h2>
             <p>{lang === 'ar' ? 'تفاعل، اسأل، شارك وتعلم مع الآخرين.' : 'Ask, share, and learn with other students.'}</p>
             <Link href="/forums">{lang === 'ar' ? 'دخول المنتدى' : 'Open forum'}</Link>
           </section>

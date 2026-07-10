@@ -126,12 +126,12 @@ flutter_launcher_icons:
   image_path: "assets/logo2.png"  # استخدام PNG بدلاً من JPG
   min_sdk_android: 21
   # Adaptive icon لأندرويد (بدون إطار أبيض)
-  adaptive_icon_background: "#7C3AED"  # بنفسجي مناسب للبراند
+  adaptive_icon_background: "#06142F"
   adaptive_icon_foreground: "assets/logo2.png"
   web:
     generate: true
     image_path: "assets/logo2.png"
-    background_color: "#7C3AED"
+    background_color: "#06142F"
   windows:
     generate: true
     image_path: "assets/logo2.png"

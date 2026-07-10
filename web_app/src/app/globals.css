@@ -22,19 +22,19 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 8px 10px rgba(0, 0, 0, 0.04);
-  --shadow-primary: 0 16px 34px rgba(37, 99, 235, 0.18);
+  --shadow-primary: 0 16px 34px rgba(11, 99, 255, 0.18);
 
-  --primary: #2563EB;
-  --primary-rgb: 37, 99, 235;
-  --primary-light: #DBEAFE;
-  --primary-dark: #1D4ED8;
-  --primary-on-dark: #93C5FD;
-  --primary-glow: rgba(37, 99, 235, 0.10);
+  --primary: #0B63FF;
+  --primary-rgb: 11, 99, 255;
+  --primary-light: #D8E8FF;
+  --primary-dark: #0648C8;
+  --primary-on-dark: #6FB6FF;
+  --primary-glow: rgba(11, 99, 255, 0.12);
 
-  --background: #F7F6F8;
+  --background: #EEF5FF;
   --surface: #FFFFFF;
   --surface-card: #FFFFFF;
-  --surface-hover: rgba(37, 99, 235, 0.04);
+  --surface-hover: rgba(11, 99, 255, 0.04);
   --surface-soft: #F3F4F6;
   --card-dark: #172033;
   --surface-dark: #0F172A;
@@ -166,18 +166,18 @@ button, input, textarea, select { font-family: inherit; }
 .hidden { display: none !important; }
 
 [data-theme="dark"] {
-  --primary-rgb: 59, 130, 246;
-  --primary: #3b82f6;
-  --primary-dark: #1d4ed8;
-  --primary-light: #1e3a8a;
-  --primary-on-dark: #60a5fa;
-  --primary-glow: rgba(59, 130, 246, 0.15);
+  --primary-rgb: 65, 150, 255;
+  --primary: #4196FF;
+  --primary-dark: #0B63FF;
+  --primary-light: #0A2A5F;
+  --primary-on-dark: #82C2FF;
+  --primary-glow: rgba(65, 150, 255, 0.16);
 
-  --background: #0F172A;
-  --surface: rgba(30, 41, 59, 0.86);
-  --surface-card: #1E293B;
-  --surface-hover: rgba(37, 99, 235, 0.12);
-  --surface-soft: #1E293B;
+  --background: #050B18;
+  --surface: rgba(12, 26, 56, 0.88);
+  --surface-card: #0B1730;
+  --surface-hover: rgba(65, 150, 255, 0.12);
+  --surface-soft: #0D1E42;
   --card-dark: #172033;
   --surface-dark: #0F172A;
 

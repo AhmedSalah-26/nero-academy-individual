@@ -1,6 +1,6 @@
 {
-  "app_name": "Shahab Tech",
-  "splash_slogan": "We will continue the journey together",
+  "app_name": "Ahmed Yahia",
+  "splash_slogan": "LAB COAT in Chemistry",
   "clear_all": "Clear All",
   "common": {
     "loading": "Loading...",
@@ -118,7 +118,7 @@
     "bio": "Bio",
     "bio_placeholder": "Write about yourself and your experience...",
     "expertise": "Areas of Expertise",
-    "expertise_placeholder": "e.g. Programming, Design, Marketing",
+    "expertise_placeholder": "e.g. Chemistry, Reviews, Exams",
     "expertise_hint": "Separate areas with commas",
     "student_email": "Student Email",
     "student_email_placeholder": "Enter student email to link",
@@ -326,7 +326,7 @@
     "instructor_whatsapp": "Instructor WhatsApp",
     "instructor_whatsapp_unavailable": "Instructor phone is not available right now",
     "contact_whatsapp": "Contact on WhatsApp",
-    "whatsapp_message": "Hello, I want to complete my Shahab Tech payment. Operation ID: {orderId}",
+    "whatsapp_message": "Hello, I want to complete my Ahmed Yahia payment. Operation ID: {orderId}",
     "copied": "Copied"
   },
   "my_learning": {

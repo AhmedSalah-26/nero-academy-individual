@@ -5,21 +5,21 @@ class AppColors {
   AppColors._();
 
   // ============ Primary Colors ============
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryLight = Color(0xFFBFDBFE);
-  static const Color primaryDark = Color(0xFF1D4ED8);
+  static const Color primary = Color(0xFF0B63FF);
+  static const Color primaryLight = Color(0xFFD8E8FF);
+  static const Color primaryDark = Color(0xFF0648C8);
 
   // Primary for dark mode (brighter/more visible)
-  static const Color primaryOnDark = Color(0xFF93C5FD);
+  static const Color primaryOnDark = Color(0xFF82C2FF);
 
   // ============ Background Colors ============
-  static const Color backgroundLight = Color(0xFFEFF6FF);
-  static const Color backgroundDark = Color(0xFF07111F);
+  static const Color backgroundLight = Color(0xFFEEF5FF);
+  static const Color backgroundDark = Color(0xFF050B18);
 
   // ============ Surface Colors ============
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF0F172A);
-  static const Color cardDark = Color(0xFF172033);
+  static const Color surfaceDark = Color(0xFF0B1730);
+  static const Color cardDark = Color(0xFF0D1E42);
 
   // ============ Text Colors ============
   static const Color textMainLight = Color(0xFF0F172A);

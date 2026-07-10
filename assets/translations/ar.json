@@ -1,6 +1,6 @@
 {
-  "app_name": "شهاب تك",
-  "splash_slogan": "معاك هنكمل المشوار",
+  "app_name": "أحمد يحيى",
+  "splash_slogan": "LAB COAT في الكيمياء",
   "clear_all": "مسح الكل",
   "common": {
     "loading": "جاري التحميل...",
@@ -118,7 +118,7 @@
     "bio": "نبذة تعريفية",
     "bio_placeholder": "اكتب نبذة عن نفسك وخبراتك...",
     "expertise": "مجالات الخبرة",
-    "expertise_placeholder": "مثال: برمجة، تصميم، تسويق",
+    "expertise_placeholder": "مثال: كيمياء، مراجعات، امتحانات",
     "expertise_hint": "افصل بين المجالات بفاصلة",
     "student_email": "بريد الطالب",
     "student_email_placeholder": "أدخل بريد الطالب لربطه",
@@ -328,7 +328,7 @@
     "instructor_whatsapp": "واتساب المدرب",
     "instructor_whatsapp_unavailable": "رقم المدرب غير متاح حالياً",
     "contact_whatsapp": "تواصل على واتساب",
-    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب تك. رقم العملية: {orderId}",
+    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب أحمد يحيى. رقم العملية: {orderId}",
     "copied": "تم النسخ"
   },
   "my_learning": {

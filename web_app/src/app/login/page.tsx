@@ -261,7 +261,7 @@ function LoginContent() {
       <div className={`${styles.card} glass`}>
         <div className={styles.header}>
           <h1 className={`${styles.brandTitle} gradient-text`}>
-            {lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}
+            {lang === 'ar' ? 'أحمد يحيى' : 'Ahmed Yahia'}
           </h1>
         </div>
 

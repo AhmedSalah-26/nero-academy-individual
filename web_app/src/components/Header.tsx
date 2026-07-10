@@ -228,6 +228,11 @@ export function Header() {
     { href: '/#method', label: lang === 'ar' ? 'طريقة التعلم' : 'How it works' },
     { href: '/#reviews', label: lang === 'ar' ? 'آراء الطلاب' : 'Reviews' },
   ];
+  const displayName = (profile?.name || user?.email || '')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .join(' ');
 
   return (
     <>
@@ -240,11 +245,11 @@ export function Header() {
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>
               <span className={styles.logoIcon}>
-                <img src="/logo2.png" alt="Logo" className={styles.logoImg} />
+                <span className={styles.logoMark} aria-hidden="true" />
               </span>
               <span className={styles.logoText}>
-                <b>{lang === 'ar' ? 'شهاب Tech' : 'Shahab Tech'}</b>
-                <small>{lang === 'ar' ? 'منصة التعليم' : 'Learning Platform'}</small>
+                <b>{lang === 'ar' ? 'أحمد يحيى' : 'Ahmed Yahia'}</b>
+                <small>{lang === 'ar' ? 'LAB COAT في الكيمياء' : 'LAB COAT in Chemistry'}</small>
               </span>
             </Link>
 
@@ -294,7 +299,7 @@ export function Header() {
                   <span className={styles.avatar}>
                     {profile?.avatar_url ? <img src={profile.avatar_url} alt={profile.name || ''} /> : <Person fontSize="small" />}
                   </span>
-                  <span className={styles.userName}>{profile?.name || user.email}</span>
+                  <span className={styles.userName}>{displayName}</span>
                 </div>
                 <Link href="/profile" className={styles.settings} title={lang === 'ar' ? 'الملف الشخصي' : 'Profile'}>
                   <Settings fontSize="small" />

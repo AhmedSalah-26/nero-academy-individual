@@ -68,7 +68,7 @@ const testimonials = [
 ];
 
 const stats = [
-  { icon: Groups, value: '+15K', label_ar: 'طالب سجل معنا', label_en: 'students joined' },
+  { icon: Groups, value: '+15K', label_ar: 'طالب كيمياء سجل معنا', label_en: 'chemistry students joined' },
   { icon: Schedule, value: '+200', label_ar: 'ساعة محتوى', label_en: 'content hours' },
   { icon: Star, value: '+98%', label_ar: 'نتائج مميزة', label_en: 'great results', color: 'var(--warning)' },
   { icon: EmojiEvents, value: '+10', label_ar: 'سنوات خبرة', label_en: 'years experience' },
@@ -173,18 +173,18 @@ export default function HomePage() {
           <div className={`${styles.heroText} animate-fade-up`}>
             <div className={styles.heroBadge}>
               <AutoAwesome fontSize="small" />
-              <span>{lang === 'ar' ? 'برمجة مفهومة، خطوة بخطوة' : 'Programming, clearly explained'}</span>
+              <span>{lang === 'ar' ? 'كيمياء مفهومة، خطوة بخطوة' : 'Chemistry, clearly explained'}</span>
             </div>
             
             <h1>
               {lang === 'ar' ? (
                 <>
-                  افهم البرمجة.<br />
+                  افهم الكيمياء.<br />
                   <span>حقق هدفك.</span>
                 </>
               ) : (
                 <>
-                  Understand programming.<br />
+                  Understand chemistry.<br />
                   <span>Earn the grade.</span>
                 </>
               )}
@@ -192,7 +192,7 @@ export default function HomePage() {
             
             <p>
               {lang === 'ar'
-                ? 'شرح بسيط، تدريب ذكي، ومتابعة مستمرة تساعدك تدخل الامتحان وأنت واثق.'
+                ? 'شرح كيمياء بسيط، تدريب ذكي، ومراجعات مركزة تساعدك تدخل الامتحان وأنت واثق.'
                 : 'Clear lessons, smart practice, and steady support to help you enter every exam with confidence.'}
             </p>
             
@@ -213,8 +213,8 @@ export default function HomePage() {
             <div className={styles.visualRing} />
             <div className={styles.teacherContainer}>
               <Image
-                src="/logo2.png"
-                alt={lang === 'ar' ? 'المهندس شهاب غزال' : 'Eng Shehab Ghazal'}
+                src="/ahmed-yahia-hero.png"
+                alt={lang === 'ar' ? 'مستر أحمد يحيى' : 'Ahmed Yahia'}
                 fill
                 priority
                 sizes="(max-width: 760px) 78vw, 520px"

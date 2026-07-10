@@ -76,8 +76,6 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-    
     return Stack(
       fit: StackFit.expand,
       clipBehavior: Clip.none,
@@ -88,17 +86,32 @@ class _HeroVisual extends StatelessWidget {
                 isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
           ),
         ),
-        _AnimatedProgrammingShapes(isDark: isDark),
-        Positioned(
-          right: -w * 0.05,
-          bottom: 0,
-          width: w * 0.65,
+        Positioned.fill(
           child: Image.asset(
             'assets/transparent_hero.png',
-            fit: BoxFit.contain,
-            alignment: Alignment.bottomCenter,
+            fit: BoxFit.cover,
+            alignment: Alignment.centerRight,
           ),
         ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  (isDark ? AppColors.backgroundDark : const Color(0xFF06142F))
+                      .withValues(alpha: 0.88),
+                  (isDark ? AppColors.backgroundDark : const Color(0xFF06142F))
+                      .withValues(alpha: 0.54),
+                  Colors.transparent,
+                ],
+                stops: const [0, 0.48, 0.86],
+              ),
+            ),
+          ),
+        ),
+        const _AnimatedProgrammingShapes(isDark: true),
         _HeroCopy(isDark: isDark),
       ],
     );
@@ -552,7 +565,7 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.012),
                 Text(
-                  'شهاب تك',
+                  'أحمد يحيى',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.primaryOnDark
@@ -573,7 +586,7 @@ class _HeroCopy extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    'برمجة للمبتدئين',
+                    'LAB COAT في الكيمياء',
                     style: TextStyle(
                       color: AppColors.white,
                       fontSize: (w * 0.021).clamp(8.5, 11.0),
@@ -584,7 +597,7 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.014),
                 Text(
-                  'لسه هنبدأ خطوة بخطوة',
+                  'كيمياء خطوة بخطوة',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.textMutedDark

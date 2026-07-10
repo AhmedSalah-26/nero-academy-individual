@@ -264,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
   Widget _brandNameText(bool isArabic, bool isDark) {
-    final brandName = isArabic ? 'شهاب تك' : 'Shahab Tech';
+    final brandName = isArabic ? 'أحمد يحيى' : 'Ahmed Yahia';
     final gradient = isDark
         ? const LinearGradient(
             colors: [

@@ -2,7 +2,7 @@ export type Language = 'ar' | 'en';
 
 export const translations = {
   ar: {
-    appName: 'شهاب Tech',
+    appName: 'أحمد يحيى',
     home: 'الرئيسية',
     myLearning: 'تعليمي',
     parentPortal: 'بوابة ولي الأمر',
@@ -186,7 +186,7 @@ export const translations = {
     whatsappMessage: 'مرحباً، أود تأكيد الدفع على الطلب رقم: {orderId}',
   },
   en: {
-    appName: 'Shahab Tech',
+    appName: 'Ahmed Yahia',
     home: 'Home',
     myLearning: 'My Learning',
     parentPortal: 'Parent Portal',

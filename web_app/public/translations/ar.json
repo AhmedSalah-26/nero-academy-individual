@@ -1,6 +1,6 @@
 {
-  "app_name": "شهاب اكاديمى",
-  "splash_slogan": "معاك هنكمل المشوار",
+  "app_name": "أحمد يحيى",
+  "splash_slogan": "LAB COAT في الكيمياء",
   "clear_all": "مسح الكل",
   "common": {
     "loading": "جاري التحميل...",
@@ -117,7 +117,7 @@
     "bio": "نبذة تعريفية",
     "bio_placeholder": "اكتب نبذة عن نفسك وخبراتك...",
     "expertise": "مجالات الخبرة",
-    "expertise_placeholder": "مثال: برمجة، تصميم، تسويق",
+    "expertise_placeholder": "مثال: كيمياء، مراجعات، امتحانات",
     "expertise_hint": "افصل بين المجالات بفاصلة",
     "student_email": "بريد الطالب",
     "student_email_placeholder": "أدخل بريد الطالب لربطه",
