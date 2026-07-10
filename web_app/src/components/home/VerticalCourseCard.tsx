@@ -48,16 +48,17 @@ function formatCount(count: number): string {
 }
 
 export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, width }: VerticalCourseCardProps) {
-  const { lang, addToCart, cart } = useApp();
+  const { lang, addToCart, cart, enrolledCourseIds } = useApp();
   const title = lang === 'ar' ? (course.title_ar || course.title_en || '') : (course.title_en || course.title_ar || '');
   const inCart = cart.includes(course.id);
+  const isEnrolled = enrolledCourseIds?.includes(course.id);
   const discountPct = getCourseDiscountPercentage(course);
   const basePrice = getBaseCoursePrice(course);
   const currentPrice = getEffectiveCoursePrice(course);
   const hasDiscount = discountPct != null;
 
   return (
-    <Link href={`/courses/${course.id}`} className={styles.card} style={width ? { width } : undefined}>
+    <Link href={isEnrolled ? `/learn/${course.id}` : `/courses/${course.id}`} className={styles.card} style={width ? { width } : undefined}>
       <div className={styles.thumbnail}>
         {course.thumbnail_url ? (
           <img src={course.thumbnail_url} alt={title} className={styles.img} />
@@ -94,7 +95,20 @@ export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, wid
           </span>
         </div>
         <div className={styles.priceRow}>
-          {course.is_free ? (
+          {isEnrolled ? (
+            <>
+              <span className={styles.freePrice} style={{ color: 'var(--primary)' }}>
+                {lang === 'ar' ? 'مشترك' : 'Enrolled'}
+              </span>
+              <button
+                type="button"
+                className={styles.cartButton}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/learn/${course.id}`; }}
+              >
+                {lang === 'ar' ? 'استكمال' : 'Resume'}
+              </button>
+            </>
+          ) : course.is_free ? (
             <span className={styles.freePrice}>{lang === 'ar' ? 'مجاني' : 'Free'}</span>
           ) : (
             <span className={styles.price}>
@@ -102,14 +116,16 @@ export function VerticalCourseCard({ course, isWishlisted, onWishlistToggle, wid
               {hasDiscount && <del className={styles.origPrice}>{Math.round(basePrice)}</del>}
             </span>
           )}
-          <button
-            type="button"
-            className={`${styles.cartButton} ${inCart ? styles.cartButtonAdded : ''}`}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(course.id); }}
-            disabled={inCart}
-          >
-            {inCart ? (lang === 'ar' ? 'تمت الإضافة' : 'Added') : (lang === 'ar' ? 'أضف للسلة' : 'Add to cart')}
-          </button>
+          {!isEnrolled && (
+            <button
+              type="button"
+              className={`${styles.cartButton} ${inCart ? styles.cartButtonAdded : ''}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(course.id); }}
+              disabled={inCart}
+            >
+              {inCart ? (lang === 'ar' ? 'تمت الإضافة' : 'Added') : (lang === 'ar' ? 'أضف للسلة' : 'Add to cart')}
+            </button>
+          )}
         </div>
       </div>
     </Link>
