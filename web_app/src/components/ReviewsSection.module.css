@@ -182,3 +182,25 @@
   font-size: 0.8rem;
   color: var(--text-secondary);
 }
+
+.reportLink {
+  align-self: flex-start;
+  min-height: 32px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-light);
+  border-radius: 99px;
+  color: var(--text-secondary);
+  background: var(--surface-soft);
+  font-size: .72rem;
+  font-weight: 800;
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+.reportLink:hover {
+  border-color: var(--error);
+  color: var(--error);
+  background: var(--error-light);
+}

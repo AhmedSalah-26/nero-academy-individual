@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useApp } from '../../../context/AppContext';
@@ -79,8 +79,6 @@ interface CourseDetails {
   objectives: string[];
   target_audience: string[];
 }
-
-const LESSON_TYPE_ICONS: Record<string, React.ReactNode> = {};
 
 function LessonTypeIcon({ type }: { type: string }) {
   switch (type) {
@@ -227,6 +225,13 @@ export default function CourseDetailsPage() {
     }
   };
 
+  const handleReportCourse = () => {
+    if (!course) return;
+
+    const returnTo = `/courses/${course.id}`;
+    router.push(`/report?target=course&id=${course.id}&returnTo=${encodeURIComponent(returnTo)}`);
+  };
+
   const ratingBuckets = useMemo(() => {
     const dist = course?.rating_distribution || {};
     const total = course?.rating_count || 0;
@@ -327,7 +332,7 @@ export default function CourseDetailsPage() {
               <Share fontSize="small" />
               <span>{copied ? t.copied : t.share}</span>
             </button>
-            <button className={styles.iconActionBtn} type="button">
+            <button className={styles.iconActionBtn} type="button" onClick={handleReportCourse}>
               <Flag fontSize="small" />
               <span>{t.report}</span>
             </button>
