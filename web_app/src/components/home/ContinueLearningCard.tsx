@@ -32,16 +32,17 @@ export function ContinueLearningCard({
       </div>
       <div className={styles.body}>
         <span className={styles.label}>
-          {lang === 'ar' ? 'متابعة التعلم' : 'CONTINUE LEARNING'}
+          {lang === 'ar' ? 'تابع التعلم' : 'CONTINUE LEARNING'}
         </span>
         <h3 className={styles.title}>{title}</h3>
         <div className={styles.meta}>
-          <span>{lang === 'ar' ? 'مكتمل' : 'Completed'} {Math.round(progress)}%</span>
+          <span>{lang === 'ar' ? `أتممت ${Math.round(progress)}%` : `Completed ${Math.round(progress)}%`}</span>
           <span>{completedLessons}/{totalLessons} {lang === 'ar' ? 'درس' : 'lessons'}</span>
         </div>
-        <button className={styles.resumeBtn}>
-          ▶ {lang === 'ar' ? 'متابعة' : 'Resume'}
-        </button>
+        <div className={styles.resumeBtn}>
+          <span style={{ display: 'inline-block', fontSize: 10, marginInlineEnd: 4, transform: lang === 'ar' ? 'rotate(180deg)' : 'none' }}>▶</span>
+          {lang === 'ar' ? 'استكمل' : 'Resume'}
+        </div>
       </div>
     </Link>
   );
