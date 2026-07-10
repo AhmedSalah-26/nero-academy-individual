@@ -1,4 +1,4 @@
-.card{display:flex;gap:0;border-radius:14px;overflow:hidden;border:1px solid rgba(var(--primary-rgb),.25);background:var(--surface);height:clamp(95px,6.5vw,120px);transition:transform .2s,box-shadow .2s}
+.card{display:flex;gap:0;border-radius:14px;overflow:hidden;border:1px solid rgba(var(--primary-rgb),.25);background:var(--surface);height:clamp(95px,6.5vw,120px);transition:transform .2s,box-shadow .2s;cursor:pointer;text-decoration:none;color:inherit}
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .thumbnailLink{display:block;text-decoration:none;color:inherit;flex-shrink:0}
 .thumbnail{position:relative;width:clamp(85px,5.5vw,115px);height:100%;overflow:hidden}

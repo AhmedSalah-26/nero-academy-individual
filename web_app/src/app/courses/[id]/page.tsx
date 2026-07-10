@@ -121,12 +121,27 @@ export default function CourseDetailsPage() {
 
         if (courseData && !courseError) {
           const parsedOptions = typeof courseData.pricing_options === 'string' ? JSON.parse(courseData.pricing_options) : (courseData.pricing_options || []);
+          const { data: reviewsData } = await supabase
+            .from('course_reviews')
+            .select('rating')
+            .eq('course_id', id);
+
+          const ratingDist: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+          if (reviewsData) {
+            reviewsData.forEach((review) => {
+              const rating = String(review.rating);
+              if (ratingDist[rating] !== undefined) {
+                ratingDist[rating] += 1;
+              }
+            });
+          }
+
           const parsedCourse = {
             ...courseData,
             requirements: typeof courseData.requirements === 'string' ? JSON.parse(courseData.requirements) : (courseData.requirements || []),
             objectives: typeof courseData.objectives === 'string' ? JSON.parse(courseData.objectives) : (courseData.objectives || []),
             target_audience: typeof courseData.target_audience === 'string' ? JSON.parse(courseData.target_audience) : (courseData.target_audience || []),
-            rating_distribution: typeof courseData.rating_distribution === 'string' ? JSON.parse(courseData.rating_distribution) : (courseData.rating_distribution || {}),
+            rating_distribution: ratingDist,
             pricing_options: parsedOptions,
             total_quizzes: courseData.total_quizzes || 0,
             has_certificate: courseData.has_certificate ?? true,
@@ -138,40 +153,91 @@ export default function CourseDetailsPage() {
           }
         }
 
-        const { data: sectionsData, error: sectionsError } = await supabase
+        const { data: sectionsData } = await supabase
           .from('sections')
-          .select('*')
+          .select(`
+            id, title_ar, title_en, sort_order,
+            lessons(
+              id, title_ar, title_en, type, video_duration, is_preview, sort_order
+            )
+          `)
           .eq('course_id', id)
           .eq('is_published', true)
           .order('sort_order', { ascending: true });
 
-        if (sectionsData && !sectionsError) {
-          const fetchedSections = sectionsData as Section[];
-
-          const sectionsWithLessons = await Promise.all(
-            fetchedSections.map(async (sec) => {
-              const { data: lessonsData } = await supabase
-                .from('lessons')
-                .select('id, title_ar, title_en, type, video_duration, is_preview')
-                .eq('section_id', sec.id)
-                .eq('is_published', true)
-                .order('sort_order', { ascending: true });
-
-              return {
-                ...sec,
-                lessons: (lessonsData || []) as Lesson[],
-              };
-            })
-          );
-
-          setSections(sectionsWithLessons);
-
-          if (sectionsWithLessons.length > 0) {
-            setExpandedSections({ [sectionsWithLessons[0].id]: true });
-          }
+        let resolvedSections: Section[] = [];
+        if (sectionsData && sectionsData.length > 0) {
+          resolvedSections = (sectionsData as Array<{
+            id: string;
+            title_ar: string;
+            title_en: string;
+            sort_order: number;
+            lessons: Array<Lesson & { sort_order: number }>;
+          }>).map((section) => ({
+            id: section.id,
+            title_ar: section.title_ar,
+            title_en: section.title_en,
+            sort_order: section.sort_order,
+            lessons: (section.lessons || []).sort((a, b) => a.sort_order - b.sort_order),
+          }));
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
+        try {
+          const { data: rpcData, error: rpcError } = await supabase.rpc('get_course_details', {
+            p_course_id: id,
+            p_locale: lang,
+          });
+
+          if (rpcError) {
+            console.warn('[CourseDetails] RPC fallback failed:', rpcError.message);
+          }
+
+          if (rpcData && !rpcError) {
+            const rpcSections: Array<{
+              id: string;
+              title: string;
+              lessons: Array<{
+                id: string;
+                title: string;
+                type: string;
+                duration: number;
+                is_preview: boolean;
+              }>;
+            }> = rpcData.sections || [];
+
+            const rpcLessonsCount = rpcSections.reduce((sum, section) => sum + (section.lessons?.length || 0), 0);
+            const directLessonsCount = resolvedSections.reduce((sum, section) => sum + section.lessons.length, 0);
+
+            if (rpcSections.length > 0 && rpcLessonsCount > directLessonsCount) {
+              resolvedSections = rpcSections.map((section, sectionIndex) => ({
+                id: section.id,
+                title_ar: section.title,
+                title_en: section.title,
+                sort_order: sectionIndex,
+                lessons: (section.lessons || []).map((lesson) => ({
+                  id: lesson.id,
+                  title_ar: lesson.title,
+                  title_en: lesson.title,
+                  type: lesson.type || 'video',
+                  video_duration: lesson.duration || 0,
+                  is_preview: lesson.is_preview || false,
+                })),
+              }));
+            }
+          }
+        } catch (rpcErr) {
+          console.warn('[CourseDetails] RPC call threw:', rpcErr);
+        }
+
+        if (resolvedSections.length > 0) {
+          setSections(resolvedSections);
+          setExpandedSections((prev) =>
+            Object.keys(prev).length === 0 ? { [resolvedSections[0].id]: true } : prev
+          );
+        }
+
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
         if (session?.user) {
           const { data: enrollData } = await supabase
             .from('enrollments')
@@ -193,7 +259,7 @@ export default function CourseDetailsPage() {
     }
 
     fetchCourseDetails();
-  }, [id]);
+  }, [id, lang]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => ({

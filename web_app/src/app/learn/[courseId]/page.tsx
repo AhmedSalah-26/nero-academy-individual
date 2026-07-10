@@ -146,10 +146,25 @@ export default function CoursePlayerPage() {
         setEnrollmentId(enrollData.id);
 
         const { data: courseData } = await supabase.from('courses')
-          .select('instructor_id, title_ar, title_en, description_ar, description_en, rating, rating_count, rating_distribution, profiles!courses_instructor_id_fkey(id,name,avatar_url)')
+          .select('instructor_id, title_ar, title_en, description_ar, description_en, rating, rating_count, profiles!courses_instructor_id_fkey(id,name,avatar_url)')
           .eq('id', courseId).maybeSingle();
         if (courseData) {
-          setCourse(courseData as unknown as CourseSummary);
+          const { data: reviewsData } = await supabase
+            .from('course_reviews')
+            .select('rating')
+            .eq('course_id', courseId);
+
+          const ratingDist: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+          if (reviewsData) {
+            reviewsData.forEach((review) => {
+              const rating = String(review.rating);
+              if (ratingDist[rating] !== undefined) {
+                ratingDist[rating] += 1;
+              }
+            });
+          }
+
+          setCourse({ ...courseData, rating_distribution: ratingDist } as unknown as CourseSummary);
           const { data: instructorData } = await supabase.from('instructor_profiles')
             .select('display_name, headline_ar, headline_en, avatar_url')
             .eq('instructor_id', courseData.instructor_id).limit(1).maybeSingle();

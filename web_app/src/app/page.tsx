@@ -396,7 +396,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className={`${styles.section} ${styles.featuresSection}`} data-section-id="features">
+      <section id="method" className={`${styles.section} ${styles.featuresSection}`} data-section-id="features">
         <div className={styles.featuresHeader}>
           <div className={styles.sectionLabel}>
             <span>{lang === 'ar' ? 'ليه تختار منصتنا؟' : 'Why choose us?'}</span>
@@ -419,7 +419,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className={`${styles.section} ${styles.testimonialsSection}`} data-section-id="testimonials">
+      <section id="reviews" className={`${styles.section} ${styles.testimonialsSection}`} data-section-id="testimonials">
         <div className={styles.sectionHeader}>
           <div className={styles.sectionLabel}>
             <span>{lang === 'ar' ? 'من قلب الفصل' : 'From the classroom'}</span>
