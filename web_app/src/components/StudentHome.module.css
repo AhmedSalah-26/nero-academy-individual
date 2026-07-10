@@ -220,8 +220,8 @@
   min-width: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  min-height: 148px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 135px;
   border: 1px solid var(--border);
   border-radius: 22px;
   background: var(--surface);
@@ -248,6 +248,9 @@
   background:
     radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 38%),
     var(--surface-soft);
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
+  border-inline-end: 1px solid var(--border-light);
 }
 
 .courseImage img {
@@ -256,6 +259,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-start-start-radius: inherit;
+  border-end-start-radius: inherit;
 }
 
 .courseImageOverlay {
@@ -267,22 +272,25 @@
 
 .courseBody {
   min-width: 0;
-  padding: 16px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .continueBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
   color: var(--primary);
-  font-size: .62rem;
-  font-weight: 900;
+  font-size: .65rem;
+  font-weight: 850;
   letter-spacing: .04em;
   text-transform: uppercase;
+}
+
+[data-theme="dark"] .continueBadge {
+  color: var(--primary-on-dark);
 }
 
 .courseBody h3 {
@@ -290,9 +298,9 @@
   overflow: hidden;
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: .95rem;
-  font-weight: 800;
-  line-height: 1.45;
+  font-size: 1.05rem;
+  font-weight: 850;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -302,10 +310,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--text-secondary);
-  font-size: .63rem;
+  color: var(--text-muted);
+  font-size: .75rem;
   font-weight: 700;
-  gap: 8px;
+  gap: 12px;
 }
 
 .courseMeta span {
@@ -319,15 +327,18 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 5px;
+  height: 6px;
   background: color-mix(in srgb, var(--primary) 14%, transparent);
   z-index: 10;
+  border-end-start-radius: inherit;
+  overflow: hidden;
 }
 
 .track i {
   height: 100%;
   display: block;
   background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+  border-end-start-radius: inherit;
 }
 
 .resumeBtn {
@@ -335,19 +346,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   padding: 10px 14px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   font-size: .8rem;
   font-weight: 850;
   width: 100%;
   box-shadow: 0 4px 12px rgba(var(--primary-rgb), .2);
-  transition: opacity .15s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .courseCard:hover .resumeBtn {
+  transform: translateY(-1px);
   opacity: .95;
 }
 
@@ -396,11 +408,11 @@
   .actionCard > span { width: 36px; height: 36px; border-radius: 12px; }
   .actionCard strong { font-size: .62rem; }
   .actionCard small { font-size: .5rem; }
-  .courseCard { grid-template-columns: 128px minmax(0, 1fr); min-height: 132px; border-radius: 19px; }
-  .courseImage { min-height: 132px; }
-  .courseBody { padding: 13px 14px; gap: 5px; }
-  .courseBody h3 { font-size: .8rem; }
-  .resumeBtn { font-size: .67rem; padding: 8px 12px; }
+  .courseCard { grid-template-columns: 145px minmax(0, 1fr); min-height: 110px; border-radius: 19px; }
+  .courseImage { min-height: 110px; }
+  .courseBody { padding: 12px 14px; gap: 4px; }
+  .courseBody h3 { font-size: .85rem; font-weight: 850; }
+  .resumeBtn { font-size: .72rem; padding: 7px 12px; margin-top: 2px; border-radius: 10px; }
   .sectionTitle h2 { font-size: 1.35rem; }
 }
 
