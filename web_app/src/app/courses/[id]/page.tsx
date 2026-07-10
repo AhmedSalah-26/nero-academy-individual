@@ -140,37 +140,102 @@ export default function CourseDetailsPage() {
           }
         }
 
-        const { data: sectionsData, error: sectionsError } = await supabase
+        // ── Step 1: Direct query (mirrors Flutter mobile approach) ──
+        // Works fully for enrolled users. Non-enrolled users see only is_preview lessons due to RLS.
+        const { data: sectionsData } = await supabase
           .from('sections')
-          .select('*')
+          .select(`
+            id, title_ar, title_en, sort_order,
+            lessons(
+              id, title_ar, title_en, type, video_duration, is_preview, sort_order
+            )
+          `)
           .eq('course_id', id)
           .eq('is_published', true)
           .order('sort_order', { ascending: true });
 
-        if (sectionsData && !sectionsError) {
-          const fetchedSections = sectionsData as Section[];
+        let directSections: Section[] = [];
+        if (sectionsData && sectionsData.length > 0) {
+          directSections = (sectionsData as Array<{
+            id: string;
+            title_ar: string;
+            title_en: string;
+            sort_order: number;
+            lessons: Array<{
+              id: string;
+              title_ar: string;
+              title_en: string;
+              type: string;
+              video_duration: number;
+              is_preview: boolean;
+              sort_order: number;
+            }>;
+          }>).map((sec) => ({
+            id: sec.id,
+            title_ar: sec.title_ar,
+            title_en: sec.title_en,
+            sort_order: sec.sort_order,
+            lessons: (sec.lessons || []).sort((a, b) => a.sort_order - b.sort_order),
+          }));
+        }
 
-          const sectionsWithLessons = await Promise.all(
-            fetchedSections.map(async (sec) => {
-              const { data: lessonsData } = await supabase
-                .from('lessons')
-                .select('id, title_ar, title_en, type, video_duration, is_preview')
-                .eq('section_id', sec.id)
-                .eq('is_published', true)
-                .order('sort_order', { ascending: true });
+        // ── Step 2: RPC fallback (mirrors Flutter _hydratePublicCurriculumIfNeeded) ──
+        // The SECURITY DEFINER RPC bypasses RLS and returns ALL published lessons,
+        // including locked ones. We always call it and use results if they contain
+        // more lessons than the direct query (RLS may have filtered non-preview lessons).
+        try {
+          const { data: rpcData, error: rpcError } = await supabase.rpc('get_course_details', {
+            p_course_id: id,
+            p_locale: lang,
+          });
 
-              return {
-                ...sec,
-                lessons: (lessonsData || []) as Lesson[],
-              };
-            })
-          );
-
-          setSections(sectionsWithLessons);
-
-          if (sectionsWithLessons.length > 0) {
-            setExpandedSections({ [sectionsWithLessons[0].id]: true });
+          if (rpcError) {
+            console.warn('[CourseDetails] RPC fallback failed:', rpcError.message);
           }
+
+          if (rpcData && !rpcError) {
+            const rpcSections: Array<{
+              id: string;
+              title: string;
+              lessons: Array<{
+                id: string;
+                title: string;
+                type: string;
+                duration: number;
+                is_preview: boolean;
+              }>;
+            }> = rpcData.sections || [];
+
+            const rpcLessonsCount = rpcSections.reduce((acc, sec) => acc + (sec.lessons?.length || 0), 0);
+            const directLessonsCount = directSections.reduce((acc, sec) => acc + sec.lessons.length, 0);
+
+            // Use RPC result if it has more lessons (i.e. it bypassed RLS)
+            if (rpcSections.length > 0 && rpcLessonsCount > directLessonsCount) {
+              directSections = rpcSections.map((sec, secIdx) => ({
+                id: sec.id,
+                title_ar: sec.title,
+                title_en: sec.title,
+                sort_order: secIdx,
+                lessons: (sec.lessons || []).map((lesson) => ({
+                  id: lesson.id,
+                  title_ar: lesson.title,
+                  title_en: lesson.title,
+                  type: lesson.type || 'video',
+                  video_duration: lesson.duration || 0,
+                  is_preview: lesson.is_preview || false,
+                })),
+              }));
+            }
+          }
+        } catch (rpcErr) {
+          console.warn('[CourseDetails] RPC call threw:', rpcErr);
+        }
+
+        if (directSections.length > 0) {
+          setSections(directSections);
+          setExpandedSections((prev) =>
+            Object.keys(prev).length === 0 ? { [directSections[0].id]: true } : prev
+          );
         }
 
         const { data } = await supabase.auth.getSession();
@@ -196,7 +261,7 @@ export default function CourseDetailsPage() {
     }
 
     fetchCourseDetails();
-  }, [id]);
+  }, [id, lang]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => ({
