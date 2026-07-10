@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -42,6 +43,27 @@ class MainActivity : FlutterActivity() {
                 }
                 "hide" -> {
                     hideMediaNotification()
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // Screen security channel — enables/disables FLAG_SECURE
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            SCREEN_SECURE_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setScreenSecure" -> {
+                    val enable = call.argument<Boolean>("enable") ?: false
+                    runOnUiThread {
+                        if (enable) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        }
+                    }
                     result.success(null)
                 }
                 else -> result.notImplemented()
@@ -182,8 +204,9 @@ class MainActivity : FlutterActivity() {
     // ------------------------------------------------------------------ //
 
     companion object {
-        const val CHANNEL_NAME  = "nero_academy/media_notification"
-        const val ACTION_PREFIX = "com.shehabtech.edu.MEDIA_"
+        const val CHANNEL_NAME        = "nero_academy/media_notification"
+        const val SCREEN_SECURE_CHANNEL = "nero_academy/screen_secure"
+        const val ACTION_PREFIX       = "com.shehabtech.edu.MEDIA_"
 
         @Volatile
         private var instance: MainActivity? = null

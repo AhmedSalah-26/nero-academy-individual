@@ -44,6 +44,7 @@ class _FullscreenPlayerScreenState extends State<FullscreenPlayerScreen> {
   @override
   void dispose() {
     unawaited(_restorePortraitMode());
+    ScreenProtectionService.disable();
     _controller?.removeListener(_onPlayerChanged);
     _controller?.dispose();
     super.dispose();
