@@ -123,12 +123,29 @@ export default function CourseDetailsPage() {
 
         if (courseData && !courseError) {
           const parsedOptions = typeof courseData.pricing_options === 'string' ? JSON.parse(courseData.pricing_options) : (courseData.pricing_options || []);
+          
+          // Fetch rating distribution from course_reviews (mirrors Flutter getRatingSummary)
+          const { data: reviewsData } = await supabase
+            .from('course_reviews')
+            .select('rating')
+            .eq('course_id', id);
+
+          const ratingDist: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+          if (reviewsData) {
+            reviewsData.forEach((rev) => {
+              const r = String(rev.rating);
+              if (ratingDist[r] !== undefined) {
+                ratingDist[r] += 1;
+              }
+            });
+          }
+
           const parsedCourse = {
             ...courseData,
             requirements: typeof courseData.requirements === 'string' ? JSON.parse(courseData.requirements) : (courseData.requirements || []),
             objectives: typeof courseData.objectives === 'string' ? JSON.parse(courseData.objectives) : (courseData.objectives || []),
             target_audience: typeof courseData.target_audience === 'string' ? JSON.parse(courseData.target_audience) : (courseData.target_audience || []),
-            rating_distribution: typeof courseData.rating_distribution === 'string' ? JSON.parse(courseData.rating_distribution) : (courseData.rating_distribution || {}),
+            rating_distribution: ratingDist,
             pricing_options: parsedOptions,
             total_quizzes: courseData.total_quizzes || 0,
             has_certificate: courseData.has_certificate ?? true,
