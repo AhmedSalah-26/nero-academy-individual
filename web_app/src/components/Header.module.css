@@ -262,9 +262,20 @@
     inset 0 1px 0 rgba(255,255,255,.68);
 }
 
+.extraActions {
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 1100px) {
+  .extraActions {
+    display: none;
+  }
+}
+
 @media (max-width: 960px) {
-  .container { gap: 16px; }
-  .nav { gap: 16px; }
+  .container { gap: 12px; }
+  .nav { display: none; }
   .logoText small, .userName, .actionButton span { display: none; }
   .actionButton { width: 38px; padding: 0; }
 }

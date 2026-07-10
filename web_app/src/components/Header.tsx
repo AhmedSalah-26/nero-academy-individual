@@ -30,15 +30,24 @@ export function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Synchronously check scroll direction and update visibility state
-      if (currentScrollY < lastScrollY.current) {
+      const diff = currentScrollY - lastScrollY.current;
+
+      // Always show header at the top of the page
+      if (currentScrollY <= 60) {
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY.current && currentScrollY > 120) {
-        setIsVisible(false);
+        lastScrollY.current = currentScrollY;
+        return;
       }
-      
-      lastScrollY.current = currentScrollY;
+
+      // Only trigger show/hide when scrolling more than 10px to prevent bounce/jitter
+      if (Math.abs(diff) > 10) {
+        if (diff < 0) {
+          setIsVisible(true);
+        } else if (diff > 0 && currentScrollY > 120) {
+          setIsVisible(false);
+        }
+        lastScrollY.current = currentScrollY;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -98,7 +107,7 @@ export function Header() {
 
           <div className={styles.actions}>
             {user && (
-              <>
+              <div className={styles.extraActions}>
                 <Link href="/notifications" className={styles.squareButton} aria-label={t.notifications}>
                   <Notifications fontSize="small" />
                 </Link>
@@ -111,7 +120,7 @@ export function Header() {
                 <Link href="/orders-status" className={styles.squareButton} aria-label={lang === 'ar' ? 'الطلبات' : 'Orders'}>
                   <Receipt fontSize="small" />
                 </Link>
-              </>
+              </div>
             )}
             <Link href="/cart" className={styles.squareButton} aria-label={t.cart}>
               <ShoppingCart fontSize="small" />
