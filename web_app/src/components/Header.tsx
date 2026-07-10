@@ -25,29 +25,50 @@ export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
+  const [isFloating, setIsFloating] = useState(false);
   const lastScrollY = useRef(0);
+  const scrollAccumulator = useRef(0);
 
   useEffect(() => {
+    // Set initial scroll position on mount
+    lastScrollY.current = window.scrollY;
+    setIsFloating(window.scrollY > 10);
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const diff = currentScrollY - lastScrollY.current;
 
-      // Always show header at the top of the page
+      // Update floating state
+      setIsFloating(currentScrollY > 10);
+
+      // Always show header near the top of the page
       if (currentScrollY <= 60) {
         setIsVisible(true);
+        scrollAccumulator.current = 0;
         lastScrollY.current = currentScrollY;
         return;
       }
 
-      // Only trigger show/hide when scrolling more than 10px to prevent bounce/jitter
-      if (Math.abs(diff) > 10) {
-        if (diff < 0) {
-          setIsVisible(true);
-        } else if (diff > 0 && currentScrollY > 120) {
-          setIsVisible(false);
-        }
-        lastScrollY.current = currentScrollY;
+      // Determine consecutive scroll direction accumulator
+      const wasScrollingUp = scrollAccumulator.current < 0;
+      const isScrollingUpNow = diff < 0;
+
+      if (wasScrollingUp !== isScrollingUpNow) {
+        scrollAccumulator.current = 0; // Reset accumulator on direction change
       }
+
+      scrollAccumulator.current += diff;
+
+      // Apply threshold: ignore consecutive scroll changes smaller than 10px
+      if (scrollAccumulator.current < -10) {
+        setIsVisible(true);
+        scrollAccumulator.current = 0; // Reset after toggle
+      } else if (scrollAccumulator.current > 10 && currentScrollY > 120) {
+        setIsVisible(false);
+        scrollAccumulator.current = 0; // Reset after toggle
+      }
+
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -74,7 +95,7 @@ export function Header() {
   ];
 
   return (
-    <header className={`${styles.header} ${isVisible ? '' : styles.hidden}`}>
+    <header className={`${styles.header} ${isVisible ? '' : styles.hidden} ${isFloating ? styles.floating : ''}`}>
         <div className={styles.container}>
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>

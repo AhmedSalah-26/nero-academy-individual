@@ -34,9 +34,14 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   background: var(--glass-bg);
-  box-shadow: 0 18px 46px rgba(7, 16, 8, 0.10);
+  box-shadow: none;
   backdrop-filter: blur(22px) saturate(1.2);
   -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.floating .container {
+  box-shadow: 0 10px 30px rgba(7, 16, 8, 0.08);
 }
 
 .logoWrapper, .logo, .actions, .nav, .userCard, .userProfile, .actionButton, .squareButton, .loginButton {
