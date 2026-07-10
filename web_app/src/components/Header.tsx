@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  School,
   Person,
   Notifications,
   ShoppingCart,
@@ -17,12 +16,141 @@ import {
   Search,
   Settings,
 } from '@mui/icons-material';
+import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import styles from './Header.module.css';
+
+const SCROLL_THRESHOLD = 10;
+const FLOATING_OFFSET = 10;
+const TOP_REVEAL_OFFSET = 60;
+const HIDE_AFTER_OFFSET = 120;
+const SCROLL_IDLE_DELAY = 180;
+
+type HeaderScrollState = {
+  isVisible: boolean;
+  isFloating: boolean;
+  isScrolling: boolean;
+};
 
 export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
+  const [scrollState, setScrollState] = useState<HeaderScrollState>({
+    isVisible: true,
+    isFloating: false,
+    isScrolling: false,
+  });
+  const scrollStateRef = useRef(scrollState);
+  const lastScrollY = useRef(0);
+  const scrollAccumulator = useRef(0);
+  const animationFrame = useRef<number | null>(null);
+  const scrollIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const updateScrollState = (nextState: Partial<HeaderScrollState>) => {
+      const currentState = scrollStateRef.current;
+      const mergedState = { ...currentState, ...nextState };
+
+      if (
+        mergedState.isVisible === currentState.isVisible &&
+        mergedState.isFloating === currentState.isFloating &&
+        mergedState.isScrolling === currentState.isScrolling
+      ) {
+        return;
+      }
+
+      scrollStateRef.current = mergedState;
+      setScrollState(mergedState);
+    };
+
+    const markScrolling = () => {
+      updateScrollState({ isScrolling: true });
+
+      if (scrollIdleTimer.current) {
+        clearTimeout(scrollIdleTimer.current);
+      }
+
+      scrollIdleTimer.current = setTimeout(() => {
+        updateScrollState({ isScrolling: false });
+      }, SCROLL_IDLE_DELAY);
+    };
+
+    lastScrollY.current = Math.max(window.scrollY, 0);
+    updateScrollState({
+      isVisible: true,
+      isFloating: lastScrollY.current > FLOATING_OFFSET,
+      isScrolling: false,
+    });
+
+    const handleScroll = () => {
+      markScrolling();
+
+      if (animationFrame.current !== null) {
+        return;
+      }
+
+      animationFrame.current = window.requestAnimationFrame(() => {
+        animationFrame.current = null;
+
+        const currentScrollY = Math.max(window.scrollY, 0);
+        const diff = currentScrollY - lastScrollY.current;
+        const nextState: Partial<HeaderScrollState> = {
+          isFloating: currentScrollY > FLOATING_OFFSET,
+        };
+
+        if (currentScrollY <= TOP_REVEAL_OFFSET) {
+          nextState.isVisible = true;
+          scrollAccumulator.current = 0;
+        } else if (Math.abs(diff) >= 1) {
+          const changedDirection =
+            scrollAccumulator.current !== 0 &&
+            Math.sign(scrollAccumulator.current) !== Math.sign(diff);
+
+          if (changedDirection) {
+            scrollAccumulator.current = 0;
+          }
+
+          scrollAccumulator.current += diff;
+
+          if (scrollAccumulator.current <= -SCROLL_THRESHOLD) {
+            nextState.isVisible = true;
+            scrollAccumulator.current = 0;
+          } else if (
+            scrollAccumulator.current >= SCROLL_THRESHOLD &&
+            currentScrollY > HIDE_AFTER_OFFSET
+          ) {
+            nextState.isVisible = false;
+            scrollAccumulator.current = 0;
+          }
+        }
+
+        updateScrollState(nextState);
+        lastScrollY.current = currentScrollY;
+      });
+    };
+
+    const handleResize = () => {
+      if (window.scrollY <= TOP_REVEAL_OFFSET) {
+        updateScrollState({ isVisible: true });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+
+      if (animationFrame.current !== null) {
+        window.cancelAnimationFrame(animationFrame.current);
+      }
+
+      if (scrollIdleTimer.current) {
+        clearTimeout(scrollIdleTimer.current);
+      }
+    };
+  }, []);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
@@ -44,7 +172,12 @@ export function Header() {
   ];
 
   return (
-    <header className={styles.header}>
+    <>
+      <header
+        className={`${styles.header} ${scrollState.isVisible ? '' : styles.hidden} ${
+          scrollState.isFloating || scrollState.isScrolling ? styles.floating : ''
+        }`}
+      >
         <div className={styles.container}>
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>
@@ -115,6 +248,8 @@ export function Header() {
             )}
           </div>
         </div>
-    </header>
+      </header>
+      <div className={styles.headerSpacer} aria-hidden="true" />
+    </>
   );
 }
