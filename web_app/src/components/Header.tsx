@@ -19,9 +19,31 @@ import {
 import { useApp } from '../context/AppContext';
 import styles from './Header.module.css';
 
+import { useState, useEffect } from 'react';
+
 export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // If scrolling UP, show header. If scrolling DOWN, hide header after threshold.
+      if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 120) {
+        setIsVisible(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
@@ -43,7 +65,7 @@ export function Header() {
   ];
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isVisible ? '' : styles.hidden}`}>
         <div className={styles.container}>
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>

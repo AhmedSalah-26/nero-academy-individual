@@ -4,6 +4,11 @@
   z-index: 100;
   padding: 16px 22px 0;
   background: transparent;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hidden {
+  transform: translateY(-100%);
 }
 
 .header::before {
