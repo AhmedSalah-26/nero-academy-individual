@@ -220,10 +220,11 @@
   min-width: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  min-height: 135px;
+  grid-template-columns: 140px minmax(0, 1fr);
+  min-height: 116px;
+  max-width: 380px;
   border: 1px solid var(--border);
-  border-radius: 22px;
+  border-radius: 18px;
   background: var(--surface);
   box-shadow: var(--shadow-sm);
   text-decoration: none;
@@ -232,14 +233,14 @@
 }
 
 .courseCard:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
 
 .courseImage {
   height: 100%;
-  min-height: 148px;
+  min-height: 116px;
   position: relative;
   display: grid;
   place-items: center;
@@ -272,18 +273,18 @@
 
 .courseBody {
   min-width: 0;
-  padding: 18px 20px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
+  gap: 5px;
 }
 
 .continueBadge {
   display: inline-flex;
   align-items: center;
   color: var(--primary);
-  font-size: .65rem;
+  font-size: .6rem;
   font-weight: 850;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -298,7 +299,7 @@
   overflow: hidden;
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: .88rem;
   font-weight: 850;
   line-height: 1.35;
   display: -webkit-box;
@@ -311,9 +312,9 @@
   align-items: center;
   justify-content: space-between;
   color: var(--text-muted);
-  font-size: .75rem;
+  font-size: .7rem;
   font-weight: 700;
-  gap: 12px;
+  gap: 8px;
 }
 
 .courseMeta span {
@@ -327,7 +328,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 6px;
+  height: 5px;
   background: color-mix(in srgb, var(--primary) 14%, transparent);
   z-index: 10;
   border-end-start-radius: inherit;
@@ -342,19 +343,19 @@
 }
 
 .resumeBtn {
-  margin-top: 4px;
+  margin-top: 2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 14px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
-  font-size: .8rem;
+  font-size: .75rem;
   font-weight: 850;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(var(--primary-rgb), .2);
+  box-shadow: 0 3px 8px rgba(var(--primary-rgb), .18);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
