@@ -19,31 +19,31 @@ import {
 import { useApp } from '../context/AppContext';
 import styles from './Header.module.css';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // If scrolling UP, show header. If scrolling DOWN, hide header after threshold.
-      if (currentScrollY < lastScrollY) {
+      // Synchronously check scroll direction and update visibility state
+      if (currentScrollY < lastScrollY.current) {
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 120) {
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 120) {
         setIsVisible(false);
       }
       
-      setLastScrollY(currentScrollY);
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === path;
