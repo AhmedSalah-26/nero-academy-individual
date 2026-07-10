@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star, Send, Person } from '@mui/icons-material';
+import Link from 'next/link';
+import { Star, Send, Person, Flag } from '@mui/icons-material';
 import { supabase } from '../lib/supabaseClient';
 import { useApp } from '../context/AppContext';
 import styles from './ReviewsSection.module.css';
 
 interface Review {
   id: string;
+  user_id: string;
   rating: number;
   review: string;
   created_at: string;
@@ -33,7 +35,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
     async function loadReviews() {
       const { data, error } = await supabase
         .from('course_reviews')
-        .select('id, rating, review, created_at, profiles(name, avatar_url)')
+        .select('id, user_id, rating, review, created_at, profiles(name, avatar_url)')
         .eq('course_id', courseId)
         .eq('is_visible', true)
         .order('created_at', { ascending: false });
@@ -82,7 +84,7 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
       // Reload reviews
       const { data } = await supabase
         .from('course_reviews')
-        .select('id, rating, review, created_at, profiles(name, avatar_url)')
+        .select('id, user_id, rating, review, created_at, profiles(name, avatar_url)')
         .eq('course_id', courseId)
         .eq('is_visible', true)
         .order('created_at', { ascending: false });
@@ -193,6 +195,15 @@ export function ReviewsSection({ courseId, isEnrolled }: ReviewsSectionProps) {
               <span className={styles.date}>
                 {new Date(review.created_at).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US')}
               </span>
+              {user?.id !== review.user_id && (
+                <Link
+                  href={`/report?target=review&id=${review.id}&returnTo=${encodeURIComponent(`/courses/${courseId}`)}`}
+                  className={styles.reportLink}
+                >
+                  <Flag fontSize="small" />
+                  <span>{lang === 'ar' ? 'إبلاغ' : 'Report'}</span>
+                </Link>
+              )}
             </article>
           ))
         )}
