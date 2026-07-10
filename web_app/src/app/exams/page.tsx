@@ -28,6 +28,8 @@ interface Enrollment {
 interface Quiz {
   id: string;
   course_id: string;
+  section_id?: string | null;
+  lesson_id?: string | null;
   title_ar: string;
   title_en?: string;
   description_ar?: string;
@@ -56,6 +58,8 @@ export default function ExamsPage() {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sections, setSections] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadExams() {
@@ -74,7 +78,7 @@ export default function ExamsPage() {
           .eq('user_id', user.id)
           .in('status', ['active', 'completed']);
 
-        if (enrollmentError) throw enrollmentError;
+        if (enrollmentError) throw new Error(`Enrollments load failed: ${enrollmentError.message} (${enrollmentError.code})`);
         const availableEnrollments = (enrollmentData || []) as unknown as Enrollment[];
         setEnrollments(availableEnrollments);
 
@@ -82,6 +86,8 @@ export default function ExamsPage() {
         if (courseIds.length === 0) {
           setQuizzes([]);
           setAttempts([]);
+          setSections([]);
+          setLessons([]);
           return;
         }
 
@@ -92,9 +98,26 @@ export default function ExamsPage() {
           .in('course_id', courseIds)
           .order('created_at', { ascending: false });
 
-        if (quizError) throw quizError;
+        if (quizError) throw new Error(`Quizzes load failed: ${quizError.message} (${quizError.code})`);
         const availableQuizzes = (quizData || []) as unknown as Quiz[];
         setQuizzes(availableQuizzes);
+
+        // Fetch sections for these courses
+        const { data: sectionsData, error: sectionsError } = await supabase
+          .from('sections')
+          .select('id, course_id, title_ar, title_en, sort_order')
+          .order('sort_order', { ascending: true });
+        if (sectionsError) throw new Error(`Sections load failed: ${sectionsError.message} (${sectionsError.code})`);
+        const fetchedSections = sectionsData || [];
+        setSections(fetchedSections);
+
+        // Fetch lessons for these sections
+        const { data: lessonsData, error: lessonsError } = await supabase
+          .from('lessons')
+          .select('id, section_id, course_id, title_ar, title_en, sort_order')
+          .order('sort_order', { ascending: true });
+        if (lessonsError) throw new Error(`Lessons load failed: ${lessonsError.message} (${lessonsError.code})`);
+        setLessons(lessonsData || []);
 
         const quizIds = availableQuizzes.map((quiz) => quiz.id);
         if (quizIds.length > 0) {
@@ -105,12 +128,18 @@ export default function ExamsPage() {
             .in('quiz_id', quizIds)
             .not('completed_at', 'is', null)
             .order('completed_at', { ascending: false });
-          if (attemptsError) throw attemptsError;
+          if (attemptsError) throw new Error(`Attempts load failed: ${attemptsError.message} (${attemptsError.code})`);
           setAttempts((attemptData || []) as Attempt[]);
         }
-      } catch (loadError) {
-        console.error('Failed to load exams:', loadError);
-        setError(lang === 'ar' ? 'تعذر تحميل الامتحانات. حاول مرة أخرى.' : 'Could not load exams. Please try again.');
+
+        console.log('Exams debug on client:', {
+          courseIds,
+          quizzes: availableQuizzes.map(q => ({ id: q.id, title: q.title_ar, section_id: q.section_id, lesson_id: q.lesson_id })),
+          sections: fetchedSections.map(s => ({ id: s.id, course_id: s.course_id, title: s.title_ar })),
+        });
+      } catch (loadError: any) {
+        console.error('Failed to load exams error details:', loadError);
+        setError(loadError.message || (lang === 'ar' ? 'تعذر تحميل الامتحانات. حاول مرة أخرى.' : 'Could not load exams. Please try again.'));
       } finally {
         setLoading(false);
       }
@@ -141,6 +170,42 @@ export default function ExamsPage() {
       title: courseTitle,
     });
     return `/quiz/${quiz.id}?${query.toString()}`;
+  };
+
+  const renderQuizCard = (quiz: Quiz) => {
+    const quizAttempts = attemptsByQuiz.get(quiz.id) || [];
+    const bestAttempt = [...quizAttempts].sort((a, b) => Number(b.percentage) - Number(a.percentage))[0];
+    const questionCount = quiz.quiz_questions?.[0]?.count ?? quiz.total_questions ?? 0;
+    const remaining = quiz.max_attempts ? Math.max(quiz.max_attempts - quizAttempts.length, 0) : null;
+    const unavailable = remaining === 0;
+
+    return (
+      <article className={styles.card} key={quiz.id}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardIcon}><Quiz fontSize="small" /></div>
+          <span className={bestAttempt?.passed ? styles.passedBadge : styles.scoreBadge}>
+            {bestAttempt
+              ? `${Math.round(Number(bestAttempt.percentage))}%`
+              : `${quiz.passing_score}% ${lang === 'ar' ? 'للنجاح' : 'to pass'}`}
+          </span>
+        </div>
+        <h2>{lang === 'ar' ? quiz.title_ar : quiz.title_en || quiz.title_ar}</h2>
+        <p>{lang === 'ar' ? quiz.description_ar : quiz.description_en || quiz.description_ar}</p>
+        <div className={styles.metaGrid}>
+          <span><Schedule fontSize="small" /><b>{quiz.time_limit || '∞'}</b><small>{lang === 'ar' ? 'دقيقة' : 'minutes'}</small></span>
+          <span><Quiz fontSize="small" /><b>{questionCount}</b><small>{lang === 'ar' ? 'سؤال' : 'questions'}</small></span>
+          <span><Replay fontSize="small" /><b>{remaining ?? '∞'}</b><small>{lang === 'ar' ? 'متبقي' : 'left'}</small></span>
+          <span><EmojiEvents fontSize="small" /><b>{quizAttempts.length}</b><small>{lang === 'ar' ? 'نتائج' : 'results'}</small></span>
+        </div>
+        <Link href={makeQuizHref(quiz)} className={`${styles.startAction} ${unavailable ? styles.reviewAction : ''}`}>
+          {unavailable ? <CheckCircle fontSize="small" /> : <PlayArrow fontSize="small" />}
+          {unavailable
+            ? (lang === 'ar' ? 'عرض النتائج' : 'View results')
+            : (lang === 'ar' ? 'تفاصيل وبدء الامتحان' : 'Details & start')}
+          {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
+        </Link>
+      </article>
+    );
   };
 
   return (
@@ -184,47 +249,83 @@ export default function ExamsPage() {
           <p>{lang === 'ar' ? 'ستظهر هنا فور نشرها من المدرس.' : 'They will appear as soon as the instructor publishes them.'}</p>
         </div>
       ) : (
-        <section className={styles.grid}>
-          {quizzes.map((quiz) => {
-            const quizAttempts = attemptsByQuiz.get(quiz.id) || [];
-            const bestAttempt = [...quizAttempts].sort((a, b) => Number(b.percentage) - Number(a.percentage))[0];
-            const questionCount = quiz.quiz_questions?.[0]?.count ?? quiz.total_questions ?? 0;
-            const remaining = quiz.max_attempts ? Math.max(quiz.max_attempts - quizAttempts.length, 0) : null;
-            const unavailable = remaining === 0;
+        <div className={styles.groupedContainer}>
+          {enrollments.map((enrollment) => {
             const courseTitle = lang === 'ar'
-              ? quiz.courses?.title_ar
-              : quiz.courses?.title_en || quiz.courses?.title_ar;
+              ? enrollment.courses?.title_ar
+              : enrollment.courses?.title_en || enrollment.courses?.title_ar;
+
+            const courseQuizzes = quizzes.filter((q) => q.course_id === enrollment.course_id);
+            if (courseQuizzes.length === 0) return null;
+
+            const renderedQuizIds = new Set<string>();
+            const courseSections = sections.filter((s) => s.course_id === enrollment.course_id);
+
+            // Filter quizzes that belong to this section directly or via its lessons
+            const sectionBlocks = courseSections.map((section) => {
+              const sectionTitle = lang === 'ar' ? section.title_ar : section.title_en || section.title_ar;
+              
+              const secQuizzes = courseQuizzes.filter((q) => q.section_id === section.id && !q.lesson_id);
+              const sectionLessons = lessons.filter((l) => l.section_id === section.id);
+              const lesQuizzes = courseQuizzes.filter((q) => q.lesson_id && sectionLessons.some((l) => l.id === q.lesson_id));
+              const allSectionQuizzes = [...secQuizzes, ...lesQuizzes];
+
+              if (allSectionQuizzes.length === 0) return null;
+
+              allSectionQuizzes.forEach((q) => renderedQuizIds.add(q.id));
+
+              return (
+                <details key={section.id} className={styles.quizAccordionGroup}>
+                  <summary className={styles.quizAccordionHeader}>
+                    <span className={styles.quizAccordionChevron} />
+                    <div className={styles.quizAccordionTitle}>
+                      <strong>{lang === 'ar' ? `امتحانات قسم: ${sectionTitle}` : `Exams for section: ${sectionTitle}`}</strong>
+                      <small>{allSectionQuizzes.length} {lang === 'ar' ? 'اختبار' : 'quizzes'}</small>
+                    </div>
+                  </summary>
+                  <div className={styles.quizAccordionContent}>
+                    <div className={styles.grid}>
+                      {allSectionQuizzes.map((quiz) => renderQuizCard(quiz))}
+                    </div>
+                  </div>
+                </details>
+              );
+            });
+
+            // 3. Fallback / General / Remaining Quizzes
+            const remainingQuizzes = courseQuizzes.filter((q) => !renderedQuizIds.has(q.id));
 
             return (
-              <article className={styles.card} key={quiz.id}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardIcon}><Quiz fontSize="small" /></div>
-                  <span className={bestAttempt?.passed ? styles.passedBadge : styles.scoreBadge}>
-                    {bestAttempt
-                      ? `${Math.round(Number(bestAttempt.percentage))}%`
-                      : `${quiz.passing_score}% ${lang === 'ar' ? 'للنجاح' : 'to pass'}`}
-                  </span>
+              <section key={enrollment.id} className={styles.courseGroupSection}>
+                <h2 className={styles.courseGroupTitle}>
+                  <AssignmentTurnedIn fontSize="medium" />
+                  <span>{courseTitle}</span>
+                </h2>
+
+                <div className={styles.accordionContainer}>
+                  {sectionBlocks}
+
+                  {remainingQuizzes.length > 0 && (
+                    <details className={styles.quizAccordionGroup}>
+                      <summary className={styles.quizAccordionHeader}>
+                        <span className={styles.quizAccordionChevron} />
+                        <div className={styles.quizAccordionTitle}>
+                          <strong>{lang === 'ar' ? 'امتحانات عامة للمنهج' : 'General Course Exams'}</strong>
+                          <small>{remainingQuizzes.length} {lang === 'ar' ? 'اختبار' : 'quizzes'}</small>
+                        </div>
+                      </summary>
+                      <div className={styles.quizAccordionContent}>
+                        <div className={styles.grid}>
+                          {remainingQuizzes.map((quiz) => renderQuizCard(quiz))}
+                        </div>
+                      </div>
+                    </details>
+                  )}
                 </div>
-                <span className={styles.courseName}>{courseTitle}</span>
-                <h2>{lang === 'ar' ? quiz.title_ar : quiz.title_en || quiz.title_ar}</h2>
-                <p>{lang === 'ar' ? quiz.description_ar : quiz.description_en || quiz.description_ar}</p>
-                <div className={styles.metaGrid}>
-                  <span><Schedule fontSize="small" /><b>{quiz.time_limit || '∞'}</b><small>{lang === 'ar' ? 'دقيقة' : 'minutes'}</small></span>
-                  <span><Quiz fontSize="small" /><b>{questionCount}</b><small>{lang === 'ar' ? 'سؤال' : 'questions'}</small></span>
-                  <span><Replay fontSize="small" /><b>{remaining ?? '∞'}</b><small>{lang === 'ar' ? 'محاولة متبقية' : 'attempts left'}</small></span>
-                  <span><EmojiEvents fontSize="small" /><b>{quizAttempts.length}</b><small>{lang === 'ar' ? 'نتيجة سابقة' : 'past results'}</small></span>
-                </div>
-                <Link href={makeQuizHref(quiz)} className={`${styles.startAction} ${unavailable ? styles.reviewAction : ''}`}>
-                  {unavailable ? <CheckCircle fontSize="small" /> : <PlayArrow fontSize="small" />}
-                  {unavailable
-                    ? (lang === 'ar' ? 'عرض النتائج' : 'View results')
-                    : (lang === 'ar' ? 'تفاصيل وبدء الامتحان' : 'Details & start')}
-                  {lang === 'ar' ? <ArrowBack fontSize="small" /> : <ArrowForward fontSize="small" />}
-                </Link>
-              </article>
+              </section>
             );
           })}
-        </section>
+        </div>
       )}
     </main>
   );
