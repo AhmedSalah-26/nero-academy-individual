@@ -21,58 +21,136 @@ import styles from './Header.module.css';
 
 import { useState, useEffect, useRef } from 'react';
 
+const SCROLL_THRESHOLD = 10;
+const FLOATING_OFFSET = 10;
+const TOP_REVEAL_OFFSET = 60;
+const HIDE_AFTER_OFFSET = 120;
+const SCROLL_IDLE_DELAY = 180;
+
+type HeaderScrollState = {
+  isVisible: boolean;
+  isFloating: boolean;
+  isScrolling: boolean;
+};
+
 export function Header() {
   const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(true);
-  const [isFloating, setIsFloating] = useState(false);
+  const [scrollState, setScrollState] = useState<HeaderScrollState>({
+    isVisible: true,
+    isFloating: false,
+    isScrolling: false,
+  });
+  const scrollStateRef = useRef(scrollState);
   const lastScrollY = useRef(0);
   const scrollAccumulator = useRef(0);
+  const animationFrame = useRef<number | null>(null);
+  const scrollIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Set initial scroll position on mount
-    lastScrollY.current = window.scrollY;
-    setIsFloating(window.scrollY > 10);
+    const updateScrollState = (nextState: Partial<HeaderScrollState>) => {
+      const currentState = scrollStateRef.current;
+      const mergedState = { ...currentState, ...nextState };
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const diff = currentScrollY - lastScrollY.current;
-
-      // Update floating state
-      setIsFloating(currentScrollY > 10);
-
-      // Always show header near the top of the page
-      if (currentScrollY <= 60) {
-        setIsVisible(true);
-        scrollAccumulator.current = 0;
-        lastScrollY.current = currentScrollY;
+      if (
+        mergedState.isVisible === currentState.isVisible &&
+        mergedState.isFloating === currentState.isFloating &&
+        mergedState.isScrolling === currentState.isScrolling
+      ) {
         return;
       }
 
-      // Determine consecutive scroll direction accumulator
-      const wasScrollingUp = scrollAccumulator.current < 0;
-      const isScrollingUpNow = diff < 0;
+      scrollStateRef.current = mergedState;
+      setScrollState(mergedState);
+    };
 
-      if (wasScrollingUp !== isScrollingUpNow) {
-        scrollAccumulator.current = 0; // Reset accumulator on direction change
+    const markScrolling = () => {
+      updateScrollState({ isScrolling: true });
+
+      if (scrollIdleTimer.current) {
+        clearTimeout(scrollIdleTimer.current);
       }
 
-      scrollAccumulator.current += diff;
+      scrollIdleTimer.current = setTimeout(() => {
+        updateScrollState({ isScrolling: false });
+      }, SCROLL_IDLE_DELAY);
+    };
 
-      // Apply threshold: ignore consecutive scroll changes smaller than 10px
-      if (scrollAccumulator.current < -10) {
-        setIsVisible(true);
-        scrollAccumulator.current = 0; // Reset after toggle
-      } else if (scrollAccumulator.current > 10 && currentScrollY > 120) {
-        setIsVisible(false);
-        scrollAccumulator.current = 0; // Reset after toggle
+    lastScrollY.current = Math.max(window.scrollY, 0);
+    updateScrollState({
+      isVisible: true,
+      isFloating: lastScrollY.current > FLOATING_OFFSET,
+      isScrolling: false,
+    });
+
+    const handleScroll = () => {
+      markScrolling();
+
+      if (animationFrame.current !== null) {
+        return;
       }
 
-      lastScrollY.current = currentScrollY;
+      animationFrame.current = window.requestAnimationFrame(() => {
+        animationFrame.current = null;
+
+        const currentScrollY = Math.max(window.scrollY, 0);
+        const diff = currentScrollY - lastScrollY.current;
+        const nextState: Partial<HeaderScrollState> = {
+          isFloating: currentScrollY > FLOATING_OFFSET,
+        };
+
+        if (currentScrollY <= TOP_REVEAL_OFFSET) {
+          nextState.isVisible = true;
+          scrollAccumulator.current = 0;
+        } else if (Math.abs(diff) >= 1) {
+          const changedDirection =
+            scrollAccumulator.current !== 0 &&
+            Math.sign(scrollAccumulator.current) !== Math.sign(diff);
+
+          if (changedDirection) {
+            scrollAccumulator.current = 0;
+          }
+
+          scrollAccumulator.current += diff;
+
+          if (scrollAccumulator.current <= -SCROLL_THRESHOLD) {
+            nextState.isVisible = true;
+            scrollAccumulator.current = 0;
+          } else if (
+            scrollAccumulator.current >= SCROLL_THRESHOLD &&
+            currentScrollY > HIDE_AFTER_OFFSET
+          ) {
+            nextState.isVisible = false;
+            scrollAccumulator.current = 0;
+          }
+        }
+
+        updateScrollState(nextState);
+        lastScrollY.current = currentScrollY;
+      });
+    };
+
+    const handleResize = () => {
+      if (window.scrollY <= TOP_REVEAL_OFFSET) {
+        updateScrollState({ isVisible: true });
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+
+      if (animationFrame.current !== null) {
+        window.cancelAnimationFrame(animationFrame.current);
+      }
+
+      if (scrollIdleTimer.current) {
+        clearTimeout(scrollIdleTimer.current);
+      }
+    };
   }, []);
 
   const isActive = (path: string) => {
@@ -95,7 +173,12 @@ export function Header() {
   ];
 
   return (
-    <header className={`${styles.header} ${isVisible ? '' : styles.hidden} ${isFloating ? styles.floating : ''}`}>
+    <>
+      <header
+        className={`${styles.header} ${scrollState.isVisible ? '' : styles.hidden} ${
+          scrollState.isFloating || scrollState.isScrolling ? styles.floating : ''
+        }`}
+      >
         <div className={styles.container}>
           <div className={styles.logoWrapper}>
             <Link href="/" className={styles.logo} aria-label={t.appName}>
@@ -168,7 +251,9 @@ export function Header() {
             )}
           </div>
         </div>
-    </header>
+      </header>
+      <div className={styles.headerSpacer} aria-hidden="true" />
+    </>
   );
 }
 

@@ -1,14 +1,25 @@
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   padding: 16px 22px 0;
   background: transparent;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 
 .hidden {
-  transform: translateY(-100%);
+  transform: translate3d(0, -100%, 0);
+}
+
+.headerSpacer {
+  flex: 0 0 88px;
+  height: 88px;
+  pointer-events: none;
 }
 
 .header::before {
@@ -38,6 +49,7 @@
   backdrop-filter: blur(22px) saturate(1.2);
   -webkit-backdrop-filter: blur(22px) saturate(1.2);
   transition: box-shadow 0.3s ease;
+  pointer-events: auto;
 }
 
 .floating .container {
@@ -287,36 +299,110 @@
 
 @media (max-width: 720px) {
   .header { padding: 8px 10px 0; }
-  .container { min-height: 54px; padding: 0 9px; display: flex; gap: 8px; border-radius: 16px; }
+  .headerSpacer { flex-basis: 62px; height: 62px; }
+  .container {
+    min-height: 54px;
+    padding: 0 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    border-radius: 16px;
+  }
   .nav, .userCard, .actionButton { display: none; }
+  .logoWrapper {
+    min-width: 0;
+    gap: 6px;
+  }
+  .logo {
+    min-width: 0;
+    gap: 7px;
+  }
   .logoIcon {
     width: 34px;
     height: 34px;
+    flex: 0 0 34px;
   }
   .logoSymbol { font-size: 1.2rem; }
   .logoNumber { font-size: .38rem; top: 4px; right: 5px; }
   .logoMass { font-size: .34rem; bottom: 4px; left: 5px; }
-  .logoText b { font-size: .7rem; }
-  .logoText small { display: block; font-size: .42rem; }
+  .logoText {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .logoText b,
+  .logoText small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .logoText b { font-size: .66rem; }
+  .logoText small { display: block; font-size: .4rem; }
   .headerSearch {
     width: 34px;
+    min-width: 34px;
     height: 34px;
     padding: 0;
-    margin-inline-start: 6px;
+    margin-inline-start: 2px;
     justify-content: center;
     border-radius: var(--radius-full);
+    flex: 0 0 34px;
   }
   .headerSearchText {
     display: none;
   }
-  .actions { margin-inline-start: auto; }
-  .loginButton { height: 34px; padding: 0 11px; border-radius: 11px; font-size: .54rem; }
+  .actions {
+    margin-inline-start: 0;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .squareButton {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 11px;
+  }
+  .loginButton {
+    height: 34px;
+    max-width: 88px;
+    padding: 0 9px;
+    border-radius: 11px;
+    font-size: .5rem;
+    white-space: nowrap;
+  }
   .loginButton svg:last-child { display: none; }
+}
+
+@media (max-width: 390px) {
+  .container {
+    padding: 0 7px;
+    gap: 4px;
+  }
+  .logoWrapper { gap: 4px; }
+  .logo { gap: 5px; }
+  .logoText b { font-size: .6rem; }
+  .logoText small { font-size: .36rem; }
+  .actions { gap: 3px; }
+  .squareButton,
+  .headerSearch {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+  .loginButton {
+    max-width: 74px;
+    padding: 0 7px;
+    font-size: .46rem;
+  }
 }
 
 [data-theme="dark"] .container {
   background: var(--glass-bg);
-  box-shadow: 0 14px 42px rgba(0,0,0,.28);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .floating .container {
+  box-shadow: 0 10px 30px rgba(0,0,0,.24);
 }
 
 [data-theme="dark"] .navLink:hover,
