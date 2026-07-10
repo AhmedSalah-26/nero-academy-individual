@@ -226,6 +226,16 @@
   border-radius: 25px;
   background: var(--surface-card);
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  box-shadow: var(--shadow-md);
 }
 
 .courseImage {
@@ -249,7 +259,7 @@
   object-fit: cover;
 }
 
-.courseImage a {
+.courseImage .playOverlay {
   position: absolute;
   z-index: 2;
   inset: auto 14px 14px auto;

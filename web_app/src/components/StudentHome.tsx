@@ -186,18 +186,18 @@ export function StudentHome() {
               const course = enrollment.courses;
               const title = lang === 'ar' ? course.title_ar : course.title_en;
               return (
-                <article className={styles.courseCard} key={enrollment.id}>
+                <Link href={`/learn/${enrollment.course_id}`} className={styles.courseCard} key={enrollment.id}>
                   <div className={styles.courseImage}>
                     <MenuBook fontSize="medium" />
                     {course.thumbnail_url && <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
-                    <Link href={`/learn/${enrollment.course_id}`}><PlayArrow fontSize="small" /></Link>
+                    <div className={styles.playOverlay}><PlayArrow fontSize="small" /></div>
                   </div>
                   <div className={styles.courseBody}>
                     <h3>{title}</h3>
                     <div className={styles.courseMeta}><span><Schedule fontSize="small" />{enrollment.completed_lessons}/{course.total_lessons || 0}</span><strong>{Math.round(enrollment.progress_percentage || 0)}%</strong></div>
                     <div className={styles.track}><i style={{ width: `${enrollment.progress_percentage || 0}%` }} /></div>
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
