@@ -327,8 +327,8 @@ function SearchContent() {
             const hasDiscount = hasCourseDiscount(course);
 
             return (
-              <article key={course.id} className={styles.courseCard}>
-                <Link href={`/courses/${course.id}`} className={styles.thumbLink}>
+              <Link href={isEnrolled ? `/learn/${course.id}` : `/courses/${course.id}`} key={course.id} className={styles.courseCard}>
+                <div className={styles.thumbLink}>
                   {course.thumbnail_url ? (
                     <img src={course.thumbnail_url} alt="" className={styles.thumb} />
                   ) : (
@@ -341,7 +341,7 @@ function SearchContent() {
                         : course.level}
                     </span>
                   )}
-                </Link>
+                </div>
                 <div className={styles.cardBody}>
                   <h3>{lang === 'ar' ? course.title_ar : course.title_en}</h3>
                   <p>{lang === 'ar' ? course.subtitle_ar : course.subtitle_en}</p>
@@ -367,12 +367,13 @@ function SearchContent() {
                       )}
                     </div>
                     {isEnrolled ? (
-                      <Link href={`/learn/${course.id}`} className={`${styles.actionBtn} ${styles.enrolled}`}>
+                      <div className={`${styles.actionBtn} ${styles.enrolled}`}>
                         {t.continueLearning}
-                      </Link>
+                      </div>
                     ) : (
                       <button
-                        onClick={() => addToCart(course.id)}
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(course.id); }}
                         disabled={inCart}
                         className={`${styles.actionBtn} ${inCart ? styles.inCart : ''}`}
                       >
@@ -381,7 +382,7 @@ function SearchContent() {
                     )}
                   </div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>

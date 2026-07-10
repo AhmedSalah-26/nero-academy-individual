@@ -186,18 +186,30 @@ export function StudentHome() {
               const course = enrollment.courses;
               const title = lang === 'ar' ? course.title_ar : course.title_en;
               return (
-                <article className={styles.courseCard} key={enrollment.id}>
+                <Link href={`/learn/${enrollment.course_id}`} className={styles.courseCard} key={enrollment.id}>
                   <div className={styles.courseImage}>
-                    <MenuBook fontSize="medium" />
-                    {course.thumbnail_url && <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
-                    <Link href={`/learn/${enrollment.course_id}`}><PlayArrow fontSize="small" /></Link>
-                  </div>
-                  <div className={styles.courseBody}>
-                    <h3>{title}</h3>
-                    <div className={styles.courseMeta}><span><Schedule fontSize="small" />{enrollment.completed_lessons}/{course.total_lessons || 0}</span><strong>{Math.round(enrollment.progress_percentage || 0)}%</strong></div>
+                    {course.thumbnail_url ? (
+                      <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+                    ) : (
+                      <MenuBook fontSize="medium" />
+                    )}
                     <div className={styles.track}><i style={{ width: `${enrollment.progress_percentage || 0}%` }} /></div>
                   </div>
-                </article>
+                  <div className={styles.courseBody}>
+                    <span className={styles.continueBadge}>
+                      {lang === 'ar' ? 'تابع التعلم' : 'CONTINUE LEARNING'}
+                    </span>
+                    <h3>{title}</h3>
+                    <div className={styles.courseMeta}>
+                      <span>{lang === 'ar' ? `أتممت ${Math.round(enrollment.progress_percentage || 0)}%` : `Completed ${Math.round(enrollment.progress_percentage || 0)}%`}</span>
+                      <span>{enrollment.completed_lessons}/{course.total_lessons || 0} {lang === 'ar' ? 'درس' : 'lessons'}</span>
+                    </div>
+                    <div className={styles.resumeBtn}>
+                      <PlayArrow fontSize="small" />
+                      {lang === 'ar' ? 'استكمل' : 'Resume'}
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>

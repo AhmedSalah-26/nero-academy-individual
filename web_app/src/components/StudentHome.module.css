@@ -220,22 +220,31 @@
   min-width: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  min-height: 170px;
-  border: 1px solid var(--glass-border);
-  border-radius: 25px;
-  background: var(--surface-card);
+  grid-template-columns: 160px minmax(0, 1fr);
+  min-height: 148px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
   box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
 
 .courseImage {
   height: 100%;
-  min-height: 170px;
+  min-height: 148px;
   position: relative;
   display: grid;
   place-items: center;
   overflow: hidden;
-  color: var(--primary);
+  color: color-mix(in srgb, var(--primary) 50%, transparent);
   background:
     radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--primary) 28%, transparent), transparent 38%),
     var(--surface-soft);
@@ -249,35 +258,40 @@
   object-fit: cover;
 }
 
-.courseImage a {
+.courseImageOverlay {
   position: absolute;
-  z-index: 2;
-  inset: auto 14px 14px auto;
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 15px;
-  color: white;
-  background: var(--primary);
-  box-shadow: 0 14px 28px rgba(0,0,0,.16);
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.35));
+  z-index: 1;
 }
 
 .courseBody {
   min-width: 0;
-  padding: 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 6px;
+}
+
+.continueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
 .courseBody h3 {
-  min-height: 46px;
   margin: 0;
   overflow: hidden;
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: .95rem;
+  font-weight: 800;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -285,35 +299,56 @@
 }
 
 .courseMeta {
-  margin: 18px 0 9px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: var(--text-secondary);
-  font-size: .62rem;
-  font-weight: 800;
+  font-size: .63rem;
+  font-weight: 700;
+  gap: 8px;
 }
 
 .courseMeta span {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
-.courseMeta strong { color: var(--primary); }
-
 .track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 99px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
   background: color-mix(in srgb, var(--primary) 14%, transparent);
+  z-index: 10;
 }
 
 .track i {
   height: 100%;
   display: block;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--primary));
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+}
+
+.resumeBtn {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: white;
+  font-size: .8rem;
+  font-weight: 850;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), .2);
+  transition: opacity .15s ease;
+}
+
+.courseCard:hover .resumeBtn {
+  opacity: .95;
 }
 
 .empty {
@@ -363,8 +398,9 @@
   .actionCard small { font-size: .5rem; }
   .courseCard { grid-template-columns: 128px minmax(0, 1fr); min-height: 132px; border-radius: 19px; }
   .courseImage { min-height: 132px; }
-  .courseBody { padding: 13px; }
-  .courseBody h3 { min-height: 40px; font-size: .78rem; }
+  .courseBody { padding: 13px 14px; gap: 5px; }
+  .courseBody h3 { font-size: .8rem; }
+  .resumeBtn { font-size: .67rem; padding: 8px 12px; }
   .sectionTitle h2 { font-size: 1.35rem; }
 }
 

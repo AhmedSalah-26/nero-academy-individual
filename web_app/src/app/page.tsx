@@ -299,7 +299,7 @@ export default function HomePage() {
               const subtitle = lang === 'ar' ? course.subtitle_ar : course.subtitle_en;
 
               return (
-                <article className={styles.courseCard} key={course.id}>
+                <Link href={isEnrolled ? `/learn/${course.id}` : `/courses/${course.id}`} className={styles.courseCard} key={course.id}>
                   <div className={styles.courseImage}>
                     {course.thumbnail_url ? (
                       <img src={course.thumbnail_url} alt={title} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
@@ -312,7 +312,7 @@ export default function HomePage() {
                     <button
                       type="button"
                       className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlistActive : ''}`}
-                      onClick={() => isWishlisted ? removeFromWishlist(course.id) : addToWishlist(course.id)}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); isWishlisted ? removeFromWishlist(course.id) : addToWishlist(course.id); }}
                       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                     >
                       <Favorite fontSize="small" sx={{ color: isWishlisted ? 'var(--error)' : 'var(--text-muted)' }} />
@@ -339,17 +339,22 @@ export default function HomePage() {
                         )}
                       </div>
                       {isEnrolled ? (
-                        <Link href={`/learn/${course.id}`} className={styles.actionBtn}>
+                        <div className={styles.actionBtn}>
                           <PlayArrow fontSize="inherit" />
-                        </Link>
+                        </div>
                       ) : (
-                        <button className={styles.actionBtn} onClick={() => addToCart(course.id)} disabled={inCart}>
+                        <button
+                          type="button"
+                          className={styles.actionBtn}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(course.id); }}
+                          disabled={inCart}
+                        >
                           {inCart ? <Check fontSize="small" /> : <Add fontSize="small" />}
                         </button>
                       )}
                     </div>
                   </div>
-                </article>
+                </Link>
               );
             })}
           </div>
