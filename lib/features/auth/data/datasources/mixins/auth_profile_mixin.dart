@@ -16,12 +16,28 @@ mixin AuthProfileMixin {
 
   Future<void> forgotPassword(String email) async {
     try {
-      // Use signInWithOtp to send a 6-digit OTP code to the user's email.
+      // 1) Verify if the email exists in profiles table first (ilike for case-insensitivity)
+      final profile = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('email', email.trim())
+          .maybeSingle();
+
+      if (profile == null) {
+        throw const app_exceptions.AuthException(
+          'auth.errors.email_not_registered',
+          code: 'email_not_registered',
+        );
+      }
+
+      // 2) Use signInWithOtp to send a 6-digit OTP code to the user's email.
       // resetPasswordForEmail sends a magic link, not an OTP code.
       await supabase.auth.signInWithOtp(
-        email: email,
+        email: email.trim(),
         shouldCreateUser: false,
       );
+    } on app_exceptions.AuthException {
+      rethrow;
     } on AuthApiException catch (e) {
       throw handleAuthError(e);
     }

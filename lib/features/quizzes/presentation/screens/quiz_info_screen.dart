@@ -105,7 +105,7 @@ class _QuizInfoScreenState extends State<QuizInfoScreen> {
     return ErrorState(
       type: ErrorType.generic,
       display: ErrorStateDisplay.section,
-      message: state.errorMessage ?? LocaleKeys.error.tr(),
+      message: state.errorMessage ?? LocaleKeys.common_error.tr(),
       onRetry: _loadQuiz,
     );
   }

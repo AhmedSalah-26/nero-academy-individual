@@ -144,16 +144,26 @@ mixin CourseSectionsMixin on Cubit<CourseEditorState> {
 
   /// Reorder sections and save to database
   Future<void> reorderSectionsAndSave(int oldIndex, int newIndex) async {
-    reorderSections(oldIndex, newIndex);
+    // 1. Build the reordered list locally
+    final sections = List<SectionData>.from(state.sections);
+    if (newIndex > oldIndex) newIndex--;
+    final item = sections.removeAt(oldIndex);
+    sections.insert(newIndex, item);
+    for (int i = 0; i < sections.length; i++) {
+      sections[i] = sections[i].copyWith(order: i);
+    }
 
+    // 2. Update UI immediately (optimistic update)
+    emit(state.copyWith(sections: sections));
+
+    // 3. Persist to database using the locally computed list
     if (state.courseId != null) {
       try {
-        final sections = state.sections;
         final sectionIds =
             sections.where((s) => s.id != null).map((s) => s.id!).toList();
         if (sectionIds.isNotEmpty) {
           await repository.reorderSections(state.courseId!, sectionIds);
-          AppLogger.success('[CourseSectionsMixin] Sections reordered');
+          AppLogger.success('[CourseSectionsMixin] Sections reordered & saved');
         }
       } catch (e) {
         AppLogger.e('[CourseSectionsMixin] reorderSectionsAndSave error: $e');

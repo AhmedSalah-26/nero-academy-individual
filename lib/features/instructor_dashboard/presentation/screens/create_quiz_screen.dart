@@ -7,6 +7,8 @@ import '../../../../core/animations/widgets/feedback/animated_snackbar.dart';
 import '../cubit/instructor_quizzes_cubit.dart';
 import '../widgets/instructor_quizzes/quiz_form_widgets.dart';
 
+enum _QuizScope { course, section, lesson }
+
 /// Create Quiz Screen - Full page for creating a new quiz
 class CreateQuizScreen extends StatefulWidget {
   final InstructorQuizzesCubit cubit;
@@ -31,13 +33,17 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   final _maxAttemptsController = TextEditingController();
 
   List<Map<String, dynamic>> _courses = [];
+  List<Map<String, dynamic>> _sections = [];
   List<Map<String, dynamic>> _lessons = [];
   String? _selectedCourseId;
+  String? _selectedSectionId;
   String? _selectedLessonId;
 
   bool _isLoading = false;
   bool _isLoadingCourses = true;
+  bool _isLoadingSections = false;
   bool _isLoadingLessons = false;
+  _QuizScope _quizScope = _QuizScope.course;
   bool _isCourseLevelQuiz = true;
   bool _shuffleQuestions = false;
   bool _shuffleAnswers = false;
@@ -88,6 +94,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _loadLessons(String courseId) async {
     setState(() {
       _isLoadingLessons = true;
@@ -111,6 +118,47 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
       AppLogger.e('📝 [CreateQuizScreen] Error loading lessons: $e');
       if (mounted) {
         setState(() => _isLoadingLessons = false);
+      }
+    }
+  }
+
+  Future<void> _loadCourseContent(String courseId) async {
+    setState(() {
+      _isLoadingSections = true;
+      _isLoadingLessons = true;
+      _selectedSectionId = null;
+      _selectedLessonId = null;
+      _sections = [];
+      _lessons = [];
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+      final sectionsResponse = await supabase
+          .from('sections')
+          .select('id, title_ar, title_en, sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order');
+      final lessonsResponse = await supabase
+          .from('lessons')
+          .select('id, section_id, title_ar, title_en, sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order');
+
+      if (!mounted) return;
+      setState(() {
+        _sections = List<Map<String, dynamic>>.from(sectionsResponse);
+        _lessons = List<Map<String, dynamic>>.from(lessonsResponse);
+        _isLoadingSections = false;
+        _isLoadingLessons = false;
+      });
+    } catch (e) {
+      AppLogger.e('[CreateQuizScreen] Error loading course content: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingSections = false;
+          _isLoadingLessons = false;
+        });
       }
     }
   }
@@ -212,11 +260,13 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               onChanged: (value) {
                 setState(() {
                   _selectedCourseId = value;
+                  _selectedSectionId = null;
                   _selectedLessonId = null;
+                  _sections = [];
                   _lessons = [];
                 });
                 if (value != null) {
-                  _loadLessons(value);
+                  _loadCourseContent(value);
                 }
               },
               validator: (value) {
@@ -242,24 +292,33 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SegmentedButton<bool>(
+          SegmentedButton<_QuizScope>(
             segments: [
-              ButtonSegment<bool>(
-                value: true,
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.course,
                 icon: const Icon(Icons.school_outlined),
                 label: Text(isArabic ? 'اختبار شامل' : 'Course quiz'),
               ),
-              ButtonSegment<bool>(
-                value: false,
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.section,
+                icon: const Icon(Icons.view_agenda_outlined),
+                label: Text(isArabic ? 'اختبار سيكشن' : 'Section quiz'),
+              ),
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.lesson,
                 icon: const Icon(Icons.menu_book_outlined),
                 label: Text(isArabic ? 'اختبار درس' : 'Lesson quiz'),
               ),
             ],
-            selected: {_isCourseLevelQuiz},
+            selected: {_quizScope},
             onSelectionChanged: (selection) {
               setState(() {
-                _isCourseLevelQuiz = selection.first;
+                _quizScope = selection.first;
+                _isCourseLevelQuiz = _quizScope == _QuizScope.course;
                 if (_isCourseLevelQuiz) {
+                  _selectedSectionId = null;
+                  _selectedLessonId = null;
+                } else if (_quizScope == _QuizScope.section) {
                   _selectedLessonId = null;
                 }
               });
@@ -267,7 +326,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                   _selectedCourseId != null &&
                   _lessons.isEmpty &&
                   !_isLoadingLessons) {
-                _loadLessons(_selectedCourseId!);
+                _loadCourseContent(_selectedCourseId!);
               }
             },
           ),
@@ -282,41 +341,84 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                   color: isDark ? AppColors.textMutedDark : AppColors.grey600,
                 ),
               )
-            else if (_isLoadingLessons)
+            else if (_isLoadingSections || _isLoadingLessons)
               const Padding(
                 padding: EdgeInsets.all(16),
                 child: Center(child: CircularProgressIndicator()),
               )
-            else
+            else ...[
               DropdownButtonFormField<String>(
-                initialValue: _selectedLessonId,
+                initialValue: _selectedSectionId,
                 isExpanded: true,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
-                  hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
-                  prefixIcon: const Icon(Icons.play_lesson_outlined),
+                  hintText: isArabic ? 'اختر السيكشن' : 'Select section',
+                  prefixIcon: const Icon(Icons.view_agenda_outlined),
                 ),
-                items: _lessons.map((lesson) {
+                items: _sections.map((section) {
                   return DropdownMenuItem<String>(
-                    value: lesson['id'] as String,
+                    value: section['id'] as String,
                     child: Text(
                       isArabic
-                          ? lesson['title_ar'] ?? ''
-                          : lesson['title_en'] ?? '',
+                          ? section['title_ar'] ?? ''
+                          : section['title_en'] ?? section['title_ar'] ?? '',
                       overflow: TextOverflow.ellipsis,
                     ),
                   );
                 }).toList(),
-                onChanged: (value) => setState(() => _selectedLessonId = value),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSectionId = value;
+                    _selectedLessonId = null;
+                  });
+                },
                 validator: (value) {
                   if (!_isCourseLevelQuiz && value == null) {
                     return isArabic
-                        ? 'يرجى اختيار الدرس'
-                        : 'Please select a lesson';
+                        ? 'يرجى اختيار السيكشن'
+                        : 'Please select a section';
                   }
                   return null;
                 },
               ),
+              if (_quizScope == _QuizScope.lesson) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedLessonId,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
+                    prefixIcon: const Icon(Icons.play_lesson_outlined),
+                  ),
+                  items: _lessons
+                      .where((lesson) =>
+                          _selectedSectionId == null ||
+                          lesson['section_id'] == _selectedSectionId)
+                      .map((lesson) {
+                    return DropdownMenuItem<String>(
+                      value: lesson['id'] as String,
+                      child: Text(
+                        isArabic
+                            ? lesson['title_ar'] ?? ''
+                            : lesson['title_en'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedLessonId = value),
+                  validator: (value) {
+                    if (!_isCourseLevelQuiz && value == null) {
+                      return isArabic
+                          ? 'يرجى اختيار الدرس'
+                          : 'Please select a lesson';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ],
           ],
         ],
       ),
@@ -594,7 +696,8 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     try {
       final success = await widget.cubit.createQuiz(
         courseId: _selectedCourseId!,
-        lessonId: _isCourseLevelQuiz ? null : _selectedLessonId,
+        sectionId: _isCourseLevelQuiz ? null : _selectedSectionId,
+        lessonId: _quizScope == _QuizScope.lesson ? _selectedLessonId : null,
         titleAr: _titleArController.text,
         titleEn: _titleEnController.text,
         descriptionAr:
@@ -613,13 +716,14 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
         shuffleQuestions: _shuffleQuestions,
         shuffleAnswers: _shuffleAnswers,
         showCorrectAnswers: _showCorrectAnswers,
+        isPublished: false,
       );
 
       if (mounted) {
         setState(() => _isLoading = false);
         if (success) {
           AppLogger.success('📝 [CreateQuizScreen] Quiz created successfully');
-          AppRouter.pop(context);
+          Navigator.of(context).pop(true);
           AnimatedSnackbar.showSuccess(
             context: context,
             message: Localizations.localeOf(context).languageCode == 'ar'

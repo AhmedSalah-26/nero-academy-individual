@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Quiz Entity - Pure Dart Object
 class QuizEntity extends Equatable {
   final String id;
+  final String? sectionId;
   final String? lessonId;
   final String titleAr;
   final String? titleEn;
@@ -15,6 +16,7 @@ class QuizEntity extends Equatable {
   final bool shuffleAnswers;
   final bool showCorrectAnswers;
   final bool isMandatory;
+  final bool isPublished;
   final int totalQuestions;
   final DateTime? availableFrom;
   final DateTime? availableUntil;
@@ -22,6 +24,7 @@ class QuizEntity extends Equatable {
 
   const QuizEntity({
     required this.id,
+    this.sectionId,
     this.lessonId,
     required this.titleAr,
     this.titleEn,
@@ -34,6 +37,7 @@ class QuizEntity extends Equatable {
     this.shuffleAnswers = false,
     this.showCorrectAnswers = true,
     this.isMandatory = false,
+    this.isPublished = true,
     this.totalQuestions = 0,
     this.availableFrom,
     this.availableUntil,
@@ -41,7 +45,8 @@ class QuizEntity extends Equatable {
   });
 
   /// Check if quiz is course-level (not tied to specific lesson)
-  bool get isCourseLevelQuiz => lessonId == null;
+  bool get isCourseLevelQuiz => sectionId == null && lessonId == null;
+  bool get isSectionLevelQuiz => sectionId != null && lessonId == null;
 
   /// Get localized title
   String getTitle(String locale) {
@@ -88,6 +93,7 @@ class QuizEntity extends Equatable {
   @override
   List<Object?> get props => [
         id,
+        sectionId,
         lessonId,
         titleAr,
         titleEn,
@@ -95,6 +101,7 @@ class QuizEntity extends Equatable {
         timeLimit,
         maxAttempts,
         totalQuestions,
+        isPublished,
         availableFrom,
         availableUntil,
       ];

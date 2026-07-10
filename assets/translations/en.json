@@ -135,7 +135,8 @@
       "email_not_confirmed": "Please confirm your email first",
       "session_expired": "Session expired, please login again",
       "user_banned": "Your account is banned",
-      "user_inactive": "Your account is inactive. Contact support"
+      "user_inactive": "Your account is inactive. Contact support",
+      "email_not_registered": "This email is not registered in the system. Please verify or create a new account."
     },
     "login_required": "Please login first",
     "login_with_phone": "Login with Phone",
@@ -893,7 +894,9 @@
       "create_quiz": "Create Quiz",
       "edit_quiz": "Edit Quiz",
       "quiz_attempts": "Quiz Attempts",
-      "preview_quiz": "Preview Quiz"
+      "preview_quiz": "Preview Quiz",
+      "delete_course_title": "Delete Course Permanently",
+      "delete_course_confirm": "Are you sure you want to delete the course ({title})?\n\n⚠️ This will permanently delete the course, along with all its lessons, sections, attachments, and content from the system!"
     },
     "common": {
       "search": "Search...",
@@ -985,7 +988,37 @@
     "validation_section_fallback": "Section {number}",
     "validation_lesson_fallback": "Lesson {number}",
     "validation_section_empty": "{section} has no lessons",
-    "validation_lesson_availability": "{lesson} availability in {section} is invalid"
+    "validation_lesson_availability": "{lesson} availability in {section} is invalid",
+    "ai_import_title": "Add Questions from AI",
+    "ai_import_tab_prompt": "The Prompt",
+    "ai_import_tab_paste": "Paste & Preview",
+    "ai_import_how_title": "How to use this feature?",
+    "ai_import_step1": "Copy the Prompt using the button below",
+    "ai_import_step2": "Send it to any AI (ChatGPT, Gemini, Claude...)",
+    "ai_import_step3": "Change the topic and number of questions at the end",
+    "ai_import_step4": "Copy the JSON result from the AI",
+    "ai_import_step5": "Paste JSON in the \"Paste & Preview\" tab",
+    "ai_import_copy_prompt": "Copy the Prompt",
+    "ai_import_copied": "Copied! ✓",
+    "ai_import_hint": "After copying the Prompt, go to the \"Paste & Preview\" tab",
+    "ai_import_paste_label": "Paste JSON from AI here:",
+    "ai_import_paste_hint": "[ { \"question_ar\": \"...\", ... } ]",
+    "ai_import_preview_btn": "Preview Questions",
+    "ai_import_ready": "{count} questions ready to import ✓",
+    "ai_import_add_btn": "Add {count} Questions",
+    "ai_import_adding": "Adding...",
+    "ai_import_success": "Added {count} of {total} questions successfully ✓",
+    "ai_import_err_empty": "Please paste JSON here first",
+    "ai_import_err_not_array": "JSON must be an array [ ... ]",
+    "ai_import_err_no_questions": "No questions found in JSON",
+    "ai_import_err_invalid": "Invalid JSON: {msg}",
+    "ai_import_fab_label": "Import from AI (JSON)",
+    "ai_import_fab_subtitle": "Send prompt to any AI and paste the result",
+    "ai_import_type_single": "Single Choice",
+    "ai_import_type_multiple": "Multiple Choice",
+    "ai_import_type_tf": "True / False",
+    "ai_import_type_text": "Text Answer",
+    "ai_import_points": "{n} pts"
   }
 }
 

@@ -139,49 +139,71 @@ class ReportsRemoteDataSource {
     }
   }
 
-  /// Get user's own reports
-  Future<List<Map<String, dynamic>>> getMyReports() async {
+  /// Get all reports for instructor's courses (course + review reports)
+  Future<Map<String, List<Map<String, dynamic>>>> getInstructorReports() async {
     try {
       final courseReports = await _client
           .from('course_reports')
-          .select('*, course:courses(title_ar, title_en)')
-          .eq('user_id', _userId)
+          .select('*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       final reviewReports = await _client
           .from('review_reports')
-          .select('*')
-          .eq('user_id', _userId)
+          .select('*, reporter:profiles!review_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
-      // Combine and sort
-      final allReports = <Map<String, dynamic>>[];
-
-      for (final r in (courseReports as List)) {
-        allReports.add({
-          ...Map<String, dynamic>.from(r),
-          'type': 'course',
-        });
-      }
-
-      for (final r in (reviewReports as List)) {
-        allReports.add({
-          ...Map<String, dynamic>.from(r),
-          'type': 'review',
-        });
-      }
-
-      // Sort by created_at
-      allReports.sort((a, b) {
-        final aDate = DateTime.parse(a['created_at'] as String);
-        final bDate = DateTime.parse(b['created_at'] as String);
-        return bDate.compareTo(aDate);
-      });
-
-      return allReports;
+      return {
+        'course': List<Map<String, dynamic>>.from(courseReports as List),
+        'review': List<Map<String, dynamic>>.from(reviewReports as List),
+      };
     } catch (e, s) {
-      AppLogger.e('[$_tag] getMyReports error', e, s);
+      AppLogger.e('[$_tag] getInstructorReports error', e, s);
       rethrow;
     }
   }
+
+  /// Update report status (pending → reviewed / resolved / rejected)
+  Future<bool> updateCourseReportStatus(String reportId, String status, {String? response}) async {
+    try {
+      await _client
+          .from('course_reports')
+          .update({
+            'status': status,
+            'admin_response': response,
+            'admin_id': _userId,
+            'resolved_at': status == 'resolved' || status == 'rejected'
+                ? DateTime.now().toIso8601String()
+                : null,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', reportId);
+      return true;
+    } catch (e, s) {
+      AppLogger.e('[$_tag] updateCourseReportStatus error', e, s);
+      return false;
+    }
+  }
+
+  Future<bool> updateReviewReportStatus(String reportId, String status, {String? response}) async {
+    try {
+      await _client
+          .from('review_reports')
+          .update({
+            'status': status,
+            'admin_response': response,
+            'admin_id': _userId,
+            'resolved_at': status == 'resolved' || status == 'rejected'
+                ? DateTime.now().toIso8601String()
+                : null,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', reportId);
+      return true;
+    } catch (e, s) {
+      AppLogger.e('[$_tag] updateReviewReportStatus error', e, s);
+      return false;
+    }
+  }
 }
+
+

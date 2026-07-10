@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/notifications_repository.dart';
@@ -12,11 +13,30 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   NotificationsCubit(this._repository) : super(const NotificationsInitial());
 
   List<NotificationEntity> _notifications = [];
+  String? _loadedUserId;
+
+  String? get _currentUserId => Supabase.instance.client.auth.currentUser?.id;
 
   Future<void> loadNotifications({bool refresh = false}) async {
     AppLogger.d('[$_tag] loadNotifications: refresh=$refresh');
 
-    if (!refresh && state is NotificationsLoaded) {
+    final currentUserId = _currentUserId;
+    if (currentUserId == null) {
+      _loadedUserId = null;
+      _notifications = [];
+      if (!isClosed) {
+        emit(const NotificationsLoaded(notifications: [], unreadCount: 0));
+      }
+      return;
+    }
+
+    final userChanged = _loadedUserId != null && _loadedUserId != currentUserId;
+    if (userChanged) {
+      _notifications = [];
+      if (!isClosed) emit(const NotificationsInitial());
+    }
+
+    if (!refresh && !userChanged && state is NotificationsLoaded) {
       return;
     }
 
@@ -25,6 +45,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
     try {
       _notifications = await _repository.getNotifications();
+      _loadedUserId = currentUserId;
       final unreadCount = _notifications.where((n) => !n.isRead).length;
 
       AppLogger.success(
@@ -164,6 +185,7 @@ class NotificationsCubit extends Cubit<NotificationsState> {
 
   /// Add notification locally (for real-time updates)
   void addNotification(NotificationEntity notification) {
+    if (notification.userId != _currentUserId) return;
     _notifications.insert(0, notification);
     final unreadCount = _notifications.where((n) => !n.isRead).length;
     if (isClosed) return;

@@ -135,7 +135,8 @@
       "email_not_confirmed": "يرجى تأكيد بريدك الإلكتروني أولاً",
       "session_expired": "انتهت صلاحية الجلسة، سجل دخولك مرة أخرى",
       "user_banned": "حسابك محظور",
-      "user_inactive": "حسابك غير مفعل. تواصل مع الدعم"
+      "user_inactive": "حسابك غير مفعل. تواصل مع الدعم",
+      "email_not_registered": "البريد الإلكتروني غير مسجل في النظام. يرجى التحقق من البريد أو إنشاء حساب جديد."
     },
     "login_required": "يجب تسجيل الدخول أولاً",
     "login_with_phone": "تسجيل الدخول برقم الهاتف",
@@ -885,7 +886,9 @@
       "create_quiz": "إنشاء اختبار",
       "edit_quiz": "تعديل الاختبار",
       "quiz_attempts": "محاولات الاختبار",
-      "preview_quiz": "معاينة الاختبار"
+      "preview_quiz": "معاينة الاختبار",
+      "delete_course_title": "حذف الكورس نهائياً",
+      "delete_course_confirm": "هل أنت متأكد من حذف كورس ({title})؟\n\n⚠️ سيتم حذف الكورس بجميع دروسه، أقسامه، ملفاته، ومحتوياته بالكامل نهائياً من النظام!"
     },
     "common": {
       "search": "بحث...",
@@ -995,7 +998,37 @@
     "validation_section_fallback": "القسم {number}",
     "validation_lesson_fallback": "الدرس {number}",
     "validation_section_empty": "{section} لا يحتوي على دروس",
-    "validation_lesson_availability": "وقت إتاحة {lesson} داخل {section} غير صحيح"
+    "validation_lesson_availability": "وقت إتاحة {lesson} داخل {section} غير صحيح",
+    "ai_import_title": "إضافة أسئلة من AI",
+    "ai_import_tab_prompt": "الـ Prompt",
+    "ai_import_tab_paste": "لصق ومعاينة",
+    "ai_import_how_title": "كيف تستخدم هذه الميزة؟",
+    "ai_import_step1": "انسخ الـ Prompt بالزر أدناه",
+    "ai_import_step2": "أرسله لأي AI (شات جيبيت، جيميناي، كلود...)",
+    "ai_import_step3": "غيّر الموضوع وعدد الأسئلة في نهاية الـ Prompt",
+    "ai_import_step4": "انسخ الـ JSON الناتج من الـ AI",
+    "ai_import_step5": "الصق JSON في تبويب \"لصق ومعاينة\"",
+    "ai_import_copy_prompt": "نسخ الـ Prompt",
+    "ai_import_copied": "تم النسخ! ✓",
+    "ai_import_hint": "بعد نسخ الـ Prompt، اذهب لتبويب \"لصق ومعاينة\"",
+    "ai_import_paste_label": "الصق JSON من الـ AI هنا:",
+    "ai_import_paste_hint": "[ { \"question_ar\": \"...\", ... } ]",
+    "ai_import_preview_btn": "معاينة الأسئلة",
+    "ai_import_ready": "{count} أسئلة جاهزة للإضافة ✓",
+    "ai_import_add_btn": "إضافة {count} أسئلة",
+    "ai_import_adding": "جاري الإضافة...",
+    "ai_import_success": "تم إضافة {count} من {total} أسئلة بنجاح ✓",
+    "ai_import_err_empty": "الرجاء لصق JSON هنا أولاً",
+    "ai_import_err_not_array": "JSON يجب أن يكون مصفوفة [ ... ]",
+    "ai_import_err_no_questions": "لم يتم إيجاد أسئلة في JSON",
+    "ai_import_err_invalid": "JSON غير صالح: {msg}",
+    "ai_import_fab_label": "إضافة من AI (JSON)",
+    "ai_import_fab_subtitle": "أرسل Prompt لأي AI والصق النتيجة",
+    "ai_import_type_single": "اختيار واحد",
+    "ai_import_type_multiple": "اختيار متعدد",
+    "ai_import_type_tf": "صح / خطأ",
+    "ai_import_type_text": "إجابة نصية",
+    "ai_import_points": "{n} نقطة"
   }
 }
 

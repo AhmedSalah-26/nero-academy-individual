@@ -192,6 +192,24 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         );
   }
 
+  Future<void> _onRefresh() async {
+    AppLogger.i('[CoursePlayer] Pull-to-refresh triggered');
+    try {
+      final cubit = context.read<CoursePlayerCubit>();
+      await cubit.initialize(
+        courseId: widget.courseId,
+        enrollmentId: widget.enrollmentId,
+        courseTitle: widget.courseTitle,
+        initialLessonId: cubit.state.currentLesson?.id ?? widget.initialLessonId,
+        instructorId: widget.instructorId,
+        instructorName: widget.instructorName,
+        instructorAvatar: widget.instructorAvatar,
+      );
+    } catch (e) {
+      AppLogger.e('[CoursePlayer] Refresh failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -328,58 +346,71 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     return Column(
       children: [
         Expanded(
-          child: CustomScrollView(
-            // Persistent controller: keeps scroll position when tabs change
-            controller: _playerScrollController,
-            slivers: [
-              // ── Collapsible: video player + lesson header ────────────
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    if (state.currentLesson != null)
-                      VideoPlayerSection(
-                        lesson: state.currentLesson!,
-                        currentPosition: _currentPosition,
-                        totalDuration: _totalDuration,
-                        isPlaying: _isPlaying,
-                        isDark: isDark,
-                        onPlayPause: _togglePlayPause,
-                        onReplay10: _replay10,
-                        onForward10: _forward10,
-                        onFullscreen: () => HapticFeedback.mediumImpact(),
-                        onCast: () {},
-                        onSeek: _onSeek,
-                        onSpeedTap: () {},
-                        onBack: _handleBack,
-                        courseTitle: state.courseTitle,
-                        sectionIndex: sectionIndex,
-                        lessonIndex: lessonIndex,
-                      ),
-                    if (state.currentLesson != null)
-                      _buildLessonHeader(state, isDark),
-                    if (state.groupLinks.hasAny)
-                      _buildCourseGroupLinks(state, isDark),
-                  ],
-                ),
-              ),
-              // ── Sticky: tab bar (like search bar in home) ────────────
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyTabBarDelegate(
-                  isDark: isDark,
-                  child: ContentTabs(
-                    currentIndex: state.currentTabIndex,
-                    isDark: isDark,
-                    onTabChanged: _changeContentTab,
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            backgroundColor:
+                isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+            displacement: 60,
+            child: CustomScrollView(
+              // Persistent controller: keeps scroll position when tabs change
+              controller: _playerScrollController,
+              // Must be scrollable even when content fits screen for pull-to-refresh
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // ── Collapsible: video player + lesson header ────────────
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      if (state.currentLesson != null)
+                        VideoPlayerSection(
+                          lesson: state.currentLesson!,
+                          currentPosition: _currentPosition,
+                          totalDuration: _totalDuration,
+                          isPlaying: _isPlaying,
+                          isDark: isDark,
+                          onPlayPause: _togglePlayPause,
+                          onReplay10: _replay10,
+                          onForward10: _forward10,
+                          onFullscreen: () => HapticFeedback.mediumImpact(),
+                          onCast: () {},
+                          onSeek: _onSeek,
+                          onSpeedTap: () {},
+                          onBack: _handleBack,
+                          courseTitle: state.courseTitle,
+                          sectionIndex: sectionIndex,
+                          lessonIndex: lessonIndex,
+                          // For document/resource lessons, open the file URL
+                          onOpenFile: state.currentLesson!.fileUrl != null &&
+                                  state.currentLesson!.fileUrl!.isNotEmpty
+                              ? () => _openUrl(state.currentLesson!.fileUrl!)
+                              : null,
+                        ),
+                      if (state.currentLesson != null)
+                        _buildLessonHeader(state, isDark),
+                      if (state.groupLinks.hasAny)
+                        _buildCourseGroupLinks(state, isDark),
+                    ],
                   ),
                 ),
-              ),
-              // ── Scrollable: tab content (no fixed height = all lessons show) ─
-              SliverToBoxAdapter(
-                child: _buildCurrentTabContent(state, isDark),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
+                // ── Sticky: tab bar (like search bar in home) ────────────
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyTabBarDelegate(
+                    isDark: isDark,
+                    child: ContentTabs(
+                      currentIndex: state.currentTabIndex,
+                      isDark: isDark,
+                      onTabChanged: _changeContentTab,
+                    ),
+                  ),
+                ),
+                // ── Scrollable: tab content (no fixed height = all lessons show) ─
+                SliverToBoxAdapter(
+                  child: _buildCurrentTabContent(state, isDark),
+                ),
+              ],
+            ),
           ),
         ),
         BottomActionBar(

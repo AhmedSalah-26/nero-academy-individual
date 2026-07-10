@@ -26,6 +26,7 @@ class VideoPlayerSection extends StatelessWidget {
   final String? courseTitle;
   final int sectionIndex;
   final int lessonIndex;
+  final VoidCallback? onOpenFile;
 
   const VideoPlayerSection({
     super.key,
@@ -46,6 +47,7 @@ class VideoPlayerSection extends StatelessWidget {
     this.courseTitle,
     this.sectionIndex = 0,
     this.lessonIndex = 0,
+    this.onOpenFile,
   });
 
   @override
@@ -76,6 +78,11 @@ class VideoPlayerSection extends StatelessWidget {
   }
 
   Widget _buildPlayerContent(BuildContext context) {
+    // ── File / Document lessons → show file card instead of video player ──
+    if (_isFileLessonType()) {
+      return _buildFileCard(context);
+    }
+
     if (lesson.videoUrl != null && lesson.videoUrl!.isNotEmpty) {
       final videoUrl = lesson.videoUrl!.trim();
       final progress = context.read<CoursePlayerCubit>().state.currentProgress;
@@ -106,6 +113,212 @@ class VideoPlayerSection extends StatelessWidget {
     }
 
     return _buildNoVideoWidget();
+  }
+
+  bool _isFileLessonType() {
+    return lesson.type == LessonType.document ||
+        lesson.type == LessonType.resource;
+  }
+
+  /// Beautiful file card shown instead of video player for document/resource lessons
+  Widget _buildFileCard(BuildContext context) {
+    final ext = _getFileExtension();
+    final fileIcon = _getFileIcon(ext);
+    final fileColor = _getFileColor(ext);
+    final hasFile = (lesson.fileUrl != null && lesson.fileUrl!.isNotEmpty) ||
+        onOpenFile != null;
+
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              fileColor.withValues(alpha: isDark ? 0.18 : 0.10),
+              fileColor.withValues(alpha: isDark ? 0.06 : 0.03),
+              isDark
+                  ? const Color(0xFF12101E)
+                  : const Color(0xFFF8F6FF),
+            ],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ── File icon badge ────────────────────────────────────────────
+            Container(
+              width: 68,
+              height: 68,
+              decoration: BoxDecoration(
+                color: fileColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: fileColor.withValues(alpha: 0.30),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: fileColor.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(fileIcon, color: fileColor, size: 34),
+            ),
+            const SizedBox(height: 14),
+            // ── File name ─────────────────────────────────────────────────
+            if (lesson.fileName != null && lesson.fileName!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Text(
+                  lesson.fileName!,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            // ── File size ─────────────────────────────────────────────────
+            if (lesson.fileSize != null && lesson.fileSize! > 0) ...[
+              const SizedBox(height: 6),
+              Text(
+                _formatFileSize(lesson.fileSize!),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+            // ── Open file button ───────────────────────────────────────────
+            if (hasFile)
+              ElevatedButton.icon(
+                onPressed: onOpenFile,
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text(
+                  'افتح الملف',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: fileColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 13,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                  shadowColor: fileColor.withValues(alpha: 0.4),
+                ),
+              )
+            else
+              // No file URL available
+              Text(
+                'الملف غير متاح حاليًا',
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getFileExtension() {
+    final source = lesson.fileName ?? lesson.fileUrl ?? lesson.fileType ?? '';
+    final dotIndex = source.lastIndexOf('.');
+    if (dotIndex >= 0 && dotIndex < source.length - 1) {
+      return source.substring(dotIndex + 1).toLowerCase();
+    }
+    return (lesson.fileType ?? '').toLowerCase();
+  }
+
+  IconData _getFileIcon(String ext) {
+    switch (ext) {
+      case 'pdf':
+        return Icons.picture_as_pdf_outlined;
+      case 'doc':
+      case 'docx':
+        return Icons.description_outlined;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart_outlined;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow_outlined;
+      case 'zip':
+      case 'rar':
+      case '7z':
+        return Icons.folder_zip_outlined;
+      case 'mp3':
+      case 'wav':
+      case 'm4a':
+        return Icons.audiotrack_outlined;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return Icons.image_outlined;
+      default:
+        return Icons.insert_drive_file_outlined;
+    }
+  }
+
+  Color _getFileColor(String ext) {
+    switch (ext) {
+      case 'pdf':
+        return const Color(0xFFE53E3E);
+      case 'doc':
+      case 'docx':
+        return const Color(0xFF2B5CE6);
+      case 'xls':
+      case 'xlsx':
+        return const Color(0xFF1D8A4C);
+      case 'ppt':
+      case 'pptx':
+        return const Color(0xFFE85D2A);
+      case 'zip':
+      case 'rar':
+      case '7z':
+        return const Color(0xFFB8860B);
+      case 'mp3':
+      case 'wav':
+      case 'm4a':
+        return const Color(0xFF7C3AED);
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
   bool _isYouTubeUrl(String url) {

@@ -60,10 +60,34 @@ class _InstructorStudentsContentState extends State<InstructorStudentsContent> {
   Widget _buildHeader(BuildContext context, bool isArabic) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: DashboardSearchBar(
-        hintText: isArabic ? 'بحث عن طالب...' : 'Search students...',
-        onSearch: (query) =>
-            context.read<InstructorStudentsCubit>().search(query),
+      child: Row(
+        children: [
+          Expanded(
+            child: DashboardSearchBar(
+              hintText: isArabic ? 'بحث عن طالب...' : 'Search students...',
+              onSearch: (query) =>
+                  context.read<InstructorStudentsCubit>().search(query),
+            ),
+          ),
+          const SizedBox(width: 12),
+          InkWell(
+            onTap: () => AppRouter.goToStudentsProgressSheet(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: const Icon(
+                Icons.table_chart_outlined,
+                color: AppColors.primary,
+                size: 22,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
