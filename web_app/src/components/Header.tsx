@@ -46,6 +46,7 @@ export function Header() {
   const scrollAccumulator = useRef(0);
   const animationFrame = useRef<number | null>(null);
   const scrollIdleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     const updateScrollState = (nextState: Partial<HeaderScrollState>) => {
@@ -76,7 +77,52 @@ export function Header() {
       }, SCROLL_IDLE_DELAY);
     };
 
-    lastScrollY.current = Math.max(window.scrollY, 0);
+    const getScrollY = () =>
+      Math.max(
+        window.scrollY,
+        document.documentElement.scrollTop,
+        document.body.scrollTop,
+        0
+      );
+
+    const processScrollDelta = (
+      diff: number,
+      currentScrollY: number,
+      nextState: Partial<HeaderScrollState>
+    ) => {
+      if (currentScrollY <= TOP_REVEAL_OFFSET) {
+        nextState.isVisible = true;
+        scrollAccumulator.current = 0;
+        return;
+      }
+
+      if (Math.abs(diff) < 1) {
+        return;
+      }
+
+      const changedDirection =
+        scrollAccumulator.current !== 0 &&
+        Math.sign(scrollAccumulator.current) !== Math.sign(diff);
+
+      if (changedDirection) {
+        scrollAccumulator.current = 0;
+      }
+
+      scrollAccumulator.current += diff;
+
+      if (scrollAccumulator.current <= -SCROLL_THRESHOLD) {
+        nextState.isVisible = true;
+        scrollAccumulator.current = 0;
+      } else if (
+        scrollAccumulator.current >= SCROLL_THRESHOLD &&
+        currentScrollY > HIDE_AFTER_OFFSET
+      ) {
+        nextState.isVisible = false;
+        scrollAccumulator.current = 0;
+      }
+    };
+
+    lastScrollY.current = getScrollY();
     updateScrollState({
       isVisible: true,
       isFloating: lastScrollY.current > FLOATING_OFFSET,
@@ -93,54 +139,66 @@ export function Header() {
       animationFrame.current = window.requestAnimationFrame(() => {
         animationFrame.current = null;
 
-        const currentScrollY = Math.max(window.scrollY, 0);
+        const currentScrollY = getScrollY();
         const diff = currentScrollY - lastScrollY.current;
         const nextState: Partial<HeaderScrollState> = {
           isFloating: currentScrollY > FLOATING_OFFSET,
         };
 
-        if (currentScrollY <= TOP_REVEAL_OFFSET) {
-          nextState.isVisible = true;
-          scrollAccumulator.current = 0;
-        } else if (Math.abs(diff) >= 1) {
-          const changedDirection =
-            scrollAccumulator.current !== 0 &&
-            Math.sign(scrollAccumulator.current) !== Math.sign(diff);
-
-          if (changedDirection) {
-            scrollAccumulator.current = 0;
-          }
-
-          scrollAccumulator.current += diff;
-
-          if (scrollAccumulator.current <= -SCROLL_THRESHOLD) {
-            nextState.isVisible = true;
-            scrollAccumulator.current = 0;
-          } else if (
-            scrollAccumulator.current >= SCROLL_THRESHOLD &&
-            currentScrollY > HIDE_AFTER_OFFSET
-          ) {
-            nextState.isVisible = false;
-            scrollAccumulator.current = 0;
-          }
-        }
+        processScrollDelta(diff, currentScrollY, nextState);
 
         updateScrollState(nextState);
         lastScrollY.current = currentScrollY;
       });
     };
 
+    const handleDirectionalInput = (diff: number) => {
+      markScrolling();
+
+      const currentScrollY = getScrollY();
+      const nextState: Partial<HeaderScrollState> = {
+        isFloating: currentScrollY > FLOATING_OFFSET,
+      };
+
+      processScrollDelta(diff, currentScrollY, nextState);
+      updateScrollState(nextState);
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      handleDirectionalInput(event.deltaY);
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartY.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const currentTouchY = event.touches[0]?.clientY;
+      if (touchStartY.current === null || currentTouchY === undefined) {
+        return;
+      }
+
+      handleDirectionalInput(touchStartY.current - currentTouchY);
+      touchStartY.current = currentTouchY;
+    };
+
     const handleResize = () => {
-      if (window.scrollY <= TOP_REVEAL_OFFSET) {
+      if (getScrollY() <= TOP_REVEAL_OFFSET) {
         updateScrollState({ isVisible: true });
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('resize', handleResize);
 
       if (animationFrame.current !== null) {
