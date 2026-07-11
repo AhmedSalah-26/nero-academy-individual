@@ -33,7 +33,7 @@ type HeaderScrollState = {
 };
 
 export function Header() {
-  const { lang, t, user, profile, cart, signOut, theme, toggleTheme } = useApp();
+  const { lang, t, user, profile, cart, signOut, theme, toggleTheme, toggleLang } = useApp();
   const pathname = usePathname();
   const [scrollState, setScrollState] = useState<HeaderScrollState>({
     isVisible: true,
