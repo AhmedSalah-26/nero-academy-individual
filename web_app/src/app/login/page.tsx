@@ -306,6 +306,7 @@ function LoginContent() {
                 <input
                   type="email"
                   required
+                  suppressHydrationWarning
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                   placeholder="you@example.com"
@@ -324,6 +325,7 @@ function LoginContent() {
                 <input
                   type="password"
                   required
+                  suppressHydrationWarning
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
                   placeholder="••••••••"
@@ -376,6 +378,7 @@ function LoginContent() {
                   <input
                     type="text"
                     required
+                    suppressHydrationWarning
                     value={name}
                     onChange={(e) => { setName(e.target.value); clearError('name'); }}
                     placeholder={lang === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
@@ -395,6 +398,7 @@ function LoginContent() {
                     <input
                       type="email"
                       required
+                      suppressHydrationWarning
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                       placeholder="you@example.com"
@@ -415,6 +419,7 @@ function LoginContent() {
                       <input
                         type="tel"
                         required
+                        suppressHydrationWarning
                         value={phone}
                         onChange={(e) => { setPhone(e.target.value); clearError('phone'); }}
                         placeholder={lang === 'ar' ? '01xxxxxxxxx' : '01xxxxxxxxx'}
@@ -436,6 +441,7 @@ function LoginContent() {
                     <input
                       type="password"
                       required
+                      suppressHydrationWarning
                       value={password}
                       onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
                       placeholder="••••••••"
@@ -455,6 +461,7 @@ function LoginContent() {
                     <input
                       type="password"
                       required
+                      suppressHydrationWarning
                       value={confirmPassword}
                       onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword'); }}
                       placeholder="••••••••"
