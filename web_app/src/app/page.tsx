@@ -179,12 +179,13 @@ export default function HomePage() {
             <h1>
               {lang === 'ar' ? (
                 <>
-                  اوعي تنسي.<br />
-                  <span>تزود معرفتك بالكيمياء.</span>
+                  اوعي تنسي تزود<br />
+                  <span style={{ display: 'inline' }}>معرفتك</span> بالكيمياء.
                 </>
               ) : (
                 <>
-                  Never forget to boost your chemistry knowledge.
+                  Never forget<br />
+                  <span style={{ display: 'inline' }}>to</span> boost your chemistry <span style={{ display: 'inline' }}>knowledge</span>.
                 </>
               )}
             </h1>
