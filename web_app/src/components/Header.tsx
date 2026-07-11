@@ -15,6 +15,7 @@ import {
   Logout,
   Search,
   Settings,
+  Language as LanguageIcon,
 } from '@mui/icons-material';
 import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
