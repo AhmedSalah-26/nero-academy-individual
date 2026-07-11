@@ -293,6 +293,9 @@ export function Header() {
             <button onClick={toggleTheme} className={styles.squareButton} title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}>
               {theme === 'light' ? <DarkMode fontSize="small" /> : <LightMode fontSize="small" />}
             </button>
+            <button onClick={toggleLang} className={styles.squareButton} title={lang === 'ar' ? 'English' : 'العربية'} aria-label="Change language">
+              <LanguageIcon fontSize="small" />
+            </button>
             {user ? (
               <div className={styles.userCard}>
                 <div className={styles.userProfile}>
