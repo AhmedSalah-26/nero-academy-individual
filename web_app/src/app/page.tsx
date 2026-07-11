@@ -179,13 +179,13 @@ export default function HomePage() {
             <h1>
               {lang === 'ar' ? (
                 <>
-                  افهم الكيمياء.<br />
-                  <span>حقق هدفك.</span>
+                  اوعي تنسي.<br />
+                  <span>تزود معرفتك بالكيمياء.</span>
                 </>
               ) : (
                 <>
-                  Understand chemistry.<br />
-                  <span>Earn the grade.</span>
+                  Never forget to<br />
+                  <span>boost your chemistry knowledge.</span>
                 </>
               )}
             </h1>
