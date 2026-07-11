@@ -475,7 +475,7 @@ export default function HomePage() {
           </div>
           <h2>{lang === 'ar' ? 'جاهز تخلي الكيمياء أسهل مادة عندك؟' : 'Ready to make chemistry your easiest subject?'}</h2>
           <Link href={user ? '/my-learning' : '/login'} className={styles.ctaBtn}>
-            {lang === 'ar' ? 'ابدأ مجانًا' : 'Start for free'}
+            {lang === 'ar' ? 'ابدأ الآن' : 'Start now'}
             {arrow}
           </Link>
         </div>
