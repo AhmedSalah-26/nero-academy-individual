@@ -384,9 +384,21 @@ export default function HomePage() {
 
         <div className={styles.gradesGrid}>
           {[
-            ['01', 'الصف الأول الثانوي', 'علوم متكاملة وتأسيس قوي'],
-            ['02', 'الصف الثاني الثانوي', 'شرح المنهج وتدريب متدرج'],
-            ['03', 'الصف الثالث الثانوي', 'شرح ومراجعات وليالي الامتحان'],
+            [
+              '01',
+              lang === 'ar' ? 'الصف الأول الثانوي' : '1st Secondary Grade',
+              lang === 'ar' ? 'علوم متكاملة وتأسيس قوي' : 'Integrated Science & Strong Foundation',
+            ],
+            [
+              '02',
+              lang === 'ar' ? 'الصف الثاني الثانوي' : '2nd Secondary Grade',
+              lang === 'ar' ? 'شرح المنهج وتدريب متدرج' : 'Curriculum Explanation & Gradual Practice',
+            ],
+            [
+              '03',
+              lang === 'ar' ? 'الصف الثالث الثانوي' : '3rd Secondary Grade',
+              lang === 'ar' ? 'شرح ومراجعات وليالي الامتحان' : 'Explanations, Revisions & Exam Nights',
+            ],
           ].map(([number, title, description], idx) => (
             <Link href="/search" className={styles.gradeCard} key={number}>
               <div className={styles.gradeNumber}>{number}</div>
