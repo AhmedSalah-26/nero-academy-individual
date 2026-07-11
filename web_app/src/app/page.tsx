@@ -184,8 +184,7 @@ export default function HomePage() {
                 </>
               ) : (
                 <>
-                  Never forget to<br />
-                  <span>boost your chemistry knowledge.</span>
+                  Never forget to boost your chemistry knowledge.
                 </>
               )}
             </h1>
