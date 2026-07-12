@@ -17,6 +17,9 @@ class AdminAnalyticsContent extends StatefulWidget {
 }
 
 class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
+  String _instructorSearch = '';
+  _AnalyticsView _selectedView = _AnalyticsView.overview;
+
   @override
   void initState() {
     super.initState();
@@ -38,15 +41,11 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(context, state, isArabic, isDark),
-                const SizedBox(height: 20),
-                _buildPlatformSummary(state, isArabic),
-                const SizedBox(height: 20),
-                _buildPlatformChart(state, isArabic),
-                const SizedBox(height: 24),
-                _buildInstructorAnalytics(context, state, isArabic, isDark),
-                const SizedBox(height: 24),
-                _buildTopCoursesSection(state, isArabic, isDark),
+                _buildTopBar(context, state, isArabic, isDark),
+                const SizedBox(height: 18),
+                _buildViewSwitcher(isArabic, isDark),
+                const SizedBox(height: 18),
+                _buildSelectedView(context, state, isArabic, isDark),
               ],
             ),
           ),
@@ -55,29 +54,138 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     );
   }
 
-  Widget _buildHeader(
+  Widget _buildSelectedView(
     BuildContext context,
     AdminAnalyticsState state,
     bool isArabic,
     bool isDark,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
+    switch (_selectedView) {
+      case _AnalyticsView.overview:
+        return _buildPlatformWorkspace(state, isArabic, isDark);
+      case _AnalyticsView.instructors:
+        return _buildInstructorWorkspace(context, state, isArabic, isDark);
+      case _AnalyticsView.courses:
+        return _buildTopCoursesSection(state, isArabic, isDark);
+    }
+  }
+
+  Widget _buildViewSwitcher(bool isArabic, bool isDark) {
+    final items = [
+      (
+        view: _AnalyticsView.overview,
+        icon: Icons.dashboard_rounded,
+        label: isArabic ? 'نظرة عامة' : 'Overview',
       ),
+      (
+        view: _AnalyticsView.instructors,
+        icon: Icons.people_alt_rounded,
+        label: isArabic ? 'المدرسين' : 'Instructors',
+      ),
+      (
+        view: _AnalyticsView.courses,
+        icon: Icons.play_lesson_rounded,
+        label: isArabic ? 'الكورسات' : 'Courses',
+      ),
+    ];
+
+    return _surface(
+      isDark: isDark,
+      padding: const EdgeInsets.all(8),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxWidth < 760;
-          final titleBlock = Column(
+          final compact = constraints.maxWidth < 560;
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: items.map((item) {
+              final selected = item.view == _selectedView;
+              final width = compact
+                  ? (constraints.maxWidth - 8) / 2
+                  : (constraints.maxWidth - 16) / 3;
+              return SizedBox(
+                width: width,
+                child: InkWell(
+                  onTap: () => setState(() => _selectedView = item.view),
+                  borderRadius: BorderRadius.circular(12),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 13,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.primary
+                          : isDark
+                              ? AppColors.surfaceDark
+                              : AppColors.grey50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.primary
+                            : isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item.icon,
+                          size: 18,
+                          color: selected
+                              ? AppColors.white
+                              : isDark
+                                  ? AppColors.textMutedDark
+                                  : AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            item.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: selected
+                                  ? AppColors.white
+                                  : isDark
+                                      ? AppColors.textMainDark
+                                      : AppColors.textMainLight,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTopBar(
+    BuildContext context,
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
+    return _surface(
+      isDark: isDark,
+      padding: const EdgeInsets.all(18),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 820;
+          final title = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isArabic ? 'تحليلات المنصة والمدرسين' : 'Platform Analytics',
+                isArabic ? 'تحليلات المنصة' : 'Platform analytics',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -85,13 +193,12 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                       isDark ? AppColors.textMainDark : AppColors.textMainLight,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
                 isArabic
-                    ? 'اختر فترة زمنية ثم اضغط على أي مدرس لعرض أدائه داخل نفس الفترة.'
-                    : 'Choose a date range, then select an instructor to inspect their activity.',
+                    ? 'تحكم سريع في الفترة، ثم راجع أداء المنصة وكل مدرس.'
+                    : 'Filter the period, then review platform and instructor activity.',
                 style: TextStyle(
-                  height: 1.5,
                   color: isDark
                       ? AppColors.textMutedDark
                       : AppColors.textMutedLight,
@@ -99,25 +206,25 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
               ),
             ],
           );
+          final filters = _buildDateFilter(context, state, isArabic, isDark);
 
-          final dateFilter = _buildDateFilter(context, state, isArabic, isDark);
-
-          if (isCompact) {
+          if (compact) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                titleBlock,
-                const SizedBox(height: 16),
-                dateFilter,
+                title,
+                const SizedBox(height: 14),
+                filters,
               ],
             );
           }
 
           return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(child: titleBlock),
-              const SizedBox(width: 20),
-              dateFilter,
+              Expanded(child: title),
+              const SizedBox(width: 18),
+              filters,
             ],
           );
         },
@@ -152,14 +259,14 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         ),
-        _buildQuickDateButton(context, isArabic ? '7 أيام' : '7 Days', 7),
-        _buildQuickDateButton(context, isArabic ? '30 يوم' : '30 Days', 30),
-        _buildQuickDateButton(context, isArabic ? '90 يوم' : '90 Days', 90),
+        _quickRangeButton(context, isArabic ? '7 أيام' : '7 Days', 7),
+        _quickRangeButton(context, isArabic ? '30 يوم' : '30 Days', 30),
+        _quickRangeButton(context, isArabic ? '90 يوم' : '90 Days', 90),
       ],
     );
   }
 
-  Widget _buildQuickDateButton(BuildContext context, String label, int days) {
+  Widget _quickRangeButton(BuildContext context, String label, int days) {
     return TextButton(
       onPressed: () {
         final end = DateTime.now();
@@ -192,100 +299,95 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     }
   }
 
-  Widget _buildPlatformSummary(AdminAnalyticsState state, bool isArabic) {
-    final stats = state.platformStats;
-    final isLoading = state.isLoading;
-
-    return StatsGrid(
-      isLoading: isLoading,
-      loadingCount: 6,
-      stats: [
-        StatsCardData(
-          title: isArabic ? 'طلاب المنصة' : 'Students',
-          value: stats.totalStudents.toString(),
-          icon: Icons.school_rounded,
-          color: AppColors.primary,
-        ),
-        StatsCardData(
-          title: isArabic ? 'مدرسو المنصة' : 'Instructors',
-          value: stats.totalInstructors.toString(),
-          icon: Icons.person_rounded,
-          color: AppColors.info,
-        ),
-        StatsCardData(
-          title: isArabic ? 'كورسات المنصة' : 'Courses',
-          value: stats.totalCourses.toString(),
-          icon: Icons.play_lesson_rounded,
-          color: AppColors.success,
-        ),
-        StatsCardData(
-          title: isArabic ? 'كل التسجيلات' : 'All Enrollments',
-          value: stats.totalEnrollments.toString(),
-          icon: Icons.assignment_turned_in_rounded,
-          color: AppColors.warning,
-        ),
-        StatsCardData(
-          title: isArabic ? 'تسجيلات الفترة' : 'Range Enrollments',
-          value: state.totalEnrollments.toString(),
-          icon: Icons.filter_alt_rounded,
-          color: AppColors.error,
-        ),
-        StatsCardData(
-          title: isArabic ? 'تسجيلات اليوم' : "Today's Enrollments",
-          value: stats.todayEnrollments.toString(),
-          icon: Icons.today_rounded,
-          color: AppColors.primary,
-          changePercentage: stats.enrollmentChange.toDouble(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPlatformChart(AdminAnalyticsState state, bool isArabic) {
-    return DashboardChart(
-      title: isArabic
-          ? 'تسجيلات المنصة حسب الفترة'
-          : 'Platform enrollments by date',
-      type: DashboardChartType.bar,
-      data: state.enrollmentsData
-          .map((d) => ChartDataPoint(
-                label: d.label,
-                value: d.value,
-                date: d.date,
-              ))
-          .toList(),
-      isLoading: state.isLoading,
-      height: 280,
-      primaryColor: AppColors.primary,
-      showTotal: true,
-    );
-  }
-
-  Widget _buildInstructorAnalytics(
-    BuildContext context,
+  Widget _buildPlatformWorkspace(
     AdminAnalyticsState state,
     bool isArabic,
     bool isDark,
   ) {
-    final selectedInstructor = _selectedInstructor(state);
+    final stats = state.platformStats;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 980;
-        final list = _buildInstructorList(context, state, isArabic, isDark);
-        final details = _buildInstructorDetails(
-          state,
-          selectedInstructor,
-          isArabic,
-          isDark,
+        final wide = constraints.maxWidth >= 1020;
+        final chart = DashboardChart(
+          title: isArabic
+              ? 'تسجيلات المنصة خلال الفترة'
+              : 'Platform enrollments in range',
+          type: DashboardChartType.bar,
+          data: state.enrollmentsData
+              .map((d) => ChartDataPoint(
+                    label: d.label,
+                    value: d.value,
+                    date: d.date,
+                  ))
+              .toList(),
+          isLoading: state.isLoading,
+          height: 278,
+          primaryColor: AppColors.primary,
+          showTotal: true,
         );
 
-        if (!isWide) {
+        final summary = _surface(
+          isDark: isDark,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionTitle(
+                isArabic ? 'ملخص المنصة' : 'Platform summary',
+                isDark,
+                subtitle: isArabic
+                    ? 'أهم الأرقام العامة والتسجيلات حسب الفترة'
+                    : 'Core totals and selected-range activity',
+              ),
+              const SizedBox(height: 18),
+              _buildMainKpi(
+                icon: Icons.filter_alt_rounded,
+                label: isArabic ? 'تسجيلات الفترة' : 'Range enrollments',
+                value: state.totalEnrollments.toString(),
+                color: AppColors.primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 14),
+              _buildKpiGrid(
+                isDark: isDark,
+                items: [
+                  _KpiItem(
+                    icon: Icons.school_rounded,
+                    label: isArabic ? 'الطلاب' : 'Students',
+                    value: stats.totalStudents.toString(),
+                    color: AppColors.info,
+                  ),
+                  _KpiItem(
+                    icon: Icons.person_rounded,
+                    label: isArabic ? 'المدرسون' : 'Instructors',
+                    value: stats.totalInstructors.toString(),
+                    color: AppColors.success,
+                  ),
+                  _KpiItem(
+                    icon: Icons.play_lesson_rounded,
+                    label: isArabic ? 'الكورسات' : 'Courses',
+                    value: stats.totalCourses.toString(),
+                    color: AppColors.warning,
+                  ),
+                  _KpiItem(
+                    icon: Icons.today_rounded,
+                    label: isArabic ? 'اليوم' : 'Today',
+                    value: stats.todayEnrollments.toString(),
+                    color: AppColors.error,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+        if (!wide) {
           return Column(
             children: [
-              list,
+              summary,
               const SizedBox(height: 16),
-              details,
+              chart,
             ],
           );
         }
@@ -293,12 +395,76 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 360, child: list),
+            Expanded(flex: 5, child: chart),
             const SizedBox(width: 16),
-            Expanded(child: details),
+            Expanded(flex: 3, child: summary),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildInstructorWorkspace(
+    BuildContext context,
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
+    final selectedInstructor = _selectedInstructor(state);
+
+    return _surface(
+      isDark: isDark,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle(
+            isArabic ? 'تحليلات المدرسين' : 'Instructor analytics',
+            isDark,
+            subtitle: isArabic
+                ? 'ابحث واختر مدرس لمراجعة نشاطه داخل الفترة المحددة'
+                : 'Search and select an instructor to inspect the selected period',
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 980;
+              final list = _buildInstructorList(
+                context,
+                state,
+                isArabic,
+                isDark,
+                maxHeight: wide ? 520 : 360,
+              );
+              final details = _buildInstructorDetails(
+                state,
+                selectedInstructor,
+                isArabic,
+                isDark,
+              );
+
+              if (!wide) {
+                return Column(
+                  children: [
+                    list,
+                    const SizedBox(height: 16),
+                    details,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 360, child: list),
+                  const SizedBox(width: 18),
+                  Expanded(child: details),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -315,133 +481,171 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     BuildContext context,
     AdminAnalyticsState state,
     bool isArabic,
-    bool isDark,
-  ) {
-    return _buildSectionShell(
-      title: isArabic ? 'قائمة المدرسين' : 'Instructors',
-      subtitle: isArabic
-          ? 'اضغط على مدرس لعرض إحصائياته'
-          : 'Select an instructor to view analytics',
-      isDark: isDark,
-      child: state.isLoading
-          ? Column(
-              children: List.generate(
-                5,
-                (_) => const Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: LoadingSkeleton(width: double.infinity, height: 64),
-                ),
+    bool isDark, {
+    required double maxHeight,
+  }) {
+    final filtered = state.topInstructors.where((instructor) {
+      final query = _instructorSearch.trim().toLowerCase();
+      if (query.isEmpty) return true;
+      return instructor.name.toLowerCase().contains(query);
+    }).toList();
+
+    return Column(
+      children: [
+        TextField(
+          onChanged: (value) => setState(() => _instructorSearch = value),
+          decoration: InputDecoration(
+            hintText: isArabic ? 'بحث باسم المدرس' : 'Search instructors',
+            prefixIcon: const Icon(Icons.search_rounded),
+            filled: true,
+            fillColor: isDark ? AppColors.surfaceDark : AppColors.grey50,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
               ),
-            )
-          : state.topInstructors.isEmpty
-              ? _buildEmptyState(
-                  icon: Icons.person_off_rounded,
-                  title: isArabic ? 'لا يوجد مدرسون' : 'No instructors',
-                  isDark: isDark,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              ),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: state.isLoading
+              ? ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: 5,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, __) =>
+                      const LoadingSkeleton(width: double.infinity, height: 68),
                 )
-              : Column(
-                  children: state.topInstructors.map((instructor) {
-                    final selected =
-                        instructor.id == state.selectedInstructorId;
-                    return _buildInstructorTile(
-                      context,
-                      instructor,
-                      selected,
-                      isArabic,
-                      isDark,
-                    );
-                  }).toList(),
-                ),
+              : filtered.isEmpty
+                  ? _emptyState(
+                      icon: Icons.person_off_rounded,
+                      title: isArabic ? 'لا يوجد مدرسون' : 'No instructors',
+                      isDark: isDark,
+                    )
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final instructor = filtered[index];
+                        return _instructorTile(
+                          context,
+                          instructor,
+                          instructor.id == state.selectedInstructorId,
+                          isArabic,
+                          isDark,
+                        );
+                      },
+                    ),
+        ),
+      ],
     );
   }
 
-  Widget _buildInstructorTile(
+  Widget _instructorTile(
     BuildContext context,
     TopInstructorModel instructor,
     bool selected,
     bool isArabic,
     bool isDark,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        onTap: () {
-          context.read<AdminAnalyticsCubit>().selectInstructor(instructor.id);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
+    final name = instructor.name.isEmpty
+        ? (isArabic ? 'مدرس بدون اسم' : 'Unnamed')
+        : instructor.name;
+
+    return InkWell(
+      onTap: () {
+        context.read<AdminAnalyticsCubit>().selectInstructor(instructor.id);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.1)
+              : isDark
+                  ? AppColors.surfaceDark
+                  : AppColors.grey50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
             color: selected
-                ? AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.11)
+                ? AppColors.primary
                 : isDark
-                    ? AppColors.surfaceDark
-                    : AppColors.grey50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
+                    ? AppColors.borderDark
+                    : AppColors.borderLight,
+          ),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: AppColors.primary.withValues(alpha: 0.13),
+              backgroundImage: instructor.avatarUrl == null
+                  ? null
+                  : NetworkImage(instructor.avatarUrl!),
+              child: instructor.avatarUrl == null
+                  ? const Icon(Icons.person_rounded, color: AppColors.primary)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: isDark
+                          ? AppColors.textMainDark
+                          : AppColors.textMainLight,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      _miniBadge(
+                        '${instructor.coursesCount} ${isArabic ? 'كورس' : 'courses'}',
+                        AppColors.info,
+                        isDark,
+                      ),
+                      _miniBadge(
+                        '${instructor.studentsCount} ${isArabic ? 'طالب' : 'students'}',
+                        AppColors.success,
+                        isDark,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              selected
+                  ? Icons.check_circle_rounded
+                  : Icons.keyboard_arrow_right_rounded,
               color: selected
                   ? AppColors.primary
                   : isDark
-                      ? AppColors.borderDark
-                      : AppColors.borderLight,
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
             ),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                backgroundImage: instructor.avatarUrl == null
-                    ? null
-                    : NetworkImage(instructor.avatarUrl!),
-                child: instructor.avatarUrl == null
-                    ? const Icon(Icons.person_rounded, color: AppColors.primary)
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      instructor.name.isEmpty
-                          ? (isArabic ? 'مدرس بدون اسم' : 'Unnamed instructor')
-                          : instructor.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.textMainDark
-                            : AppColors.textMainLight,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${instructor.coursesCount} ${isArabic ? 'كورس' : 'courses'} • ${instructor.studentsCount} ${isArabic ? 'طالب' : 'students'}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                selected ? Icons.check_circle_rounded : Icons.chevron_right,
-                color: selected
-                    ? AppColors.primary
-                    : isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -454,60 +658,107 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     bool isDark,
   ) {
     if (instructor == null) {
-      return _buildSectionShell(
-        title: isArabic ? 'تحليلات المدرس' : 'Instructor analytics',
+      return _emptyState(
+        icon: Icons.insights_rounded,
+        title: isArabic ? 'اختر مدرس لعرض البيانات' : 'Select an instructor',
         isDark: isDark,
-        child: _buildEmptyState(
-          icon: Icons.insights_rounded,
-          title: isArabic ? 'اختر مدرس لعرض البيانات' : 'Select an instructor',
-          isDark: isDark,
-        ),
       );
     }
 
+    final name = instructor.name.isEmpty
+        ? (isArabic ? 'مدرس بدون اسم' : 'Unnamed instructor')
+        : instructor.name;
+
     return Column(
       children: [
-        _buildSectionShell(
-          title: instructor.name.isEmpty
-              ? (isArabic ? 'تحليلات المدرس' : 'Instructor analytics')
-              : instructor.name,
-          subtitle: isArabic
-              ? 'الإحصائيات المعروضة حسب فلتر التاريخ الحالي'
-              : 'Numbers reflect the selected date range',
-          isDark: isDark,
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.grey50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            ),
+          ),
+          child: Row(
             children: [
-              _buildMetricCard(
-                icon: Icons.play_lesson_rounded,
-                label: isArabic ? 'الكورسات' : 'Courses',
-                value: instructor.coursesCount.toString(),
-                color: AppColors.info,
-                isDark: isDark,
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.primary.withValues(alpha: 0.13),
+                backgroundImage: instructor.avatarUrl == null
+                    ? null
+                    : NetworkImage(instructor.avatarUrl!),
+                child: instructor.avatarUrl == null
+                    ? const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.primary,
+                        size: 30,
+                      )
+                    : null,
               ),
-              _buildMetricCard(
-                icon: Icons.groups_rounded,
-                label: isArabic ? 'كل الطلاب' : 'All students',
-                value: instructor.studentsCount.toString(),
-                color: AppColors.success,
-                isDark: isDark,
-              ),
-              _buildMetricCard(
-                icon: Icons.date_range_rounded,
-                label: isArabic ? 'تسجيلات الفترة' : 'Range enrollments',
-                value: state.instructorEnrollmentsTotal.toString(),
-                color: AppColors.primary,
-                isDark: isDark,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: isDark
+                            ? AppColors.textMainDark
+                            : AppColors.textMainLight,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isArabic
+                          ? 'بيانات الفترة المحددة فقط للتسجيلات'
+                          : 'Range filter applies to enrollments',
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        _buildKpiGrid(
+          isDark: isDark,
+          items: [
+            _KpiItem(
+              icon: Icons.play_lesson_rounded,
+              label: isArabic ? 'الكورسات' : 'Courses',
+              value: instructor.coursesCount.toString(),
+              color: AppColors.info,
+            ),
+            _KpiItem(
+              icon: Icons.groups_rounded,
+              label: isArabic ? 'كل الطلاب' : 'All students',
+              value: instructor.studentsCount.toString(),
+              color: AppColors.success,
+            ),
+            _KpiItem(
+              icon: Icons.date_range_rounded,
+              label: isArabic ? 'تسجيلات الفترة' : 'Range enrollments',
+              value: state.instructorEnrollmentsTotal.toString(),
+              color: AppColors.primary,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
         DashboardChart(
           title: isArabic
-              ? 'تسجيلات المدرس حسب الفترة'
-              : 'Instructor enrollments by date',
+              ? 'تسجيلات المدرس خلال الفترة'
+              : 'Instructor enrollments in range',
           type: DashboardChartType.bar,
           data: state.instructorEnrollmentsData
               .map((d) => ChartDataPoint(
@@ -517,62 +768,11 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                   ))
               .toList(),
           isLoading: state.isLoading,
-          height: 240,
+          height: 245,
           primaryColor: AppColors.info,
           showTotal: true,
         ),
       ],
-    );
-  }
-
-  Widget _buildMetricCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-    required bool isDark,
-  }) {
-    return Container(
-      width: 170,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.16 : 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.22)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
-                  ),
-                ),
-                Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -581,14 +781,22 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     bool isArabic,
     bool isDark,
   ) {
-    return _buildSectionShell(
-      title: isArabic ? 'الكورسات حسب التسجيلات' : 'Courses by enrollments',
-      subtitle: isArabic
-          ? 'أكثر الكورسات نشاطا على مستوى المنصة'
-          : 'Most active platform courses',
+    return _surface(
       isDark: isDark,
-      child: state.isLoading
-          ? Column(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle(
+            isArabic ? 'الكورسات حسب التسجيلات' : 'Courses by enrollments',
+            isDark,
+            subtitle: isArabic
+                ? 'أكثر الكورسات نشاطا على مستوى المنصة'
+                : 'Most active platform courses',
+          ),
+          const SizedBox(height: 16),
+          if (state.isLoading)
+            Column(
               children: List.generate(
                 4,
                 (_) => const Padding(
@@ -597,26 +805,42 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                 ),
               ),
             )
-          : state.topCourses.isEmpty
-              ? _buildEmptyState(
-                  icon: Icons.play_lesson_outlined,
-                  title: isArabic ? 'لا توجد بيانات كورسات' : 'No course data',
-                  isDark: isDark,
-                )
-              : Column(
+          else if (state.topCourses.isEmpty)
+            _emptyState(
+              icon: Icons.play_lesson_outlined,
+              title: isArabic ? 'لا توجد بيانات كورسات' : 'No course data',
+              isDark: isDark,
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final twoColumns = constraints.maxWidth >= 920;
+                final itemWidth = twoColumns
+                    ? (constraints.maxWidth - 12) / 2
+                    : constraints.maxWidth;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
                   children: state.topCourses.asMap().entries.map((entry) {
-                    return _buildCourseRow(
-                      rank: entry.key + 1,
-                      course: entry.value,
-                      isArabic: isArabic,
-                      isDark: isDark,
+                    return SizedBox(
+                      width: itemWidth,
+                      child: _courseRow(
+                        rank: entry.key + 1,
+                        course: entry.value,
+                        isArabic: isArabic,
+                        isDark: isDark,
+                      ),
                     );
                   }).toList(),
-                ),
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 
-  Widget _buildCourseRow({
+  Widget _courseRow({
     required int rank,
     required TopCourseModel course,
     required bool isArabic,
@@ -625,24 +849,33 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     final title = isArabic ? course.titleAr : course.titleEn;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : AppColors.grey50,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: 42,
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Text(
-              '#$rank',
+              '$rank',
               style: const TextStyle(
                 fontWeight: FontWeight.w800,
                 color: AppColors.primary,
               ),
             ),
           ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,7 +887,7 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: isDark
                         ? AppColors.textMainDark
                         : AppColors.textMainLight,
@@ -676,27 +909,24 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
+          _miniBadge(
             '${course.enrollmentsCount} ${isArabic ? 'تسجيل' : 'enrollments'}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
-            ),
+            AppColors.primary,
+            isDark,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionShell({
-    required String title,
-    required Widget child,
+  Widget _surface({
     required bool isDark,
-    String? subtitle,
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(20),
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: padding,
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardDark : AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -704,35 +934,183 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: child,
+    );
+  }
+
+  Widget _sectionTitle(String title, bool isDark, {String? subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
           Text(
-            title,
+            subtitle,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-              ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMainKpi({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-          const SizedBox(height: 16),
-          child,
+            child: Icon(icon, color: color, size: 25),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState({
+  Widget _buildKpiGrid({
+    required bool isDark,
+    required List<_KpiItem> items,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 520 ? 2 : 1;
+        const spacing = 10.0;
+        final width =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: items.map((item) {
+            return SizedBox(
+              width: width,
+              child: _compactKpi(item, isDark),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Widget _compactKpi(_KpiItem item, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.grey50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(item.icon, color: item.color, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.value,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                  ),
+                ),
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _miniBadge(String text, Color color, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.16 : 0.09),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: isDark ? AppColors.textMainDark : color,
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyState({
     required IconData icon,
     required String title,
     required bool isDark,
@@ -762,3 +1140,19 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     );
   }
 }
+
+class _KpiItem {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  const _KpiItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+}
+
+enum _AnalyticsView { overview, instructors, courses }
