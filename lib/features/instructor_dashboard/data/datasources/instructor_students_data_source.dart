@@ -240,7 +240,6 @@ class InstructorStudentsDataSource {
         'title_en': subject,
         'body_ar': message,
         'body_en': message,
-        'sender_id': _userId,
         'data': {'from_instructor_id': _userId, 'type': 'direct_message'},
       });
       AppLogger.success('[$_tag] sendMessageToStudent success');

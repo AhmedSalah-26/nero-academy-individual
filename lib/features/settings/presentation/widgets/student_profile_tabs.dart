@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import '../../../../core/shared_widgets/empty_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'student_profile_widgets.dart';
 
@@ -43,19 +44,22 @@ class StudentOverviewTab extends StatelessWidget {
     final avgScore = quizAttempts.isEmpty
         ? 0.0
         : quizAttempts
-                .map((a) => (a['percentage'] as num?)?.toDouble() ?? (a['score'] as num?)?.toDouble() ?? 0)
+                .map((a) =>
+                    (a['percentage'] as num?)?.toDouble() ??
+                    (a['score'] as num?)?.toDouble() ??
+                    0)
                 .reduce((a, b) => a + b) /
             quizAttempts.length;
     final overall =
         totalLessons == 0 ? 0.0 : completedLessons / totalLessons * 100;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 36),
       children: [
         // Overall progress
         ProfileCard(
           isDark: isDark,
-          borderColor: AppColors.primary.withValues(alpha: 0.2),
+          borderColor: AppColors.primary.withValues(alpha: 0.16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -80,20 +84,30 @@ class StudentOverviewTab extends StatelessWidget {
                                 ? AppColors.textMainDark
                                 : AppColors.textMainLight)),
                   ),
-                  Text('${overall.toStringAsFixed(0)}%',
-                      style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: profileProgressColor(overall))),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color:
+                          profileProgressColor(overall).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text('${overall.toStringAsFixed(0)}%',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: profileProgressColor(overall))),
+                  ),
                 ],
               ),
-              const SizedBox(height: 14),
-              ProfileProgressBar(progress: overall),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
+              ProfileProgressBar(progress: overall, height: 9),
+              const SizedBox(height: 10),
               Text(
                 '$completedLessons / $totalLessons ${isArabic ? 'درس' : 'lessons'}',
                 style: TextStyle(
                     fontSize: 12,
+                    fontWeight: FontWeight.w700,
                     color: isDark
                         ? AppColors.textMutedDark
                         : AppColors.textMutedLight),
@@ -101,15 +115,15 @@ class StudentOverviewTab extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         // Stats grid 2x3
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.55,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2.15,
           children: [
             ProfileStatCard(
                 icon: Icons.school_outlined,
@@ -294,12 +308,15 @@ class StudentCoursesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (enrollments.isEmpty) {
       return Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(isArabic ? 'لم تسجل في أي كورس بعد' : 'No courses enrolled yet',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-      ]));
+        child: EmptyState(
+          type: EmptyStateType.courses,
+          title: isArabic ? 'لا توجد كورسات بعد' : 'No courses yet',
+          message: isArabic
+              ? 'الكورسات التي تسجل بها ستظهر هنا.'
+              : 'Your enrolled courses will appear here.',
+          compact: true,
+        ),
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.all(20),
@@ -456,17 +473,23 @@ class StudentQuizzesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (quizAttempts.isEmpty) {
       return Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.quiz_outlined, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(isArabic ? 'لم تحل أي اختبار بعد' : 'No quiz attempts yet',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600])),
-      ]));
+        child: EmptyState(
+          type: EmptyStateType.quizzes,
+          title: isArabic ? 'لا توجد اختبارات بعد' : 'No quizzes yet',
+          message: isArabic
+              ? 'نتائج الاختبارات والمحاولات ستظهر هنا.'
+              : 'Quiz attempts and results will appear here.',
+          compact: true,
+        ),
+      );
     }
     final total = quizAttempts.length;
     final passed = quizAttempts.where((a) => a['passed'] == true).length;
     final avgScore = quizAttempts
-            .map((a) => (a['percentage'] as num?)?.toDouble() ?? (a['score'] as num?)?.toDouble() ?? 0)
+            .map((a) =>
+                (a['percentage'] as num?)?.toDouble() ??
+                (a['score'] as num?)?.toDouble() ??
+                0)
             .reduce((a, b) => a + b) /
         total;
 
@@ -561,7 +584,9 @@ class _QuizAttemptCard extends StatelessWidget {
     final courseTitle = isArabic
         ? course['title_ar'] as String? ?? ''
         : course['title_en'] as String? ?? '';
-    final score = (attempt['percentage'] as num?)?.toDouble() ?? (attempt['score'] as num?)?.toDouble() ?? 0;
+    final score = (attempt['percentage'] as num?)?.toDouble() ??
+        (attempt['score'] as num?)?.toDouble() ??
+        0;
     final passed = attempt['passed'] as bool? ?? false;
     final timeTaken = attempt['time_spent'] as int? ?? 0;
     final completedAt = attempt['completed_at'] != null

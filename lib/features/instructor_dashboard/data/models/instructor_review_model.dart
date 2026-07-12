@@ -33,8 +33,8 @@ class InstructorReviewModel {
       userName: json['user']?['name'] as String? ?? 'Unknown',
       userAvatar: json['user']?['avatar_url'] as String?,
       rating: json['rating'] as int? ?? 0,
-      comment: json['comment'] as String?,
-      isFeatured: json['is_featured'] as bool? ?? false,
+      comment: json['review'] as String?,
+      isFeatured: false,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

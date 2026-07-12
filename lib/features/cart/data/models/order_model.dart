@@ -36,7 +36,8 @@ class OrderModel extends OrderEntity {
       subtotal: (json['subtotal'] as num?)?.toDouble() ??
           (json['total_amount'] as num?)?.toDouble() ??
           0,
-      discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0,
+      discountAmount: (json['discount'] as num?)?.toDouble() ??
+          (json['discount_amount'] as num?)?.toDouble() ?? 0,
       total: (json['total'] as num?)?.toDouble() ??
           (json['total_amount'] as num?)?.toDouble() ??
           0,
@@ -44,13 +45,14 @@ class OrderModel extends OrderEntity {
       couponCode: json['coupon_code'] as String?,
       paymentMethod:
           PaymentMethodType.fromString(json['payment_method'] as String?),
-      status: OrderStatus.fromString(json['status'] as String?),
-      transactionId: json['transaction_id'] as String?,
+      status: OrderStatus.fromString(
+          json['payment_status'] as String? ?? json['status'] as String?),
+      transactionId: json['payment_transaction_id'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
-      completedAt: json['completed_at'] != null
-          ? DateTime.parse(json['completed_at'] as String)
+      completedAt: json['paid_at'] != null
+          ? DateTime.parse(json['paid_at'] as String)
           : null,
     );
   }
@@ -60,15 +62,14 @@ class OrderModel extends OrderEntity {
       'id': id,
       'user_id': userId,
       'subtotal': subtotal,
-      'discount_amount': discountAmount,
+      'discount': discountAmount,
       'total': total,
-      'currency': currency,
       'coupon_code': couponCode,
       'payment_method': paymentMethod.name,
-      'status': status.name,
-      'transaction_id': transactionId,
+      'payment_status': status.name,
+      'payment_transaction_id': transactionId,
       'created_at': createdAt.toIso8601String(),
-      'completed_at': completedAt?.toIso8601String(),
+      'paid_at': completedAt?.toIso8601String(),
     };
   }
 }

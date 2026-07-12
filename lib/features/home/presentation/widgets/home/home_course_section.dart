@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../../core/shared_widgets/empty_state.dart';
 import '../../../../wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../../../../wishlist/presentation/cubit/wishlist_state.dart';
 import '../../../domain/entities/course_entity.dart';
@@ -81,19 +82,15 @@ class HomeCourseSection extends StatelessWidget {
         ),
         // Course List with BlocBuilder for proper rebuilds
         if (courses.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 30),
-            child: Center(
-              child: Text(
-                'home.no_courses_available'.tr(),
-                style: TextStyle(
-                  color: isDark
-                      ? AppColors.textMutedDark
-                      : const Color(0xFF6B7280),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          SizedBox(
+            height: (screenHeight * 0.24).clamp(150.0, 210.0),
+            child: EmptyState(
+              type: EmptyStateType.courses,
+              title: 'home.no_courses_available'.tr(),
+              message: locale == 'ar'
+                  ? 'ستظهر الكورسات هنا عند إضافتها.'
+                  : 'Courses will appear here once added.',
+              compact: true,
             ),
           )
         else

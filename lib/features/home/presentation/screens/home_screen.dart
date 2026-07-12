@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/routing/app_router.dart';
+import '../../../../core/shared_widgets/empty_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/toast_utils.dart';
 import '../../../../core/services/app_logger.dart';
@@ -266,16 +267,18 @@ class _EmptyCoursesState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60),
+    final isArabic = context.locale.languageCode == 'ar';
+
+    return SizedBox(
+      height: 260,
       child: Center(
-        child: Text(
-          'home.no_courses_available'.tr(),
-          style: TextStyle(
-            color: isDark ? AppColors.textMutedDark : const Color(0xFF6B7280),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        child: EmptyState(
+          type: EmptyStateType.courses,
+          title: 'home.no_courses_available'.tr(),
+          message: isArabic
+              ? 'ستظهر الكورسات هنا عند إضافتها.'
+              : 'Courses will appear here once added.',
+          compact: true,
         ),
       ),
     );

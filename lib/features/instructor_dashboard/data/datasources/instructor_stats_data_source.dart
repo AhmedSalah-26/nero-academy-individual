@@ -154,7 +154,7 @@ class InstructorStatsDataSource {
       final response = await _client
           .from('enrollments')
           .select('enrolled_at, course:courses!inner(instructor_id)')
-          .eq('courses.instructor_id', _userId)
+          .eq('course.instructor_id', _userId)
           .gte('enrolled_at', start.toIso8601String())
           .lte('enrolled_at', end.toIso8601String());
 

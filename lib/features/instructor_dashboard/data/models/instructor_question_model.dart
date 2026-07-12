@@ -32,7 +32,7 @@ class InstructorAnswerModel {
       userName: json['user']?['name'] as String? ?? 'Unknown',
       userAvatar: json['user']?['avatar_url'] as String?,
       content: json['content'] as String? ?? '',
-      isInstructor: json['is_instructor'] as bool? ?? false,
+      isInstructor: json['is_instructor_answer'] as bool? ?? false,
       isAccepted: json['is_accepted'] as bool? ?? false,
       upvotesCount: json['upvotes_count'] as int? ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),

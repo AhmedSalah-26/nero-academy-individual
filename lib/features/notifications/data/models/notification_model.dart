@@ -25,6 +25,9 @@ class NotificationModel extends NotificationEntity {
 
   /// Create from JSON (database row)
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    final dataMap = json['data'] != null
+        ? Map<String, dynamic>.from(json['data'] as Map)
+        : null;
     return NotificationModel(
       id: json['id'] as String,
       userId: json['user_id'] as String,
@@ -33,19 +36,17 @@ class NotificationModel extends NotificationEntity {
       titleEn: json['title_en'] as String?,
       bodyAr: json['body_ar'] as String?,
       bodyEn: json['body_en'] as String?,
-      imageUrl: json['image_url'] as String?,
-      iconName: json['icon_name'] as String?,
-      actionType: json['action_type'] as String?,
-      actionValue: json['action_value'] as String?,
-      data: json['data'] != null
-          ? Map<String, dynamic>.from(json['data'] as Map)
-          : null,
+      imageUrl: dataMap?['image_url'] as String?,
+      iconName: dataMap?['icon_name'] as String?,
+      actionType: dataMap?['action_type'] as String?,
+      actionValue: dataMap?['action_value'] as String?,
+      data: dataMap,
       isRead: json['is_read'] as bool? ?? false,
       readAt: json['read_at'] != null
           ? DateTime.parse(json['read_at'] as String)
           : null,
-      senderId: json['sender_id'] as String?,
-      courseId: json['course_id'] as String?,
+      senderId: dataMap?['sender_id'] as String?,
+      courseId: dataMap?['course_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -55,6 +56,13 @@ class NotificationModel extends NotificationEntity {
 
   /// Convert to JSON (for insert/update)
   Map<String, dynamic> toJson() {
+    final dataMap = Map<String, dynamic>.from(data ?? {});
+    if (imageUrl != null) dataMap['image_url'] = imageUrl;
+    if (iconName != null) dataMap['icon_name'] = iconName;
+    if (actionType != null) dataMap['action_type'] = actionType;
+    if (actionValue != null) dataMap['action_value'] = actionValue;
+    if (senderId != null) dataMap['sender_id'] = senderId;
+    if (courseId != null) dataMap['course_id'] = courseId;
     return {
       'id': id,
       'user_id': userId,
@@ -63,15 +71,9 @@ class NotificationModel extends NotificationEntity {
       'title_en': titleEn,
       'body_ar': bodyAr,
       'body_en': bodyEn,
-      'image_url': imageUrl,
-      'icon_name': iconName,
-      'action_type': actionType,
-      'action_value': actionValue,
-      'data': data,
+      'data': dataMap,
       'is_read': isRead,
       'read_at': readAt?.toIso8601String(),
-      'sender_id': senderId,
-      'course_id': courseId,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

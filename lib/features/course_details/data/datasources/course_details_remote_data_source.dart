@@ -487,7 +487,7 @@ class CourseDetailsRemoteDataSourceImpl
       // Apply sorting and get data
       final data = sortBy == 'helpful'
           ? await baseQuery
-              .order('helpful_count', ascending: false)
+              .order('rating', ascending: false)
               .range(offset, offset + limit - 1)
           : await baseQuery
               .order('created_at', ascending: false)

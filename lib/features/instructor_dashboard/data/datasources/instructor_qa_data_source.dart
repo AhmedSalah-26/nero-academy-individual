@@ -119,7 +119,7 @@ class InstructorQADataSource {
     AppLogger.d('[$_tag] hideQuestion: $questionId');
     try {
       await _client.from('qa_questions').update({
-        'is_hidden': true,
+        'is_visible': false,
       }).eq('id', questionId);
       AppLogger.success('[$_tag] hideQuestion success');
       return true;

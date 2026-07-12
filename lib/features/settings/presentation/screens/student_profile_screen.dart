@@ -27,6 +27,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
   List<Map<String, dynamic>> _quizAttempts = [];
   int _totalLessons = 0;
   int _completedLessons = 0;
+  int _watchSeconds = 0;
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
       try {
         final enrollmentsRes = await client.from('enrollments').select('''
           id, enrolled_at, last_accessed_at, completed_at,
-          progress_percentage, status, course_id
+          progress_percentage, status, course_id, total_watch_time
         ''').eq('user_id', userId).order('enrolled_at', ascending: false);
         enrollments = (enrollmentsRes as List).cast<Map<String, dynamic>>();
 
@@ -92,19 +93,21 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
       List<Map<String, dynamic>> quizAttempts = [];
       try {
         final quizRes = await client.from('quiz_attempts').select('''
-          id, score, percentage, passed, started_at, completed_at, time_spent
+          id, score, percentage, passed, started_at, completed_at, time_spent,
+          quizzes(title_ar, title_en, courses(title_ar, title_en))
         ''').eq('user_id', userId).order('completed_at', ascending: false);
         quizAttempts = (quizRes as List).cast<Map<String, dynamic>>();
       } catch (_) {
         // Quiz attempts are optional
       }
 
-      int totalL = 0, completedL = 0;
+      int totalL = 0, completedL = 0, watchSec = 0;
       for (final e in enrollments) {
         final total = ((e['courses'] as Map?)?['total_lessons'] as int?) ?? 0;
         final prog = (e['progress_percentage'] as num?)?.toDouble() ?? 0;
         totalL += total;
         completedL += (total * prog / 100).round();
+        watchSec += (e['total_watch_time'] as int?) ?? 0;
       }
 
       if (mounted) {
@@ -114,6 +117,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
           _quizAttempts = quizAttempts;
           _totalLessons = totalL;
           _completedLessons = completedL;
+          _watchSeconds = watchSec;
           _isLoading = false;
         });
       }
@@ -151,7 +155,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
                         quizAttempts: _quizAttempts,
                         totalLessons: _totalLessons,
                         completedLessons: _completedLessons,
-                        watchSeconds: _profile?['total_watch_time'] as int? ?? 0,
+                        watchSeconds: _watchSeconds,
                         isDark: isDark,
                         isArabic: isArabic,
                       ),

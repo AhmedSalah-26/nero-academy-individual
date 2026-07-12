@@ -248,6 +248,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return Column(
                     children: [
                       _buildMenuItem(
+                        icon: Icons.school_outlined,
+                        title: isArabic ? 'تغيير المدرس' : 'Change Teacher',
+                        onTap: () => AppRouter.goToSelectTeacher(context),
+                        isDark: isDark,
+                      ),
+                      _buildDivider(isDark),
+                      _buildMenuItem(
                         icon: Icons.analytics_outlined,
                         title: isArabic ? 'ملف التعلم' : 'Learning Profile',
                         onTap: () => AppRouter.goToStudentProfile(context),

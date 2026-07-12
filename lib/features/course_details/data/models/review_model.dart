@@ -29,10 +29,9 @@ class ReviewModel extends ReviewEntity {
       userAvatarUrl: profile?['avatar_url'] as String?,
       rating: json['rating'] as int,
       title: json['title'] as String?,
-      comment: json['comment'] as String? ??
-          json['review'] as String?, // Support both 'comment' and 'review'
-      helpfulCount: json['helpful_count'] as int? ?? 0,
-      isVerifiedPurchase: json['is_verified_purchase'] as bool? ?? false,
+      comment: json['review'] as String?,
+      helpfulCount: 0,
+      isVerifiedPurchase: false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
@@ -46,10 +45,7 @@ class ReviewModel extends ReviewEntity {
       'course_id': courseId,
       'user_id': userId,
       'rating': rating,
-      'title': title,
-      'comment': comment,
-      'helpful_count': helpfulCount,
-      'is_verified_purchase': isVerifiedPurchase,
+      'review': comment,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };

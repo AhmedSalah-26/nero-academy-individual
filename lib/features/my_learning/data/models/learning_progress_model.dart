@@ -19,8 +19,8 @@ class LearningProgressModel extends LearningProgressEntity {
       lessonId: json['lesson_id'] as String,
       enrollmentId: json['enrollment_id'] as String,
       isCompleted: json['is_completed'] as bool? ?? false,
-      watchedSeconds: json['watched_seconds'] as int? ?? 0,
-      totalSeconds: json['total_seconds'] as int? ?? 0,
+      watchedSeconds: json['watch_time'] as int? ?? 0,
+      totalSeconds: 0,
       lastWatchedAt: json['last_watched_at'] != null
           ? DateTime.parse(json['last_watched_at'] as String)
           : null,
@@ -36,8 +36,7 @@ class LearningProgressModel extends LearningProgressEntity {
       'lesson_id': lessonId,
       'enrollment_id': enrollmentId,
       'is_completed': isCompleted,
-      'watched_seconds': watchedSeconds,
-      'total_seconds': totalSeconds,
+      'watch_time': watchedSeconds,
       'last_watched_at': lastWatchedAt?.toIso8601String(),
       'completed_at': completedAt?.toIso8601String(),
     };
