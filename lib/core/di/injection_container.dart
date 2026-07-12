@@ -150,6 +150,8 @@ import 'package:lms_platform/features/student/payments_history/presentation/cubi
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
+  if (sl.isRegistered<AuthCubit>()) return;
+
   // ============ External ============
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -208,7 +210,7 @@ Future<void> initDependencies() async {
 
 void _initAuth() {
   // Cubits - AuthCubit as singleton to maintain state across navigation
-  sl.registerLazySingleton(() => AuthCubit(
+  sl.registerLazySingleton<AuthCubit>(() => AuthCubit(
         loginUseCase: sl(),
         loginWithGoogleUseCase: sl(),
         registerUseCase: sl(),

@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:lms_platform/core/animations/animations.dart';
@@ -16,19 +19,28 @@ class _TeacherThemeSettingsContentState
     extends State<TeacherThemeSettingsContent> {
   static const _defaultPrimary = '#20E5DC';
   static const _defaultSecondary = '#117CFF';
-  static const _defaultBackground = '#01060B';
+  static const _defaultDarkBackground = '#01060B';
+  static const _defaultLightBackground = '#F4F9FA';
 
   final _client = Supabase.instance.client;
-  final _primaryController = TextEditingController(text: _defaultPrimary);
-  final _secondaryController = TextEditingController(text: _defaultSecondary);
-  final _backgroundController = TextEditingController(text: _defaultBackground);
-  final _logoController = TextEditingController();
+  final _picker = ImagePicker();
+  final _coverUrlController = TextEditingController();
+  final _logoUrlController = TextEditingController();
   final _welcomeController = TextEditingController();
 
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isUploadingCover = false;
+  bool _isUploadingLogo = false;
   String? _teacherId;
   String? _error;
+  Uint8List? _coverPreviewBytes;
+  Uint8List? _logoPreviewBytes;
+
+  Color _primaryColor = _parseColor(_defaultPrimary);
+  Color _secondaryColor = _parseColor(_defaultSecondary);
+  Color _backgroundColor = _parseColor(_defaultDarkBackground);
+  _ThemeModePreview _previewMode = _ThemeModePreview.dark;
 
   @override
   void initState() {
@@ -38,10 +50,8 @@ class _TeacherThemeSettingsContentState
 
   @override
   void dispose() {
-    _primaryController.dispose();
-    _secondaryController.dispose();
-    _backgroundController.dispose();
-    _logoController.dispose();
+    _coverUrlController.dispose();
+    _logoUrlController.dispose();
     _welcomeController.dispose();
     super.dispose();
   }
@@ -58,23 +68,32 @@ class _TeacherThemeSettingsContentState
 
       final teacher = await _client
           .from('teachers')
-          .select('id, teacher_themes(*)')
+          .select('id, avatar_url, cover_image_url, teacher_themes(*)')
           .eq('profile_id', userId)
           .maybeSingle();
 
       if (teacher == null) throw Exception('Teacher profile was not found');
 
       _teacherId = teacher['id'] as String;
+      _logoUrlController.text = teacher['avatar_url'] as String? ?? '';
+
       final themeData = _firstMap(teacher['teacher_themes']);
       if (themeData != null) {
-        _primaryController.text =
-            themeData['primary_color'] as String? ?? _defaultPrimary;
-        _secondaryController.text =
-            themeData['secondary_color'] as String? ?? _defaultSecondary;
-        _backgroundController.text =
-            themeData['background_color'] as String? ?? _defaultBackground;
-        _logoController.text = themeData['logo_url'] as String? ?? '';
+        _primaryColor = _parseColor(
+          themeData['primary_color'] as String? ?? _defaultPrimary,
+        );
+        _secondaryColor = _parseColor(
+          themeData['secondary_color'] as String? ?? _defaultSecondary,
+        );
+        _backgroundColor = _parseColor(
+          themeData['background_color'] as String? ?? _defaultDarkBackground,
+        );
+        _coverUrlController.text = themeData['logo_url'] as String? ??
+            teacher['cover_image_url'] as String? ??
+            '';
         _welcomeController.text = themeData['welcome_text'] as String? ?? '';
+      } else {
+        _coverUrlController.text = teacher['cover_image_url'] as String? ?? '';
       }
 
       if (mounted) setState(() => _isLoading = false);
@@ -88,27 +107,109 @@ class _TeacherThemeSettingsContentState
     }
   }
 
+  Future<void> _pickAndUploadImage(_ThemeImageTarget target) async {
+    final teacherId = _teacherId;
+    if (teacherId == null) return;
+
+    final image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: target == _ThemeImageTarget.cover ? 1800 : 700,
+      maxHeight: target == _ThemeImageTarget.cover ? 1000 : 700,
+      imageQuality: 86,
+    );
+    if (image == null) return;
+
+    final bytes = await image.readAsBytes();
+    setState(() {
+      if (target == _ThemeImageTarget.cover) {
+        _isUploadingCover = true;
+        _coverPreviewBytes = bytes;
+      } else {
+        _isUploadingLogo = true;
+        _logoPreviewBytes = bytes;
+      }
+    });
+
+    try {
+      final fileName = target == _ThemeImageTarget.cover
+          ? 'theme_cover.jpg'
+          : 'theme_logo.jpg';
+      final path = 'teacher_themes/$teacherId/$fileName';
+
+      await _client.storage.from('avatars').uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(
+              cacheControl: '3600',
+              upsert: true,
+              contentType: 'image/jpeg',
+            ),
+          );
+
+      final url = _client.storage.from('avatars').getPublicUrl(path);
+      final cacheBusted = '$url?v=${DateTime.now().millisecondsSinceEpoch}';
+
+      setState(() {
+        if (target == _ThemeImageTarget.cover) {
+          _coverUrlController.text = cacheBusted;
+        } else {
+          _logoUrlController.text = cacheBusted;
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      AnimatedSnackbar.showError(
+        context: context,
+        message: 'تعذر رفع الصورة',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (target == _ThemeImageTarget.cover) {
+            _isUploadingCover = false;
+          } else {
+            _isUploadingLogo = false;
+          }
+        });
+      }
+    }
+  }
+
   Future<void> _saveTheme() async {
     final teacherId = _teacherId;
     if (teacherId == null) return;
 
     setState(() => _isSaving = true);
     try {
+      final coverUrl = _emptyToNull(_coverUrlController.text);
+      final logoUrl = _emptyToNull(_logoUrlController.text);
+
       await _client.from('teacher_themes').upsert({
         'teacher_id': teacherId,
-        'primary_color': _normalizeColor(_primaryController.text),
-        'secondary_color': _normalizeColor(_secondaryController.text),
-        'background_color': _normalizeColor(_backgroundController.text),
-        'logo_url': _emptyToNull(_logoController.text),
+        'primary_color': _colorToHex(_primaryColor),
+        'secondary_color': _colorToHex(_secondaryColor),
+        'background_color': _colorToHex(_backgroundColor),
+        'logo_url': coverUrl,
         'welcome_text': _emptyToNull(_welcomeController.text),
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'teacher_id');
 
+      await _client.from('teachers').update({
+        'avatar_url': logoUrl,
+        'cover_image_url': coverUrl,
+      }).eq('id', teacherId);
+
       if (!mounted) return;
-      AnimatedSnackbar.showSuccess(context: context, message: 'تم حفظ الثيم');
+      AnimatedSnackbar.showSuccess(
+        context: context,
+        message: 'تم حفظ الهوية',
+      );
     } catch (_) {
       if (!mounted) return;
-      AnimatedSnackbar.showError(context: context, message: 'تعذر حفظ الثيم');
+      AnimatedSnackbar.showError(
+        context: context,
+        message: 'تعذر حفظ الهوية',
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -144,44 +245,229 @@ class _TeacherThemeSettingsContentState
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('هوية المدرس', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 6),
-        Text(
-          'هذه الإعدادات تتحكم في ألوان تطبيق الطالب بعد اختيار هذا المدرس.',
-          style: TextStyle(
-            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+        _HeaderCard(isDark: isDark),
+        const SizedBox(height: 14),
+        _ThemePreview(
+          primary: _primaryColor,
+          secondary: _secondaryColor,
+          background: _previewMode == _ThemeModePreview.dark
+              ? _backgroundColor
+              : _parseColor(_defaultLightBackground),
+          logoUrl: _logoUrlController.text,
+          coverUrl: _coverUrlController.text,
+          logoBytes: _logoPreviewBytes,
+          coverBytes: _coverPreviewBytes,
+          isDarkPreview: _previewMode == _ThemeModePreview.dark,
+        ),
+        const SizedBox(height: 14),
+        _ModeSelector(
+          value: _previewMode,
+          onChanged: (value) {
+            setState(() {
+              _previewMode = value;
+              _backgroundColor = value == _ThemeModePreview.dark
+                  ? _parseColor(_defaultDarkBackground)
+                  : _parseColor(_defaultLightBackground);
+            });
+          },
+          isDark: isDark,
+        ),
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'الألوان',
+          subtitle: 'اختر ألوان الهوية من قوائم جاهزة',
+          isDark: isDark,
+          child: Column(
+            children: [
+              _ColorSelectorTile(
+                title: 'اللون الأساسي',
+                color: _primaryColor,
+                onTap: () => _openColorSheet(
+                  title: 'اللون الأساسي',
+                  selected: _primaryColor,
+                  onSelected: (color) => setState(() => _primaryColor = color),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'اللون الثانوي',
+                color: _secondaryColor,
+                onTap: () => _openColorSheet(
+                  title: 'اللون الثانوي',
+                  selected: _secondaryColor,
+                  onSelected: (color) =>
+                      setState(() => _secondaryColor = color),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'لون الخلفية',
+                color: _backgroundColor,
+                onTap: () => _openColorSheet(
+                  title: 'لون الخلفية',
+                  selected: _backgroundColor,
+                  onSelected: (color) =>
+                      setState(() => _backgroundColor = color),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
-        _ThemePreview(
-          primary: _parseColor(_primaryController.text),
-          secondary: _parseColor(_secondaryController.text),
-          background: _parseColor(_backgroundController.text),
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'الصور',
+          subtitle: 'ارفع شعار المدرس وصورة الكفر من الجهاز',
+          isDark: isDark,
+          child: Column(
+            children: [
+              _ImageUploadTile(
+                title: 'الشعار',
+                subtitle: 'يظهر مع بيانات المدرس',
+                url: _logoUrlController.text,
+                bytes: _logoPreviewBytes,
+                isUploading: _isUploadingLogo,
+                icon: Icons.badge_rounded,
+                onUpload: () => _pickAndUploadImage(_ThemeImageTarget.logo),
+                onClear: () {
+                  setState(() {
+                    _logoUrlController.clear();
+                    _logoPreviewBytes = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              _ImageUploadTile(
+                title: 'صورة الكفر',
+                subtitle: 'تظهر في الصفحة الرئيسية للطالب',
+                url: _coverUrlController.text,
+                bytes: _coverPreviewBytes,
+                isUploading: _isUploadingCover,
+                icon: Icons.wallpaper_rounded,
+                wide: true,
+                onUpload: () => _pickAndUploadImage(_ThemeImageTarget.cover),
+                onClear: () {
+                  setState(() {
+                    _coverUrlController.clear();
+                    _coverPreviewBytes = null;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-        _Field(controller: _primaryController, label: 'اللون الأساسي'),
-        _Field(controller: _secondaryController, label: 'اللون الثانوي'),
-        _Field(controller: _backgroundController, label: 'لون الخلفية'),
-        _Field(controller: _logoController, label: 'رابط الشعار'),
-        _Field(
-          controller: _welcomeController,
-          label: 'نص الترحيب',
-          maxLines: 3,
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'نص الترحيب',
+          subtitle: 'اختياري',
+          isDark: isDark,
+          child: TextField(
+            controller: _welcomeController,
+            minLines: 3,
+            maxLines: 5,
+            decoration: InputDecoration(
+              hintText: 'مثال: ابدأ رحلتك التعليمية بثقة',
+              filled: true,
+              fillColor: isDark ? AppColors.surfaceDark : AppColors.grey50,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+            ),
+          ),
         ),
-        const SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: _isSaving ? null : _saveTheme,
-          icon: _isSaving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.save_rounded),
-          label: const Text('حفظ الثيم'),
+        const SizedBox(height: 18),
+        SizedBox(
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: _isSaving || _isUploadingCover || _isUploadingLogo
+                ? null
+                : _saveTheme,
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_rounded),
+            label: const Text(
+              'حفظ الهوية',
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
         ),
+        const SizedBox(height: 24),
       ],
     );
+  }
+
+  Future<void> _openColorSheet({
+    required String title,
+    required Color selected,
+    required ValueChanged<Color> onSelected,
+  }) async {
+    final color = await showModalBottomSheet<Color>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _colorPresets.map((preset) {
+                    final isSelected = preset.toARGB32() == selected.toARGB32();
+                    return InkWell(
+                      onTap: () => Navigator.pop(context, preset),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: preset,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected
+                                ? (isDark
+                                    ? AppColors.textMainDark
+                                    : AppColors.textMainLight)
+                                : Colors.transparent,
+                            width: 3,
+                          ),
+                        ),
+                        child: isSelected
+                            ? const Icon(Icons.check, color: Colors.white)
+                            : null,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (color != null) onSelected(color);
   }
 
   static Map<String, dynamic>? _firstMap(dynamic value) {
@@ -191,11 +477,6 @@ class _TeacherThemeSettingsContentState
       if (first is Map<String, dynamic>) return first;
     }
     return null;
-  }
-
-  static String _normalizeColor(String value) {
-    final trimmed = value.trim();
-    return trimmed.startsWith('#') ? trimmed : '#$trimmed';
   }
 
   static String? _emptyToNull(String value) {
@@ -211,68 +492,73 @@ class _TeacherThemeSettingsContentState
     );
     return parsed == null ? AppColors.primary : Color(parsed);
   }
-}
 
-class _Field extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final int maxLines;
-
-  const _Field({
-    required this.controller,
-    required this.label,
-    this.maxLines = 1,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-      ),
-    );
+  static String _colorToHex(Color color) {
+    final value = color.toARGB32().toRadixString(16).padLeft(8, '0');
+    return '#${value.substring(2).toUpperCase()}';
   }
+
+  static final List<Color> _colorPresets = [
+    const Color(0xFF20E5DC),
+    const Color(0xFF117CFF),
+    const Color(0xFF22C55E),
+    const Color(0xFFF59E0B),
+    const Color(0xFFEF4444),
+    const Color(0xFF8B5CF6),
+    const Color(0xFF0F172A),
+    const Color(0xFF01060B),
+    const Color(0xFFF4F9FA),
+    const Color(0xFFFFFFFF),
+  ];
 }
 
-class _ThemePreview extends StatelessWidget {
-  final Color primary;
-  final Color secondary;
-  final Color background;
+class _HeaderCard extends StatelessWidget {
+  final bool isDark;
 
-  const _ThemePreview({
-    required this.primary,
-    required this.secondary,
-    required this.background,
-  });
+  const _HeaderCard({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 92,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primary.withValues(alpha: 0.25)),
+        color: isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Row(
         children: [
-          CircleAvatar(backgroundColor: primary),
-          const SizedBox(width: 12),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.palette_rounded, color: AppColors.primary),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(height: 12, width: 150, color: primary),
-                const SizedBox(height: 8),
-                Container(height: 10, width: 100, color: secondary),
+                Text(
+                  'هوية المدرس',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ألوان وصور تظهر للطالب بعد اختيار هذا المدرس',
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
               ],
             ),
           ),
@@ -281,3 +567,479 @@ class _ThemePreview extends StatelessWidget {
     );
   }
 }
+
+class _ModeSelector extends StatelessWidget {
+  final _ThemeModePreview value;
+  final ValueChanged<_ThemeModePreview> onChanged;
+  final bool isDark;
+
+  const _ModeSelector({
+    required this.value,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ModeButton(
+              label: 'لايت مود',
+              icon: Icons.light_mode_rounded,
+              selected: value == _ThemeModePreview.light,
+              onTap: () => onChanged(_ThemeModePreview.light),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _ModeButton(
+              label: 'دارك مود',
+              icon: Icons.dark_mode_rounded,
+              selected: value == _ThemeModePreview.dark,
+              onTap: () => onChanged(_ThemeModePreview.dark),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModeButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ModeButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(13),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: selected ? AppColors.white : AppColors.primary),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: selected ? AppColors.white : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool isDark;
+  final Widget child;
+
+  const _SectionCard({
+    required this.title,
+    required this.subtitle,
+    required this.isDark,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            ),
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _ColorSelectorTile extends StatelessWidget {
+  final String title;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ColorSelectorTile({
+    required this.title,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.grey50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      _TeacherThemeSettingsContentState._colorToHex(color),
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.expand_more_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageUploadTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String url;
+  final Uint8List? bytes;
+  final bool isUploading;
+  final IconData icon;
+  final VoidCallback onUpload;
+  final VoidCallback onClear;
+  final bool wide;
+
+  const _ImageUploadTile({
+    required this.title,
+    required this.subtitle,
+    required this.url,
+    required this.bytes,
+    required this.isUploading,
+    required this.icon,
+    required this.onUpload,
+    required this.onClear,
+    this.wide = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.grey50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          _ImagePreview(
+            url: url,
+            bytes: bytes,
+            icon: icon,
+            wide: wide,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: isUploading ? null : onUpload,
+                      icon: isUploading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.upload_rounded),
+                      label: Text(isUploading ? 'جاري الرفع' : 'رفع صورة'),
+                    ),
+                    if (url.trim().isNotEmpty || bytes != null)
+                      IconButton(
+                        onPressed: isUploading ? null : onClear,
+                        tooltip: 'حذف',
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ImagePreview extends StatelessWidget {
+  final String url;
+  final Uint8List? bytes;
+  final IconData icon;
+  final bool wide;
+
+  const _ImagePreview({
+    required this.url,
+    required this.bytes,
+    required this.icon,
+    required this.wide,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(14);
+    final child = bytes != null
+        ? Image.memory(bytes!, fit: BoxFit.cover)
+        : url.trim().isNotEmpty
+            ? Image.network(
+                url.trim(),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _placeholder(),
+              )
+            : _placeholder();
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Container(
+        width: wide ? 108 : 72,
+        height: 72,
+        color: AppColors.primary.withValues(alpha: 0.1),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Icon(icon, color: AppColors.primary, size: 28);
+  }
+}
+
+class _ThemePreview extends StatelessWidget {
+  final Color primary;
+  final Color secondary;
+  final Color background;
+  final String logoUrl;
+  final String coverUrl;
+  final Uint8List? logoBytes;
+  final Uint8List? coverBytes;
+  final bool isDarkPreview;
+
+  const _ThemePreview({
+    required this.primary,
+    required this.secondary,
+    required this.background,
+    required this.logoUrl,
+    required this.coverUrl,
+    required this.logoBytes,
+    required this.coverBytes,
+    required this.isDarkPreview,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isDarkPreview ? AppColors.white : AppColors.textMainLight;
+    return Container(
+      height: 184,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: primary.withValues(alpha: 0.35)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (coverBytes != null)
+            Image.memory(coverBytes!, fit: BoxFit.cover)
+          else if (coverUrl.trim().isNotEmpty)
+            Image.network(
+              coverUrl.trim(),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          Container(color: background.withValues(alpha: 0.68)),
+          Positioned(
+            right: 18,
+            left: 18,
+            bottom: 18,
+            child: Row(
+              children: [
+                _LogoPreview(
+                  color: primary,
+                  url: logoUrl,
+                  bytes: logoBytes,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'تجربة الطالب',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(height: 8, width: 150, color: primary),
+                      const SizedBox(height: 7),
+                      Container(height: 8, width: 108, color: secondary),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LogoPreview extends StatelessWidget {
+  final Color color;
+  final String url;
+  final Uint8List? bytes;
+
+  const _LogoPreview({
+    required this.color,
+    required this.url,
+    required this.bytes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child;
+    if (bytes != null) {
+      child = Image.memory(bytes!, fit: BoxFit.cover);
+    } else if (url.trim().isNotEmpty) {
+      child = Image.network(
+        url.trim(),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Icon(Icons.school_rounded, color: color),
+      );
+    } else {
+      child = Icon(Icons.school_rounded, color: color);
+    }
+
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withValues(alpha: 0.55), width: 2),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: child,
+    );
+  }
+}
+
+enum _ThemeModePreview { light, dark }
+
+enum _ThemeImageTarget { logo, cover }
