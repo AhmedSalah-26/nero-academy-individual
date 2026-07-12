@@ -46,6 +46,12 @@ class TeacherThemeConfig {
   final Color? primaryColor;
   final Color? secondaryColor;
   final Color? backgroundColor;
+  final Color? lightPrimaryColor;
+  final Color? lightSecondaryColor;
+  final Color? lightBackgroundColor;
+  final Color? darkPrimaryColor;
+  final Color? darkSecondaryColor;
+  final Color? darkBackgroundColor;
   final String? logoUrl;
   final String? welcomeText;
 
@@ -53,6 +59,12 @@ class TeacherThemeConfig {
     this.primaryColor,
     this.secondaryColor,
     this.backgroundColor,
+    this.lightPrimaryColor,
+    this.lightSecondaryColor,
+    this.lightBackgroundColor,
+    this.darkPrimaryColor,
+    this.darkSecondaryColor,
+    this.darkBackgroundColor,
     this.logoUrl,
     this.welcomeText,
   });
@@ -62,13 +74,42 @@ class TeacherThemeConfig {
       primaryColor: _parseColor(json['primary_color'] as String?),
       secondaryColor: _parseColor(json['secondary_color'] as String?),
       backgroundColor: _parseColor(json['background_color'] as String?),
+      lightPrimaryColor: _parseColor(json['light_primary_color'] as String?),
+      lightSecondaryColor:
+          _parseColor(json['light_secondary_color'] as String?),
+      lightBackgroundColor:
+          _parseColor(json['light_background_color'] as String?),
+      darkPrimaryColor: _parseColor(json['dark_primary_color'] as String?),
+      darkSecondaryColor: _parseColor(json['dark_secondary_color'] as String?),
+      darkBackgroundColor:
+          _parseColor(json['dark_background_color'] as String?),
       logoUrl: json['logo_url'] as String?,
       welcomeText: json['welcome_text'] as String?,
     );
   }
 
   bool get hasColors =>
-      primaryColor != null || secondaryColor != null || backgroundColor != null;
+      primaryColor != null ||
+      secondaryColor != null ||
+      backgroundColor != null ||
+      lightPrimaryColor != null ||
+      lightSecondaryColor != null ||
+      lightBackgroundColor != null ||
+      darkPrimaryColor != null ||
+      darkSecondaryColor != null ||
+      darkBackgroundColor != null;
+
+  Color? primaryFor(bool isDarkMode) => isDarkMode
+      ? darkPrimaryColor ?? primaryColor
+      : lightPrimaryColor ?? primaryColor;
+
+  Color? secondaryFor(bool isDarkMode) => isDarkMode
+      ? darkSecondaryColor ?? secondaryColor
+      : lightSecondaryColor ?? secondaryColor;
+
+  Color? backgroundFor(bool isDarkMode) => isDarkMode
+      ? darkBackgroundColor ?? backgroundColor
+      : lightBackgroundColor ?? backgroundColor;
 
   static Color? _parseColor(String? value) {
     if (value == null || value.trim().isEmpty) return null;

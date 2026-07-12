@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:lms_platform/core/animations/animations.dart';
+import 'package:lms_platform/core/services/teacher_context_service.dart';
 import 'package:lms_platform/core/theme/app_colors.dart';
 
 class TeacherThemeSettingsContent extends StatefulWidget {
@@ -37,9 +38,12 @@ class _TeacherThemeSettingsContentState
   Uint8List? _coverPreviewBytes;
   Uint8List? _logoPreviewBytes;
 
-  Color _primaryColor = _parseColor(_defaultPrimary);
-  Color _secondaryColor = _parseColor(_defaultSecondary);
-  Color _backgroundColor = _parseColor(_defaultDarkBackground);
+  Color _lightPrimaryColor = _parseColor(_defaultPrimary);
+  Color _lightSecondaryColor = _parseColor(_defaultSecondary);
+  Color _lightBackgroundColor = _parseColor(_defaultLightBackground);
+  Color _darkPrimaryColor = _parseColor(_defaultPrimary);
+  Color _darkSecondaryColor = _parseColor(_defaultSecondary);
+  Color _darkBackgroundColor = _parseColor(_defaultDarkBackground);
   _ThemeModePreview _previewMode = _ThemeModePreview.dark;
 
   @override
@@ -79,14 +83,37 @@ class _TeacherThemeSettingsContentState
 
       final themeData = _firstMap(teacher['teacher_themes']);
       if (themeData != null) {
-        _primaryColor = _parseColor(
-          themeData['primary_color'] as String? ?? _defaultPrimary,
+        final legacyPrimary = themeData['primary_color'] as String?;
+        final legacySecondary = themeData['secondary_color'] as String?;
+        final legacyBackground = themeData['background_color'] as String?;
+        _lightPrimaryColor = _parseColor(
+          themeData['light_primary_color'] as String? ??
+              legacyPrimary ??
+              _defaultPrimary,
         );
-        _secondaryColor = _parseColor(
-          themeData['secondary_color'] as String? ?? _defaultSecondary,
+        _lightSecondaryColor = _parseColor(
+          themeData['light_secondary_color'] as String? ??
+              legacySecondary ??
+              _defaultSecondary,
         );
-        _backgroundColor = _parseColor(
-          themeData['background_color'] as String? ?? _defaultDarkBackground,
+        _lightBackgroundColor = _parseColor(
+          themeData['light_background_color'] as String? ??
+              _defaultLightBackground,
+        );
+        _darkPrimaryColor = _parseColor(
+          themeData['dark_primary_color'] as String? ??
+              legacyPrimary ??
+              _defaultPrimary,
+        );
+        _darkSecondaryColor = _parseColor(
+          themeData['dark_secondary_color'] as String? ??
+              legacySecondary ??
+              _defaultSecondary,
+        );
+        _darkBackgroundColor = _parseColor(
+          themeData['dark_background_color'] as String? ??
+              legacyBackground ??
+              _defaultDarkBackground,
         );
         _coverUrlController.text = themeData['logo_url'] as String? ??
             teacher['cover_image_url'] as String? ??
@@ -186,9 +213,15 @@ class _TeacherThemeSettingsContentState
 
       await _client.from('teacher_themes').upsert({
         'teacher_id': teacherId,
-        'primary_color': _colorToHex(_primaryColor),
-        'secondary_color': _colorToHex(_secondaryColor),
-        'background_color': _colorToHex(_backgroundColor),
+        'primary_color': _colorToHex(_darkPrimaryColor),
+        'secondary_color': _colorToHex(_darkSecondaryColor),
+        'background_color': _colorToHex(_darkBackgroundColor),
+        'light_primary_color': _colorToHex(_lightPrimaryColor),
+        'light_secondary_color': _colorToHex(_lightSecondaryColor),
+        'light_background_color': _colorToHex(_lightBackgroundColor),
+        'dark_primary_color': _colorToHex(_darkPrimaryColor),
+        'dark_secondary_color': _colorToHex(_darkSecondaryColor),
+        'dark_background_color': _colorToHex(_darkBackgroundColor),
         'logo_url': coverUrl,
         'welcome_text': _emptyToNull(_welcomeController.text),
         'updated_at': DateTime.now().toIso8601String(),
@@ -198,6 +231,8 @@ class _TeacherThemeSettingsContentState
         'avatar_url': logoUrl,
         'cover_image_url': coverUrl,
       }).eq('id', teacherId);
+
+      _syncSelectedTeacherTheme(teacherId, logoUrl);
 
       if (!mounted) return;
       AnimatedSnackbar.showSuccess(
@@ -212,6 +247,67 @@ class _TeacherThemeSettingsContentState
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  void _syncSelectedTeacherTheme(String teacherId, String? logoUrl) {
+    final selectedTeacher =
+        TeacherContextService.instance.selectedTeacher.value;
+    if (selectedTeacher == null || selectedTeacher.id != teacherId) return;
+
+    TeacherContextService.instance.selectedTeacher.value = SelectedTeacher(
+      id: selectedTeacher.id,
+      name: selectedTeacher.name,
+      avatarUrl: logoUrl ?? selectedTeacher.avatarUrl,
+      theme: TeacherThemeConfig(
+        primaryColor: _darkPrimaryColor,
+        secondaryColor: _darkSecondaryColor,
+        backgroundColor: _darkBackgroundColor,
+        lightPrimaryColor: _lightPrimaryColor,
+        lightSecondaryColor: _lightSecondaryColor,
+        lightBackgroundColor: _lightBackgroundColor,
+        darkPrimaryColor: _darkPrimaryColor,
+        darkSecondaryColor: _darkSecondaryColor,
+        darkBackgroundColor: _darkBackgroundColor,
+        logoUrl: _emptyToNull(_coverUrlController.text),
+        welcomeText: _emptyToNull(_welcomeController.text),
+      ),
+    );
+  }
+
+  Color get _currentPrimaryColor => _previewMode == _ThemeModePreview.dark
+      ? _darkPrimaryColor
+      : _lightPrimaryColor;
+
+  Color get _currentSecondaryColor => _previewMode == _ThemeModePreview.dark
+      ? _darkSecondaryColor
+      : _lightSecondaryColor;
+
+  Color get _currentBackgroundColor => _previewMode == _ThemeModePreview.dark
+      ? _darkBackgroundColor
+      : _lightBackgroundColor;
+
+  void _setCurrentPrimaryColor(Color color) {
+    if (_previewMode == _ThemeModePreview.dark) {
+      _darkPrimaryColor = color;
+    } else {
+      _lightPrimaryColor = color;
+    }
+  }
+
+  void _setCurrentSecondaryColor(Color color) {
+    if (_previewMode == _ThemeModePreview.dark) {
+      _darkSecondaryColor = color;
+    } else {
+      _lightSecondaryColor = color;
+    }
+  }
+
+  void _setCurrentBackgroundColor(Color color) {
+    if (_previewMode == _ThemeModePreview.dark) {
+      _darkBackgroundColor = color;
+    } else {
+      _lightBackgroundColor = color;
     }
   }
 
@@ -248,11 +344,9 @@ class _TeacherThemeSettingsContentState
         _HeaderCard(isDark: isDark),
         const SizedBox(height: 14),
         _ThemePreview(
-          primary: _primaryColor,
-          secondary: _secondaryColor,
-          background: _previewMode == _ThemeModePreview.dark
-              ? _backgroundColor
-              : _parseColor(_defaultLightBackground),
+          primary: _currentPrimaryColor,
+          secondary: _currentSecondaryColor,
+          background: _currentBackgroundColor,
           logoUrl: _logoUrlController.text,
           coverUrl: _coverUrlController.text,
           logoBytes: _logoPreviewBytes,
@@ -265,9 +359,6 @@ class _TeacherThemeSettingsContentState
           onChanged: (value) {
             setState(() {
               _previewMode = value;
-              _backgroundColor = value == _ThemeModePreview.dark
-                  ? _parseColor(_defaultDarkBackground)
-                  : _parseColor(_defaultLightBackground);
             });
           },
           isDark: isDark,
@@ -281,31 +372,32 @@ class _TeacherThemeSettingsContentState
             children: [
               _ColorSelectorTile(
                 title: 'اللون الأساسي',
-                color: _primaryColor,
+                color: _currentPrimaryColor,
                 onTap: () => _openColorSheet(
                   title: 'اللون الأساسي',
-                  selected: _primaryColor,
-                  onSelected: (color) => setState(() => _primaryColor = color),
+                  selected: _currentPrimaryColor,
+                  onSelected: (color) =>
+                      setState(() => _setCurrentPrimaryColor(color)),
                 ),
               ),
               _ColorSelectorTile(
                 title: 'اللون الثانوي',
-                color: _secondaryColor,
+                color: _currentSecondaryColor,
                 onTap: () => _openColorSheet(
                   title: 'اللون الثانوي',
-                  selected: _secondaryColor,
+                  selected: _currentSecondaryColor,
                   onSelected: (color) =>
-                      setState(() => _secondaryColor = color),
+                      setState(() => _setCurrentSecondaryColor(color)),
                 ),
               ),
               _ColorSelectorTile(
                 title: 'لون الخلفية',
-                color: _backgroundColor,
+                color: _currentBackgroundColor,
                 onTap: () => _openColorSheet(
                   title: 'لون الخلفية',
-                  selected: _backgroundColor,
+                  selected: _currentBackgroundColor,
                   onSelected: (color) =>
-                      setState(() => _backgroundColor = color),
+                      setState(() => _setCurrentBackgroundColor(color)),
                 ),
               ),
             ],
@@ -411,61 +503,108 @@ class _TeacherThemeSettingsContentState
     required Color selected,
     required ValueChanged<Color> onSelected,
   }) async {
+    final hexController = TextEditingController(text: _colorToHex(selected));
     final color = await showModalBottomSheet<Color>(
       context: context,
       showDragHandle: true,
       builder: (context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+        String? errorText;
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  18,
+                  6,
+                  18,
+                  24 + MediaQuery.of(context).viewInsets.bottom,
                 ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: _colorPresets.map((preset) {
-                    final isSelected = preset.toARGB32() == selected.toARGB32();
-                    return InkWell(
-                      onTap: () => Navigator.pop(context, preset),
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: 58,
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: preset,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isSelected
-                                ? (isDark
-                                    ? AppColors.textMainDark
-                                    : AppColors.textMainLight)
-                                : Colors.transparent,
-                            width: 3,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: _colorPresets.map((preset) {
+                        final isSelected =
+                            preset.toARGB32() == selected.toARGB32();
+                        return InkWell(
+                          onTap: () => Navigator.pop(context, preset),
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            width: 58,
+                            height: 58,
+                            decoration: BoxDecoration(
+                              color: preset,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected
+                                    ? (isDark
+                                        ? AppColors.textMainDark
+                                        : AppColors.textMainLight)
+                                    : Colors.transparent,
+                                width: 3,
+                              ),
+                            ),
+                            child: isSelected
+                                ? const Icon(Icons.check, color: Colors.white)
+                                : null,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: hexController,
+                      textDirection: TextDirection.ltr,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: InputDecoration(
+                        labelText: 'Hex',
+                        hintText: '#20E5DC',
+                        errorText: errorText,
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.check_rounded),
+                          onPressed: () {
+                            final parsed = _tryParseColor(hexController.text);
+                            if (parsed == null) {
+                              setSheetState(() {
+                                errorText = 'اكتب كود لون صحيح';
+                              });
+                              return;
+                            }
+                            Navigator.pop(context, parsed);
+                          },
                         ),
-                        child: isSelected
-                            ? const Icon(Icons.check, color: Colors.white)
-                            : null,
                       ),
-                    );
-                  }).toList(),
+                      onSubmitted: (value) {
+                        final parsed = _tryParseColor(value);
+                        if (parsed == null) {
+                          setSheetState(() {
+                            errorText = 'اكتب كود لون صحيح';
+                          });
+                          return;
+                        }
+                        Navigator.pop(context, parsed);
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
+    hexController.dispose();
 
     if (color != null) onSelected(color);
   }
@@ -485,12 +624,17 @@ class _TeacherThemeSettingsContentState
   }
 
   static Color _parseColor(String value) {
+    return _tryParseColor(value) ?? AppColors.primary;
+  }
+
+  static Color? _tryParseColor(String value) {
     final normalized = value.replaceAll('#', '').trim();
+    if (normalized.length != 6 && normalized.length != 8) return null;
     final parsed = int.tryParse(
       normalized.length == 6 ? 'FF$normalized' : normalized,
       radix: 16,
     );
-    return parsed == null ? AppColors.primary : Color(parsed);
+    return parsed == null ? null : Color(parsed);
   }
 
   static String _colorToHex(Color color) {

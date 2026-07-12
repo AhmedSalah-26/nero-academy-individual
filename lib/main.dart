@@ -75,10 +75,12 @@ class MyApp extends StatelessWidget {
         final lightTheme = _applyTeacherTheme(
           AppTheme.lightTheme,
           teacherTheme,
+          isDarkMode: false,
         );
         final darkTheme = _applyTeacherTheme(
           AppTheme.darkTheme,
           teacherTheme,
+          isDarkMode: true,
         );
 
         return ToastificationWrapper(
@@ -118,15 +120,17 @@ class MyApp extends StatelessWidget {
 
   ThemeData _applyTeacherTheme(
     ThemeData baseTheme,
-    TeacherThemeConfig? teacherTheme,
-  ) {
+    TeacherThemeConfig? teacherTheme, {
+    required bool isDarkMode,
+  }) {
     if (teacherTheme == null || !teacherTheme.hasColors) return baseTheme;
 
-    final primary = teacherTheme.primaryColor ?? baseTheme.colorScheme.primary;
-    final secondary =
-        teacherTheme.secondaryColor ?? baseTheme.colorScheme.secondary;
-    final background =
-        teacherTheme.backgroundColor ?? baseTheme.scaffoldBackgroundColor;
+    final primary =
+        teacherTheme.primaryFor(isDarkMode) ?? baseTheme.colorScheme.primary;
+    final secondary = teacherTheme.secondaryFor(isDarkMode) ??
+        baseTheme.colorScheme.secondary;
+    final background = teacherTheme.backgroundFor(isDarkMode) ??
+        baseTheme.scaffoldBackgroundColor;
 
     return baseTheme.copyWith(
       primaryColor: primary,
