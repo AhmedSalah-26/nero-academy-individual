@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../cubit/admin_dashboard_cubit.dart';
-import '../widgets/admin_analytics/admin_analytics_content.dart';
-import '../widgets/admin_courses/admin_courses_content.dart';
-import '../widgets/admin_home/admin_home_content.dart';
-import '../widgets/admin_users/admin_users_content.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/cubit/admin_dashboard_cubit.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_analytics/admin_analytics_content.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_courses/admin_courses_content.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_home/admin_home_content.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_users/admin_users_content.dart';
 
 /// Admin Dashboard Screen
 class AdminDashboardScreen extends StatefulWidget {

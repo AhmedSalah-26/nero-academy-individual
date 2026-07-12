@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
-import '../cubit/course_editor_cubit.dart';
-import '../widgets/course_editor/basic_info_step.dart';
-import '../widgets/course_editor/curriculum_step.dart';
-import '../widgets/course_editor/pricing_step.dart';
-import '../widgets/course_editor/settings_step.dart';
-import '../widgets/course_editor/attachments_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/basic_info_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/curriculum_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/pricing_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/settings_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/attachments_step.dart';
 
 class CourseEditStepScreen extends StatefulWidget {
   final int stepIndex;

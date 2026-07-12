@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../generated/locale_keys.g.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/generated/locale_keys.g.dart';
 import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_quizzes_cubit.dart';
 import 'ai_import_models.dart';
 import 'ai_import_prompt_tab.dart';
@@ -273,8 +273,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             child: const Icon(Icons.auto_awesome_rounded,
                 color: AppColors.primary, size: 24),
@@ -402,14 +402,13 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
             // ─── Import Mode Toggle ────────────────────────────────────────
             Container(
               decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.backgroundDark
-                    : const Color(0xFFF5F3FF),
+                color:
+                    isDark ? AppColors.backgroundDark : const Color(0xFFF5F3FF),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                color: isDark
-                    ? AppColors.borderDark
-                    : AppColors.primary.withValues(alpha: 0.2),
+                  color: isDark
+                      ? AppColors.borderDark
+                      : AppColors.primary.withValues(alpha: 0.2),
                 ),
               ),
               padding: const EdgeInsets.all(4),
@@ -420,8 +419,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                     child: GestureDetector(
                       onTap: _isSaving
                           ? null
-                          : () => setState(
-                              () => _replaceExistingQuestions = false),
+                          : () =>
+                              setState(() => _replaceExistingQuestions = false),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(
@@ -607,10 +606,10 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                 label: Text(
                   _isSaving
                       ? LocaleKeys.course_editor_ai_import_adding.tr()
-                      : LocaleKeys.course_editor_ai_import_add_btn
-                          .tr(namedArgs: {'count': '${_parsedQuestions.length}'}),
-                  style:
-                      const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                      : LocaleKeys.course_editor_ai_import_add_btn.tr(
+                          namedArgs: {'count': '${_parsedQuestions.length}'}),
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w800),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _replaceExistingQuestions

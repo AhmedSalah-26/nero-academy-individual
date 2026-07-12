@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/instructor_review_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_review_model.dart';
 
 part 'instructor_reviews_state.dart';
 

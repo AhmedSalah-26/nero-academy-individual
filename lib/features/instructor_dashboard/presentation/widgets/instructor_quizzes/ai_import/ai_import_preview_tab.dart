@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../generated/locale_keys.g.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/generated/locale_keys.g.dart';
 import 'ai_import_models.dart';
 import 'ai_preview_question_card.dart';
 
@@ -38,9 +38,7 @@ class AiImportPreviewTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: isDark
-                  ? AppColors.textMainDark
-                  : AppColors.textMainLight,
+              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
             ),
           ),
           const SizedBox(height: 8),
@@ -51,35 +49,29 @@ class AiImportPreviewTab extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.5,
               fontFamily: 'monospace',
-              color: isDark
-                  ? AppColors.textMainDark
-                  : AppColors.textMainLight,
+              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
             ),
             decoration: InputDecoration(
               hintText: LocaleKeys.course_editor_ai_import_paste_hint.tr(),
               hintStyle: TextStyle(
-                color: isDark
-                    ? AppColors.textMutedDark
-                    : AppColors.textMutedLight,
+                color:
+                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
                 fontSize: 11.5,
               ),
               filled: true,
-              fillColor: isDark
-                  ? AppColors.surfaceDark
-                  : AppColors.backgroundLight,
+              fillColor:
+                  isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight),
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight),
+                    color:
+                        isDark ? AppColors.borderDark : AppColors.borderLight),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -97,8 +89,8 @@ class AiImportPreviewTab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.error.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -108,8 +100,8 @@ class AiImportPreviewTab extends StatelessWidget {
                   Expanded(
                     child: Text(
                       parseError!,
-                      style: const TextStyle(
-                          color: AppColors.error, fontSize: 12),
+                      style:
+                          const TextStyle(color: AppColors.error, fontSize: 12),
                     ),
                   ),
                 ],
@@ -139,14 +131,14 @@ class AiImportPreviewTab extends StatelessWidget {
           if (parsedQuestions.isNotEmpty) ...[
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.success.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                LocaleKeys.course_editor_ai_import_ready.tr(namedArgs: {'count': '${parsedQuestions.length}'}),
+                LocaleKeys.course_editor_ai_import_ready
+                    .tr(namedArgs: {'count': '${parsedQuestions.length}'}),
                 style: const TextStyle(
                   color: AppColors.success,
                   fontSize: 12,

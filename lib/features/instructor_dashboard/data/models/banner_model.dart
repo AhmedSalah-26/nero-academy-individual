@@ -6,7 +6,8 @@ class BannerModel {
   final String? subtitleAr;
   final String? subtitleEn;
   final String imageUrl;
-  final String linkType; // 'none' | 'course' | 'category' | 'url' | 'instructor'
+  final String
+      linkType; // 'none' | 'course' | 'category' | 'url' | 'instructor'
   final String? linkValue;
   final int sortOrder;
   final bool isActive;
@@ -92,7 +93,8 @@ class BannerModel {
   }
 
   bool get isVisible => isActive && isWithinDateRange;
-  bool get isScheduled => startDate != null && DateTime.now().isBefore(startDate!);
+  bool get isScheduled =>
+      startDate != null && DateTime.now().isBefore(startDate!);
   bool get isExpired => endDate != null && DateTime.now().isAfter(endDate!);
 
   String get statusLabel {

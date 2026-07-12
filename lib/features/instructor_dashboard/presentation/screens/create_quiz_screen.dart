@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/routing/app_router.dart';
-import '../../../../core/animations/widgets/feedback/animated_snackbar.dart';
-import '../cubit/instructor_quizzes_cubit.dart';
-import '../widgets/instructor_quizzes/quiz_form_widgets.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/core/animations/widgets/feedback/animated_snackbar.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_quizzes_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/quiz_form_widgets.dart';
 
 enum _QuizScope { course, section, lesson }
 

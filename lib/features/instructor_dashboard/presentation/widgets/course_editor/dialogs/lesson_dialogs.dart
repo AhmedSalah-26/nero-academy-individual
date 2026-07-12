@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../../core/di/injection_container.dart';
-import '../../../../../../core/services/app_logger.dart';
-import '../../../../../../core/services/file_picker_service.dart';
-import '../../../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../course_details/presentation/screens/course_preview_player_screen.dart';
-import '../../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/di/injection_container.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/services/file_picker_service.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/student/course_details/presentation/screens/course_preview_player_screen.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 import 'scheduled_date_time_picker.dart';
 
 Future<void> _uploadDocument(

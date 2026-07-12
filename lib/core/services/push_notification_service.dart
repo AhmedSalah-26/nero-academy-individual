@@ -21,7 +21,8 @@ class PushNotificationService {
       await OneSignal.Notifications.requestPermission(true);
 
       _isInitialized = true;
-      debugPrint('[PushNotificationService] OneSignal initialized successfully');
+      debugPrint(
+          '[PushNotificationService] OneSignal initialized successfully');
     } catch (e, stackTrace) {
       debugPrint('[PushNotificationService] Error initializing OneSignal: $e');
       debugPrint('[PushNotificationService] Stack trace: $stackTrace');
@@ -40,7 +41,8 @@ class PushNotificationService {
       // وضع تاغ بالدور للاستهداف لاحقاً (الأدمن يستقبل إشعارات الطلبات الجديدة)
       OneSignal.User.addTagWithKey('role', role);
 
-      debugPrint('[PushNotificationService] OneSignal logged in user: $userId (role: $role)');
+      debugPrint(
+          '[PushNotificationService] OneSignal logged in user: $userId (role: $role)');
     } catch (e, stackTrace) {
       debugPrint('[PushNotificationService] OneSignal login error: $e');
       debugPrint('[PushNotificationService] Stack trace: $stackTrace');

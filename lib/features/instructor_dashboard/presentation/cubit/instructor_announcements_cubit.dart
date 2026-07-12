@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 part 'instructor_announcements_state.dart';
 

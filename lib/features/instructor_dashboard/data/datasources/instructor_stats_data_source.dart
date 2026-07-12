@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../models/instructor_models.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
 /// Instructor Stats Data Source - Dashboard statistics and charts
 class InstructorStatsDataSource {

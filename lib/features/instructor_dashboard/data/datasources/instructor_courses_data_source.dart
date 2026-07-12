@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/entities/instructor_entities.dart';
-import '../models/instructor_models.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
 /// Instructor Courses Data Source - Course management
 class InstructorCoursesDataSource {

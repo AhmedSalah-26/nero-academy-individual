@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 /// Enrollment Card Widget
 class EnrollmentCard extends StatefulWidget {

@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/entities/admin_entities.dart';
-import '../../domain/repositories/admin_repository.dart';
-import '../../data/models/admin_course_model.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_course_model.dart';
 
 part 'admin_courses_state.dart';
 

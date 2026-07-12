@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../errors/failures.dart';
+import 'package:lms_platform/core/errors/failures.dart';
 
 /// Base State Status
 enum StateStatus {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/admin_dashboard_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/cubit/admin_dashboard_cubit.dart';
 
 /// Admin Dashboard home with platform-wide operational statistics.
 class AdminHomeContent extends StatelessWidget {

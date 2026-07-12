@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/routing/app_router.dart';
-import '../../../../core/services/direct_chat_service.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/user_avatar.dart';
-import '../../data/models/instructor_student_model.dart';
-import '../widgets/instructor_students/student_details_widgets.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/core/services/direct_chat_service.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/user_avatar.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_student_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_students/student_details_widgets.dart';
 
 /// Student Details Screen - Full page with all profile fields
 class StudentDetailsScreen extends StatelessWidget {

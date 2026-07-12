@@ -1,5 +1,5 @@
-import '../entities/admin_entities.dart';
-import '../../data/models/admin_models.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_models.dart';
 
 /// Admin Repository Interface
 abstract class AdminRepository {

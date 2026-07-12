@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/routing/app_router.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
 
 /// Quiz Preview Screen - Full page for previewing quiz as a student would see it
 class QuizPreviewScreen extends StatefulWidget {

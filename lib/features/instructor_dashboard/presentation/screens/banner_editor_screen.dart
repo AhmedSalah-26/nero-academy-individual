@@ -1,9 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../data/models/banner_model.dart';
-import '../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/banner_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 /// Banner Editor Screen - Full screen version for Create/Edit banner
 class BannerEditorScreen extends StatefulWidget {

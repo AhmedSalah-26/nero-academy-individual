@@ -1,9 +1,9 @@
-import '../../domain/entities/admin_entities.dart';
-import '../../domain/repositories/admin_repository.dart';
-import '../datasources/admin_courses_data_source.dart';
-import '../datasources/admin_stats_data_source.dart';
-import '../datasources/admin_users_data_source.dart';
-import '../models/admin_models.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
+import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_courses_data_source.dart';
+import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_stats_data_source.dart';
+import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_users_data_source.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_models.dart';
 
 /// Admin Repository Implementation
 class AdminRepositoryImpl implements AdminRepository {

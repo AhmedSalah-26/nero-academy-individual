@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../cubit/instructor_earnings_cubit.dart';
-import '../../data/models/instructor_earning_model.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_earnings_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
 
 /// Earnings History Screen — NEW SCHEMA
 class EarningsHistoryScreen extends StatefulWidget {
@@ -544,7 +544,9 @@ class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          isArabic ? '${earning.count} مرات' : '${earning.count}x',
+                          isArabic
+                              ? '${earning.count} مرات'
+                              : '${earning.count}x',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,

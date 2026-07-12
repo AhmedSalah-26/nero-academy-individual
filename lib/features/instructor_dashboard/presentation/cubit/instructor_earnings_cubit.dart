@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/instructor_earning_model.dart';
-import '../../data/models/instructor_payout_model.dart';
-import '../../data/models/instructor_balance_model.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_payout_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_balance_model.dart';
 
 part 'instructor_earnings_state.dart';
 

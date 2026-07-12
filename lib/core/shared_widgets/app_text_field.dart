@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Unified App TextField Widget
 class AppTextField extends StatefulWidget {

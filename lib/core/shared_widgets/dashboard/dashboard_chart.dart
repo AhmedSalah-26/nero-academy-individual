@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../theme/app_colors.dart';
-import '../loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
 
 /// Chart Type
 enum DashboardChartType { area, bar, line }

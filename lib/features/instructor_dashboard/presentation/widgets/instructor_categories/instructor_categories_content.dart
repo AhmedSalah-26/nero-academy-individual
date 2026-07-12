@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/routing/app_router.dart';
-import '../../cubit/instructor_categories_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_categories_cubit.dart';
 import 'category_list_item.dart';
 
 /// Instructor Categories Content
@@ -11,10 +11,12 @@ class InstructorCategoriesContent extends StatefulWidget {
   const InstructorCategoriesContent({super.key});
 
   @override
-  State<InstructorCategoriesContent> createState() => _InstructorCategoriesContentState();
+  State<InstructorCategoriesContent> createState() =>
+      _InstructorCategoriesContentState();
 }
 
-class _InstructorCategoriesContentState extends State<InstructorCategoriesContent> {
+class _InstructorCategoriesContentState
+    extends State<InstructorCategoriesContent> {
   @override
   void initState() {
     super.initState();

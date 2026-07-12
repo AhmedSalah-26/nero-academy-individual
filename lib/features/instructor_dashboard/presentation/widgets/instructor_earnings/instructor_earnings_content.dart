@@ -3,9 +3,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/instructor_earning_model.dart';
-import '../../cubit/instructor_earnings_cubit.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_earnings_cubit.dart';
 
 /// Instructor Earnings Content — Simple Stats View
 class InstructorEarningsContent extends StatefulWidget {
@@ -16,8 +16,7 @@ class InstructorEarningsContent extends StatefulWidget {
       _InstructorEarningsContentState();
 }
 
-class _InstructorEarningsContentState
-    extends State<InstructorEarningsContent> {
+class _InstructorEarningsContentState extends State<InstructorEarningsContent> {
   _Period _selectedPeriod = _Period.month;
 
   @override
@@ -58,8 +57,8 @@ class _InstructorEarningsContentState
     return BlocBuilder<InstructorEarningsCubit, InstructorEarningsState>(
       builder: (context, state) {
         // Calculate stats from loaded earnings
-        final totalEarnings = state.earnings
-            .fold<double>(0, (sum, e) => sum + e.netAmount);
+        final totalEarnings =
+            state.earnings.fold<double>(0, (sum, e) => sum + e.netAmount);
         final totalEnrollments = state.earnings.length;
 
         return RefreshIndicator(
@@ -101,9 +100,8 @@ class _InstructorEarningsContentState
                     Expanded(
                       child: _StatCard(
                         icon: Icons.people_alt_rounded,
-                        label: isArabic
-                            ? 'عدد الاشتراكات'
-                            : 'Total Enrollments',
+                        label:
+                            isArabic ? 'عدد الاشتراكات' : 'Total Enrollments',
                         value: '$totalEnrollments',
                         color: AppColors.primary,
                         isDark: isDark,
@@ -288,11 +286,14 @@ class _StatCard extends StatelessWidget {
             Directionality(
               textDirection: ui.TextDirection.ltr,
               child: Text(
-                isArabic && value.contains('ج.م') ? '${value.replaceAll('ج.م', '').trim()} ج.م' : value,
+                isArabic && value.contains('ج.م')
+                    ? '${value.replaceAll('ج.م', '').trim()} ج.م'
+                    : value,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                  color:
+                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
                 ),
               ),
             ),
@@ -301,7 +302,8 @@ class _StatCard extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
         ],
@@ -336,7 +338,8 @@ class _TransactionsList extends StatelessWidget {
             Icon(
               Icons.receipt_long_rounded,
               size: 20,
-              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
             const SizedBox(width: 8),
             Text(
@@ -391,9 +394,7 @@ class _TransactionsList extends StatelessWidget {
                   Icon(
                     Icons.receipt_outlined,
                     size: 48,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.grey300,
+                    color: isDark ? AppColors.textMutedDark : AppColors.grey300,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -410,42 +411,43 @@ class _TransactionsList extends StatelessWidget {
               ),
             ),
           )
-        else ...() {
-          final Map<String, _GroupedTransaction> grouped = {};
-          for (final e in earnings) {
-            final key = e.courseId ?? e.courseName;
-            if (grouped.containsKey(key)) {
-              final existing = grouped[key]!;
-              grouped[key] = _GroupedTransaction(
-                courseId: key,
-                courseName: e.courseName,
-                count: existing.count + 1,
-                totalAmount: existing.totalAmount + e.netAmount,
-                latestDate: e.createdAt.isAfter(existing.latestDate)
-                    ? e.createdAt
-                    : existing.latestDate,
-                sourceType: e.sourceType,
-              );
-            } else {
-              grouped[key] = _GroupedTransaction(
-                courseId: key,
-                courseName: e.courseName,
-                count: 1,
-                totalAmount: e.netAmount,
-                latestDate: e.createdAt,
-                sourceType: e.sourceType,
-              );
+        else
+          ...() {
+            final Map<String, _GroupedTransaction> grouped = {};
+            for (final e in earnings) {
+              final key = e.courseId ?? e.courseName;
+              if (grouped.containsKey(key)) {
+                final existing = grouped[key]!;
+                grouped[key] = _GroupedTransaction(
+                  courseId: key,
+                  courseName: e.courseName,
+                  count: existing.count + 1,
+                  totalAmount: existing.totalAmount + e.netAmount,
+                  latestDate: e.createdAt.isAfter(existing.latestDate)
+                      ? e.createdAt
+                      : existing.latestDate,
+                  sourceType: e.sourceType,
+                );
+              } else {
+                grouped[key] = _GroupedTransaction(
+                  courseId: key,
+                  courseName: e.courseName,
+                  count: 1,
+                  totalAmount: e.netAmount,
+                  latestDate: e.createdAt,
+                  sourceType: e.sourceType,
+                );
+              }
             }
-          }
-          final groupedList = grouped.values.toList()
-            ..sort((a, b) => b.latestDate.compareTo(a.latestDate));
+            final groupedList = grouped.values.toList()
+              ..sort((a, b) => b.latestDate.compareTo(a.latestDate));
 
-          return groupedList.map((g) => _TransactionItem(
-                earning: g,
-                isArabic: isArabic,
-                isDark: isDark,
-              ));
-        }(),
+            return groupedList.map((g) => _TransactionItem(
+                  earning: g,
+                  isArabic: isArabic,
+                  isDark: isDark,
+                ));
+          }(),
       ],
     );
   }
@@ -547,13 +549,16 @@ class _TransactionItem extends StatelessWidget {
                     if (earning.count > 1) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          isArabic ? '${earning.count} مرات' : '${earning.count}x',
+                          isArabic
+                              ? '${earning.count} مرات'
+                              : '${earning.count}x',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,

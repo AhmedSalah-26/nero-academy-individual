@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../data/models/instructor_earning_model.dart';
-import '../../../data/models/instructor_payout_model.dart';
-import '../../cubit/instructor_earnings_cubit.dart';
-import '../../pages/earning_details_wrapper.dart';
-import '../../pages/withdraw_details_screen.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_payout_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_earnings_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/pages/earning_details_wrapper.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/pages/withdraw_details_screen.dart';
 
 /// Recent Earnings List — NEW SCHEMA
 class RecentEarningsList extends StatelessWidget {

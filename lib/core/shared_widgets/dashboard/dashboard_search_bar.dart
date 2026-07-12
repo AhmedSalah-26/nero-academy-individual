@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../glass_search_bar.dart';
+import 'package:lms_platform/core/shared_widgets/glass_search_bar.dart';
 
 /// Dashboard Search Bar - Search input with debounce
 class DashboardSearchBar extends StatefulWidget {

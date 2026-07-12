@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 import 'dashboard_nav_item.dart';
 
 /// Dashboard Sidebar - Collapsible navigation sidebar

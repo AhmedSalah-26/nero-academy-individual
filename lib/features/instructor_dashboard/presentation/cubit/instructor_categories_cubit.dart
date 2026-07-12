@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/category_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/category_model.dart';
 
 part 'instructor_categories_state.dart';
 
@@ -9,7 +9,8 @@ part 'instructor_categories_state.dart';
 class InstructorCategoriesCubit extends Cubit<InstructorCategoriesState> {
   final InstructorRepository _repository;
 
-  InstructorCategoriesCubit(this._repository) : super(const InstructorCategoriesState());
+  InstructorCategoriesCubit(this._repository)
+      : super(const InstructorCategoriesState());
 
   /// Load categories
   Future<void> loadCategories({bool? isActive, bool refresh = false}) async {
@@ -22,7 +23,8 @@ class InstructorCategoriesCubit extends Cubit<InstructorCategoriesState> {
     }
 
     try {
-      final categories = await _repository.getAdminCategories(isActive: isActive);
+      final categories =
+          await _repository.getAdminCategories(isActive: isActive);
       emit(state.copyWith(
         status: InstructorCategoriesStatus.success,
         categories: categories,

@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../../../data/models/instructor_question_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_question_model.dart';
 
 /// Dialog for answering a student question
 class QuestionAnswerDialog extends StatefulWidget {

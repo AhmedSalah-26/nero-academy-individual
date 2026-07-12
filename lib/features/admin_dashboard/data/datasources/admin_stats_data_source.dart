@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../models/admin_models.dart';
-import '../../domain/repositories/admin_repository.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_models.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
 
 /// Admin Stats Data Source - Dashboard statistics and charts
 class AdminStatsDataSource {

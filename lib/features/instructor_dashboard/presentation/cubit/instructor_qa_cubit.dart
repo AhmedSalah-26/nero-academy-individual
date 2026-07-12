@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/instructor_entities.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/instructor_question_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_question_model.dart';
 
 part 'instructor_qa_state.dart';
 

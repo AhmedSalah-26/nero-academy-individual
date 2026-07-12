@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/admin_user_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_user_model.dart';
 
 /// User Details Sections - Instructor and Student info sections
 

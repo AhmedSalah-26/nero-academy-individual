@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/accessibility_manager.dart';
+import 'package:lms_platform/core/animations/foundation/accessibility_manager.dart';
 
 /// Type of snackbar to display
 enum SnackbarType {

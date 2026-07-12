@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
 
 part 'instructor_coupons_state.dart';
 
@@ -134,7 +134,8 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
         'min_order_amount': minOrderAmount ?? 0,
         'usage_limit': usageLimit,
         'usage_limit_per_user': usageLimitPerUser ?? 1,
-        if (startDate != null) 'start_date': startDate.toUtc().toIso8601String(),
+        if (startDate != null)
+          'start_date': startDate.toUtc().toIso8601String(),
         'end_date': _toUtcEndOfDay(endDate),
         'scope': scope,
         'is_active': true,

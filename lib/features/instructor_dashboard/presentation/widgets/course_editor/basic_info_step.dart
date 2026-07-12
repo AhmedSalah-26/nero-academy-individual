@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/models/course_commerce_models.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 /// Basic Info Step - Course title, description, category, etc.
 class BasicInfoStep extends StatefulWidget {

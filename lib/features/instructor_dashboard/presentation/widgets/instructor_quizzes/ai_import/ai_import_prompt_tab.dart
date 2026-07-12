@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../generated/locale_keys.g.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/generated/locale_keys.g.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────────
 /// Prompt display and copy tab for AI question import
@@ -97,8 +97,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
             decoration: BoxDecoration(
               color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: AppColors.info.withValues(alpha: 0.2)),
+              border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,11 +118,16 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                _buildStep(isArabic ? '١' : '1', LocaleKeys.course_editor_ai_import_step1.tr()),
-                _buildStep(isArabic ? '٢' : '2', LocaleKeys.course_editor_ai_import_step2.tr()),
-                _buildStep(isArabic ? '٣' : '3', LocaleKeys.course_editor_ai_import_step3.tr()),
-                _buildStep(isArabic ? '٤' : '4', LocaleKeys.course_editor_ai_import_step4.tr()),
-                _buildStep(isArabic ? '٥' : '5', LocaleKeys.course_editor_ai_import_step5.tr()),
+                _buildStep(isArabic ? '١' : '1',
+                    LocaleKeys.course_editor_ai_import_step1.tr()),
+                _buildStep(isArabic ? '٢' : '2',
+                    LocaleKeys.course_editor_ai_import_step2.tr()),
+                _buildStep(isArabic ? '٣' : '3',
+                    LocaleKeys.course_editor_ai_import_step3.tr()),
+                _buildStep(isArabic ? '٤' : '4',
+                    LocaleKeys.course_editor_ai_import_step4.tr()),
+                _buildStep(isArabic ? '٥' : '5',
+                    LocaleKeys.course_editor_ai_import_step5.tr()),
               ],
             ),
           ),
@@ -170,13 +174,12 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                 _promptCopied
                     ? LocaleKeys.course_editor_ai_import_copied.tr()
                     : LocaleKeys.course_editor_ai_import_copy_prompt.tr(),
-                style: const TextStyle(
-                    fontSize: 14, fontWeight: FontWeight.w700),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _promptCopied
-                    ? AppColors.success
-                    : AppColors.primary,
+                backgroundColor:
+                    _promptCopied ? AppColors.success : AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -228,8 +231,8 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text,
-                style: const TextStyle(fontSize: 12.5, height: 1.5)),
+            child:
+                Text(text, style: const TextStyle(fontSize: 12.5, height: 1.5)),
           ),
         ],
       ),

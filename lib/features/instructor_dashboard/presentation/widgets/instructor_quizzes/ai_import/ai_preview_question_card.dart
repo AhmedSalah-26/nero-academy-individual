@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../../generated/locale_keys.g.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/generated/locale_keys.g.dart';
 import 'ai_import_models.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────────
@@ -26,14 +26,19 @@ class AiPreviewQuestionCard extends StatelessWidget {
     final isArabic = context.locale.languageCode == 'ar';
 
     final primaryQuestion = isArabic
-        ? (question.questionAr.isNotEmpty ? question.questionAr : question.questionEn)
-        : (question.questionEn.isNotEmpty ? question.questionEn : question.questionAr);
+        ? (question.questionAr.isNotEmpty
+            ? question.questionAr
+            : question.questionEn)
+        : (question.questionEn.isNotEmpty
+            ? question.questionEn
+            : question.questionAr);
 
     final secondaryQuestion = isArabic
         ? (question.questionAr.isNotEmpty ? question.questionEn : '')
         : (question.questionEn.isNotEmpty ? question.questionAr : '');
 
-    final showSecondary = secondaryQuestion.isNotEmpty && secondaryQuestion != primaryQuestion;
+    final showSecondary =
+        secondaryQuestion.isNotEmpty && secondaryQuestion != primaryQuestion;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -69,13 +74,11 @@ class AiPreviewQuestionCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: typeColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
-                  border:
-                      Border.all(color: typeColor.withValues(alpha: 0.3)),
+                  border: Border.all(color: typeColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   typeLabel,
@@ -88,7 +91,8 @@ class AiPreviewQuestionCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                LocaleKeys.course_editor_ai_import_points.tr(namedArgs: {'n': '${question.points}'}),
+                LocaleKeys.course_editor_ai_import_points
+                    .tr(namedArgs: {'n': '${question.points}'}),
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark
@@ -106,9 +110,8 @@ class AiPreviewQuestionCard extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 height: 1.5,
-                color: isDark
-                    ? AppColors.textMainDark
-                    : AppColors.textMainLight,
+                color:
+                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
               ),
             ),
           if (showSecondary) ...[
@@ -118,9 +121,8 @@ class AiPreviewQuestionCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
-                color: isDark
-                    ? AppColors.textMutedDark
-                    : AppColors.textMutedLight,
+                color:
+                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
               ),
             ),
           ],

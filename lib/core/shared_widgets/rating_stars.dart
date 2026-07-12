@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Rating Stars Size
 enum RatingSize { xs, sm, md, lg }

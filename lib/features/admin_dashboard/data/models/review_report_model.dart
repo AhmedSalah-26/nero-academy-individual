@@ -1,4 +1,4 @@
-import '../../domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
 
 /// Review Report Model
 class ReviewReportModel {

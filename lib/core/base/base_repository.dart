@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import '../errors/error_handler.dart';
-import '../errors/failures.dart';
-import '../network/network_info.dart';
+import 'package:lms_platform/core/errors/error_handler.dart';
+import 'package:lms_platform/core/errors/failures.dart';
+import 'package:lms_platform/core/network/network_info.dart';
 
 /// Base Repository - Handles common repository logic
 abstract class BaseRepository {

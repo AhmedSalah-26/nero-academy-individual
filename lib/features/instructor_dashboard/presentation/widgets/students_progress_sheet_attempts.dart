@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../screens/quiz_response_details_screen.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/screens/quiz_response_details_screen.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
 
 class StudentAttemptsDialog extends StatefulWidget {
   final String studentId;
@@ -40,7 +40,9 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
       final client = Supabase.instance.client;
 
       // 1. Fetch attempts for the student
-      final attemptsRes = await client.from('quiz_attempts').select('''
+      final attemptsRes = await client
+          .from('quiz_attempts')
+          .select('''
         id,
         score,
         percentage,
@@ -51,7 +53,9 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
         time_spent,
         quiz_id,
         quizzes!inner(id, title_ar, title_en)
-      ''').eq('user_id', widget.studentId).order('completed_at', ascending: false);
+      ''')
+          .eq('user_id', widget.studentId)
+          .order('completed_at', ascending: false);
 
       final attemptsList = (attemptsRes as List).cast<Map<String, dynamic>>();
       if (attemptsList.isEmpty) {
@@ -65,7 +69,8 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
       }
 
       // 2. Fetch questions and options for those quizzes
-      final quizIds = attemptsList.map((a) => a['quiz_id'] as String).toSet().toList();
+      final quizIds =
+          attemptsList.map((a) => a['quiz_id'] as String).toSet().toList();
       final questionsRes = await client.from('quiz_questions').select('''
         id,
         quiz_id,
@@ -85,12 +90,14 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
         final answersData = attempt['answers'] as Map<String, dynamic>? ?? {};
         final quizId = attempt['quiz_id'] as String;
 
-        final quizQuestions = questionsList.where((q) => q['quiz_id'] == quizId).toList();
+        final quizQuestions =
+            questionsList.where((q) => q['quiz_id'] == quizId).toList();
         final List<QuizAnswerDetail> detailedAnswers = [];
 
         for (final q in quizQuestions) {
           final qId = q['id'] as String;
-          final optionsData = (q['options'] as List? ?? []).cast<Map<String, dynamic>>();
+          final optionsData =
+              (q['options'] as List? ?? []).cast<Map<String, dynamic>>();
 
           final optionsList = optionsData.map((o) {
             return QuizOptionDetail(
@@ -117,7 +124,8 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
                 : null;
             isCorrect = answerVal['is_correct'] as bool? ?? false;
           } else if (answerVal is List) {
-            selectedOptionId = answerVal.isNotEmpty ? answerVal.first.toString() : null;
+            selectedOptionId =
+                answerVal.isNotEmpty ? answerVal.first.toString() : null;
             isCorrect = selectedOptionId == correctOptionId;
           } else if (answerVal != null) {
             selectedOptionId = answerVal.toString();
@@ -133,7 +141,8 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
             selectedOptionId: selectedOptionId,
             correctOptionId: correctOptionId,
             isCorrect: isCorrect,
-            explanation: q['explanation_ar'] as String? ?? q['explanation_en'] as String?,
+            explanation: q['explanation_ar'] as String? ??
+                q['explanation_en'] as String?,
           ));
         }
 
@@ -142,9 +151,15 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
         if (timeSpent != null && timeSpent > 0) {
           timeTaken = timeSpent;
         } else {
-          final startedAt = attempt['started_at'] != null ? DateTime.tryParse(attempt['started_at'].toString()) : null;
-          final completedAt = attempt['completed_at'] != null ? DateTime.tryParse(attempt['completed_at'].toString()) : null;
-          timeTaken = (startedAt != null && completedAt != null) ? completedAt.difference(startedAt).inSeconds.abs() : 0;
+          final startedAt = attempt['started_at'] != null
+              ? DateTime.tryParse(attempt['started_at'].toString())
+              : null;
+          final completedAt = attempt['completed_at'] != null
+              ? DateTime.tryParse(attempt['completed_at'].toString())
+              : null;
+          timeTaken = (startedAt != null && completedAt != null)
+              ? completedAt.difference(startedAt).inSeconds.abs()
+              : 0;
         }
 
         return {
@@ -152,7 +167,9 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
           'quiz_title_en': quiz['title_en'] as String? ?? '',
           'score': (attempt['percentage'] as num?)?.toDouble() ?? 0.0,
           'passed': attempt['passed'] as bool? ?? false,
-          'completed_at': attempt['completed_at'] != null ? DateTime.tryParse(attempt['completed_at'].toString()) : null,
+          'completed_at': attempt['completed_at'] != null
+              ? DateTime.tryParse(attempt['completed_at'].toString())
+              : null,
           'time_taken': timeTaken,
           'answers': detailedAnswers,
         };
@@ -193,8 +210,11 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  isArabic ? 'محاولات اختبارات الطالب' : 'Student Quiz Attempts',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  isArabic
+                      ? 'محاولات اختبارات الطالب'
+                      : 'Student Quiz Attempts',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -207,51 +227,74 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
               child: _isLoading
                   ? const AppLoadingState()
                   : _error != null
-                      ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.error)))
+                      ? Center(
+                          child: Text(_error!,
+                              style: const TextStyle(color: AppColors.error)))
                       : _attempts.isEmpty
-                          ? Center(child: Text(isArabic ? 'لا توجد محاولات اختبار' : 'No quiz attempts found'))
+                          ? Center(
+                              child: Text(isArabic
+                                  ? 'لا توجد محاولات اختبار'
+                                  : 'No quiz attempts found'))
                           : ListView.builder(
                               itemCount: _attempts.length,
                               itemBuilder: (context, index) {
                                 final a = _attempts[index];
-                                final title = isArabic ? a['quiz_title_ar'] : a['quiz_title_en'];
+                                final title = isArabic
+                                    ? a['quiz_title_ar']
+                                    : a['quiz_title_en'];
                                 final passed = a['passed'] as bool;
                                 final score = a['score'] as double;
-                                final dateStr = a['completed_at'] != null ? fmt.format(a['completed_at']) : '-';
+                                final dateStr = a['completed_at'] != null
+                                    ? fmt.format(a['completed_at'])
+                                    : '-';
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
                                   child: ListTile(
-                                    title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                    subtitle: Text('${isArabic ? 'التاريخ:' : 'Date:'} $dateStr'),
+                                    title: Text(title,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14)),
+                                    subtitle: Text(
+                                        '${isArabic ? 'التاريخ:' : 'Date:'} $dateStr'),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: (passed ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: (passed
+                                                    ? AppColors.success
+                                                    : AppColors.error)
+                                                .withValues(alpha: 0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Text(
                                             '${score.toStringAsFixed(0)}%',
                                             style: TextStyle(
-                                              color: passed ? AppColors.success : AppColors.error,
+                                              color: passed
+                                                  ? AppColors.success
+                                                  : AppColors.error,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 12,
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 8),
-                                        const Icon(Icons.chevron_right, size: 20),
+                                        const Icon(Icons.chevron_right,
+                                            size: 20),
                                       ],
                                     ),
                                     onTap: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (ctx) => QuizResponseDetailsScreen(
+                                          builder: (ctx) =>
+                                              QuizResponseDetailsScreen(
                                             studentName: widget.studentName,
                                             studentEmail: widget.studentEmail,
                                             studentPhone: widget.studentPhone,
@@ -259,7 +302,8 @@ class _StudentAttemptsDialogState extends State<StudentAttemptsDialog> {
                                             passed: passed,
                                             completedAt: a['completed_at'],
                                             timeTaken: a['time_taken'] as int,
-                                            answers: a['answers'] as List<QuizAnswerDetail>,
+                                            answers: a['answers']
+                                                as List<QuizAnswerDetail>,
                                           ),
                                         ),
                                       );

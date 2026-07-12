@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// App Button Variants
 enum AppButtonVariant { primary, secondary, outline, text, success, error }

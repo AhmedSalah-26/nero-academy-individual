@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 
 /// Animated tab view widget
 /// Smoothly transitions between tabs with cross-fade animation

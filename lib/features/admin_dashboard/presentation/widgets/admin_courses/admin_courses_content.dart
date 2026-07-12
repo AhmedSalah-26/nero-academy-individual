@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/routing/app_router.dart';
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/entities/admin_entities.dart';
-import '../../cubit/admin_courses_cubit.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/cubit/admin_courses_cubit.dart';
 import 'course_list_item.dart';
 
 /// Admin Courses Content

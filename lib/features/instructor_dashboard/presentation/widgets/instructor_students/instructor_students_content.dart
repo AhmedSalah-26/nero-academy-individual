@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/services/direct_chat_service.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/routing/app_router.dart';
-import '../../../domain/repositories/instructor_repository.dart';
-import '../../cubit/instructor_students_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/services/direct_chat_service.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_students_cubit.dart';
 
 /// Instructor Students Content
 class InstructorStudentsContent extends StatefulWidget {
@@ -78,7 +78,8 @@ class _InstructorStudentsContentState extends State<InstructorStudentsContent> {
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: const Icon(
                 Icons.table_chart_outlined,

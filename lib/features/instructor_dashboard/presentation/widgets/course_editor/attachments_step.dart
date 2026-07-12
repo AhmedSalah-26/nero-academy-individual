@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/di/injection_container.dart';
-import '../../../../../core/services/app_logger.dart';
-import '../../../../../core/services/file_picker_service.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/di/injection_container.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/services/file_picker_service.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 /// Attachments Step - Course-level attachments management
 class AttachmentsStep extends StatelessWidget {
@@ -46,9 +46,7 @@ class AttachmentsStep extends StatelessWidget {
           Icon(Icons.attach_file, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            isArabic
-                ? 'لا توجد مرفقات بعد'
-                : 'No attachments yet',
+            isArabic ? 'لا توجد مرفقات بعد' : 'No attachments yet',
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
@@ -197,12 +195,8 @@ class AttachmentsStep extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(success
-                            ? (isArabic
-                                ? 'تم حفظ المسودة'
-                                : 'Draft saved')
-                            : (isArabic
-                                ? 'فشل في الحفظ'
-                                : 'Failed to save')),
+                            ? (isArabic ? 'تم حفظ المسودة' : 'Draft saved')
+                            : (isArabic ? 'فشل في الحفظ' : 'Failed to save')),
                         backgroundColor:
                             success ? AppColors.success : AppColors.error,
                       ),
@@ -261,9 +255,7 @@ class AttachmentsStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(isArabic
-                    ? 'جاري رفع الملف...'
-                    : 'Uploading file...'),
+                Text(isArabic ? 'جاري رفع الملف...' : 'Uploading file...'),
               ],
             ),
             duration: const Duration(seconds: 30),
@@ -307,9 +299,8 @@ class AttachmentsStep extends StatelessWidget {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isArabic
-                ? 'تم رفع الملف بنجاح'
-                : 'File uploaded successfully'),
+            content: Text(
+                isArabic ? 'تم رفع الملف بنجاح' : 'File uploaded successfully'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -382,9 +373,8 @@ class AttachmentsStep extends StatelessWidget {
               TextField(
                 controller: fileNameController,
                 decoration: InputDecoration(
-                  labelText: isArabic
-                      ? 'اسم الملف (إنجليزي)'
-                      : 'File Name (English)',
+                  labelText:
+                      isArabic ? 'اسم الملف (إنجليزي)' : 'File Name (English)',
                 ),
               ),
               const SizedBox(height: 16),
@@ -392,9 +382,8 @@ class AttachmentsStep extends StatelessWidget {
                 controller: fileNameArController,
                 textDirection: ui.TextDirection.rtl,
                 decoration: InputDecoration(
-                  labelText: isArabic
-                      ? 'اسم الملف (عربي)'
-                      : 'File Name (Arabic)',
+                  labelText:
+                      isArabic ? 'اسم الملف (عربي)' : 'File Name (Arabic)',
                 ),
               ),
             ],

@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
 
 /// Report Type Enum
 enum ReportTargetType {
@@ -144,12 +144,14 @@ class ReportsRemoteDataSource {
     try {
       final courseReports = await _client
           .from('course_reports')
-          .select('*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
+          .select(
+              '*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       final reviewReports = await _client
           .from('review_reports')
-          .select('*, reporter:profiles!review_reports_user_id_fkey(name, avatar_url)')
+          .select(
+              '*, reporter:profiles!review_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       return {
@@ -163,20 +165,18 @@ class ReportsRemoteDataSource {
   }
 
   /// Update report status (pending → reviewed / resolved / rejected)
-  Future<bool> updateCourseReportStatus(String reportId, String status, {String? response}) async {
+  Future<bool> updateCourseReportStatus(String reportId, String status,
+      {String? response}) async {
     try {
-      await _client
-          .from('course_reports')
-          .update({
-            'status': status,
-            'admin_response': response,
-            'admin_id': _userId,
-            'resolved_at': status == 'resolved' || status == 'rejected'
-                ? DateTime.now().toIso8601String()
-                : null,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', reportId);
+      await _client.from('course_reports').update({
+        'status': status,
+        'admin_response': response,
+        'admin_id': _userId,
+        'resolved_at': status == 'resolved' || status == 'rejected'
+            ? DateTime.now().toIso8601String()
+            : null,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', reportId);
       return true;
     } catch (e, s) {
       AppLogger.e('[$_tag] updateCourseReportStatus error', e, s);
@@ -184,20 +184,18 @@ class ReportsRemoteDataSource {
     }
   }
 
-  Future<bool> updateReviewReportStatus(String reportId, String status, {String? response}) async {
+  Future<bool> updateReviewReportStatus(String reportId, String status,
+      {String? response}) async {
     try {
-      await _client
-          .from('review_reports')
-          .update({
-            'status': status,
-            'admin_response': response,
-            'admin_id': _userId,
-            'resolved_at': status == 'resolved' || status == 'rejected'
-                ? DateTime.now().toIso8601String()
-                : null,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', reportId);
+      await _client.from('review_reports').update({
+        'status': status,
+        'admin_response': response,
+        'admin_id': _userId,
+        'resolved_at': status == 'resolved' || status == 'rejected'
+            ? DateTime.now().toIso8601String()
+            : null,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', reportId);
       return true;
     } catch (e, s) {
       AppLogger.e('[$_tag] updateReviewReportStatus error', e, s);
@@ -205,5 +203,3 @@ class ReportsRemoteDataSource {
     }
   }
 }
-
-

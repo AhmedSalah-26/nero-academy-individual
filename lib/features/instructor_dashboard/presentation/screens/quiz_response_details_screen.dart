@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../widgets/instructor_quizzes/quiz_response_details_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/quiz_response_details_widgets.dart';
 
 /// Quiz Response Details Screen - Full page for viewing detailed quiz responses.
 class QuizResponseDetailsScreen extends StatelessWidget {

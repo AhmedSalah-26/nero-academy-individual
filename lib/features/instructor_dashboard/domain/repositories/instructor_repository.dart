@@ -1,7 +1,7 @@
-import '../entities/instructor_entities.dart';
-import '../../../../core/models/course_commerce_models.dart';
-import '../../data/models/instructor_models.dart';
-import '../../data/models/instructor_balance_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_balance_model.dart';
 
 /// Instructor Repository Interface
 abstract class InstructorRepository {

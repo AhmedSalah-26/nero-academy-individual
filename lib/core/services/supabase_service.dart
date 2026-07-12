@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../constants/app_constants.dart';
+import 'package:lms_platform/core/constants/app_constants.dart';
 
 abstract class SupabaseService {
   SupabaseClient get client;

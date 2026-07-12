@@ -2,9 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/animations/animations.dart';
-import '../../../../core/models/course_commerce_models.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/animations/animations.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 class ManualPurchaseRequestsScreen extends StatefulWidget {
   const ManualPurchaseRequestsScreen({super.key});

@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '../routing/app_router.dart';
-import '../theme/app_colors.dart';
-import '../di/injection_container.dart';
-import '../services/video_player_notifier_service.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/di/injection_container.dart';
+import 'package:lms_platform/core/services/video_player_notifier_service.dart';
 
 class VideoMiniPlayerOverlay extends StatelessWidget {
   const VideoMiniPlayerOverlay({super.key});
@@ -34,7 +34,8 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
         // Get the current path to dynamically position the player
         String currentPath = '';
         try {
-          currentPath = AppRouter.router.routerDelegate.currentConfiguration.uri.path;
+          currentPath =
+              AppRouter.router.routerDelegate.currentConfiguration.uri.path;
         } catch (_) {}
 
         final double bottomMargin = _hasBottomNavBar(currentPath) ? 96.0 : 16.0;
@@ -57,9 +58,12 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                       'enrollment': service.enrollmentId ?? '',
                       'title': service.courseTitle ?? '',
                       if (service.lessonId != null) 'lesson': service.lessonId!,
-                      if (service.instructorId != null) 'instructorId': service.instructorId!,
-                      if (service.instructorName != null) 'instructor': service.instructorName!,
-                      if (service.instructorAvatar != null) 'avatar': service.instructorAvatar!,
+                      if (service.instructorId != null)
+                        'instructorId': service.instructorId!,
+                      if (service.instructorName != null)
+                        'instructor': service.instructorName!,
+                      if (service.instructorAvatar != null)
+                        'avatar': service.instructorAvatar!,
                     },
                   );
                 }
@@ -101,7 +105,8 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -120,7 +125,9 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : Colors.black87,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -130,7 +137,9 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                                       service.courseTitle ?? '',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                        color: isDark
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600],
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -147,7 +156,9 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                                       isPlaying
                                           ? Icons.pause_rounded
                                           : Icons.play_arrow_rounded,
-                                      color: isDark ? Colors.white : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                     onPressed: () {
                                       if (isPlaying) {
@@ -162,7 +173,9 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                               IconButton(
                                 icon: Icon(
                                   Icons.close_rounded,
-                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  color: isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
                                   size: 20,
                                 ),
                                 onPressed: () {

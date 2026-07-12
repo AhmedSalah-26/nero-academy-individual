@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 
 /// Bounce icon animation widget
 /// Triggers a bounce animation when the trigger value changes

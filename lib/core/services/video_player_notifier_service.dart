@@ -178,4 +178,3 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     super.dispose();
   }
 }
-

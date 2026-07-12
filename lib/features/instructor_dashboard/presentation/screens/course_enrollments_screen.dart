@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/empty_state.dart';
-import '../../../../core/shared_widgets/error_state.dart';
-import '../../../../core/shared_widgets/back_button.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
-import '../../data/models/instructor_student_model.dart';
-import '../../../../core/routing/app_router.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/empty_state.dart';
+import 'package:lms_platform/core/shared_widgets/error_state.dart';
+import 'package:lms_platform/core/shared_widgets/back_button.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_student_model.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
 
 /// Instructor Course Enrollments Screen - Shows all students enrolled in a specific course
 class InstructorCourseEnrollmentsScreen extends StatefulWidget {

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/banner_model.dart';
-import '../../domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/banner_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 
 part 'instructor_banners_state.dart';
 
@@ -10,7 +10,8 @@ part 'instructor_banners_state.dart';
 class InstructorBannersCubit extends Cubit<InstructorBannersState> {
   final InstructorRepository _repository;
 
-  InstructorBannersCubit(this._repository) : super(const InstructorBannersState());
+  InstructorBannersCubit(this._repository)
+      : super(const InstructorBannersState());
 
   /// Load banners with optional filters
   Future<void> loadBanners({

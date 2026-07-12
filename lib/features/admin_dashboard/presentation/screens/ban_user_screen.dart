@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/app_button.dart';
-import '../../domain/entities/admin_entities.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/app_button.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
 
 /// Ban User Screen - Full screen version
 class BanUserScreen extends StatefulWidget {

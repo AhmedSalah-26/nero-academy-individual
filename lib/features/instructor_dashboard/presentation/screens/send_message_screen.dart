@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/animations/widgets/feedback/animated_snackbar.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/animations/widgets/feedback/animated_snackbar.dart';
 
 /// Send Message Screen - Full page for sending messages to students
 class SendMessageScreen extends StatefulWidget {

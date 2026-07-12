@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/instructor_enrollments_cubit.dart';
-import '../../../data/models/instructor_enrollment_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_enrollments_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_enrollment_model.dart';
 
 /// Instructor Enrollments Content
 class InstructorEnrollmentsContent extends StatefulWidget {

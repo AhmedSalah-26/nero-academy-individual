@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/routing/app_router.dart';
-import '../../cubit/instructor_coupons_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_coupons_cubit.dart';
 
 /// Instructor Coupons Content
 class InstructorCouponsContent extends StatefulWidget {

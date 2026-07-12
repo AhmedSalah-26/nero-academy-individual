@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/routing/app_router.dart';
-import '../cubit/instructor_quizzes_cubit.dart';
-import '../widgets/instructor_quizzes/quiz_form_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_quizzes_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/quiz_form_widgets.dart';
 
 /// Quiz Editor Screen - Full page for editing quiz settings
 class QuizEditorScreen extends StatefulWidget {

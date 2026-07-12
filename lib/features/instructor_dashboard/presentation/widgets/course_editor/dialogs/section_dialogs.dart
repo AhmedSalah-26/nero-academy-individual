@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 import 'scheduled_date_time_picker.dart';
 
 /// Show Add Section Dialog
@@ -12,7 +12,7 @@ void showAddSectionDialog(
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveDialog(
       title: Text(isArabic ? 'إضافة قسم جديد' : 'Add New Section'),
       content: Column(
@@ -74,7 +74,7 @@ void showEditSectionDialog(BuildContext context, CourseEditorCubit cubit,
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (dialogContext, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'تعديل القسم' : 'Edit Section'),
@@ -191,7 +191,7 @@ void confirmDeleteSection(
     BuildContext context, CourseEditorCubit cubit, int index, bool isArabic) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'حذف القسم' : 'Delete Section',
       content: isArabic

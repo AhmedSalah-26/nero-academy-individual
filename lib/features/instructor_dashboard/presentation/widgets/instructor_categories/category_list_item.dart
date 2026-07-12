@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/category_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/category_model.dart';
 
 /// Category List Item Widget
 class CategoryListItem extends StatelessWidget {

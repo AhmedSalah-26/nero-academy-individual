@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/instructor_earning_model.dart';
-import '../../data/models/instructor_course_model.dart';
-import '../cubit/instructor_courses_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_course_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_courses_cubit.dart';
 import 'earning_details_screen.dart';
 
 /// Wrapper that fetches course data before showing details

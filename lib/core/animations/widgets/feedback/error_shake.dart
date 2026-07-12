@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 
 /// Error shake animation widget
 /// Shakes the child widget horizontally to indicate an error

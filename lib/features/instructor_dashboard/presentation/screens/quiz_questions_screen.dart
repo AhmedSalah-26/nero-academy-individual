@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
-import '../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../cubit/instructor_quizzes_cubit.dart';
-import '../widgets/instructor_quizzes/ai_import/ai_import_dialog.dart';
-import '../widgets/instructor_quizzes/quiz_questions_widgets.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_quizzes_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/ai_import/ai_import_dialog.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/quiz_questions_widgets.dart';
 import 'bulk_image_questions_screen.dart';
 import 'question_editor_screen.dart';
 

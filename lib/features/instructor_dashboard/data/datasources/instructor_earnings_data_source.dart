@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../models/instructor_earning_model.dart';
-import '../models/instructor_balance_model.dart';
-import '../models/instructor_payout_model.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_earning_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_balance_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_payout_model.dart';
 
 /// Instructor Earnings Data Source — reads from instructor_earnings
 /// Tables used: instructor_earnings, withdraw_requests (history only)

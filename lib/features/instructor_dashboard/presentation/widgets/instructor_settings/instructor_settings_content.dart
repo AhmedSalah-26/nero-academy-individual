@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/services/logout_service.dart';
-import '../../../../../core/services/theme_service.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/services/logout_service.dart';
+import 'package:lms_platform/core/services/theme_service.dart';
 
 /// Instructor Settings Content
 class InstructorSettingsContent extends StatefulWidget {

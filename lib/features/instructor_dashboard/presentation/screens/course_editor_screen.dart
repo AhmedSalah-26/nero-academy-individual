@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../cubit/course_editor_cubit.dart';
-import '../widgets/course_editor/attachments_step.dart';
-import '../widgets/course_editor/basic_info_step.dart';
-import '../widgets/course_editor/course_edit_menu.dart';
-import '../widgets/course_editor/course_editor_dialogs.dart';
-import '../widgets/course_editor/curriculum_step.dart';
-import '../widgets/course_editor/pricing_step.dart';
-import '../widgets/course_editor/settings_step.dart';
-import '../widgets/course_editor/stepper_header.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/attachments_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/basic_info_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/course_edit_menu.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/course_editor_dialogs.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/curriculum_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/pricing_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/settings_step.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/course_editor/stepper_header.dart';
 
 /// Course Editor Screen
 class CourseEditorScreen extends StatefulWidget {
@@ -92,16 +92,13 @@ class _CourseEditorScreenState extends State<CourseEditorScreen> {
     if (MediaQuery.of(context).size.width > 600) {
       return [
         TextButton(
-          onPressed: state.isLoading
-              ? null
-              : () => showSaveDraftDialog(context),
+          onPressed:
+              state.isLoading ? null : () => showSaveDraftDialog(context),
           child: Text('course_editor.save_draft'.tr()),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
-          onPressed: state.isLoading
-              ? null
-              : () => showPublishDialog(context),
+          onPressed: state.isLoading ? null : () => showPublishDialog(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,

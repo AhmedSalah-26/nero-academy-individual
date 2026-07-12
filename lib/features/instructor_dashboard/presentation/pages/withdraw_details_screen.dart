@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../data/models/instructor_payout_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_payout_model.dart';
 
 /// صفحة تفاصيل السحب
 /// Withdraw Details Screen - Shows detailed information about a withdrawal request

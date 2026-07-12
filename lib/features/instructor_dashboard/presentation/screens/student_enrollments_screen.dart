@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/animations/widgets/feedback/animated_snackbar.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../widgets/instructor_students/enrollment_card_widgets.dart';
-import '../widgets/instructor_students/enrollment_dialogs.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/animations/widgets/feedback/animated_snackbar.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_students/enrollment_card_widgets.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_students/enrollment_dialogs.dart';
 
 /// Student Enrollments Screen - Full page for managing student enrollments
 class StudentEnrollmentsScreen extends StatefulWidget {

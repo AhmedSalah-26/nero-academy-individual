@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/admin_course_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_course_model.dart';
 
 class CourseDetailsThumbnail extends StatelessWidget {
   final AdminCourseModel course;

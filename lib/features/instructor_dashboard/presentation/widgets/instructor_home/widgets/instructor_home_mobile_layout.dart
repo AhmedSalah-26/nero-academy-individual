@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../../core/di/injection_container.dart';
-import '../../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../../core/theme/app_colors.dart';
-import '../../../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../../domain/entities/instructor_entities.dart';
-import '../../../cubit/instructor_dashboard_cubit.dart';
+import 'package:lms_platform/core/di/injection_container.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/student/auth/presentation/cubit/auth_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_dashboard_cubit.dart';
 
 class InstructorHomeMobileLayout extends StatelessWidget {
   final InstructorDashboardState state;
@@ -451,7 +451,9 @@ class InstructorHomeMobileLayout extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onNavigate == null ? null : () => _navigateTo(6), // Earnings = index 6
+                  onPressed: onNavigate == null
+                      ? null
+                      : () => _navigateTo(6), // Earnings = index 6
                   icon: const Icon(Icons.paid_rounded, size: 18),
                   label: Text(isArabic ? 'الأرباح' : 'Earnings'),
                 ),
@@ -673,8 +675,7 @@ class _DashboardAvatarState extends State<_DashboardAvatar> {
           .eq('profile_id', userId)
           .maybeSingle();
 
-      final instructorAvatar =
-          _sanitize(teacher?['avatar_url'] as String?);
+      final instructorAvatar = _sanitize(teacher?['avatar_url'] as String?);
       if (instructorAvatar != null) {
         if (!mounted) return;
         setState(() => _resolvedAvatarUrl = instructorAvatar);

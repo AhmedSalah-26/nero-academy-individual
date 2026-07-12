@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/instructor_reviews_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_reviews_cubit.dart';
 
 /// Instructor Reviews Content
 class InstructorReviewsContent extends StatefulWidget {

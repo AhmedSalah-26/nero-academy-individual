@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../di/injection_container.dart';
+import 'package:lms_platform/core/di/injection_container.dart';
 
 /// Service to check user role from database
 class UserRoleService {

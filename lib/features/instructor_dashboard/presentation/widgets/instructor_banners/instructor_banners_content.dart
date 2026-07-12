@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/routing/app_router.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/banner_model.dart';
-import '../../../domain/repositories/instructor_repository.dart';
-import '../../cubit/instructor_banners_cubit.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/banner_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_banners_cubit.dart';
 import 'banner_list_item.dart';
 
 /// Instructor Banners Content
@@ -14,7 +14,8 @@ class InstructorBannersContent extends StatefulWidget {
   const InstructorBannersContent({super.key});
 
   @override
-  State<InstructorBannersContent> createState() => _InstructorBannersContentState();
+  State<InstructorBannersContent> createState() =>
+      _InstructorBannersContentState();
 }
 
 class _InstructorBannersContentState extends State<InstructorBannersContent> {
@@ -152,7 +153,8 @@ class _InstructorBannersContentState extends State<InstructorBannersContent> {
     InstructorBannersState state,
     bool isArabic,
   ) {
-    if (state.status == InstructorBannersStatus.loading && state.banners.isEmpty) {
+    if (state.status == InstructorBannersStatus.loading &&
+        state.banners.isEmpty) {
       return _buildLoadingSkeleton();
     }
 
@@ -198,8 +200,9 @@ class _InstructorBannersContentState extends State<InstructorBannersContent> {
             index: index,
             totalCount: state.banners.length,
             onEdit: () => _showBannerEditor(context, banner),
-            onToggleStatus: () =>
-                context.read<InstructorBannersCubit>().toggleBannerStatus(banner),
+            onToggleStatus: () => context
+                .read<InstructorBannersCubit>()
+                .toggleBannerStatus(banner),
             onDelete: () => _confirmDelete(context, banner, isArabic),
           );
         },
@@ -256,11 +259,10 @@ class _InstructorBannersContentState extends State<InstructorBannersContent> {
       onSave: (dto) async {
         bool success;
         if (banner == null) {
-          success = await context.read<InstructorBannersCubit>().createBanner(dto);
+          success =
+              await context.read<InstructorBannersCubit>().createBanner(dto);
         } else {
-          success = await context
-              .read<InstructorBannersCubit>()
-              .updateBanner(
+          success = await context.read<InstructorBannersCubit>().updateBanner(
                 banner.id,
                 BannerUpdateDto(
                   titleAr: dto.titleAr,
@@ -296,8 +298,7 @@ class _InstructorBannersContentState extends State<InstructorBannersContent> {
     );
   }
 
-  void _confirmDelete(
-      BuildContext context, BannerModel banner, bool isArabic) {
+  void _confirmDelete(BuildContext context, BannerModel banner, bool isArabic) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.7),
@@ -311,8 +312,9 @@ class _InstructorBannersContentState extends State<InstructorBannersContent> {
         isDestructive: true,
         onConfirm: () async {
           Navigator.pop(dialogContext);
-          final success =
-              await context.read<InstructorBannersCubit>().deleteBanner(banner.id);
+          final success = await context
+              .read<InstructorBannersCubit>()
+              .deleteBanner(banner.id);
           if (success && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

@@ -74,7 +74,8 @@ class LessonHistoryService {
     try {
       debugPrint('📚 [History Service] Adding to history: ${item.lessonTitle}');
       final history = await getHistory();
-      debugPrint('📚 [History Service] Current history count: ${history.length}');
+      debugPrint(
+          '📚 [History Service] Current history count: ${history.length}');
 
       // Remove existing entry for this lesson if it exists
       history.removeWhere((h) => h.lessonId == item.lessonId);
@@ -115,7 +116,8 @@ class LessonHistoryService {
           '📚 [History Service] Getting history - Data exists: ${jsonString != null}');
 
       if (jsonString == null) {
-        debugPrint('📚 [History Service] No history found in SharedPreferences');
+        debugPrint(
+            '📚 [History Service] No history found in SharedPreferences');
         return [];
       }
 

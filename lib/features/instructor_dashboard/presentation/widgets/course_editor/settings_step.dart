@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/services/app_logger.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 import 'availability_schedule_card.dart';
 import 'course_summary_card.dart';
 import 'publish_checklist_card.dart';
@@ -65,7 +65,8 @@ class SettingsStep extends StatelessWidget {
                 isDark: isDark,
               ),
               const SizedBox(height: 32),
-              if (!state.isEditing) _buildActionButtons(context, cubit, state, isArabic),
+              if (!state.isEditing)
+                _buildActionButtons(context, cubit, state, isArabic),
             ],
           ),
         );
@@ -112,8 +113,7 @@ class SettingsStep extends StatelessWidget {
               child: Text(isArabic ? 'حفظ كمسودة' : 'Save as Draft'),
             ),
             ElevatedButton.icon(
-              onPressed: () =>
-                  _handlePublish(context, cubit, state, isArabic),
+              onPressed: () => _handlePublish(context, cubit, state, isArabic),
               icon: const Icon(Icons.publish),
               label: Text('course_editor.publish_course'.tr()),
               style: ElevatedButton.styleFrom(

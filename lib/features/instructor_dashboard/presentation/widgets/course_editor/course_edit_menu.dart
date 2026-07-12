@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
-import '../../screens/course_edit_step_screen.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/screens/course_edit_step_screen.dart';
 
 /// Edit menu shown when editing an existing course – displays a card grid
 /// where the instructor can navigate to each step individually.
@@ -49,9 +49,8 @@ class CourseEditMenu extends StatelessWidget {
                   ),
                   _buildEditCard(
                     context: context,
-                    title: isArabic
-                        ? 'المحتوى والدروس'
-                        : 'Curriculum & Lessons',
+                    title:
+                        isArabic ? 'المحتوى والدروس' : 'Curriculum & Lessons',
                     icon: Icons.play_lesson_outlined,
                     stepIndex: 1,
                     width: _getCardWidth(constraints.maxWidth),

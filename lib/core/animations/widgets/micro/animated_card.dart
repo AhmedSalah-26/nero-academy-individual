@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 
 /// Animated card widget with tap animation
 /// Combines scale and elevation changes for tactile feedback

@@ -44,7 +44,6 @@ class AppColors {
   static const Color info = Color(0xFF0EA5E9);
   static const Color infoLight = Color(0xFFE0F7FF);
 
-
   // ============ Rating Color (Accessible) ============
   static const Color rating =
       Color(0xFFB47D00); // Changed from E59819 for better contrast (4.5:1)

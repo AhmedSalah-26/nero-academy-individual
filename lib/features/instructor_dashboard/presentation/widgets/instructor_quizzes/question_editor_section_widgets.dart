@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 import 'quiz_form_widgets.dart';
 
 class QuestionEditorImageSection extends StatelessWidget {

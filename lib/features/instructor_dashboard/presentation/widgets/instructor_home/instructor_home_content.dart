@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart' show DateFormat;
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/instructor_dashboard_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_dashboard_cubit.dart';
 import 'widgets/instructor_home_mobile_layout.dart';
 
 /// Instructor Home Content
@@ -200,14 +200,16 @@ class InstructorHomeContent extends StatelessWidget {
               '${stats.totalEarnings.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
           icon: Icons.attach_money_rounded,
           color: AppColors.success,
-          onTap: onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
+          onTap:
+              onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
         ),
         StatsCardData(
           title: isArabic ? 'متوسط التقييم' : 'Average Rating',
           value: stats.averageRating.toStringAsFixed(1),
           icon: Icons.star_rounded,
           color: AppColors.warning,
-          onTap: onNavigate != null ? () => onNavigate!(10) : null, // Reviews = 10
+          onTap:
+              onNavigate != null ? () => onNavigate!(10) : null, // Reviews = 10
         ),
         StatsCardData(
           title: isArabic ? 'الرصيد المتاح' : 'Available Balance',
@@ -215,7 +217,8 @@ class InstructorHomeContent extends StatelessWidget {
               '${stats.availableBalance.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
           icon: Icons.account_balance_wallet_rounded,
           color: AppColors.warning,
-          onTap: onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
+          onTap:
+              onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
         ),
         StatsCardData(
           title: isArabic ? 'أسئلة بدون إجابة' : 'Unanswered Q&A',

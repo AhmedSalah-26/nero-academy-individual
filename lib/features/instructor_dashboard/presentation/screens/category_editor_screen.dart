@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/app_button.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../../data/models/instructor_models.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/app_button.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
 /// Category Editor Screen - Full screen version for Create/Edit
 class CategoryEditorScreen extends StatefulWidget {
@@ -65,7 +65,7 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
       appBar: AppBar(
         title: Text(
           isEdit
-               ? (isArabic ? 'تعديل التصنيف' : 'Edit Category')
+              ? (isArabic ? 'تعديل التصنيف' : 'Edit Category')
               : (isArabic ? 'إضافة تصنيف' : 'Add Category'),
         ),
       ),

@@ -2,10 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../cubit/instructor_coupons_cubit.dart';
-import '../widgets/dialogs/course_selection_dialog.dart';
-import '../widgets/common/editor_form_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_coupons_cubit.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/dialogs/course_selection_dialog.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/common/editor_form_widgets.dart';
 
 /// Coupon Editor Screen - Full page for creating/editing coupons
 class CouponEditorScreen extends StatefulWidget {

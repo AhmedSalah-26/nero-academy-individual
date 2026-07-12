@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/repositories/instructor_repository.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 /// Shows a summary card of all key course details (title, category, level, etc.)
 class CourseSummaryCard extends StatelessWidget {
@@ -54,8 +54,8 @@ class CourseSummaryCard extends StatelessWidget {
                 ? state.categories
                     .firstWhere(
                       (c) => c.id == state.categoryId,
-                      orElse: () =>
-                          const CategoryOption(id: '', nameAr: '-', nameEn: '-'),
+                      orElse: () => const CategoryOption(
+                          id: '', nameAr: '-', nameEn: '-'),
                     )
                     .let((c) => isArabic ? c.nameAr : c.nameEn)
                 : '-',

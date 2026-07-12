@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 import 'slide_fade_in.dart';
 
 /// Staggered list animation widget

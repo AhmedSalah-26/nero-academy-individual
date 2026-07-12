@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/admin_course_model.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_course_model.dart';
 
 class CourseActionsBar extends StatelessWidget {
   final AdminCourseModel course;

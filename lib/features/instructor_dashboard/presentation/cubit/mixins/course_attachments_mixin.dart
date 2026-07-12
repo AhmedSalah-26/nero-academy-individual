@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../../core/services/app_logger.dart';
-import '../../../domain/repositories/instructor_repository.dart';
-import '../course_editor_cubit.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 mixin CourseAttachmentsMixin on Cubit<CourseEditorState> {
   InstructorRepository get repository;

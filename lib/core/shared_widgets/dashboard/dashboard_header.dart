@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Dashboard Header - Top bar with title and actions
 /// Height: 64px desktop, 56px mobile

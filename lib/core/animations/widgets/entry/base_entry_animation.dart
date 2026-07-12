@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 
 /// Base class for all entry animations
 /// Provides common functionality for animation lifecycle and accessibility

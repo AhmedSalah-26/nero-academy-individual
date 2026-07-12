@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/entities/admin_entities.dart';
-import '../../domain/repositories/admin_repository.dart';
-import '../../data/models/chart_data_point_model.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/chart_data_point_model.dart';
 
 part 'admin_dashboard_state.dart';
 

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/repositories/admin_repository.dart';
-import '../../cubit/admin_analytics_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/cubit/admin_analytics_cubit.dart';
 
 /// Platform and per-instructor analytics for the admin dashboard.
 class AdminAnalyticsContent extends StatefulWidget {

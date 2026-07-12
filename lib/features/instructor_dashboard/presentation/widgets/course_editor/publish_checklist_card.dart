@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 /// Displays a checklist of required fields with a progress bar.
 class PublishChecklistCard extends StatelessWidget {
@@ -88,7 +88,8 @@ class PublishChecklistCard extends StatelessWidget {
                   '$completedCount/${checks.length}',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: progress == 1 ? AppColors.success : AppColors.warning,
+                    color:
+                        progress == 1 ? AppColors.success : AppColors.warning,
                   ),
                 ),
               ),

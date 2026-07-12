@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../routing/app_router.dart';
+import 'package:lms_platform/core/routing/app_router.dart';
 
 class DeepLinkService {
   static final DeepLinkService _instance = DeepLinkService._internal();

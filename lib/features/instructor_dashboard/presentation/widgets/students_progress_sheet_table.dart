@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 import 'students_progress_sheet_models.dart';
 import 'students_progress_sheet_widgets.dart';
 
@@ -48,7 +48,19 @@ class StudentsProgressTable extends StatelessWidget {
   }
 
   int? _getSortIndex() {
-    const cols = ['name', 'courses', 'courses', 'progress', 'lessons', 'watch', 'quizzes', '', 'score', 'last', ''];
+    const cols = [
+      'name',
+      'courses',
+      'courses',
+      'progress',
+      'lessons',
+      'watch',
+      'quizzes',
+      '',
+      'score',
+      'last',
+      ''
+    ];
     final idx = cols.indexOf(sortColumn ?? '');
     return idx >= 0 ? idx : null;
   }
@@ -59,7 +71,8 @@ class StudentsProgressTable extends StatelessWidget {
     final cardColor = isDark ? AppColors.cardDark : AppColors.white;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
     final headerBg = isDark ? AppColors.surfaceDark : const Color(0xFFF8F9FA);
-    final mutedColor = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final mutedColor =
+        isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
     final mainColor = isDark ? AppColors.textMainDark : AppColors.textMainLight;
 
     return SingleChildScrollView(
@@ -67,61 +80,75 @@ class StudentsProgressTable extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+          constraints:
+              BoxConstraints(minWidth: MediaQuery.of(context).size.width),
           child: DataTable(
             columnSpacing: 20,
             horizontalMargin: 16,
             headingRowColor: WidgetStateProperty.all(headerBg),
-            dataRowColor: WidgetStateProperty.resolveWith((states) => cardColor),
-            border: TableBorder.all(color: borderColor, borderRadius: BorderRadius.circular(12)),
+            dataRowColor:
+                WidgetStateProperty.resolveWith((states) => cardColor),
+            border: TableBorder.all(
+                color: borderColor, borderRadius: BorderRadius.circular(12)),
             sortColumnIndex: _getSortIndex(),
             sortAscending: sortAscending,
             columns: [
               DataColumn(
-                label: HeaderCell(isArabic ? 'الطالب' : 'Student', color: mainColor),
+                label: HeaderCell(isArabic ? 'الطالب' : 'Student',
+                    color: mainColor),
                 onSort: (_, __) => onSort('name'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'الكورسات' : 'Courses', color: mainColor, icon: Icons.school_outlined),
+                label: HeaderCell(isArabic ? 'الكورسات' : 'Courses',
+                    color: mainColor, icon: Icons.school_outlined),
                 numeric: true,
                 onSort: (_, __) => onSort('courses'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'مكتملة' : 'Done', color: mainColor, icon: Icons.check_circle_outline),
+                label: HeaderCell(isArabic ? 'مكتملة' : 'Done',
+                    color: mainColor, icon: Icons.check_circle_outline),
                 numeric: true,
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'التقدم%' : 'Progress%', color: mainColor, icon: Icons.bar_chart),
+                label: HeaderCell(isArabic ? 'التقدم%' : 'Progress%',
+                    color: mainColor, icon: Icons.bar_chart),
                 numeric: true,
                 onSort: (_, __) => onSort('progress'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'الدروس' : 'Lessons', color: mainColor, icon: Icons.menu_book_outlined),
+                label: HeaderCell(isArabic ? 'الدروس' : 'Lessons',
+                    color: mainColor, icon: Icons.menu_book_outlined),
                 numeric: true,
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'وقت المشاهدة' : 'Watch Time', color: mainColor, icon: Icons.timer_outlined),
+                label: HeaderCell(isArabic ? 'وقت المشاهدة' : 'Watch Time',
+                    color: mainColor, icon: Icons.timer_outlined),
                 onSort: (_, __) => onSort('watch'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'الاختبارات' : 'Quizzes', color: mainColor, icon: Icons.quiz_outlined),
+                label: HeaderCell(isArabic ? 'الاختبارات' : 'Quizzes',
+                    color: mainColor, icon: Icons.quiz_outlined),
                 numeric: true,
                 onSort: (_, __) => onSort('quizzes'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'ناجح/راسب' : 'P/F', color: mainColor),
+                label: HeaderCell(isArabic ? 'ناجح/راسب' : 'P/F',
+                    color: mainColor),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'متوسط الاختبار' : 'Avg Score', color: mainColor),
+                label: HeaderCell(isArabic ? 'متوسط الاختبار' : 'Avg Score',
+                    color: mainColor),
                 numeric: true,
                 onSort: (_, __) => onSort('score'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'آخر نشاط' : 'Last Activity', color: mainColor, icon: Icons.history_outlined),
+                label: HeaderCell(isArabic ? 'آخر نشاط' : 'Last Activity',
+                    color: mainColor, icon: Icons.history_outlined),
                 onSort: (_, __) => onSort('last'),
               ),
               DataColumn(
-                label: HeaderCell(isArabic ? 'تاريخ الانضمام' : 'Joined', color: mainColor, icon: Icons.calendar_today_outlined),
+                label: HeaderCell(isArabic ? 'تاريخ الانضمام' : 'Joined',
+                    color: mainColor, icon: Icons.calendar_today_outlined),
               ),
             ],
             rows: filteredRows.map((r) {
@@ -134,12 +161,20 @@ class StudentsProgressTable extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-                            backgroundImage: r.avatarUrl != null ? NetworkImage(r.avatarUrl!) : null,
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: 0.15),
+                            backgroundImage: r.avatarUrl != null
+                                ? NetworkImage(r.avatarUrl!)
+                                : null,
                             child: r.avatarUrl == null
                                 ? Text(
-                                    r.name.isNotEmpty ? r.name[0].toUpperCase() : '?',
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                    r.name.isNotEmpty
+                                        ? r.name[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary),
                                   )
                                 : null,
                           ),
@@ -149,9 +184,19 @@ class StudentsProgressTable extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(r.name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: mainColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text(r.name,
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: mainColor),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
                                 if (r.email != null)
-                                  Text(r.email!, style: TextStyle(fontSize: 10, color: mutedColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text(r.email!,
+                                      style: TextStyle(
+                                          fontSize: 10, color: mutedColor),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
@@ -160,15 +205,22 @@ class StudentsProgressTable extends StatelessWidget {
                     ),
                     onTap: () => onCopy(r.email ?? r.name),
                   ),
-                  DataCell(NumberCell(value: '${r.coursesCount}', color: AppColors.info)),
-                  DataCell(NumberCell(value: '${r.completedCourses}', color: AppColors.success)),
+                  DataCell(NumberCell(
+                      value: '${r.coursesCount}', color: AppColors.info)),
+                  DataCell(NumberCell(
+                      value: '${r.completedCourses}',
+                      color: AppColors.success)),
                   DataCell(
                     InkWell(
                       onTap: () => onLessonProgressTap(r),
                       borderRadius: BorderRadius.circular(8),
                       child: Tooltip(
-                        message: isArabic ? 'اضغط لعرض تفاصيل الدروس' : 'Tap to view lesson details',
-                        child: ProgressCell(progress: r.avgProgress, color: _progressColor(r.avgProgress)),
+                        message: isArabic
+                            ? 'اضغط لعرض تفاصيل الدروس'
+                            : 'Tap to view lesson details',
+                        child: ProgressCell(
+                            progress: r.avgProgress,
+                            color: _progressColor(r.avgProgress)),
                       ),
                     ),
                   ),
@@ -177,24 +229,38 @@ class StudentsProgressTable extends StatelessWidget {
                       onTap: () => onLessonProgressTap(r),
                       borderRadius: BorderRadius.circular(8),
                       child: Tooltip(
-                        message: isArabic ? 'اضغط لعرض تفاصيل الدروس' : 'Tap to view lesson details',
-                        child: NumberCell(value: '${r.completedLessons}/${r.totalLessons}', color: AppColors.info, fontSize: 11),
+                        message: isArabic
+                            ? 'اضغط لعرض تفاصيل الدروس'
+                            : 'Tap to view lesson details',
+                        child: NumberCell(
+                            value: '${r.completedLessons}/${r.totalLessons}',
+                            color: AppColors.info,
+                            fontSize: 11),
                       ),
                     ),
                   ),
-                  DataCell(Text(_formatWatch(r.watchSeconds), style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600))),
+                  DataCell(Text(_formatWatch(r.watchSeconds),
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600))),
                   DataCell(
                     r.quizCount > 0
                         ? InkWell(
                             onTap: () => onQuizAttemptsTap(r),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors.warning.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
+                                border: Border.all(
+                                    color: AppColors.warning
+                                        .withValues(alpha: 0.3)),
                               ),
-                              child: NumberCell(value: '${r.quizCount}', color: AppColors.warning),
+                              child: NumberCell(
+                                  value: '${r.quizCount}',
+                                  color: AppColors.warning),
                             ),
                           )
                         : NumberCell(value: '0', color: mutedColor),
@@ -203,15 +269,34 @@ class StudentsProgressTable extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('${r.passedQuizzes}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.success)),
-                        Text(' / ', style: TextStyle(color: mutedColor, fontSize: 12)),
-                        Text('${r.failedQuizzes}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.error)),
+                        Text('${r.passedQuizzes}',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success)),
+                        Text(' / ',
+                            style: TextStyle(color: mutedColor, fontSize: 12)),
+                        Text('${r.failedQuizzes}',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.error)),
                       ],
                     ),
                   ),
-                  DataCell(r.quizCount == 0 ? Text('-', style: TextStyle(color: mutedColor)) : NumberCell(value: '${r.avgQuizScore.toStringAsFixed(0)}%', color: _scoreColor(r.avgQuizScore))),
-                  DataCell(Text(r.lastActivity != null ? dateFormat.format(r.lastActivity!) : '-', style: TextStyle(fontSize: 11, color: mutedColor))),
-                  DataCell(Text(r.joinedAt != null ? dateFormat.format(r.joinedAt!) : '-', style: TextStyle(fontSize: 11, color: mutedColor))),
+                  DataCell(r.quizCount == 0
+                      ? Text('-', style: TextStyle(color: mutedColor))
+                      : NumberCell(
+                          value: '${r.avgQuizScore.toStringAsFixed(0)}%',
+                          color: _scoreColor(r.avgQuizScore))),
+                  DataCell(Text(
+                      r.lastActivity != null
+                          ? dateFormat.format(r.lastActivity!)
+                          : '-',
+                      style: TextStyle(fontSize: 11, color: mutedColor))),
+                  DataCell(Text(
+                      r.joinedAt != null ? dateFormat.format(r.joinedAt!) : '-',
+                      style: TextStyle(fontSize: 11, color: mutedColor))),
                 ],
               );
             }).toList(),

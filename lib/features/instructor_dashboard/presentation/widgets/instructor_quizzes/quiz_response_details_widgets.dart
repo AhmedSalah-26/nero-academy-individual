@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 class QuizResponseDetailsHeaderSliver extends StatelessWidget {
   final String studentName;

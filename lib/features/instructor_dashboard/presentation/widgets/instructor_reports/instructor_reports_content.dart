@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/services/reports_service.dart';
-import '../../../../../core/shared_widgets/error_state.dart';
-import '../../../../../core/animations/widgets/feedback/animated_snackbar.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/services/reports_service.dart';
+import 'package:lms_platform/core/shared_widgets/error_state.dart';
+import 'package:lms_platform/core/animations/widgets/feedback/animated_snackbar.dart';
 
 /// Instructor Reports Content — shows course & review reports
 class InstructorReportsContent extends StatefulWidget {

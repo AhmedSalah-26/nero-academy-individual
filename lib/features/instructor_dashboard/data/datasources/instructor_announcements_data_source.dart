@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
 
 /// Instructor Announcements Data Source
 /// Uses the 'announcements' table (DB column: instructor_id, not user_id)
@@ -21,7 +21,8 @@ class InstructorAnnouncementsDataSource {
     try {
       final response = await _client
           .from('announcements')
-          .select('*, instructor:profiles!announcements_instructor_id_fkey(name, avatar_url)')
+          .select(
+              '*, instructor:profiles!announcements_instructor_id_fkey(name, avatar_url)')
           .eq('course_id', courseId)
           .order('created_at', ascending: false)
           .range((page - 1) * limit, page * limit - 1);
@@ -72,7 +73,7 @@ class InstructorAnnouncementsDataSource {
     try {
       await _client.from('announcements').insert({
         'course_id': courseId,
-        'instructor_id': _userId,  // DB column is instructor_id
+        'instructor_id': _userId, // DB column is instructor_id
         'title_ar': titleAr,
         'title_en': titleEn,
         'content_ar': contentAr,

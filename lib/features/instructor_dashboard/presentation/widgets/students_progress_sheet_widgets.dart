@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class HeaderCell extends StatelessWidget {
   final String text;
   final Color color;
@@ -131,7 +132,8 @@ class SheetStatChip extends StatelessWidget {
               ),
               Text(
                 label,
-                style: TextStyle(fontSize: 10, color: color.withValues(alpha: 0.8)),
+                style: TextStyle(
+                    fontSize: 10, color: color.withValues(alpha: 0.8)),
               ),
             ],
           ),

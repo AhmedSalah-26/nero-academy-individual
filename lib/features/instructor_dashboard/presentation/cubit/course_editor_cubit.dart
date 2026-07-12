@@ -2,9 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/models/course_commerce_models.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 import 'mixins/course_sections_mixin.dart';
 import 'mixins/course_lessons_mixin.dart';

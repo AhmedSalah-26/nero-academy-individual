@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// نوع ترقيم الإجابات
 enum AnswerLabelType { numeric, alphabetEn, alphabetAr }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 import 'dialogs/scheduled_date_time_picker.dart';
 
 /// Card that lets the instructor set a visible-from / visible-until window
@@ -61,7 +61,8 @@ class AvailabilityScheduleCard extends StatelessWidget {
                 ? 'حدد مدة ظهور الكورس للطلاب. اتركها فارغة ليظل متاحا دائما.'
                 : 'Set when students can see this course. Leave empty to keep it always available.',
             style: TextStyle(
-              color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
             ),
           ),
           const SizedBox(height: 16),

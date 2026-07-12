@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/animations/widgets/feedback/animated_snackbar.dart';
-import '../../../../../core/shared_widgets/responsive_dialog.dart';
-import '../../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/animations/widgets/feedback/animated_snackbar.dart';
+import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 /// Enrollment Dialogs - Add course, extend, reset, status, certificate, unenroll
 
@@ -23,7 +23,7 @@ void showAddCourseDialog({
   }
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (dialogContext) => ResponsiveDialog(
       title: Text(isArabic ? 'إضافة كورس' : 'Add Course'),
       content: SizedBox(
@@ -88,7 +88,7 @@ void showExtendDialog({
   int selectedDays = 30;
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (context, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'تمديد الوصول' : 'Extend Access'),
@@ -154,7 +154,7 @@ void confirmResetProgress({
 }) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'إعادة تعيين التقدم' : 'Reset Progress',
       content: isArabic
@@ -193,7 +193,7 @@ void showStatusDialog({
 }) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveDialog(
       title: Text(isArabic ? 'تغيير الحالة' : 'Change Status'),
       content: Column(
@@ -251,7 +251,7 @@ void confirmMarkAsCompleted({
 }) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'تحديد كمكتمل' : 'Mark as Completed',
       content: isArabic
@@ -290,7 +290,7 @@ void confirmUnenroll({
 }) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'إزالة التسجيل' : 'Remove Enrollment',
       content: isArabic

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/user_avatar.dart';
-import '../../data/models/admin_user_model.dart';
-import '../widgets/admin_users/user_details_sections.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/user_avatar.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_user_model.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_users/user_details_sections.dart';
 
 /// User Details Screen - Full screen version
 class UserDetailsScreen extends StatefulWidget {

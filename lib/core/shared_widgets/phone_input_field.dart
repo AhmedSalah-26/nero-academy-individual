@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
-import '../theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Unified Phone Input Field with Country Picker
 /// Supports both light and dark themes

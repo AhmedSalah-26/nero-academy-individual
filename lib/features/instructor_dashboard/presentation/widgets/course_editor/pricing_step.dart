@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../core/models/course_commerce_models.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/course_editor_cubit.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/course_editor_cubit.dart';
 
 /// Pricing Step - Course price and discount
 class PricingStep extends StatefulWidget {
@@ -14,7 +14,6 @@ class PricingStep extends StatefulWidget {
 }
 
 class _PricingStepState extends State<PricingStep> {
-
   String? _selectedBadge;
   bool _isBadgeEnabled = false;
   bool _isFlashSaleEnabled = false;
@@ -300,9 +299,9 @@ class _PricingStepState extends State<PricingStep> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                     isArabic
-                                         ? 'بعد انتهاء وقت الفلاش، يعود سعر الاشتراك العادي تلقائيًا.'
-                                         : 'After the flash sale ends, the regular subscription price is restored automatically.',
+                                    isArabic
+                                        ? 'بعد انتهاء وقت الفلاش، يعود سعر الاشتراك العادي تلقائيًا.'
+                                        : 'After the flash sale ends, the regular subscription price is restored automatically.',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: isDark
@@ -380,7 +379,6 @@ class _PricingStepState extends State<PricingStep> {
       },
     );
   }
-
 
   Widget _buildBadgeDropdown({
     required bool isDark,
@@ -572,7 +570,9 @@ class _PricingStepState extends State<PricingStep> {
                       const SizedBox(height: 12),
                       _buildCompactTextField(
                         controller: option.discountPrice,
-                        label: isArabic ? 'سعر الخصم (اختياري)' : 'Discount Price (Optional)',
+                        label: isArabic
+                            ? 'سعر الخصم (اختياري)'
+                            : 'Discount Price (Optional)',
                         hint: '0',
                         isDark: isDark,
                         keyboardType: TextInputType.number,
@@ -685,8 +685,7 @@ class _PricingStepState extends State<PricingStep> {
           if (firstOptionPrice != null && firstOptionPrice > 0) ...[
             if (firstOptionLabel != null && firstOptionLabel.isNotEmpty)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
@@ -739,7 +738,8 @@ class _PricingStepState extends State<PricingStep> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                  color:
+                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
                 ),
               ),
             if (validOptions.length > 1)

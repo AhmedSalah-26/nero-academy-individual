@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Common form card wrapper for editor screens
 class EditorFormCard extends StatelessWidget {

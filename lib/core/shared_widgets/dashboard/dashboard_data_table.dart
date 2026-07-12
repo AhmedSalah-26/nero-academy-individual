@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
-import '../loading_skeleton.dart';
-import '../empty_state.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/shared_widgets/empty_state.dart';
 
 /// Dashboard Data Table - Generic data table with search and pagination
 class DashboardDataTable<T> extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../models/instructor_models.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
 /// Instructor Reviews Data Source - Reviews management
 class InstructorReviewsDataSource {

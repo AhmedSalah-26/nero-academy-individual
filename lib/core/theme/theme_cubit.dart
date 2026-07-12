@@ -204,8 +204,7 @@ class ThemeCubit extends Cubit<ThemeState> {
   static InputDecorationTheme _buildInputDecorationTheme(
       Brightness brightness) {
     final isLight = brightness == Brightness.light;
-    final primaryColor =
-        isLight ? AppColors.primary : AppColors.primaryOnDark;
+    final primaryColor = isLight ? AppColors.primary : AppColors.primaryOnDark;
     final borderColor = isLight ? AppColors.borderLight : AppColors.borderDark;
     final hintColor =
         isLight ? AppColors.textHintLight : AppColors.textHintDark;

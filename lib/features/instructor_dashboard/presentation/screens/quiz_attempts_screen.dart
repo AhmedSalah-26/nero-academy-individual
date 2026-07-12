@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../widgets/instructor_quizzes/download_helper.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/widgets/instructor_quizzes/download_helper.dart';
 import 'quiz_response_details_screen.dart';
-import '../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 /// Quiz Attempts Screen - Full page for viewing quiz attempts by students
 class QuizAttemptsScreen extends StatelessWidget {

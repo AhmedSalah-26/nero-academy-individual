@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/admin_entities.dart';
-import '../../domain/repositories/admin_repository.dart';
-import '../../data/models/admin_user_model.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/entities/admin_entities.dart';
+import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
+import 'package:lms_platform/features/admin_dashboard/data/models/admin_user_model.dart';
 
 part 'admin_users_state.dart';
 

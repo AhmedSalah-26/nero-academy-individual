@@ -1,4 +1,4 @@
-import '../../domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 
 /// Instructor Dashboard Stats Model
 class InstructorDashboardStatsModel extends InstructorDashboardStats {

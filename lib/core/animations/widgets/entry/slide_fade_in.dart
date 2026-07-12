@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../foundation/foundation.dart';
+import 'package:lms_platform/core/animations/foundation/foundation.dart';
 import 'base_entry_animation.dart';
 
 /// Slide and fade in animation widget with RTL support

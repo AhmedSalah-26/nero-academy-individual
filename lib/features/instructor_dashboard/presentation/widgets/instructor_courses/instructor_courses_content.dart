@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../core/services/app_logger.dart';
-import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../../core/shared_widgets/loading_skeleton.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/entities/instructor_entities.dart';
-import '../../../data/models/instructor_course_model.dart';
-import '../../cubit/instructor_courses_cubit.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/shared_widgets/loading_skeleton.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_course_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_courses_cubit.dart';
 import 'instructor_course_list_item.dart';
 
 /// Instructor Courses Content

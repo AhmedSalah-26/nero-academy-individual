@@ -96,8 +96,7 @@ class StudentRowBuilder {
   }
 
   StudentRow build(List<Map<String, dynamic>> quizzes) {
-    final avgProgress =
-        coursesCount > 0 ? totalProgress / coursesCount : 0.0;
+    final avgProgress = coursesCount > 0 ? totalProgress / coursesCount : 0.0;
     final passed = quizzes.where((q) => q['passed'] == true).length;
     final failed = quizzes.length - passed;
     final avgScore = quizzes.isEmpty

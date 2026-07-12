@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../foundation/rtl_handler.dart';
-import '../../foundation/accessibility_manager.dart';
+import 'package:lms_platform/core/animations/foundation/rtl_handler.dart';
+import 'package:lms_platform/core/animations/foundation/accessibility_manager.dart';
 
 /// A widget that allows swipe-to-delete gesture
 ///

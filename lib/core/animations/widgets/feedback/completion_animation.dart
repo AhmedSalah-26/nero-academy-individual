@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../foundation/animation_config.dart';
-import '../../foundation/accessibility_manager.dart';
+import 'package:lms_platform/core/animations/foundation/animation_config.dart';
+import 'package:lms_platform/core/animations/foundation/accessibility_manager.dart';
 
 /// Type of completion animation to display
 enum CompletionType {

@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../domain/entities/instructor_entities.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../models/instructor_models.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
 /// Instructor Enrollments Data Source - Enrollment management
 class InstructorEnrollmentsDataSource {
@@ -252,7 +252,8 @@ class InstructorEnrollmentsDataSource {
         await _client
             .rpc('decrement_enrolled_count', params: {'p_course_id': courseId});
       } catch (rpcError) {
-        AppLogger.w('[$_tag] decrement_enrolled_count RPC failed (non-fatal): $rpcError');
+        AppLogger.w(
+            '[$_tag] decrement_enrolled_count RPC failed (non-fatal): $rpcError');
       }
 
       AppLogger.success('[$_tag] unenrollStudent success');

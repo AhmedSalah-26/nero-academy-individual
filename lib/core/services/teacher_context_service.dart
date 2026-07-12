@@ -178,7 +178,8 @@ class TeacherContextService {
           '[TeacherContextService] Available teachers: ${teachers.length}');
       return teachers;
     } catch (e, stack) {
-      AppLogger.e('[TeacherContextService] Error fetching available teachers', e, stack);
+      AppLogger.e('[TeacherContextService] Error fetching available teachers',
+          e, stack);
       rethrow;
     }
   }

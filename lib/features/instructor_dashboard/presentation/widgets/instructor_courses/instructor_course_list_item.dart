@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../data/models/instructor_course_model.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_course_model.dart';
 
 /// Instructor Course List Item - Banner Style Design
 class InstructorCourseListItem extends StatelessWidget {
@@ -107,7 +107,9 @@ class InstructorCourseListItem extends StatelessWidget {
                         size: 20,
                       ),
                       onPressed: onDelete,
-                      tooltip: isArabic ? 'حذف الكورس نهائياً' : 'Delete Course Permanently',
+                      tooltip: isArabic
+                          ? 'حذف الكورس نهائياً'
+                          : 'Delete Course Permanently',
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
                         minWidth: 36,

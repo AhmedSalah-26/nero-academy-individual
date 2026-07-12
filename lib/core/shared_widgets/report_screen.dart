@@ -2,8 +2,8 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../theme/app_colors.dart';
-import '../services/reports_service.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/services/reports_service.dart';
 
 /// Report Screen - Full page replacement for ReportDialog
 class ReportScreen extends StatefulWidget {

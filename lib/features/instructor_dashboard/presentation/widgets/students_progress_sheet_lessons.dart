@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/loading_state.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/core/shared_widgets/loading_state.dart';
 import 'students_progress_sheet_models.dart' show sanitizeString;
 
 class _CourseData {
@@ -74,21 +74,34 @@ class _StudentLessonsProgressDialogState
 
       // 1. Fetch enrollments for this student (only courses by this instructor)
       final instructorId = client.auth.currentUser?.id;
-      final enrollmentsRes = await client.from('enrollments').select('''
+      final enrollmentsRes = await client
+          .from('enrollments')
+          .select('''
         course_id,
         courses!inner(id, title_ar, title_en, instructor_id)
-      ''').eq('user_id', widget.studentId).eq('courses.instructor_id', instructorId!);
+      ''')
+          .eq('user_id', widget.studentId)
+          .eq('courses.instructor_id', instructorId!);
 
-      final enrollmentsList = (enrollmentsRes as List).cast<Map<String, dynamic>>();
+      final enrollmentsList =
+          (enrollmentsRes as List).cast<Map<String, dynamic>>();
       if (enrollmentsList.isEmpty) {
-        if (mounted) setState(() { _courses = []; _isLoading = false; });
+        if (mounted) {
+          setState(() {
+            _courses = [];
+            _isLoading = false;
+          });
+        }
         return;
       }
 
-      final courseIds = enrollmentsList.map((e) => e['course_id'] as String).toList();
+      final courseIds =
+          enrollmentsList.map((e) => e['course_id'] as String).toList();
 
       // 2. Fetch ALL current lessons for those courses (source of truth for total)
-      final lessonsRes = await client.from('lessons').select('id, title_ar, title_en, course_id, sort_order')
+      final lessonsRes = await client
+          .from('lessons')
+          .select('id, title_ar, title_en, course_id, sort_order')
           .inFilter('course_id', courseIds)
           .order('sort_order');
 
@@ -100,7 +113,9 @@ class _StudentLessonsProgressDialogState
       ''').eq('user_id', widget.studentId).inFilter('course_id', courseIds);
 
       final progressList = (progressRes as List).cast<Map<String, dynamic>>();
-      final progressMap = { for (final p in progressList) p['lesson_id'] as String: p };
+      final progressMap = {
+        for (final p in progressList) p['lesson_id'] as String: p
+      };
 
       // 4. Build per-course data and collect updates
       final List<Map<String, dynamic>> progressUpdates = [];
@@ -109,7 +124,8 @@ class _StudentLessonsProgressDialogState
         final course = enrollment['courses'] as Map<String, dynamic>;
         final courseId = enrollment['course_id'] as String;
 
-        final courseLessons = allLessons.where((l) => l['course_id'] == courseId).toList();
+        final courseLessons =
+            allLessons.where((l) => l['course_id'] == courseId).toList();
         final totalLessons = courseLessons.length;
 
         final lessonDataList = courseLessons.map((lesson) {
@@ -126,8 +142,10 @@ class _StudentLessonsProgressDialogState
           );
         }).toList();
 
-        final completedCount = lessonDataList.where((l) => l.isCompleted).length;
-        final realProgress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0.0;
+        final completedCount =
+            lessonDataList.where((l) => l.isCompleted).length;
+        final realProgress =
+            totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0.0;
         final isCompleted = totalLessons > 0 && completedCount == totalLessons;
 
         // Queue update for this enrollment
@@ -150,11 +168,15 @@ class _StudentLessonsProgressDialogState
 
       // 5. Update stored progress_percentage in enrollments (fire-and-forget)
       for (final update in progressUpdates) {
-        client.from('enrollments').update({
-          'progress_percentage': (update['realProgress'] as double).roundToDouble(),
-          if (update['isCompleted'] as bool) 'status': 'completed',
-          if (update['isCompleted'] as bool) 'completed_at': DateTime.now().toIso8601String(),
-        })
+        client
+            .from('enrollments')
+            .update({
+              'progress_percentage':
+                  (update['realProgress'] as double).roundToDouble(),
+              if (update['isCompleted'] as bool) 'status': 'completed',
+              if (update['isCompleted'] as bool)
+                'completed_at': DateTime.now().toIso8601String(),
+            })
             .eq('user_id', widget.studentId)
             .eq('course_id', update['courseId'] as String)
             .then((_) {}, onError: (_) {});
@@ -167,7 +189,12 @@ class _StudentLessonsProgressDialogState
         });
       }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -188,13 +215,20 @@ class _StudentLessonsProgressDialogState
               child: _isLoading
                   ? const AppLoadingState()
                   : _error != null
-                      ? Center(child: Text(_error!, style: const TextStyle(color: AppColors.error), textAlign: TextAlign.center))
+                      ? Center(
+                          child: Text(_error!,
+                              style: const TextStyle(color: AppColors.error),
+                              textAlign: TextAlign.center))
                       : _courses.isEmpty
-                          ? Center(child: Text(isArabic ? 'لا توجد كورسات' : 'No courses found'))
+                          ? Center(
+                              child: Text(isArabic
+                                  ? 'لا توجد كورسات'
+                                  : 'No courses found'))
                           : ListView.builder(
                               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                               itemCount: _courses.length,
-                              itemBuilder: (ctx, i) => _buildCourseCard(_courses[i], isArabic, isDark),
+                              itemBuilder: (ctx, i) => _buildCourseCard(
+                                  _courses[i], isArabic, isDark),
                             ),
             ),
           ],
@@ -207,7 +241,9 @@ class _StudentLessonsProgressDialogState
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight)),
+        border: Border(
+            bottom: BorderSide(
+                color: isDark ? AppColors.borderDark : AppColors.borderLight)),
       ),
       child: Row(
         children: [
@@ -217,16 +253,21 @@ class _StudentLessonsProgressDialogState
               children: [
                 Text(
                   isArabic ? 'تقدم الدروس' : 'Lessons Progress',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   widget.studentName,
-                  style: TextStyle(fontSize: 12, color: isDark ? AppColors.grey400 : AppColors.grey500),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? AppColors.grey400 : AppColors.grey500),
                 ),
               ],
             ),
           ),
-          IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+          IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context)),
         ],
       ),
     );
@@ -235,14 +276,22 @@ class _StudentLessonsProgressDialogState
   Widget _buildCourseCard(_CourseData course, bool isArabic, bool isDark) {
     final title = isArabic ? course.titleAr : course.titleEn;
     final progress = course.realProgress;
-    final color = progress >= 80 ? AppColors.success : progress >= 50 ? AppColors.info : progress >= 25 ? AppColors.warning : AppColors.error;
+    final color = progress >= 80
+        ? AppColors.success
+        : progress >= 50
+            ? AppColors.info
+            : progress >= 25
+                ? AppColors.warning
+                : AppColors.error;
 
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -260,13 +309,16 @@ class _StudentLessonsProgressDialogState
               const SizedBox(width: 10),
               Text(
                 '${course.completedLessons}/${course.totalLessons}',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color),
+                style: TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.bold, color: color),
               ),
             ],
           ),
         ],
       ),
-      children: course.lessons.map((l) => _buildLessonTile(l, isArabic, isDark)).toList(),
+      children: course.lessons
+          .map((l) => _buildLessonTile(l, isArabic, isDark))
+          .toList(),
     );
   }
 
@@ -280,9 +332,13 @@ class _StudentLessonsProgressDialogState
       child: Row(
         children: [
           Icon(
-            lesson.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+            lesson.isCompleted
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
             size: 18,
-            color: lesson.isCompleted ? AppColors.success : (isDark ? AppColors.grey600 : AppColors.grey400),
+            color: lesson.isCompleted
+                ? AppColors.success
+                : (isDark ? AppColors.grey600 : AppColors.grey400),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -290,7 +346,9 @@ class _StudentLessonsProgressDialogState
               title,
               style: TextStyle(
                 fontSize: 13,
-                color: lesson.isCompleted ? null : (isDark ? AppColors.grey400 : AppColors.grey500),
+                color: lesson.isCompleted
+                    ? null
+                    : (isDark ? AppColors.grey400 : AppColors.grey500),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -298,11 +356,15 @@ class _StudentLessonsProgressDialogState
           ),
           if (lesson.watchSeconds > 0) ...[
             const SizedBox(width: 6),
-            Text('${watchMin}m', style: const TextStyle(fontSize: 11, color: AppColors.primary)),
+            Text('${watchMin}m',
+                style: const TextStyle(fontSize: 11, color: AppColors.primary)),
           ],
           if (lesson.completedAt != null) ...[
             const SizedBox(width: 6),
-            Text(dateFmt.format(lesson.completedAt!), style: TextStyle(fontSize: 10, color: isDark ? AppColors.grey500 : AppColors.grey400)),
+            Text(dateFmt.format(lesson.completedAt!),
+                style: TextStyle(
+                    fontSize: 10,
+                    color: isDark ? AppColors.grey500 : AppColors.grey400)),
           ],
         ],
       ),

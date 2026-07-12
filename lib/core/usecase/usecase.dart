@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../errors/failures.dart';
+import 'package:lms_platform/core/errors/failures.dart';
 
 /// Base UseCase - No parameters
 abstract class UseCase<Result> {

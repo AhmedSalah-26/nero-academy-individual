@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../../core/services/app_logger.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../cubit/instructor_quizzes_cubit.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_quizzes_cubit.dart';
 import 'bulk_image_widgets.dart';
 
 /// Bulk Image Questions Dialog - إضافة أسئلة مجمعة من صور
@@ -363,7 +363,7 @@ class _BulkImageQuestionsDialogState extends State<BulkImageQuestionsDialog> {
     if (imageFile == null) return;
     showDialog(
         context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+        barrierColor: Colors.black.withValues(alpha: 0.7),
         builder: (ctx) => Dialog(
               backgroundColor: Colors.transparent,
               insetPadding: const EdgeInsets.all(16),

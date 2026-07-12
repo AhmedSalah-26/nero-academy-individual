@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../../core/theme/app_colors.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
 
 /// Quiz Section Card - Common card wrapper for quiz form sections
 class QuizSectionCard extends StatelessWidget {

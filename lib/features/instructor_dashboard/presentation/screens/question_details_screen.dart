@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../data/models/instructor_question_model.dart';
-import '../cubit/instructor_qa_cubit.dart';
+import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
+import 'package:lms_platform/core/theme/app_colors.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_question_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_qa_cubit.dart';
 
 /// Question Details Screen - صفحة تفاصيل السؤال كاملة
 class QuestionDetailsScreen extends StatelessWidget {
@@ -360,8 +360,7 @@ class QuestionDetailsScreen extends StatelessWidget {
   Widget _buildAnswerItem(BuildContext context, InstructorAnswerModel answer,
       bool isDark, bool isArabic) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
-    final canEditAnswer =
-        answer.userId == currentUserId || answer.isInstructor;
+    final canEditAnswer = answer.userId == currentUserId || answer.isInstructor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

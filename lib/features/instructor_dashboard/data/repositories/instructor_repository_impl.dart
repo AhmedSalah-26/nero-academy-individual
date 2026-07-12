@@ -1,9 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../domain/entities/instructor_entities.dart';
-import '../../domain/repositories/instructor_repository.dart';
-import '../datasources/instructor_data_sources.dart';
-import '../models/instructor_models.dart';
-import '../models/instructor_balance_model.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/datasources/instructor_data_sources.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
+import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_balance_model.dart';
 
 /// Instructor Repository Implementation
 class InstructorRepositoryImpl implements InstructorRepository {
@@ -488,13 +488,17 @@ class InstructorRepositoryImpl implements InstructorRepository {
   @override
   Future<CategoryModel> createCategory(CategoryCreateDto dto) async {
     try {
-      final response = await _client.from('categories').insert({
-        'name_ar': dto.nameAr,
-        'name_en': dto.nameEn,
-        'description_ar': dto.description,
-        'icon_name': dto.icon,
-        'parent_id': dto.parentId,
-      }).select().single();
+      final response = await _client
+          .from('categories')
+          .insert({
+            'name_ar': dto.nameAr,
+            'name_en': dto.nameEn,
+            'description_ar': dto.description,
+            'icon_name': dto.icon,
+            'parent_id': dto.parentId,
+          })
+          .select()
+          .single();
       return CategoryModel.fromJson(response);
     } catch (e) {
       rethrow;
@@ -541,7 +545,8 @@ class InstructorRepositoryImpl implements InstructorRepository {
 
   // Banners (Merged from Admin)
   @override
-  Future<List<BannerModel>> getBanners({BannerType? type, bool? isActive}) async {
+  Future<List<BannerModel>> getBanners(
+      {BannerType? type, bool? isActive}) async {
     try {
       var query = _client.from('banners').select();
       if (isActive != null) {
@@ -557,18 +562,22 @@ class InstructorRepositoryImpl implements InstructorRepository {
   @override
   Future<BannerModel> createBanner(BannerCreateDto dto) async {
     try {
-      final response = await _client.from('banners').insert({
-        'title_ar': dto.titleAr,
-        'title_en': dto.titleEn,
-        'subtitle_ar': dto.subtitleAr,
-        'subtitle_en': dto.subtitleEn,
-        'image_url': dto.imageUrl,
-        'link_type': dto.linkType,
-        'link_value': dto.linkValue,
-        'sort_order': dto.sortOrder,
-        'start_date': dto.startDate?.toUtc().toIso8601String(),
-        'end_date': dto.endDate?.toUtc().toIso8601String(),
-      }).select().single();
+      final response = await _client
+          .from('banners')
+          .insert({
+            'title_ar': dto.titleAr,
+            'title_en': dto.titleEn,
+            'subtitle_ar': dto.subtitleAr,
+            'subtitle_en': dto.subtitleEn,
+            'image_url': dto.imageUrl,
+            'link_type': dto.linkType,
+            'link_value': dto.linkValue,
+            'sort_order': dto.sortOrder,
+            'start_date': dto.startDate?.toUtc().toIso8601String(),
+            'end_date': dto.endDate?.toUtc().toIso8601String(),
+          })
+          .select()
+          .single();
       return BannerModel.fromJson(response);
     } catch (e) {
       rethrow;

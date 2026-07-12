@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/services/app_logger.dart';
-import '../../../../core/models/course_commerce_models.dart';
-import '../../domain/repositories/instructor_repository.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
+import 'package:lms_platform/core/models/course_commerce_models.dart';
+import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
 
 /// Instructor Course Editor Data Source - Course editor methods
 class InstructorCourseEditorDataSource {
