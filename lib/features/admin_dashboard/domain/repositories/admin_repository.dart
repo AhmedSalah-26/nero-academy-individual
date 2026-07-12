@@ -35,6 +35,11 @@ abstract class AdminRepository {
   // Analytics
   Future<List<TopCourseModel>> getTopCourses({int limit = 10});
   Future<List<TopInstructorModel>> getTopInstructors({int limit = 10});
+  Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
+    String instructorId,
+    DateTime start,
+    DateTime end,
+  );
 
   // ==========================================
   // NEW: Missing Permissions

@@ -145,7 +145,54 @@ class AdminStatsDataSource {
     }
   }
 
-  /// Get top courses by enrollments and revenue
+  /// Get instructor enrollments chart data for date range
+  Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
+    String instructorId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    AppLogger.d(
+      '[$_tag] getInstructorEnrollmentsChart: $instructorId, $start to $end',
+    );
+    try {
+      final response = await _client
+          .from('enrollments')
+          .select('enrolled_at, course:courses!inner(instructor_id)')
+          .eq('course.instructor_id', instructorId)
+          .gte('enrolled_at', start.toIso8601String())
+          .lte('enrolled_at', end.toIso8601String())
+          .order('enrolled_at');
+
+      final enrollments = response as List;
+
+      final Map<String, int> enrollmentsByDate = {};
+      for (final e in enrollments) {
+        final date = DateTime.parse(e['enrolled_at'] as String);
+        final dateKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        enrollmentsByDate[dateKey] = (enrollmentsByDate[dateKey] ?? 0) + 1;
+      }
+
+      final result = enrollmentsByDate.entries
+          .map((e) => ChartDataPointModel(
+                label: e.key,
+                value: e.value.toDouble(),
+                date: DateTime.parse(e.key),
+              ))
+          .toList()
+        ..sort((a, b) => a.date!.compareTo(b.date!));
+
+      AppLogger.success(
+        '[$_tag] getInstructorEnrollmentsChart success: ${result.length} points',
+      );
+      return result;
+    } catch (e) {
+      AppLogger.e('[$_tag] getInstructorEnrollmentsChart error', e);
+      rethrow;
+    }
+  }
+
+  /// Get top courses by enrollments.
   Future<List<TopCourseModel>> getTopCourses({int limit = 10}) async {
     AppLogger.d('[$_tag] getTopCourses: limit=$limit');
     try {
@@ -157,7 +204,7 @@ class AdminStatsDataSource {
 
       final courses = response as List;
 
-      // Calculate enrollments and revenue for each course
+      // Calculate enrollments for each course.
       final topCourses = courses.map((c) {
         final enrollments = (c['enrollments'] as List?) ?? [];
         final enrollmentsCount = enrollments.length;
@@ -186,7 +233,7 @@ class AdminStatsDataSource {
     }
   }
 
-  /// Get top instructors by students and revenue
+  /// Get instructors by activity.
   Future<List<TopInstructorModel>> getTopInstructors({int limit = 10}) async {
     AppLogger.d('[$_tag] getTopInstructors: limit=$limit');
     try {
@@ -205,7 +252,7 @@ class AdminStatsDataSource {
         final courses = (i['courses'] as List?) ?? [];
         final coursesCount = courses.length;
 
-        // Calculate total students and revenue
+        // Calculate total students and keep revenue only for legacy model shape.
         int totalStudents = 0;
         double totalRevenue = 0;
 
@@ -226,7 +273,11 @@ class AdminStatsDataSource {
           rating: 0,
         );
       }).toList()
-        ..sort((a, b) => b.totalRevenue.compareTo(a.totalRevenue));
+        ..sort((a, b) {
+          final students = b.studentsCount.compareTo(a.studentsCount);
+          if (students != 0) return students;
+          return b.coursesCount.compareTo(a.coursesCount);
+        });
 
       AppLogger.success(
           '[$_tag] getTopInstructors success: ${topInstructors.length} instructors');

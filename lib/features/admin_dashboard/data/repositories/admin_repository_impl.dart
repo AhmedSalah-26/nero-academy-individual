@@ -111,6 +111,19 @@ class AdminRepositoryImpl implements AdminRepository {
   }
 
   @override
+  Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
+    String instructorId,
+    DateTime start,
+    DateTime end,
+  ) {
+    return _statsDataSource.getInstructorEnrollmentsChart(
+      instructorId,
+      start,
+      end,
+    );
+  }
+
+  @override
   Future<bool> deleteUser(String userId) {
     return _usersDataSource.deleteUser(userId);
   }
