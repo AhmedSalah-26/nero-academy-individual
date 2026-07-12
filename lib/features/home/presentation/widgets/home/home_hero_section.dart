@@ -802,7 +802,7 @@ class _HeroCopy extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    'كيمياء بشكل مختلف',
+                    'حلول رقمية ذكية',
                     style: TextStyle(
                       color: AppColors.white,
                       fontSize: (w * 0.021).clamp(8.5, 11.0),
@@ -813,7 +813,7 @@ class _HeroCopy extends StatelessWidget {
                 ),
                 SizedBox(height: w * 0.014),
                 Text(
-                  'تجارب، شرح، وتدريب لحد الامتحان',
+                  'تعلم، تنظيم، وتجربة سلسة كل يوم',
                   style: TextStyle(
                     color: isDark
                         ? AppColors.textMutedDark

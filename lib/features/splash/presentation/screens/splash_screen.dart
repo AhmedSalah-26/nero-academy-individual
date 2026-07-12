@@ -165,6 +165,32 @@ class _LogoMark extends StatelessWidget {
       width: 154,
       height: 154,
       decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryOnDark.withValues(alpha: 0.26),
+            blurRadius: 28,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        'assets/default_identity/nasaq_logo.png',
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) =>
+            const _FallbackLogoMark(),
+      ),
+    );
+  }
+}
+
+class _FallbackLogoMark extends StatelessWidget {
+  const _FallbackLogoMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.primaryOnDark, width: 2),
         gradient: LinearGradient(
@@ -175,58 +201,79 @@ class _LogoMark extends StatelessWidget {
             AppColors.primaryDark.withValues(alpha: 0.08),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryOnDark.withValues(alpha: 0.26),
-            blurRadius: 28,
-            spreadRadius: 1,
-          ),
-        ],
       ),
-      child: const Stack(
-        children: [
-          Positioned(
-            top: 14,
-            right: 16,
-            child: Text(
-              '92',
-              style: TextStyle(
-                color: AppColors.primaryOnDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          Center(
-            child: Text(
-              'U',
-              style: TextStyle(
-                color: AppColors.primaryOnDark,
-                fontSize: 86,
-                fontWeight: FontWeight.w900,
-                height: 1,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 15,
-            bottom: 14,
-            child: Text(
-              '238.03',
-              style: TextStyle(
-                color: AppColors.primaryOnDark,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
+      child: CustomPaint(
+        painter: _NasaqSplashMarkPainter(),
       ),
     );
   }
 }
 
+class _NasaqSplashMarkPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width;
+    final rect = Offset.zero & size;
 
+    final glowPaint = Paint()
+      ..color = AppColors.primaryOnDark.withValues(alpha: 0.30)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = s * 0.10
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+
+    final markPath = Path()
+      ..moveTo(s * 0.30, s * 0.68)
+      ..lineTo(s * 0.30, s * 0.34)
+      ..cubicTo(
+        s * 0.30,
+        s * 0.25,
+        s * 0.39,
+        s * 0.22,
+        s * 0.46,
+        s * 0.29,
+      )
+      ..lineTo(s * 0.70, s * 0.53)
+      ..lineTo(s * 0.70, s * 0.32);
+    canvas.drawPath(markPath, glowPaint);
+
+    final markPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = s * 0.085
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..shader = const LinearGradient(
+        begin: Alignment.bottomLeft,
+        end: Alignment.topRight,
+        colors: [
+          Color(0xFF117CFF),
+          Color(0xFF20E5DC),
+          Color(0xFFE9FEFF),
+        ],
+      ).createShader(rect);
+    canvas.drawPath(markPath, markPaint);
+
+    final orbitPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = AppColors.primaryOnDark.withValues(alpha: 0.24);
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(s * 0.52, s * 0.52),
+        width: s * 0.90,
+        height: s * 0.62,
+      ),
+      -0.55,
+      2.1,
+      false,
+      orbitPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _NasaqSplashMarkPainter oldDelegate) => false;
+}
 class _SoftCircle extends StatelessWidget {
   const _SoftCircle({required this.size});
 
