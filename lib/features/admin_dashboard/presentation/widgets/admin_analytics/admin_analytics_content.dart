@@ -1,15 +1,14 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
 import '../../../../../core/shared_widgets/loading_skeleton.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/repositories/admin_repository.dart';
 import '../../cubit/admin_analytics_cubit.dart';
 
-/// Admin Analytics Content
+/// Operational analytics for students, instructors, and courses.
 class AdminAnalyticsContent extends StatefulWidget {
   const AdminAnalyticsContent({super.key});
 
@@ -31,29 +30,37 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
 
     return BlocBuilder<AdminAnalyticsCubit, AdminAnalyticsState>(
       builder: (context, state) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDateRangeSelector(context, state, isArabic, isDark),
-              const SizedBox(height: 24),
-              _buildSummaryCards(state, isArabic, isDark),
-              const SizedBox(height: 24),
-              _buildChartsSection(state, isArabic, isDark),
-              const SizedBox(height: 24),
-              _buildTopCoursesSection(state, isArabic, isDark),
-              const SizedBox(height: 24),
-              _buildTopInstructorsSection(state, isArabic, isDark),
-            ],
+        return RefreshIndicator(
+          onRefresh: () => context.read<AdminAnalyticsCubit>().loadAnalytics(),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDateRangeSelector(context, state, isArabic, isDark),
+                const SizedBox(height: 24),
+                _buildSummaryCards(state, isArabic, isDark),
+                const SizedBox(height: 24),
+                _buildEnrollmentsChart(state, isArabic),
+                const SizedBox(height: 24),
+                _buildTopCoursesSection(state, isArabic, isDark),
+                const SizedBox(height: 24),
+                _buildTopInstructorsSection(state, isArabic, isDark),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildDateRangeSelector(BuildContext context,
-      AdminAnalyticsState state, bool isArabic, bool isDark) {
+  Widget _buildDateRangeSelector(
+    BuildContext context,
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -68,73 +75,40 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Icon(Icons.date_range,
-              color:
-                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
-          Text(
-            isArabic ? 'الفترة:' : 'Period:',
-            style: TextStyle(
-              color:
-                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-            ),
+          Icon(
+            Icons.date_range,
+            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
           ),
+          Text(isArabic ? 'الفترة:' : 'Period:'),
           TextButton(
-            onPressed: () => _selectDateRange(context, state, isArabic),
+            onPressed: () => _selectDateRange(context, state),
             child: Text(
               '${DateFormat('dd/MM/yyyy').format(state.startDate)} - ${DateFormat('dd/MM/yyyy').format(state.endDate)}',
             ),
           ),
-          _buildQuickDateButton(
-            context,
-            isArabic ? '7 أيام' : '7 Days',
-            7,
-            state,
-          ),
-          _buildQuickDateButton(
-            context,
-            isArabic ? '30 يوم' : '30 Days',
-            30,
-            state,
-          ),
-          _buildQuickDateButton(
-            context,
-            isArabic ? '90 يوم' : '90 Days',
-            90,
-            state,
-          ),
+          _buildQuickDateButton(context, isArabic ? '7 أيام' : '7 Days', 7),
+          _buildQuickDateButton(context, isArabic ? '30 يوم' : '30 Days', 30),
+          _buildQuickDateButton(context, isArabic ? '90 يوم' : '90 Days', 90),
         ],
       ),
     );
   }
 
-  Widget _buildQuickDateButton(
-      BuildContext context, String label, int days, AdminAnalyticsState state) {
-    final end = DateTime.now();
-    final start = end.subtract(Duration(days: days));
-    final isSelected = state.endDate.difference(state.startDate).inDays == days;
-
+  Widget _buildQuickDateButton(BuildContext context, String label, int days) {
     return OutlinedButton(
       onPressed: () {
+        final end = DateTime.now();
+        final start = end.subtract(Duration(days: days));
         context.read<AdminAnalyticsCubit>().setDateRange(start, end);
       },
-      style: OutlinedButton.styleFrom(
-        backgroundColor:
-            isSelected ? AppColors.primary.withValues(alpha: 0.1) : null,
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : Colors.grey,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? AppColors.primary : null,
-        ),
-      ),
+      child: Text(label),
     );
   }
 
   Future<void> _selectDateRange(
-      BuildContext context, AdminAnalyticsState state, bool isArabic) async {
+    BuildContext context,
+    AdminAnalyticsState state,
+  ) async {
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -145,48 +119,41 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
       ),
     );
 
-    if (picked != null && mounted) {
-      context
-          .read<AdminAnalyticsCubit>()
-          .setDateRange(picked.start, picked.end);
+    if (picked != null && context.mounted) {
+      context.read<AdminAnalyticsCubit>().setDateRange(
+            picked.start,
+            picked.end,
+          );
     }
   }
 
   Widget _buildSummaryCards(
-      AdminAnalyticsState state, bool isArabic, bool isDark) {
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
     if (state.isLoading) {
-      return const Row(
-        children: [
-          Expanded(
-            child: LoadingSkeleton(width: double.infinity, height: 100),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: LoadingSkeleton(width: double.infinity, height: 100),
-          ),
-        ],
-      );
+      return const LoadingSkeleton(width: double.infinity, height: 100);
     }
 
     return Row(
       children: [
         Expanded(
           child: _buildSummaryCard(
-            icon: Icons.attach_money,
-            title: isArabic ? 'إجمالي الإيرادات' : 'Total Revenue',
-            value:
-                '${state.totalRevenue.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
-            color: AppColors.success,
+            icon: Icons.assignment_turned_in_rounded,
+            title: isArabic ? 'إجمالي التسجيلات' : 'Total Enrollments',
+            value: state.totalEnrollments.toString(),
+            color: AppColors.primary,
             isDark: isDark,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: _buildSummaryCard(
-            icon: Icons.school,
-            title: isArabic ? 'إجمالي التسجيلات' : 'Total Enrollments',
-            value: state.totalEnrollments.toString(),
-            color: AppColors.primary,
+            icon: Icons.school_rounded,
+            title: isArabic ? 'كورسات نشطة' : 'Tracked Courses',
+            value: state.topCourses.length.toString(),
+            color: AppColors.info,
             isDark: isDark,
           ),
         ),
@@ -225,15 +192,7 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(title, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Text(
                   value,
@@ -244,7 +203,6 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                         ? AppColors.textMainDark
                         : AppColors.textMainLight,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -254,51 +212,77 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
     );
   }
 
-  Widget _buildChartsSection(
-      AdminAnalyticsState state, bool isArabic, bool isDark) {
+  Widget _buildEnrollmentsChart(AdminAnalyticsState state, bool isArabic) {
     if (state.isLoading) {
-      return const Column(
-        children: [
-          LoadingSkeleton(width: double.infinity, height: 300),
-          SizedBox(height: 16),
-          LoadingSkeleton(width: double.infinity, height: 300),
-        ],
-      );
+      return const LoadingSkeleton(width: double.infinity, height: 300);
     }
 
-    return Column(
-      children: [
-        DashboardChart(
-          title: isArabic ? 'الإيرادات' : 'Revenue',
-          type: DashboardChartType.area,
-          data: state.revenueData
-              .map((d) => ChartDataPoint(
-                    label: d.label,
-                    value: d.value,
-                    date: d.date,
-                  ))
-              .toList(),
-          primaryColor: AppColors.success,
-        ),
-        const SizedBox(height: 16),
-        DashboardChart(
-          title: isArabic ? 'التسجيلات' : 'Enrollments',
-          type: DashboardChartType.bar,
-          data: state.enrollmentsData
-              .map((d) => ChartDataPoint(
-                    label: d.label,
-                    value: d.value,
-                    date: d.date,
-                  ))
-              .toList(),
-          primaryColor: AppColors.primary,
-        ),
-      ],
+    return DashboardChart(
+      title: isArabic ? 'التسجيلات' : 'Enrollments',
+      type: DashboardChartType.bar,
+      data: state.enrollmentsData
+          .map((d) => ChartDataPoint(
+                label: d.label,
+                value: d.value,
+                date: d.date,
+              ))
+          .toList(),
+      primaryColor: AppColors.primary,
     );
   }
 
   Widget _buildTopCoursesSection(
-      AdminAnalyticsState state, bool isArabic, bool isDark) {
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
+    return _buildListSection(
+      title: isArabic ? 'الكورسات حسب التسجيلات' : 'Courses by Enrollments',
+      isDark: isDark,
+      isLoading: state.isLoading,
+      isEmpty: state.topCourses.isEmpty,
+      emptyText: isArabic ? 'لا توجد بيانات' : 'No data available',
+      children: state.topCourses.asMap().entries.map((entry) {
+        return _buildTopCourseItem(
+          entry.key + 1,
+          entry.value,
+          isArabic,
+          isDark,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTopInstructorsSection(
+    AdminAnalyticsState state,
+    bool isArabic,
+    bool isDark,
+  ) {
+    return _buildListSection(
+      title: isArabic ? 'المدرسون حسب النشاط' : 'Instructors by Activity',
+      isDark: isDark,
+      isLoading: state.isLoading,
+      isEmpty: state.topInstructors.isEmpty,
+      emptyText: isArabic ? 'لا توجد بيانات' : 'No data available',
+      children: state.topInstructors.asMap().entries.map((entry) {
+        return _buildTopInstructorItem(
+          entry.key + 1,
+          entry.value,
+          isArabic,
+          isDark,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildListSection({
+    required String title,
+    required bool isDark,
+    required bool isLoading,
+    required bool isEmpty,
+    required String emptyText,
+    required List<Widget> children,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -312,7 +296,7 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isArabic ? 'أفضل الكورسات' : 'Top Courses',
+            title,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -320,164 +304,60 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
             ),
           ),
           const SizedBox(height: 16),
-          if (state.isLoading)
+          if (isLoading)
             ...List.generate(
-                5,
-                (_) => const Padding(
-                      padding: EdgeInsets.only(bottom: 8),
-                      child:
-                          LoadingSkeleton(width: double.infinity, height: 60),
-                    ))
-          else if (state.topCourses.isEmpty)
-            Center(
-              child: Text(
-                isArabic ? 'لا توجد بيانات' : 'No data available',
-                style: TextStyle(color: Colors.grey[600]),
+              5,
+              (_) => const Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: LoadingSkeleton(width: double.infinity, height: 60),
               ),
             )
+          else if (isEmpty)
+            Center(child: Text(emptyText))
           else
-            ...state.topCourses.asMap().entries.map((entry) {
-              final index = entry.key;
-              final course = entry.value;
-              return _buildTopCourseItem(index + 1, course, isArabic, isDark);
-            }),
+            ...children,
         ],
       ),
     );
   }
 
   Widget _buildTopCourseItem(
-      int rank, TopCourseModel course, bool isArabic, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.grey50,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: rank <= 3
-                  ? AppColors.warning.withValues(alpha: 0.2)
-                  : Colors.grey.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                '#$rank',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: rank <= 3 ? AppColors.warning : Colors.grey,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isArabic ? course.titleAr : course.titleEn,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
-                  ),
-                ),
-                Text(
-                  course.instructorName,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${course.enrollmentsCount} ${isArabic ? 'طالب' : 'students'}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-              Text(
-                '${course.revenue.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.success,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopInstructorsSection(
-      AdminAnalyticsState state, bool isArabic, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isArabic ? 'أفضل المدرسين' : 'Top Instructors',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (state.isLoading)
-            ...List.generate(
-                5,
-                (_) => const Padding(
-                      padding: EdgeInsets.only(bottom: 8),
-                      child:
-                          LoadingSkeleton(width: double.infinity, height: 60),
-                    ))
-          else if (state.topInstructors.isEmpty)
-            Center(
-              child: Text(
-                isArabic ? 'لا توجد بيانات' : 'No data available',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            )
-          else
-            ...state.topInstructors.asMap().entries.map((entry) {
-              final index = entry.key;
-              final instructor = entry.value;
-              return _buildTopInstructorItem(
-                  index + 1, instructor, isArabic, isDark);
-            }),
-        ],
-      ),
+    int rank,
+    TopCourseModel course,
+    bool isArabic,
+    bool isDark,
+  ) {
+    return _buildRankedRow(
+      rank: rank,
+      title: isArabic ? course.titleAr : course.titleEn,
+      subtitle: course.instructorName,
+      trailing: '${course.enrollmentsCount} ${isArabic ? 'طالب' : 'students'}',
+      isDark: isDark,
     );
   }
 
   Widget _buildTopInstructorItem(
-      int rank, TopInstructorModel instructor, bool isArabic, bool isDark) {
+    int rank,
+    TopInstructorModel instructor,
+    bool isArabic,
+    bool isDark,
+  ) {
+    return _buildRankedRow(
+      rank: rank,
+      title: instructor.name,
+      subtitle: '${instructor.coursesCount} ${isArabic ? 'كورسات' : 'courses'}',
+      trailing: '${instructor.studentsCount} ${isArabic ? 'طالب' : 'students'}',
+      isDark: isDark,
+    );
+  }
+
+  Widget _buildRankedRow({
+    required int rank,
+    required String title,
+    required String subtitle,
+    required String trailing,
+    required bool isDark,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -487,81 +367,39 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: rank <= 3
-                  ? AppColors.warning.withValues(alpha: 0.2)
-                  : Colors.grey.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                '#$rank',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: rank <= 3 ? AppColors.warning : Colors.grey,
-                ),
-              ),
+          SizedBox(
+            width: 40,
+            child: Text(
+              '#$rank',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(width: 12),
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: instructor.avatarUrl != null
-                ? NetworkImage(instructor.avatarUrl!)
-                : null,
-            child:
-                instructor.avatarUrl == null ? const Icon(Icons.person) : null,
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(title, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
                 Text(
-                  instructor.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
-                  ),
-                ),
-                Text(
-                  '${instructor.coursesCount} ${isArabic ? 'كورس' : 'courses'} • ${instructor.studentsCount} ${isArabic ? 'طالب' : 'students'}',
+                  subtitle,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark
                         ? AppColors.textMutedDark
                         : AppColors.textMutedLight,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.star, size: 14, color: AppColors.warning),
-                  const SizedBox(width: 2),
-                  Text(
-                    instructor.rating.toStringAsFixed(1),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-              Text(
-                '${instructor.totalRevenue.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.success,
-                ),
-              ),
-            ],
+          const SizedBox(width: 12),
+          Text(
+            trailing,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),

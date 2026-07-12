@@ -124,12 +124,7 @@ import '../../features/settings/domain/repositories/settings_repository.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/settings/presentation/cubit/profile_cubit.dart';
 // Admin Dashboard Feature
-import '../../features/admin_dashboard/data/datasources/admin_coupons_data_source.dart';
 import '../../features/admin_dashboard/data/datasources/admin_courses_data_source.dart';
-import '../../features/admin_dashboard/data/datasources/admin_forum_data_source.dart';
-import '../../features/admin_dashboard/data/datasources/admin_payouts_data_source.dart';
-import '../../features/admin_dashboard/data/datasources/admin_qa_data_source.dart';
-import '../../features/admin_dashboard/data/datasources/admin_reviews_data_source.dart';
 import '../../features/admin_dashboard/data/datasources/admin_stats_data_source.dart';
 import '../../features/admin_dashboard/data/datasources/admin_users_data_source.dart';
 import '../../features/admin_dashboard/data/repositories/admin_repository_impl.dart';
@@ -545,40 +540,19 @@ void _initAdminDashboard() {
       () => AdminUsersDataSource(sl()));
   sl.registerLazySingleton<AdminCoursesDataSource>(
       () => AdminCoursesDataSource(sl()));
-  sl.registerLazySingleton<AdminCouponsDataSource>(
-      () => AdminCouponsDataSource(sl()));
-  sl.registerLazySingleton<AdminPayoutsDataSource>(
-      () => AdminPayoutsDataSource(sl()));
-  sl.registerLazySingleton<AdminReviewsDataSource>(
-      () => AdminReviewsDataSource(sl()));
-  sl.registerLazySingleton<AdminQADataSource>(() => AdminQADataSource(sl()));
-  sl.registerLazySingleton<AdminForumDataSource>(
-      () => AdminForumDataSource(sl()));
 
   // Repository - Uses multiple data sources
   sl.registerLazySingleton<AdminRepository>(() => AdminRepositoryImpl(
         statsDataSource: sl(),
         usersDataSource: sl(),
         coursesDataSource: sl(),
-        couponsDataSource: sl(),
-        payoutsDataSource: sl(),
-        reviewsDataSource: sl(),
-        qaDataSource: sl(),
-        forumDataSource: sl(),
       ));
 
   // Cubits - Some use repository, some use data sources directly
   sl.registerFactory(() => AdminDashboardCubit(sl<AdminRepository>()));
   sl.registerFactory(() => AdminUsersCubit(sl<AdminRepository>()));
   sl.registerFactory(() => AdminCoursesCubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminCategoriesCubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminEnrollmentsCubit(sl<AdminRepository>()));
   sl.registerFactory(() => AdminAnalyticsCubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminReviewsCubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminQACubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminForumCubit(sl<AdminRepository>()));
-  sl.registerFactory(() => AdminPayoutsCubit(sl<AdminPayoutsDataSource>()));
-  sl.registerFactory(() => AdminCouponsCubit(sl<AdminCouponsDataSource>()));
 }
 
 void _initInstructorDashboard() {

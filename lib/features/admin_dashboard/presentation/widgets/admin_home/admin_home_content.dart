@@ -5,7 +5,7 @@ import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../cubit/admin_dashboard_cubit.dart';
 
-/// Admin Dashboard home with statistics and charts.
+/// Admin Dashboard home with operational statistics.
 class AdminHomeContent extends StatelessWidget {
   final Function(int)? onNavigate;
 
@@ -30,7 +30,7 @@ class AdminHomeContent extends StatelessWidget {
               children: [
                 _buildStatsGrid(state, isArabic),
                 const SizedBox(height: 24),
-                _buildChartsRow(state, isArabic),
+                _buildEnrollmentsChart(state, isArabic),
               ],
             ),
           ),
@@ -78,67 +78,11 @@ class AdminHomeContent extends StatelessWidget {
         color: AppColors.error,
         changePercentage: stats.enrollmentChange.toDouble(),
       ),
-      StatsCardData(
-        title: isArabic ? 'إيرادات الشهر' : 'Monthly Revenue',
-        value:
-            '${stats.monthlyRevenue.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
-        icon: Icons.attach_money_rounded,
-        color: AppColors.success,
-        changePercentage: stats.revenueChange,
-        onTap: onNavigate != null ? () => onNavigate!(6) : null,
-      ),
     ];
 
     return StatsGrid(
       stats: statsData,
       isLoading: isLoading,
-    );
-  }
-
-  Widget _buildChartsRow(AdminDashboardState state, bool isArabic) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 900;
-
-        if (isWide) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: _buildRevenueChart(state, isArabic),
-              ),
-              const SizedBox(width: 24),
-              Expanded(
-                child: _buildEnrollmentsChart(state, isArabic),
-              ),
-            ],
-          );
-        }
-
-        return Column(
-          children: [
-            _buildRevenueChart(state, isArabic),
-            const SizedBox(height: 24),
-            _buildEnrollmentsChart(state, isArabic),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildRevenueChart(AdminDashboardState state, bool isArabic) {
-    final isLoading = state.revenueChartStatus == DashboardStatus.loading;
-    final data = state.revenueChartData
-        .map((e) => ChartDataPoint(label: e.label, value: e.value))
-        .toList();
-
-    return DashboardChart(
-      title: isArabic ? 'اتجاه الإيرادات' : 'Revenue Trend',
-      type: DashboardChartType.area,
-      data: data,
-      isLoading: isLoading,
-      height: 280,
     );
   }
 

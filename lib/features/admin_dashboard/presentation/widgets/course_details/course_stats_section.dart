@@ -39,9 +39,8 @@ class CourseDetailsStatsSection extends StatelessWidget {
                   child: _buildStatCard(
                     Icons.people_rounded,
                     course.enrolledCount.toString(),
-                    isArabic ? 'طالب' : 'Students',
+                    isArabic ? 'طلاب' : 'Students',
                     AppColors.primary,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -49,19 +48,8 @@ class CourseDetailsStatsSection extends StatelessWidget {
                   child: _buildStatCard(
                     Icons.star_rounded,
                     course.rating.toStringAsFixed(1),
-                    '(${course.ratingCount})',
+                    '${course.ratingCount} ${isArabic ? 'تقييم' : 'reviews'}',
                     AppColors.warning,
-                    isDark,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    Icons.attach_money_rounded,
-                    course.totalRevenue.toStringAsFixed(0),
-                    isArabic ? 'الإيرادات' : 'Revenue',
-                    AppColors.success,
-                    isDark,
                   ),
                 ),
               ],
@@ -77,7 +65,6 @@ class CourseDetailsStatsSection extends StatelessWidget {
     String value,
     String label,
     Color color,
-    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(12),

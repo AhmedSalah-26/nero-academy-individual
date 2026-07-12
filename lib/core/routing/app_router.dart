@@ -85,20 +85,12 @@ import '../../features/quizzes/presentation/screens/quiz_question_screen.dart';
 import '../../features/quizzes/presentation/screens/quiz_results_screen.dart';
 
 // Admin Dashboard
-import '../../features/admin_dashboard/data/models/admin_coupon_model.dart';
 import '../../features/admin_dashboard/data/models/admin_course_model.dart';
 import '../../features/admin_dashboard/data/models/admin_user_model.dart';
-import '../../features/admin_dashboard/data/models/category_model.dart'
-    as admin_category;
 import '../../features/admin_dashboard/domain/entities/admin_entities.dart';
 import '../../features/admin_dashboard/presentation/cubit/admin_cubits.dart';
 import '../../features/admin_dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/admin_dashboard/presentation/screens/ban_user_screen.dart';
-import '../../features/admin_dashboard/presentation/screens/category_editor_screen.dart'
-    as admin_category_editor;
-import '../../features/admin_dashboard/presentation/screens/coupon_editor_screen.dart'
-    as admin_coupon;
-import '../../features/admin_dashboard/presentation/screens/coupon_usage_screen.dart';
 import '../../features/admin_dashboard/presentation/screens/course_details_screen.dart'
     as admin_course;
 import '../../features/admin_dashboard/presentation/screens/course_enrollments_screen.dart'
@@ -698,14 +690,7 @@ class AppRouter {
             BlocProvider(create: (_) => sl<AdminDashboardCubit>()),
             BlocProvider(create: (_) => sl<AdminUsersCubit>()),
             BlocProvider(create: (_) => sl<AdminCoursesCubit>()),
-            BlocProvider(create: (_) => sl<AdminCategoriesCubit>()),
-            BlocProvider(create: (_) => sl<AdminEnrollmentsCubit>()),
-            BlocProvider(create: (_) => sl<AdminPayoutsCubit>()),
-            BlocProvider(create: (_) => sl<AdminCouponsCubit>()),
             BlocProvider(create: (_) => sl<AdminAnalyticsCubit>()),
-            BlocProvider(create: (_) => sl<AdminReviewsCubit>()),
-            BlocProvider(create: (_) => sl<AdminQACubit>()),
-            BlocProvider(create: (_) => sl<AdminForumCubit>()),
           ],
           child: const AdminDashboardScreen(),
         ),
@@ -755,40 +740,6 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: '/admin/category/edit',
-        name: 'admin-category-editor',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          if (extra?['onSave'] == null) {
-            return const Scaffold(
-              body: Center(child: Text('Invalid category data')),
-            );
-          }
-          return admin_category_editor.CategoryEditorScreen(
-            category: extra?['category'] as admin_category.CategoryModel?,
-            onSave: extra!['onSave'] as Function(dynamic),
-          );
-        },
-      ),
-
-      GoRoute(
-        path: '/admin/coupon/edit',
-        name: 'admin-coupon-editor',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          if (extra?['onSave'] == null) {
-            return const Scaffold(
-              body: Center(child: Text('Invalid coupon data')),
-            );
-          }
-          return admin_coupon.CouponEditorScreen(
-            coupon: extra?['coupon'] as AdminCouponModel?,
-            onSave: extra!['onSave'] as Function(CreateCouponDto),
-          );
-        },
-      ),
-
-      GoRoute(
         path: '/admin/course/:courseId/details',
         name: 'admin-course-details',
         builder: (context, state) {
@@ -832,24 +783,6 @@ class AppRouter {
             child: admin_course_enrollments.CourseEnrollmentsScreen(
               course: course,
             ),
-          );
-        },
-      ),
-
-      GoRoute(
-        path: '/admin/coupon/:couponId/usage',
-        name: 'coupon-usage',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          final coupon = extra?['coupon'] as AdminCouponModel?;
-          if (coupon == null) {
-            return const Scaffold(
-              body: Center(child: Text('Coupon not found')),
-            );
-          }
-          return BlocProvider.value(
-            value: sl<AdminCouponsCubit>(),
-            child: CouponUsageScreen(coupon: coupon),
           );
         },
       ),
@@ -1508,40 +1441,6 @@ class AppRouter {
       'courseId': courseId ?? course.id,
     }, extra: {
       'course': course,
-    });
-  }
-
-  static void goToAdminCouponEditor(
-    BuildContext context, {
-    AdminCouponModel? coupon,
-    required Function(CreateCouponDto) onSave,
-  }) {
-    context.pushNamed('admin-coupon-editor', extra: {
-      'coupon': coupon,
-      'onSave': onSave,
-    });
-  }
-
-  static void goToCouponUsage(
-    BuildContext context, {
-    String? couponId,
-    required AdminCouponModel coupon,
-  }) {
-    context.pushNamed('coupon-usage', pathParameters: {
-      'couponId': couponId ?? coupon.id,
-    }, extra: {
-      'coupon': coupon,
-    });
-  }
-
-  static void goToAdminCategoryEditor(
-    BuildContext context, {
-    admin_category.CategoryModel? category,
-    required void Function(dynamic) onSave,
-  }) {
-    context.pushNamed('admin-category-editor', extra: {
-      'category': category,
-      'onSave': onSave,
     });
   }
 

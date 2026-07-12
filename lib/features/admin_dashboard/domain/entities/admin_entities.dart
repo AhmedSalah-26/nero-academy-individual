@@ -88,26 +88,6 @@ extension CourseStatusExtension on CourseStatus {
 /// Enrollment Status Enum
 enum EnrollmentStatus { all, active, completed, pending, refunded }
 
-/// Payout Status Enum
-enum PayoutStatus { pending, processing, completed, failed, cancelled }
-
-extension PayoutStatusExtension on PayoutStatus {
-  String getLabel(bool isArabic) {
-    switch (this) {
-      case PayoutStatus.pending:
-        return isArabic ? 'قيد الانتظار' : 'Pending';
-      case PayoutStatus.processing:
-        return isArabic ? 'قيد المعالجة' : 'Processing';
-      case PayoutStatus.completed:
-        return isArabic ? 'مكتمل' : 'Completed';
-      case PayoutStatus.failed:
-        return isArabic ? 'فشل' : 'Failed';
-      case PayoutStatus.cancelled:
-        return isArabic ? 'ملغي' : 'Cancelled';
-    }
-  }
-}
-
 /// Report Status Enum
 enum ReportStatus { pending, reviewed, resolved, rejected }
 

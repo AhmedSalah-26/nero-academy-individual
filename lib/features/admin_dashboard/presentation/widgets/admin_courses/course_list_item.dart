@@ -134,12 +134,6 @@ class CourseListItem extends StatelessWidget {
             const SizedBox(width: 12),
             _buildStat(
                 Icons.star_rounded, course.rating.toStringAsFixed(1), isDark),
-            const SizedBox(width: 12),
-            _buildStat(
-              Icons.attach_money_rounded,
-              course.totalRevenue.toStringAsFixed(0),
-              isDark,
-            ),
           ],
         ),
         if (course.isSuspended && course.suspensionReason != null) ...[

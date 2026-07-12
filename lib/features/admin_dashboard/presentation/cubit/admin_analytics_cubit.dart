@@ -16,7 +16,6 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
     emit(state.copyWith(status: AdminAnalyticsStatus.loading));
     try {
       await Future.wait([
-        _loadRevenueData(),
         _loadEnrollmentsData(),
         _loadTopCourses(),
         _loadTopInstructors(),
@@ -34,17 +33,6 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
   void setDateRange(DateTime start, DateTime end) {
     emit(state.copyWith(startDate: start, endDate: end));
     loadAnalytics();
-  }
-
-  Future<void> _loadRevenueData() async {
-    try {
-      final data = await _repository.getRevenueChart(
-        state.startDate,
-        state.endDate,
-      );
-      final total = data.fold<double>(0, (sum, d) => sum + d.value);
-      emit(state.copyWith(revenueData: data, totalRevenue: total));
-    } catch (_) {}
   }
 
   Future<void> _loadEnrollmentsData() async {

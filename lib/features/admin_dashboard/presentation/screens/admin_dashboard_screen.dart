@@ -5,11 +5,7 @@ import '../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
 import '../cubit/admin_dashboard_cubit.dart';
 import '../widgets/admin_analytics/admin_analytics_content.dart';
 import '../widgets/admin_courses/admin_courses_content.dart';
-import '../widgets/admin_forum/admin_forum_content.dart';
 import '../widgets/admin_home/admin_home_content.dart';
-import '../widgets/admin_instructor_requests/admin_instructor_requests_content.dart';
-import '../widgets/admin_qa/admin_qa_content.dart';
-import '../widgets/admin_reviews/admin_reviews_content.dart';
 import '../widgets/admin_users/admin_users_content.dart';
 
 /// Admin Dashboard Screen
@@ -40,30 +36,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       icon: Icons.school_rounded,
     ),
     DashboardNavItem(
-      label: 'Reviews',
-      labelAr: '\u0627\u0644\u062a\u0642\u064a\u064a\u0645\u0627\u062a',
-      icon: Icons.star_rounded,
-    ),
-    DashboardNavItem(
-      label: 'Q&A',
-      labelAr: '\u0627\u0644\u0623\u0633\u0626\u0644\u0629',
-      icon: Icons.question_answer_rounded,
-    ),
-    DashboardNavItem(
-      label: 'Forums',
-      labelAr: '\u0627\u0644\u0645\u0646\u062a\u062f\u064a\u0627\u062a',
-      icon: Icons.forum_rounded,
-    ),
-    DashboardNavItem(
       label: 'Analytics',
       labelAr: '\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a',
       icon: Icons.analytics_rounded,
-    ),
-    DashboardNavItem(
-      label: 'Instructor Requests',
-      labelAr:
-          '\u0637\u0644\u0628\u0627\u062a \u0627\u0644\u0645\u062f\u0631\u0633\u064a\u0646',
-      icon: Icons.assignment_turned_in_rounded,
     ),
   ];
 
@@ -80,11 +55,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ),
       1 => const AdminUsersContent(),
       2 => const AdminCoursesContent(),
-      3 => const AdminReviewsContent(),
-      4 => const AdminQAContent(),
-      5 => const AdminForumContent(),
-      6 => const AdminAnalyticsContent(),
-      7 => const AdminInstructorRequestsContent(),
+      3 => const AdminAnalyticsContent(),
       _ => const AdminHomeContent(),
     };
   }
