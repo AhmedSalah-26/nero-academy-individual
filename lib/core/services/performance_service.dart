@@ -106,20 +106,8 @@ class PerformanceService {
   /// Preload critical resources
   Future<void> preloadCriticalResources(BuildContext context) async {
     try {
-      // Preload common images
-      final commonImages = [
-        'assets/slider/V1.png',
-        'assets/slider/V2.png',
-        'assets/slider/V3.png',
-        'assets/slider/V4.png',
-      ];
-
-      for (final imagePath in commonImages) {
-        await precacheImage(AssetImage(imagePath), context);
-      }
-
       AppLogger.success('Resources preloaded', {
-        'images': commonImages.length.toString(),
+        'images': '0',
       });
     } catch (e, stackTrace) {
       AppLogger.e('❌ Failed to preload resources', e, stackTrace);

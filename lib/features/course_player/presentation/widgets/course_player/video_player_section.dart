@@ -307,7 +307,7 @@ class VideoPlayerSection extends StatelessWidget {
       case 'mp3':
       case 'wav':
       case 'm4a':
-        return const Color(0xFF7C3AED);
+        return AppColors.primary;
       default:
         return AppColors.primary;
     }

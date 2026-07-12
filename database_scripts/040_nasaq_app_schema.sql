@@ -44,9 +44,9 @@ create table if not exists public.teacher_settings (
 
 create table if not exists public.teacher_themes (
   teacher_id uuid primary key references public.teachers(id) on delete cascade,
-  primary_color text not null default '#7C3AED',
-  secondary_color text not null default '#A78BFA',
-  background_color text not null default '#F8FAFC',
+  primary_color text not null default '#20E5DC',
+  secondary_color text not null default '#117CFF',
+  background_color text not null default '#01060B',
   logo_url text,
   welcome_text text,
   created_at timestamptz not null default now(),

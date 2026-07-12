@@ -260,8 +260,8 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF7C3AED).withValues(alpha: isDark ? 0.25 : 0.12),
-            const Color(0xFF4F46E5).withValues(alpha: isDark ? 0.15 : 0.06),
+            AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.12),
+            AppColors.info.withValues(alpha: isDark ? 0.15 : 0.06),
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -271,13 +271,13 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED).withValues(alpha: 0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFF7C3AED).withValues(alpha: 0.3)),
+                  color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             child: const Icon(Icons.auto_awesome_rounded,
-                color: Color(0xFF7C3AED), size: 24),
+                color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -331,10 +331,10 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: const Color(0xFF7C3AED),
+        labelColor: AppColors.primary,
         unselectedLabelColor:
             isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-        indicatorColor: const Color(0xFF7C3AED),
+        indicatorColor: AppColors.primary,
         indicatorWeight: 2.5,
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         tabs: [
@@ -407,9 +407,9 @@ class _AiImportQuestionsDialogState extends State<AiImportQuestionsDialog>
                     : const Color(0xFFF5F3FF),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark
-                      ? AppColors.borderDark
-                      : const Color(0xFF7C3AED).withValues(alpha: 0.2),
+                color: isDark
+                    ? AppColors.borderDark
+                    : AppColors.primary.withValues(alpha: 0.2),
                 ),
               ),
               padding: const EdgeInsets.all(4),

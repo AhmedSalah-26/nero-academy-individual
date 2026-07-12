@@ -95,10 +95,10 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFF4F46E5).withValues(alpha: 0.2)),
+                  color: AppColors.info.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,12 +106,12 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                 Row(
                   children: [
                     const Icon(Icons.info_outline_rounded,
-                        color: Color(0xFF4F46E5), size: 16),
+                        color: AppColors.info, size: 16),
                     const SizedBox(width: 6),
                     Text(
                       LocaleKeys.course_editor_ai_import_how_title.tr(),
                       style: const TextStyle(
-                        color: Color(0xFF4F46E5),
+                        color: AppColors.info,
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                       ),
@@ -134,13 +134,13 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: widget.isDark
-                  ? const Color(0xFF1A1A2E)
-                  : const Color(0xFFF8F7FF),
+                  ? AppColors.surfaceDark
+                  : AppColors.backgroundLight,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: widget.isDark
-                    ? const Color(0xFF7C3AED).withValues(alpha: 0.3)
-                    : const Color(0xFF7C3AED).withValues(alpha: 0.2),
+                    ? AppColors.primary.withValues(alpha: 0.3)
+                    : AppColors.primary.withValues(alpha: 0.2),
               ),
             ),
             child: SelectableText(
@@ -176,7 +176,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: _promptCopied
                     ? AppColors.success
-                    : const Color(0xFF7C3AED),
+                    : AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -212,7 +212,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: const Color(0xFF4F46E5).withValues(alpha: 0.15),
+              color: AppColors.info.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Center(
@@ -221,7 +221,7 @@ class _AiImportPromptTabState extends State<AiImportPromptTab> {
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF4F46E5),
+                  color: AppColors.info,
                 ),
               ),
             ),

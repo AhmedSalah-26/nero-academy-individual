@@ -53,7 +53,7 @@ class AiPreviewQuestionCard extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Center(
@@ -62,7 +62,7 @@ class AiPreviewQuestionCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF7C3AED),
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -192,7 +192,7 @@ class AiPreviewQuestionCard extends StatelessWidget {
   Color _typeColor(String type) {
     switch (type) {
       case 'single':
-        return const Color(0xFF4F46E5);
+        return AppColors.primary;
       case 'multiple':
         return const Color(0xFF0EA5E9);
       case 'true_false':

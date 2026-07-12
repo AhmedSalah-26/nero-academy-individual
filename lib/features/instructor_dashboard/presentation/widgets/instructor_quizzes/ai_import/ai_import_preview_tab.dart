@@ -66,7 +66,7 @@ class AiImportPreviewTab extends StatelessWidget {
               filled: true,
               fillColor: isDark
                   ? AppColors.surfaceDark
-                  : const Color(0xFFF8F7FF),
+                  : AppColors.backgroundLight,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
@@ -83,8 +83,8 @@ class AiImportPreviewTab extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                    color: Color(0xFF7C3AED), width: 1.5),
+                borderSide:
+                    const BorderSide(color: AppColors.primary, width: 1.5),
               ),
               contentPadding: const EdgeInsets.all(12),
             ),
@@ -128,8 +128,8 @@ class AiImportPreviewTab extends StatelessWidget {
                     const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF7C3AED),
-                side: const BorderSide(color: Color(0xFF7C3AED)),
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),

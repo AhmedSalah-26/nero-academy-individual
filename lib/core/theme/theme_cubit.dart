@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_colors.dart';
+
 enum AppThemeMode { light, dark }
 
 class ThemeState {
@@ -57,38 +59,38 @@ class ThemeCubit extends Cubit<ThemeState> {
   }
 
   static ThemeData _buildLightTheme() {
-    const primaryColor = Color(0xFF8B4513);
-    const secondaryColor = Color(0xFFB5651D);
+    const primaryColor = AppColors.primary;
+    const secondaryColor = AppColors.info;
 
     return ThemeData(
       brightness: Brightness.light,
       fontFamily: 'Almarai',
       primaryColor: primaryColor,
-      scaffoldBackgroundColor: const Color(0xFFFFFFFF),
+      scaffoldBackgroundColor: AppColors.backgroundLight,
       colorScheme: const ColorScheme.light(
         primary: primaryColor,
         secondary: secondaryColor,
-        surface: Color(0xFFFFFFFF),
-        onSurface: Color(0xFF5C4033),
-        outline: Color(0xFFD3D3D3),
+        surface: AppColors.surfaceLight,
+        onSurface: AppColors.textMainLight,
+        outline: AppColors.borderLight,
       ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        backgroundColor: Color(0xFFFFFFFF),
-        foregroundColor: Color(0xFF5C4033),
+        backgroundColor: AppColors.backgroundLight,
+        foregroundColor: AppColors.textMainLight,
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFFFFFFFF),
+        color: AppColors.surfaceLight,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          side: const BorderSide(color: AppColors.borderLight, width: 1),
         ),
       ),
-      dividerColor: const Color(0xFFE0E0E0),
+      dividerColor: AppColors.borderLight,
       textTheme: _buildTextTheme(Brightness.light),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: primaryColor,
@@ -105,21 +107,21 @@ class ThemeCubit extends Cubit<ThemeState> {
           ),
         ),
       ),
-      iconTheme: const IconThemeData(color: Color(0xFF5C4033)),
+      iconTheme: const IconThemeData(color: AppColors.textMainLight),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFFFFFFFF),
+        backgroundColor: AppColors.surfaceLight,
         selectedItemColor: primaryColor,
-        unselectedItemColor: Color(0xFF696969),
+        unselectedItemColor: AppColors.textMutedLight,
       ),
     );
   }
 
   static ThemeData _buildDarkTheme() {
-    const primaryColor = Color(0xFFB5651D);
-    const secondaryColor = Color(0xFFD4894A);
-    const surfaceColor = Color(0xFF1E1E1E);
-    const cardColor = Color(0xFF2D2D2D);
-    const textColor = Color(0xFFF5F5F5); // Lighter text for better visibility
+    const primaryColor = AppColors.primaryOnDark;
+    const secondaryColor = AppColors.info;
+    const surfaceColor = AppColors.backgroundDark;
+    const cardColor = AppColors.cardDark;
+    const textColor = AppColors.textMainDark;
 
     return ThemeData(
       brightness: Brightness.dark,
@@ -131,7 +133,7 @@ class ThemeCubit extends Cubit<ThemeState> {
         secondary: secondaryColor,
         surface: cardColor,
         onSurface: textColor,
-        outline: Color(0xFF5A5A5A),
+        outline: AppColors.borderDark,
       ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
@@ -146,10 +148,10 @@ class ThemeCubit extends Cubit<ThemeState> {
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF4A4A4A), width: 1),
+          side: const BorderSide(color: AppColors.borderDark, width: 1),
         ),
       ),
-      dividerColor: const Color(0xFF4A4A4A),
+      dividerColor: AppColors.borderDark,
       textTheme: _buildTextTheme(Brightness.dark),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: primaryColor,
@@ -170,15 +172,15 @@ class ThemeCubit extends Cubit<ThemeState> {
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceColor,
         selectedItemColor: primaryColor,
-        unselectedItemColor: Color(0xFFB0B0B0),
+        unselectedItemColor: AppColors.textMutedDark,
       ),
     );
   }
 
   static TextTheme _buildTextTheme(Brightness brightness) {
     final color = brightness == Brightness.light
-        ? const Color(0xFF5C4033)
-        : const Color(0xFFF5F5F5); // Lighter text for dark mode
+        ? AppColors.textMainLight
+        : AppColors.textMainDark;
 
     return TextTheme(
       displayLarge: TextStyle(fontFamily: 'Almarai', color: color),
@@ -203,11 +205,10 @@ class ThemeCubit extends Cubit<ThemeState> {
       Brightness brightness) {
     final isLight = brightness == Brightness.light;
     final primaryColor =
-        isLight ? const Color(0xFF8B4513) : const Color(0xFFB5651D);
-    final borderColor =
-        isLight ? const Color(0xFFB5651D) : const Color(0xFF4A4A4A);
+        isLight ? AppColors.primary : AppColors.primaryOnDark;
+    final borderColor = isLight ? AppColors.borderLight : AppColors.borderDark;
     final hintColor =
-        isLight ? const Color(0xFFA9A9A9) : const Color(0xFF757575);
+        isLight ? AppColors.textHintLight : AppColors.textHintDark;
 
     return InputDecorationTheme(
       labelStyle: TextStyle(

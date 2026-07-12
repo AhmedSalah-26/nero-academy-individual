@@ -77,21 +77,29 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(
       fit: StackFit.expand,
       clipBehavior: Clip.none,
       children: [
-        Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.diagonal3Values(-1, 1, 1),
-          child: Image.asset(
-            'assets/home_hero_clean.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            alignment: const Alignment(-0.4, 0),
-          ),
+        ValueListenableBuilder<SelectedTeacher?>(
+          valueListenable: TeacherContextService.instance.selectedTeacher,
+          builder: (context, teacher, _) {
+            final theme = teacher?.theme;
+            final hasCustomIdentity = theme?.hasColors == true ||
+                ((theme?.logoUrl ?? '').trim().isNotEmpty);
+
+            if (!hasCustomIdentity) {
+              return Image.asset(
+                'assets/default_identity/default_teacher_cover.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                errorBuilder: (context, error, stackTrace) =>
+                    _CustomIdentityBackdrop(isDark: isDark),
+              );
+            }
+
+            return _CustomIdentityBackdrop(isDark: isDark);
+          },
         ),
         // Gradient fade top & bottom
         Positioned.fill(
@@ -114,6 +122,208 @@ class _HeroVisual extends StatelessWidget {
         _HeroCopy(isDark: isDark),
       ],
     );
+  }
+}
+
+class _CustomIdentityBackdrop extends StatelessWidget {
+  final bool isDark;
+
+  const _CustomIdentityBackdrop({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: const Alignment(0.42, -0.08),
+              radius: 0.9,
+              colors: [
+                (isDark ? AppColors.primaryOnDark : AppColors.primary)
+                    .withValues(alpha: isDark ? 0.20 : 0.16),
+                isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
+                isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+              ],
+              stops: const [0.0, 0.48, 1.0],
+            ),
+          ),
+        ),
+        CustomPaint(
+          painter: _NasaqHeroBackgroundPainter(isDark: isDark),
+        ),
+        _AnimatedProgrammingShapes(isDark: isDark),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 28),
+            child: _NasaqMark(isDark: isDark),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NasaqMark extends StatelessWidget {
+  final bool isDark;
+
+  const _NasaqMark({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final size = (w * 0.27).clamp(92.0, 128.0);
+
+    return CustomPaint(
+      size: Size.square(size),
+      painter: _NasaqMarkPainter(isDark: isDark),
+    );
+  }
+}
+
+class _NasaqHeroBackgroundPainter extends CustomPainter {
+  final bool isDark;
+
+  const _NasaqHeroBackgroundPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final center = Offset(w * 0.70, h * 0.47);
+    final accent = isDark ? AppColors.primaryOnDark : AppColors.primary;
+    const blue = AppColors.info;
+
+    final glowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          accent.withValues(alpha: 0.34),
+          blue.withValues(alpha: 0.16),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: w * 0.46));
+    canvas.drawCircle(center, w * 0.46, glowPaint);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = accent.withValues(alpha: isDark ? 0.26 : 0.18);
+    for (var i = 0; i < 4; i++) {
+      canvas.drawCircle(center, w * (0.16 + i * 0.075), ringPaint);
+    }
+
+    final linePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = accent.withValues(alpha: 0.08);
+    for (var x = 0.0; x < w; x += 42) {
+      canvas.drawLine(Offset(x, 0), Offset(x, h), linePaint);
+    }
+    for (var y = 0.0; y < h; y += 42) {
+      canvas.drawLine(Offset(0, y), Offset(w, y), linePaint);
+    }
+
+    final dotPaint = Paint()..color = accent.withValues(alpha: 0.70);
+    for (final point in [
+      Offset(w * 0.18, h * 0.22),
+      Offset(w * 0.78, h * 0.18),
+      Offset(w * 0.84, h * 0.62),
+      Offset(w * 0.28, h * 0.74),
+    ]) {
+      canvas.drawCircle(point, 2.5, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _NasaqHeroBackgroundPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
+  }
+}
+
+class _NasaqMarkPainter extends CustomPainter {
+  final bool isDark;
+
+  const _NasaqMarkPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width;
+    final rect = Offset.zero & size;
+    final accent = isDark ? AppColors.primaryOnDark : AppColors.primary;
+
+    final shadowPaint = Paint()
+      ..color = accent.withValues(alpha: 0.32)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.deflate(s * 0.13), Radius.circular(s * 0.18)),
+      shadowPaint,
+    );
+
+    final box = RRect.fromRectAndRadius(
+      rect.deflate(s * 0.16),
+      Radius.circular(s * 0.18),
+    );
+    canvas.drawRRect(
+      box,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.backgroundDark,
+            AppColors.surfaceDark,
+            Color(0xFF071D2A),
+          ],
+        ).createShader(rect),
+    );
+    canvas.drawRRect(
+      box,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4
+        ..shader = LinearGradient(
+          colors: [
+            accent.withValues(alpha: 0.85),
+            AppColors.info.withValues(alpha: 0.72),
+          ],
+        ).createShader(rect),
+    );
+
+    final nPath = Path()
+      ..moveTo(s * 0.32, s * 0.68)
+      ..lineTo(s * 0.32, s * 0.34)
+      ..cubicTo(s * 0.32, s * 0.26, s * 0.40, s * 0.23, s * 0.46, s * 0.29)
+      ..lineTo(s * 0.68, s * 0.51)
+      ..lineTo(s * 0.68, s * 0.32);
+    final nPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..strokeWidth = s * 0.075
+      ..shader = const LinearGradient(
+        begin: Alignment.bottomLeft,
+        end: Alignment.topRight,
+        colors: [
+          Color(0xFF117CFF),
+          Color(0xFF00E3CF),
+          Color(0xFFE9FEFF),
+        ],
+      ).createShader(rect);
+    canvas.drawPath(nPath, nPaint);
+
+    final sparklePaint = Paint()..color = accent;
+    canvas.drawCircle(Offset(s * 0.74, s * 0.25), s * 0.025, sparklePaint);
+    canvas.drawLine(Offset(s * 0.74, s * 0.18), Offset(s * 0.74, s * 0.32),
+        sparklePaint..strokeWidth = s * 0.012);
+    canvas.drawLine(Offset(s * 0.67, s * 0.25), Offset(s * 0.81, s * 0.25),
+        sparklePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _NasaqMarkPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
   }
 }
 

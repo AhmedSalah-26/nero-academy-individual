@@ -14,10 +14,14 @@ class TeacherThemeSettingsContent extends StatefulWidget {
 
 class _TeacherThemeSettingsContentState
     extends State<TeacherThemeSettingsContent> {
+  static const _defaultPrimary = '#20E5DC';
+  static const _defaultSecondary = '#117CFF';
+  static const _defaultBackground = '#01060B';
+
   final _client = Supabase.instance.client;
-  final _primaryController = TextEditingController(text: '#7C3AED');
-  final _secondaryController = TextEditingController(text: '#A78BFA');
-  final _backgroundController = TextEditingController(text: '#F8FAFC');
+  final _primaryController = TextEditingController(text: _defaultPrimary);
+  final _secondaryController = TextEditingController(text: _defaultSecondary);
+  final _backgroundController = TextEditingController(text: _defaultBackground);
   final _logoController = TextEditingController();
   final _welcomeController = TextEditingController();
 
@@ -64,11 +68,11 @@ class _TeacherThemeSettingsContentState
       final themeData = _firstMap(teacher['teacher_themes']);
       if (themeData != null) {
         _primaryController.text =
-            themeData['primary_color'] as String? ?? '#7C3AED';
+            themeData['primary_color'] as String? ?? _defaultPrimary;
         _secondaryController.text =
-            themeData['secondary_color'] as String? ?? '#A78BFA';
+            themeData['secondary_color'] as String? ?? _defaultSecondary;
         _backgroundController.text =
-            themeData['background_color'] as String? ?? '#F8FAFC';
+            themeData['background_color'] as String? ?? _defaultBackground;
         _logoController.text = themeData['logo_url'] as String? ?? '';
         _welcomeController.text = themeData['welcome_text'] as String? ?? '';
       }
