@@ -148,6 +148,7 @@ CREATE TABLE courses (
   -- Pricing
   price DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (price >= 0),
   discount_price DECIMAL(10,2) CHECK (discount_price >= 0),
+  pricing_options JSONB NOT NULL DEFAULT '[]',
   is_free BOOLEAN DEFAULT FALSE,
   currency TEXT DEFAULT 'EGP',
   level TEXT DEFAULT 'beginner', -- Backward compatibility
@@ -166,6 +167,7 @@ CREATE TABLE courses (
   requirements JSONB DEFAULT '[]',
   objectives JSONB DEFAULT '[]',
   target_audience JSONB DEFAULT '[]',
+  group_links JSONB DEFAULT '{}',
   tags TEXT[] DEFAULT '{}',
   -- Certificate
   has_certificate BOOLEAN DEFAULT TRUE,
@@ -278,6 +280,7 @@ CREATE TABLE cart_items (
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   price_at_add DECIMAL(10,2),
+  pricing_option JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, course_id)
@@ -325,6 +328,7 @@ CREATE TABLE enrollments (
   instructor_id UUID REFERENCES profiles(id),
   parent_enrollment_id UUID REFERENCES parent_enrollments(id) ON DELETE SET NULL,
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  pricing_option JSONB,
   discount DECIMAL(10,2) DEFAULT 0,
   status TEXT DEFAULT 'active' CHECK (status IN ('pending', 'active', 'completed', 'expired', 'refunded')),
   progress_percentage DECIMAL(5,2) DEFAULT 0,

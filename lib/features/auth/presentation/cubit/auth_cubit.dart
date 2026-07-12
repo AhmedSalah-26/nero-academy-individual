@@ -7,15 +7,20 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/login_with_google_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/send_phone_otp_usecase.dart';
 import '../../domain/usecases/update_interests_usecase.dart';
 import '../../domain/usecases/verify_phone_otp_usecase.dart';
 import 'auth_state.dart';
+import '../../../../core/services/push_notification_service.dart';
+import '../../../../core/services/teacher_context_service.dart';
+import '../../../../core/services/user_role_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase _loginUseCase;
+  final LoginWithGoogleUseCase _loginWithGoogleUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GetCurrentUserUseCase _getCurrentUserUseCase;
@@ -26,6 +31,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthCubit({
     required LoginUseCase loginUseCase,
+    required LoginWithGoogleUseCase loginWithGoogleUseCase,
     required RegisterUseCase registerUseCase,
     required LogoutUseCase logoutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
@@ -34,6 +40,7 @@ class AuthCubit extends Cubit<AuthState> {
     required SendPhoneOtpUseCase sendPhoneOtpUseCase,
     required VerifyPhoneOtpUseCase verifyPhoneOtpUseCase,
   })  : _loginUseCase = loginUseCase,
+        _loginWithGoogleUseCase = loginWithGoogleUseCase,
         _registerUseCase = registerUseCase,
         _logoutUseCase = logoutUseCase,
         _getCurrentUserUseCase = getCurrentUserUseCase,
@@ -79,6 +86,24 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  /// Login or sign up with Google.
+  Future<void> loginWithGoogle() async {
+    emit(const AuthState.loading());
+
+    final result = await _loginWithGoogleUseCase();
+
+    result.fold(
+      (failure) {
+        if (failure.code == 'oauth_redirect_started') {
+          emit(const AuthState.unauthenticated());
+        } else {
+          emit(AuthState.error(failure.message));
+        }
+      },
+      (user) => emit(AuthState.authenticated(user)),
+    );
+  }
+
   /// Register new user
   Future<void> register({
     required String email,
@@ -91,7 +116,8 @@ class AuthCubit extends Cubit<AuthState> {
     List<String>? expertise,
     Uint8List? avatarBytes,
   }) async {
-    debugPrint('📝 [AuthCubit] Register called with email: $email, phone: $phone');
+    debugPrint(
+        '📝 [AuthCubit] Register called with email: $email, phone: $phone');
     emit(const AuthState.loading());
 
     final result = await _registerUseCase(RegisterParams(
@@ -114,13 +140,14 @@ class AuthCubit extends Cubit<AuthState> {
       (user) {
         debugPrint(
             '✅ [AuthCubit] Register successful: ${user.email}, id: ${user.id}');
-        
+
         final session = Supabase.instance.client.auth.currentSession;
         if (session == null) {
           debugPrint('📧 [AuthCubit] Session is null, user must confirm email');
           emit(const AuthState.awaitingEmailVerification());
         } else {
-          debugPrint('✅ [AuthCubit] Emitting authenticated state after registration');
+          debugPrint(
+              '✅ [AuthCubit] Emitting authenticated state after registration');
           emit(AuthState.authenticated(user));
         }
       },
@@ -133,12 +160,16 @@ class AuthCubit extends Cubit<AuthState> {
 
     final result = await _logoutUseCase();
 
-    result.fold(
-      (failure) => emit(state.copyWith(
+    await result.fold(
+      (failure) async => emit(state.copyWith(
         isLoggingOut: false,
         errorMessage: failure.message,
       )),
-      (_) => emit(const AuthState.unauthenticated()),
+      (_) async {
+        UserRoleService.clearCache();
+        await TeacherContextService.instance.clear();
+        emit(const AuthState.unauthenticated());
+      },
     );
   }
 
@@ -214,7 +245,8 @@ class AuthCubit extends Cubit<AuthState> {
 
       result.fold(
         (failure) {
-          debugPrint('❌ [AuthCubit] OTP verification failed: ${failure.message}');
+          debugPrint(
+              '❌ [AuthCubit] OTP verification failed: ${failure.message}');
           emit(AuthState.error(failure.message));
         },
         (user) {
@@ -260,7 +292,8 @@ class AuthCubit extends Cubit<AuthState> {
       if (isClosed) return false;
       return result.fold(
         (failure) {
-          debugPrint('❌ [AuthCubit] sendLinkPhoneOtp failed: ${failure.message}');
+          debugPrint(
+              '❌ [AuthCubit] sendLinkPhoneOtp failed: ${failure.message}');
           emit(AuthState.error(failure.message));
           return false;
         },
@@ -293,7 +326,8 @@ class AuthCubit extends Cubit<AuthState> {
       final currentUserResult = await _getCurrentUserUseCase();
       await currentUserResult.fold(
         (failure) {
-          debugPrint('❌ [AuthCubit] Failed to get current user: ${failure.message}');
+          debugPrint(
+              '❌ [AuthCubit] Failed to get current user: ${failure.message}');
         },
         (user) {
           if (user != null) {
@@ -381,6 +415,21 @@ class AuthCubit extends Cubit<AuthState> {
             : AuthStatus.unauthenticated,
         errorMessage: null,
       ));
+    }
+  }
+
+  @override
+  void onChange(Change<AuthState> change) {
+    super.onChange(change);
+    final user = change.nextState.user;
+    if (user != null &&
+        change.nextState.isLoggedIn &&
+        !change.currentState.isLoggedIn) {
+      // تمرير دور المستخدم لـ OneSignal لاستهداف الأدمن بإشعارات طلبات الشراء
+      PushNotificationService.login(user.id, role: user.role.name);
+    } else if (change.nextState.status == AuthStatus.unauthenticated &&
+        change.currentState.status != AuthStatus.unauthenticated) {
+      PushNotificationService.logout();
     }
   }
 }

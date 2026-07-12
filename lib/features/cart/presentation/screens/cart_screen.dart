@@ -30,16 +30,19 @@ class _CartScreenState extends State<CartScreen> {
     _loadCart();
   }
 
-  void _loadCart() {
+  Future<void> _loadCart() async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     AppLogger.i('🛒 [CartScreen] Loading cart for user: $userId');
 
     if (userId != null) {
       final cartCubit = context.read<CartCubit>();
-      if (cartCubit.currentUserId != userId) {
-        cartCubit.loadCart(userId);
-      }
+      await cartCubit.loadCart(userId);
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await _loadCart();
   }
 
   @override
@@ -52,46 +55,72 @@ class _CartScreenState extends State<CartScreen> {
       body: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
           if (state.isLoading) {
-            return CartLoadingState(isDark: isDark);
+            return _wrapStaticRefresh(CartLoadingState(isDark: isDark), isDark);
           }
 
           if (state.isError) {
-            return FadeIn(
-              duration: const Duration(milliseconds: 400),
-              child: CartErrorState(
-                message: state.errorMessage ?? '',
-                onRetry: _loadCart,
-                isDark: isDark,
+            return _wrapStaticRefresh(
+              FadeIn(
+                duration: const Duration(milliseconds: 400),
+                child: CartErrorState(
+                  message: state.errorMessage ?? '',
+                  onRetry: _loadCart,
+                  isDark: isDark,
+                ),
               ),
+              isDark,
             );
           }
 
           if (state.isEmpty) {
-            return FadeIn(
-              duration: const Duration(milliseconds: 400),
-              child: CartEmptyState(
-                onBack: () => Navigator.of(context).pop(),
-                onBrowseCourses: _browseCourses,
-                isDark: isDark,
+            return _wrapStaticRefresh(
+              FadeIn(
+                duration: const Duration(milliseconds: 400),
+                child: CartEmptyState(
+                  onBack: () => Navigator.of(context).pop(),
+                  onBrowseCourses: _browseCourses,
+                  isDark: isDark,
+                ),
               ),
+              isDark,
             );
           }
 
-          return SlideFadeIn.fromBottom(
-            duration: const Duration(milliseconds: 500),
-            child: CartContent(
-              state: state,
-              locale: context.locale.languageCode,
-              isDark: isDark,
-              onBack: () => Navigator.of(context).pop(),
-              onClear: () => _showClearCartDialog(isDark),
-              onCheckout: _goToCheckout,
-              onRemoveItem: _removeItem,
-              onApplyCoupon: _applyCoupon,
-              onRemoveCoupon: _removeCoupon,
+          return RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+            child: SlideFadeIn.fromBottom(
+              duration: const Duration(milliseconds: 500),
+              child: CartContent(
+                state: state,
+                locale: context.locale.languageCode,
+                isDark: isDark,
+                onBack: () => Navigator.of(context).pop(),
+                onClear: () => _showClearCartDialog(isDark),
+                onCheckout: _goToCheckout,
+                onRemoveItem: _removeItem,
+                onApplyCoupon: _applyCoupon,
+                onRemoveCoupon: _removeCoupon,
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _wrapStaticRefresh(Widget child, bool isDark) {
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppColors.primary,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: child,
+        ),
       ),
     );
   }

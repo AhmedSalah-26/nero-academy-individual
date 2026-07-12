@@ -1,6 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/teacher_context_service.dart';
+import '../../../../core/utils/availability_window.dart';
 import '../../domain/entities/course_details_entity.dart';
 import '../models/course_details_model.dart';
 import '../models/section_model.dart';
@@ -18,6 +20,7 @@ abstract class CourseDetailsRemoteDataSource {
   Future<bool> toggleWishlist(String courseId, String userId);
   Future<bool> isInWishlist(String courseId, String userId);
   Future<bool> isInCart(String courseId, String userId);
+  Future<void> enrollFreeCourse(String courseId, String userId);
 }
 
 class CourseDetailsRemoteDataSourceImpl
@@ -42,7 +45,8 @@ class CourseDetailsRemoteDataSourceImpl
           id, course_id, title_ar, title_en, sort_order, is_published,
           lessons(
             id, section_id, title_ar, title_en, type, video_url, video_provider,
-            video_duration, is_preview, is_mandatory, is_published, sort_order
+            video_duration, is_preview, is_mandatory, is_published, sort_order,
+            available_from, available_until
           )
         ),
         quizzes!quizzes_course_id_fkey(count)
@@ -58,10 +62,21 @@ class CourseDetailsRemoteDataSourceImpl
 
       final isPublished = data['is_published'] == true;
       final instructorId = data['instructor_id'] as String?;
+      final teacherId = data['teacher_id'] as String?;
       final isOwnerInstructor = userId != null && instructorId == userId;
+      final selectedTeacherId =
+          TeacherContextService.instance.selectedTeacherId;
 
       // Allow non-published course access only for owner instructor.
       if (!isPublished && !isOwnerInstructor) {
+        throw const ServerException('Course not found');
+      }
+      if (!isOwnerInstructor &&
+          selectedTeacherId != null &&
+          teacherId != selectedTeacherId) {
+        throw const ServerException('Course not found');
+      }
+      if (!isOwnerInstructor && !AvailabilityWindow.isJsonActive(data)) {
         throw const ServerException('Course not found');
       }
 
@@ -81,8 +96,27 @@ class CourseDetailsRemoteDataSourceImpl
               total_students, total_courses, average_rating, is_verified
             ''').eq('instructor_id', instructorId).limit(1).maybeSingle();
 
+        // احسب عدد الكورسات المنشورة مباشرة من جدول courses
+        final coursesCountResult = await supabaseClient
+            .from('courses')
+            .select('id')
+            .eq('instructor_id', instructorId)
+            .eq('is_published', true);
+        final liveTotalCourses = (coursesCountResult as List).length;
+
+        // احسب عدد الطلاب المسجلين مباشرة من جدول enrollments
+        final studentsCountResult = await supabaseClient
+            .from('enrollments')
+            .select('user_id')
+            .eq('instructor_id', instructorId)
+            .eq('status', 'active');
+        final liveTotalStudents = (studentsCountResult as List).length;
+
         if (instructorProfile != null) {
-          data['instructor_profiles'] = instructorProfile;
+          final merged = Map<String, dynamic>.from(instructorProfile);
+          merged['total_courses'] = liveTotalCourses;
+          merged['total_students'] = liveTotalStudents;
+          data['instructor_profiles'] = merged;
         } else {
           // Use profiles data as fallback
           final profile = data['profiles'] as Map<String, dynamic>?;
@@ -99,8 +133,8 @@ class CourseDetailsRemoteDataSourceImpl
               'expertise': const <String>[],
               'social_links': const <String, dynamic>{},
               'website_url': null,
-              'total_students': 0,
-              'total_courses': 0,
+              'total_students': liveTotalStudents,
+              'total_courses': liveTotalCourses,
               'average_rating': 0.0,
               'is_verified': false,
             };
@@ -157,6 +191,12 @@ class CourseDetailsRemoteDataSourceImpl
       data['enrollment_id'] = enrollmentId;
       data['enrollment_status'] = enrollmentStatus;
       data['progress_percentage'] = progressPercentage;
+
+      final hasActiveCourseAccess =
+          enrollmentStatus == 'active' || enrollmentStatus == 'completed';
+      if (!isOwnerInstructor && !hasActiveCourseAccess) {
+        data['group_links'] = <String, dynamic>{};
+      }
 
       // Students should never see unpublished sections/lessons.
       if (!isOwnerInstructor) {
@@ -261,6 +301,8 @@ class CourseDetailsRemoteDataSourceImpl
             'is_mandatory': true,
             'is_published': true,
             'sort_order': lessonIndex,
+            'available_from': lessonRaw['available_from'],
+            'available_until': lessonRaw['available_until'],
           });
         }
 
@@ -359,6 +401,7 @@ class CourseDetailsRemoteDataSourceImpl
 
       final sectionPublished = sectionRaw['is_published'];
       if (sectionPublished is bool && !sectionPublished) continue;
+      if (!AvailabilityWindow.isJsonActive(sectionRaw)) continue;
 
       final rawLessons =
           (sectionRaw['lessons'] as List?)?.cast<dynamic>() ?? [];
@@ -368,6 +411,7 @@ class CourseDetailsRemoteDataSourceImpl
         if (lessonRaw is! Map<String, dynamic>) continue;
         final lessonPublished = lessonRaw['is_published'];
         if (lessonPublished is bool && !lessonPublished) continue;
+        if (!AvailabilityWindow.isJsonActive(lessonRaw)) continue;
         filteredLessons.add(Map<String, dynamic>.from(lessonRaw));
       }
 
@@ -387,7 +431,8 @@ class CourseDetailsRemoteDataSourceImpl
     try {
       String lessonSelect = '''
         id, section_id, title_ar, title_en, type, video_url, video_provider,
-        video_duration, is_preview, is_mandatory, is_published, sort_order
+        video_duration, is_preview, is_mandatory, is_published, sort_order,
+        available_from, available_until
       ''';
 
       // Add lesson progress if user is logged in
@@ -551,6 +596,61 @@ class CourseDetailsRemoteDataSourceImpl
       return result != null;
     } catch (e) {
       return false;
+    }
+  }
+
+  @override
+  Future<void> enrollFreeCourse(String courseId, String userId) async {
+    try {
+      final courseData = await supabaseClient
+          .from('courses')
+          .select('instructor_id, price, discount_price, is_free')
+          .eq('id', courseId)
+          .single();
+
+      final isFree = courseData['is_free'] == true;
+      final price = (courseData['discount_price'] as num?)?.toDouble() ??
+          (courseData['price'] as num?)?.toDouble() ??
+          0;
+
+      if (!isFree && price > 0) {
+        throw const ServerException('Course is not free');
+      }
+
+      final parentEnrollmentResponse = await supabaseClient
+          .from('parent_enrollments')
+          .insert({
+            'user_id': userId,
+            'total': 0,
+            'subtotal': 0,
+            'discount': 0,
+            'coupon_discount': 0,
+            'payment_method': 'free',
+            'payment_status': 'paid',
+            'paid_at': DateTime.now().toIso8601String(),
+          })
+          .select('id')
+          .single();
+
+      final parentEnrollmentId = parentEnrollmentResponse['id'] as String;
+
+      await supabaseClient.from('enrollments').insert({
+        'user_id': userId,
+        'course_id': courseId,
+        'instructor_id': courseData['instructor_id'],
+        'parent_enrollment_id': parentEnrollmentId,
+        'status': 'active',
+        'progress_percentage': 0,
+        'completed_lessons': 0,
+        'price': 0,
+        'discount': 0,
+        'total_watch_time': 0,
+        'enrolled_at': DateTime.now().toIso8601String(),
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }

@@ -32,18 +32,24 @@ class PaymentEntity extends Equatable {
   });
 
   bool get isPaid => paymentStatus == 'paid';
-  bool get isPending => paymentStatus == 'pending';
+  bool get isPending =>
+      paymentStatus == 'pending' || paymentStatus == 'pending_manual_payment';
   bool get isFailed => paymentStatus == 'failed';
   bool get isRefunded => paymentStatus == 'refunded';
+  bool get isCancelled => paymentStatus == 'cancelled';
+  bool get isFree =>
+      total <= 0 || paymentMethod == 'free' || courses.every((c) => c.isFree);
 
   String get statusAr {
     switch (paymentStatus) {
       case 'paid':
         return 'مدفوع';
       case 'pending':
-        return 'قيد الانتظار';
+      case 'pending_manual_payment':
+        return 'قيد المراجعة';
       case 'failed':
-        return 'فشل';
+      case 'cancelled':
+        return 'ملغي';
       case 'refunded':
         return 'مسترد';
       default:
@@ -56,9 +62,11 @@ class PaymentEntity extends Equatable {
       case 'paid':
         return 'Paid';
       case 'pending':
+      case 'pending_manual_payment':
         return 'Pending';
       case 'failed':
-        return 'Failed';
+      case 'cancelled':
+        return 'Cancelled';
       case 'refunded':
         return 'Refunded';
       default:
@@ -67,11 +75,17 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodAr {
+    if (isFree) return 'مجاني';
+
     switch (paymentMethod) {
       case 'card':
         return 'بطاقة ائتمان';
       case 'wallet':
         return 'محفظة إلكترونية';
+      case 'manual':
+        return 'دفع يدوي';
+      case 'free':
+        return 'مجاني';
       case 'cash':
         return 'نقدي';
       default:
@@ -80,11 +94,17 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodEn {
+    if (isFree) return 'Free';
+
     switch (paymentMethod) {
       case 'card':
         return 'Credit Card';
       case 'wallet':
         return 'Mobile Wallet';
+      case 'manual':
+        return 'Manual Payment';
+      case 'free':
+        return 'Free';
       case 'cash':
         return 'Cash';
       default:
@@ -122,6 +142,8 @@ class PaymentCourseEntity extends Equatable {
     this.thumbnailUrl,
     required this.price,
   });
+
+  bool get isFree => price <= 0;
 
   @override
   List<Object?> get props => [courseId, title, thumbnailUrl, price];

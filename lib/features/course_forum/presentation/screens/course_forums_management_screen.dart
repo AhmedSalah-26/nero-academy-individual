@@ -220,6 +220,8 @@ class _CourseForumsManagementScreenState
                   ),
                 Switch.adaptive(
                   value: course.hasGroup,
+                  activeTrackColor: AppColors.primary,
+                  activeThumbColor: Colors.white,
                   onChanged: isBusy
                       ? null
                       : (value) => _toggleCourseGroup(course, value),

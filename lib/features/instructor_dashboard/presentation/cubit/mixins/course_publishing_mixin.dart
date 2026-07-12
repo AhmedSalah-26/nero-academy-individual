@@ -16,6 +16,14 @@ mixin CoursePublishingMixin
         '[CoursePublishingMixin] isEditing=${state.isEditing}, courseId=${state.courseId}');
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (!state.hasValidAvailabilityWindow) {
+        throw Exception('Invalid availability window');
+      }
+      if (state.sections
+          .expand((section) => section.lessons)
+          .any((lesson) => !lesson.hasValidAvailabilityWindow)) {
+        throw Exception('Invalid lesson availability window');
+      }
       String courseId;
 
       // Flash sale uses discount value as timed sale price.
@@ -47,14 +55,18 @@ mixin CoursePublishingMixin
         previewVideoUrl: state.previewVideoUrl,
         categoryId: state.categoryId,
         level: state.level,
+        groupLinks: state.groupLinks,
         price: state.price,
         discountPrice: normalizedDiscountPrice,
         currency: state.currency,
+        pricingOptions: state.pricingOptions,
         isPublished: false,
         badge: state.badge,
         isFlashSale: isFlashSale,
         flashSaleStart: normalizedFlashSaleStart,
         flashSaleEnd: normalizedFlashSaleEnd,
+        availableFrom: state.availableFrom?.toUtc(),
+        availableUntil: state.availableUntil?.toUtc(),
       );
 
       if (state.isEditing && state.courseId != null) {
@@ -74,16 +86,24 @@ mixin CoursePublishingMixin
             previewVideoUrl: dto.previewVideoUrl,
             categoryId: dto.categoryId,
             level: dto.level,
+            groupLinks: dto.groupLinks,
+            clearGroupLinks: !dto.groupLinks.hasAny,
             price: dto.price,
             discountPrice: dto.discountPrice,
             clearDiscountPrice: dto.discountPrice == null,
             currency: dto.currency,
+            pricingOptions: dto.pricingOptions,
+            clearPricingOptions: dto.pricingOptions.isEmpty,
             badge: dto.badge,
             clearBadge: dto.badge == null || dto.badge!.trim().isEmpty,
             isFlashSale: dto.isFlashSale,
             flashSaleStart: dto.flashSaleStart,
             flashSaleEnd: dto.flashSaleEnd,
             clearFlashSaleData: !dto.isFlashSale,
+            availableFrom: dto.availableFrom,
+            availableUntil: dto.availableUntil,
+            clearAvailabilityWindow:
+                dto.availableFrom == null && dto.availableUntil == null,
           ),
         );
         courseId = state.courseId!;
@@ -113,6 +133,8 @@ mixin CoursePublishingMixin
               durationMinutes: l.durationMinutes,
               isFree: l.isFree,
               isPublished: l.isPublished,
+              availableFrom: l.availableFrom?.toUtc(),
+              availableUntil: l.availableUntil?.toUtc(),
               videoUrl: l.videoUrl,
               articleContent: l.articleContent,
               fileUrl: l.fileUrl,
@@ -151,6 +173,10 @@ mixin CoursePublishingMixin
 
     if (!state.canPublish) {
       AppLogger.w('[CoursePublishingMixin] Cannot publish - validation failed');
+      emit(state.copyWith(
+        status: CourseEditorStatus.error,
+        errorMessage: 'Course publish validation failed',
+      ));
       return false;
     }
 
@@ -188,6 +214,9 @@ mixin CoursePublishingMixin
     if (!state.isEditing || state.courseId == null) return false;
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (!state.hasValidAvailabilityWindow) {
+        throw Exception('Invalid availability window');
+      }
       await repository.updateCourse(
         state.courseId!,
         CourseUpdateDto(
@@ -203,6 +232,8 @@ mixin CoursePublishingMixin
           previewVideoUrl: state.previewVideoUrl,
           categoryId: state.categoryId,
           level: state.level,
+          groupLinks: state.groupLinks,
+          clearGroupLinks: !state.groupLinks.hasAny,
         ),
       );
       emit(state.copyWith(status: CourseEditorStatus.success));
@@ -221,6 +252,11 @@ mixin CoursePublishingMixin
     if (!state.isEditing || state.courseId == null) return false;
     emit(state.copyWith(status: CourseEditorStatus.loading));
     try {
+      if (state.sections
+          .expand((section) => section.lessons)
+          .any((lesson) => !lesson.hasValidAvailabilityWindow)) {
+        throw Exception('Invalid lesson availability window');
+      }
       final sections = state.sections.map((s) {
         return SectionDto(
           id: s.id,
@@ -238,6 +274,8 @@ mixin CoursePublishingMixin
               durationMinutes: l.durationMinutes,
               isFree: l.isFree,
               isPublished: l.isPublished,
+              availableFrom: l.availableFrom?.toUtc(),
+              availableUntil: l.availableUntil?.toUtc(),
               videoUrl: l.videoUrl,
               articleContent: l.articleContent,
               fileUrl: l.fileUrl,
@@ -282,6 +320,8 @@ mixin CoursePublishingMixin
           discountPrice: state.discountPrice,
           clearDiscountPrice: state.discountPrice == null,
           currency: state.currency,
+          pricingOptions: state.pricingOptions,
+          clearPricingOptions: state.pricingOptions.isEmpty,
           isFlashSale: isFlashSale,
           flashSaleStart: isFlashSale ? state.flashSaleStart?.toUtc() : null,
           flashSaleEnd: isFlashSale ? state.flashSaleEnd?.toUtc() : null,
@@ -309,6 +349,10 @@ mixin CoursePublishingMixin
         CourseUpdateDto(
           badge: state.badge,
           clearBadge: state.badge == null || state.badge!.trim().isEmpty,
+          availableFrom: state.availableFrom?.toUtc(),
+          availableUntil: state.availableUntil?.toUtc(),
+          clearAvailabilityWindow:
+              state.availableFrom == null && state.availableUntil == null,
         ),
       );
       emit(state.copyWith(status: CourseEditorStatus.success));

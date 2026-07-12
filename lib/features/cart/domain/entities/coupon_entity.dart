@@ -27,6 +27,9 @@ class CouponEntity extends Equatable {
   final double discountValue;
   final double? maxDiscountAmount;
   final double? minOrderAmount;
+  final int? usageLimit;
+  final int usageCount;
+  final int usageLimitPerUser;
   final DateTime? startDate;
   final DateTime? endDate;
   final bool isActive;
@@ -40,6 +43,9 @@ class CouponEntity extends Equatable {
     this.discountValue = 0,
     this.maxDiscountAmount,
     this.minOrderAmount,
+    this.usageLimit,
+    this.usageCount = 0,
+    this.usageLimitPerUser = 1,
     this.startDate,
     this.endDate,
     this.isActive = true,
@@ -71,12 +77,48 @@ class CouponEntity extends Equatable {
   /// Check if coupon is valid
   bool get isValid {
     if (!isActive) return false;
+    if (usageLimit != null && usageCount >= usageLimit!) return false;
     final now = DateTime.now();
-    if (startDate != null && now.isBefore(startDate!)) return false;
-    if (endDate != null && now.isAfter(endDate!)) return false;
+    if (startDate != null && now.isBefore(_effectiveStartDate(startDate!))) {
+      return false;
+    }
+    if (endDate != null && now.isAfter(_effectiveEndDate(endDate!))) {
+      return false;
+    }
     return true;
   }
 
+  DateTime _effectiveStartDate(DateTime value) {
+    // Existing coupons may have been saved about one hour in the future due to
+    // timezone conversion. Treat near-future start dates as active immediately.
+    final now = DateTime.now();
+    if (value.isAfter(now) && value.difference(now).inHours < 2) {
+      return now;
+    }
+
+    return value;
+  }
+
+  DateTime _effectiveEndDate(DateTime value) {
+    final isDateOnly = value.hour == 0 &&
+        value.minute == 0 &&
+        value.second == 0 &&
+        value.millisecond == 0 &&
+        value.microsecond == 0;
+    if (!isDateOnly) return value;
+
+    return DateTime(value.year, value.month, value.day, 23, 59, 59, 999, 999);
+  }
+
   @override
-  List<Object?> get props => [id, code, discountType, discountValue, isActive];
+  List<Object?> get props => [
+        id,
+        code,
+        discountType,
+        discountValue,
+        usageLimit,
+        usageCount,
+        usageLimitPerUser,
+        isActive,
+      ];
 }

@@ -250,7 +250,7 @@ class _CompletionAnimationState extends State<CompletionAnimation>
       Colors.blue,
       Colors.yellow,
       Colors.green,
-      Colors.purple,
+      Colors.blueAccent,
       Colors.orange,
     ];
 

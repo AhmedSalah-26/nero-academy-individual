@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/base/base_state.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/services/lesson_history_service.dart';
+import '../../../../core/services/video_player_notifier_service.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/lesson_entity.dart';
 import '../../domain/entities/lesson_progress_entity.dart';
@@ -128,6 +129,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
         // Load course attachments
         await _loadCourseAttachments(courseId);
+        await _loadCourseGroupLinks(courseId, enrollmentId);
 
         // Load lesson details if we have one
         if (initialLesson != null) {
@@ -151,6 +153,25 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
         AppLogger.success(
             '[CoursePlayer] Loaded ${attachments.length} course attachments');
         _safeEmit(state.copyWith(courseAttachments: attachments));
+      },
+    );
+  }
+
+  Future<void> _loadCourseGroupLinks(
+    String courseId,
+    String enrollmentId,
+  ) async {
+    final result = await repository.getCourseGroupLinks(
+      courseId: courseId,
+      enrollmentId: enrollmentId,
+    );
+    result.fold(
+      (failure) {
+        AppLogger.e(
+            '[CoursePlayer] Failed to load group links: ${failure.message}');
+      },
+      (links) {
+        _safeEmit(state.copyWith(groupLinks: links));
       },
     );
   }
@@ -226,6 +247,11 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
   Future<void> selectLesson(LessonEntity lesson) async {
     if (_isClosed) return;
     AppLogger.i('🎬 [CoursePlayer] Selecting lesson: ${lesson.id}');
+
+    // Dismiss the media notification / stop any background video
+    try {
+      sl<VideoPlayerNotifierService>().dismiss();
+    } catch (_) {}
 
     // Load progress first to get last position
     LessonProgressEntity? progress;

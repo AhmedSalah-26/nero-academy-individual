@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../network/network_info.dart';
 import '../services/lesson_history_service.dart';
 import '../services/supabase_service.dart';
+import '../services/video_player_notifier_service.dart';
 // Auth Feature
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -13,6 +14,7 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
 import '../../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
+import '../../features/auth/domain/usecases/login_with_google_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/send_phone_otp_usecase.dart';
@@ -50,11 +52,11 @@ import '../../features/course_details/data/repositories/course_details_repositor
 import '../../features/course_details/domain/repositories/course_details_repository.dart';
 import '../../features/course_details/domain/usecases/get_course_details_usecase.dart';
 import '../../features/course_details/domain/usecases/get_course_reviews_usecase.dart';
+import '../../features/course_details/domain/usecases/enroll_free_course_usecase.dart';
 import '../../features/course_details/presentation/cubit/course_details_cubit.dart';
 // Cart Feature
 import '../../features/cart/data/datasources/cart_remote_data_source.dart';
 import '../../features/cart/data/datasources/cart_local_data_source.dart';
-import '../../features/cart/data/datasources/enrollment_payment_service.dart';
 import '../../features/cart/data/repositories/cart_repository_impl.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/cart/domain/usecases/get_cart_usecase.dart';
@@ -152,6 +154,7 @@ Future<void> initDependencies() async {
   // ============ Core ============
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
   sl.registerLazySingleton(() => LessonHistoryService(sl()));
+  sl.registerLazySingleton(() => VideoPlayerNotifierService());
 
   // ============ Auth Feature ============
   _initAuth();
@@ -197,6 +200,7 @@ void _initAuth() {
   // Cubits - AuthCubit as singleton to maintain state across navigation
   sl.registerLazySingleton(() => AuthCubit(
         loginUseCase: sl(),
+        loginWithGoogleUseCase: sl(),
         registerUseCase: sl(),
         logoutUseCase: sl(),
         getCurrentUserUseCase: sl(),
@@ -212,6 +216,7 @@ void _initAuth() {
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => LoginWithGoogleUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
@@ -302,12 +307,14 @@ void _initCourseDetails() {
   sl.registerFactory(() => CourseDetailsCubit(
         getCourseDetailsUseCase: sl(),
         getCourseReviewsUseCase: sl(),
+        enrollFreeCourseUseCase: sl(),
         wishlistCubit: sl(),
       ));
 
   // Use Cases
   sl.registerLazySingleton(() => GetCourseDetailsUseCase(sl()));
   sl.registerLazySingleton(() => GetCourseReviewsUseCase(sl()));
+  sl.registerLazySingleton(() => EnrollFreeCourseUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<CourseDetailsRepository>(
@@ -325,9 +332,6 @@ void _initCourseDetails() {
 }
 
 void _initCart() {
-  // Services
-  sl.registerLazySingleton(() => EnrollmentPaymentService(supabase: sl()));
-
   // Cubits - CartCubit is singleton to share state across screens
   sl.registerLazySingleton(() => CartCubit(
         getCartUseCase: sl(),
@@ -341,7 +345,6 @@ void _initCart() {
   sl.registerFactory(() => CheckoutCubit(
         checkoutUseCase: sl(),
         cartRepository: sl(),
-        enrollmentPaymentService: sl(),
       ));
 
   // Use Cases
@@ -519,8 +522,6 @@ void _initSettings() {
       () => SettingsLocalDataSourceImpl(prefs: sl()));
 }
 
-
-
 void _initInstructorDashboard() {
   // Data Sources - Register first as repository depends on them
   sl.registerLazySingleton<InstructorStatsDataSource>(
@@ -584,8 +585,6 @@ void _initNotifications() {
   // Cubit - Singleton to share state across screens
   sl.registerLazySingleton(() => NotificationsCubit(sl()));
 }
-
-
 
 void _initPaymentsHistory() {
   // Data Source

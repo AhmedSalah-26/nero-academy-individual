@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../di/injection_container.dart';
 import '../services/app_logger.dart';
+import '../services/teacher_context_service.dart';
 import '../services/user_role_service.dart';
 import '../services/reports_service.dart';
 import '../animations/page_transitions.dart';
@@ -24,7 +25,9 @@ import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/presentation/cubit/interests_cubit.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/screens/interests_selection_screen.dart';
+import '../../features/teacher_selection/presentation/screens/select_teacher_screen.dart';
 // Main
 import '../../features/main/presentation/screens/main_screen.dart';
 // Home
@@ -50,14 +53,17 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/settings/presentation/screens/help_support_screen.dart';
 import '../../features/settings/presentation/screens/edit_profile_screen.dart';
-import '../../features/settings/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/terms_of_service_screen.dart';
 import '../../features/settings/presentation/cubit/profile_cubit.dart';
+import '../../features/settings/presentation/screens/student_profile_screen.dart';
+import '../../features/instructor_dashboard/presentation/screens/students_progress_sheet_screen.dart';
 // Course Search
 import '../../features/course_search/presentation/cubit/course_search_cubit.dart';
 import '../../features/course_search/presentation/screens/course_search_screen.dart';
 import '../../features/course_search/presentation/screens/course_filter_screen.dart';
 import '../../features/course_search/domain/entities/search_filter_entity.dart';
+// Payments History / Orders Status
+import '../../features/payments_history/presentation/screens/payments_history_screen.dart';
 // Course Details
 import '../../features/course_details/presentation/cubit/course_details_cubit.dart';
 import '../../features/course_details/presentation/screens/course_details_screen.dart';
@@ -111,11 +117,14 @@ import '../../features/instructor/presentation/screens/instructor_profile_screen
 /// App Router - Centralized routing configuration
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
+  static final RouteObserver<ModalRoute<void>> routeObserver =
+      RouteObserver<ModalRoute<void>>();
 
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     debugLogDiagnostics: true,
+    observers: [routeObserver],
     routes: [
       GoRoute(
         path: '/',
@@ -149,12 +158,22 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) => const ResetPasswordScreen(),
+      ),
+      GoRoute(
         path: '/interests',
         name: 'interests',
         builder: (context, state) => BlocProvider(
           create: (_) => sl<InterestsCubit>(),
           child: const InterestsSelectionScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/select-teacher',
+        name: 'select-teacher',
+        builder: (context, state) => const SelectTeacherScreen(),
       ),
 
       // ==================== Main App with StatefulShellRoute ====================
@@ -268,6 +287,13 @@ class AppRouter {
         path: '/history',
         name: 'history',
         builder: (context, state) => const HistoryScreen(),
+      ),
+
+      // Orders Status (Payments History)
+      GoRoute(
+        path: '/orders-status',
+        name: 'orders-status',
+        builder: (context, state) => const PaymentsHistoryScreen(),
       ),
 
       // Wishlist (moved from nav bar)
@@ -522,18 +548,18 @@ class AppRouter {
         ),
       ),
 
-      // Privacy Policy
-      GoRoute(
-        path: '/privacy-policy',
-        name: 'privacy-policy',
-        builder: (context, state) => const PrivacyPolicyScreen(),
-      ),
-
       // Terms of Service
       GoRoute(
         path: '/terms-of-service',
         name: 'terms-of-service',
         builder: (context, state) => const TermsOfServiceScreen(),
+      ),
+
+      // Student Profile
+      GoRoute(
+        path: '/student-profile',
+        name: 'student-profile',
+        builder: (context, state) => const StudentProfileScreen(),
       ),
 
       // Quiz Info
@@ -906,6 +932,19 @@ class AppRouter {
         ),
       ),
 
+      // Students Progress Sheet
+      GoRoute(
+        path: '/instructor/students-progress-sheet',
+        name: 'students-progress-sheet',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return StudentsProgressSheetScreen(
+            courseId: extra?['courseId'] as String?,
+            courseTitle: extra?['courseTitle'] as String?,
+          );
+        },
+      ),
+
       // Quiz Editor
       GoRoute(
         path: '/instructor/quiz/:quizId/edit',
@@ -929,12 +968,15 @@ class AppRouter {
       GoRoute(
         path: '/instructor/quiz/create',
         name: 'create-quiz',
-        builder: (context, state) => BlocProvider.value(
-          value: sl<InstructorQuizzesCubit>(),
-          child: CreateQuizScreen(
-            cubit: sl<InstructorQuizzesCubit>(),
-          ),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final cubit = extra?['cubit'] as InstructorQuizzesCubit? ??
+              sl<InstructorQuizzesCubit>();
+          return BlocProvider.value(
+            value: cubit,
+            child: CreateQuizScreen(cubit: cubit),
+          );
+        },
       ),
 
       // Quiz Questions Management
@@ -1014,6 +1056,30 @@ class AppRouter {
     redirect: (context, state) async {
       final user = Supabase.instance.client.auth.currentUser;
       final path = state.uri.path;
+
+      const publicAuthPaths = {
+        '/splash',
+        '/login',
+        '/forgot-password',
+        '/reset-password',
+        '/interests',
+      };
+
+      if (user != null &&
+          !publicAuthPaths.contains(path) &&
+          path != '/select-teacher') {
+        final role = await UserRoleService.getCurrentUserRole();
+        if (role == 'student') {
+          await TeacherContextService.instance.ensureInitialized(
+            Supabase.instance.client,
+          );
+          final hasTeacher =
+              await TeacherContextService.instance.hasSelectedTeacher(user.id);
+          if (!hasTeacher) {
+            return '/select-teacher';
+          }
+        }
+      }
 
       // Instructor workspace access control. Public instructor profiles live
       // under /instructor/profile/:instructorId and remain publicly reachable.
@@ -1127,14 +1193,17 @@ class AppRouter {
 
   static void goToHistory(BuildContext context) => context.pushNamed('history');
 
+  static void goToOrdersStatus(BuildContext context) =>
+      context.pushNamed('orders-status');
+
   static void goToSettings(BuildContext context) =>
       context.pushNamed('settings');
+  static void goToSelectTeacher(BuildContext context) =>
+      context.pushNamed('select-teacher');
   static void goToHelpSupport(BuildContext context) =>
       context.pushNamed('help-support');
   static void goToEditProfile(BuildContext context) =>
       context.pushNamed('edit-profile');
-  static void goToPrivacyPolicy(BuildContext context) =>
-      context.pushNamed('privacy-policy');
   static void goToTermsOfService(BuildContext context) =>
       context.pushNamed('terms-of-service');
 
@@ -1374,8 +1443,14 @@ class AppRouter {
     });
   }
 
-  static void goToCreateQuiz(BuildContext context) {
-    context.pushNamed('create-quiz');
+  static Future<T?> goToCreateQuiz<T>(
+    BuildContext context, {
+    InstructorQuizzesCubit? cubit,
+  }) {
+    return context.pushNamed<T>(
+      'create-quiz',
+      extra: cubit == null ? null : {'cubit': cubit},
+    );
   }
 
   static void goToManageQuizQuestions(
@@ -1428,6 +1503,18 @@ class AppRouter {
     context.pushNamed('banner-editor', extra: {
       'banner': banner,
       'onSave': onSave,
+    });
+  }
+
+  static void goToStudentProfile(BuildContext context) {
+    context.pushNamed('student-profile');
+  }
+
+  static void goToStudentsProgressSheet(BuildContext context,
+      {String? courseId, String? courseTitle}) {
+    context.pushNamed('students-progress-sheet', extra: {
+      'courseId': courseId,
+      'courseTitle': courseTitle,
     });
   }
 

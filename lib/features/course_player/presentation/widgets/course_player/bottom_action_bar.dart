@@ -1,6 +1,8 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
+
 import '../../../../../core/theme/app_colors.dart';
 
 /// Bottom Action Bar Widget
@@ -26,6 +28,8 @@ class BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == ui.TextDirection.rtl;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       decoration: BoxDecoration(
@@ -41,14 +45,14 @@ class BottomActionBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Directionality(
-          textDirection: ui.TextDirection.rtl,
+          textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
           child: Row(
             children: [
               Expanded(
                 flex: 2,
                 child: isLastLesson
                     ? _buildCompleteCourseButton()
-                    : _buildNextLessonButton(),
+                    : _buildNextLessonButton(isRtl),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -70,7 +74,7 @@ class BottomActionBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -88,13 +92,18 @@ class BottomActionBar extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: 6),
-              Text(
-                'course_player.attachments'.tr(),
-                style: TextStyle(
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: Text(
+                  'course_player.attachments'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -104,7 +113,7 @@ class BottomActionBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNextLessonButton() {
+  Widget _buildNextLessonButton(bool isRtl) {
     return Material(
       color: hasNextLesson
           ? AppColors.primary
@@ -118,20 +127,25 @@ class BottomActionBar extends StatelessWidget {
         child: Container(
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'إكمال والانتقال للتالي',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+              Flexible(
+                child: Text(
+                  'course_player.next_lesson'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Icon(
-                Icons.arrow_back_rounded,
+                isRtl ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
                 color: Colors.white,
                 size: 18,
               ),
@@ -173,12 +187,16 @@ class BottomActionBar extends StatelessWidget {
                   size: 18,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'course_player.complete_course'.tr(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    'course_player.complete_course'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

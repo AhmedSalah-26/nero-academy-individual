@@ -1,6 +1,6 @@
 {
-  "app_name": "نيرو اكاديمى",
-  "splash_slogan": "معاك هنكمل المشوار",
+  "app_name": "Dr UneXpected",
+  "splash_slogan": "كيمياء بشكل غير متوقع",
   "clear_all": "مسح الكل",
   "common": {
     "loading": "جاري التحميل...",
@@ -40,7 +40,8 @@
     "months_ago": "أشهر",
     "learn_more": "معرفة المزيد",
     "read_more": "اقرأ المزيد",
-    "select_country": "اختر الدولة"
+    "select_country": "اختر الدولة",
+    "copy": "نسخ"
   },
   "errors": {
     "network": "لا يوجد اتصال بالإنترنت",
@@ -134,7 +135,8 @@
       "email_not_confirmed": "يرجى تأكيد بريدك الإلكتروني أولاً",
       "session_expired": "انتهت صلاحية الجلسة، سجل دخولك مرة أخرى",
       "user_banned": "حسابك محظور",
-      "user_inactive": "حسابك غير مفعل. تواصل مع الدعم"
+      "user_inactive": "حسابك غير مفعل. تواصل مع الدعم",
+      "email_not_registered": "البريد الإلكتروني غير مسجل في النظام. يرجى التحقق من البريد أو إنشاء حساب جديد."
     },
     "login_required": "يجب تسجيل الدخول أولاً",
     "login_with_phone": "تسجيل الدخول برقم الهاتف",
@@ -184,13 +186,32 @@
     "add_photo": "أضف صورتك",
     "photo_subtitle": "ساعد الآخرين على التعرف عليك",
     "instructor_info": "معلومات المدرس",
-    "instructor_subtitle": "أخبرنا المزيد عن خبرتك"
+    "instructor_subtitle": "أخبرنا المزيد عن خبرتك",
+    "reset_password_done_title": "تم تغيير كلمة السر بنجاح",
+    "reset_password_done_subtitle": "يمكنك الآن تسجيل الدخول بكلمة السر الجديدة.",
+    "reset_password_new_title": "تعيين كلمة سر جديدة",
+    "reset_password_new_subtitle": "اكتب كلمة السر الجديدة لحسابك.",
+    "new_password": "كلمة السر الجديدة",
+    "change_password": "تغيير كلمة السر",
+    "reset_link_invalid": "رابط إعادة التعيين غير صالح أو منتهي.",
+    "reset_password_failed": "تعذر تغيير كلمة السر. اطلب رابطا جديدا.",
+    "password_min_8": "كلمة السر يجب أن تكون 8 أحرف على الأقل",
+    "reset_otp_subtitle": "أدخل بريدك الإلكتروني وسنرسل لك كود تحقق.",
+    "reset_otp_sent": "تم إرسال كود التحقق إلى بريدك الإلكتروني",
+    "enter_reset_code": "أدخل كود التحقق وكلمة السر الجديدة.",
+    "otp_code": "كود التحقق",
+    "otp_code_hint": "كود من 6 أرقام",
+    "otp_required": "كود التحقق مطلوب",
+    "verify_and_change_password": "تأكيد وتغيير كلمة السر",
+    "reset_success": "تم تغيير كلمة السر بنجاح",
+    "resend_code": "إعادة إرسال الكود",
+    "send_reset_code": "إرسال الكود"
   },
   "home": {
     "hello": "مرحباً",
     "greeting": "مرحباً، طالب",
     "explore_courses": "استكشف الدورات",
-    "search_placeholder": "ابحث عن ما تريد...",
+    "search_placeholder": "ابحث عن درس، امتحان، مذكرة ...",
     "all": "الكل",
     "flash_sale": "عرض خاص",
     "flash_sale_subtitle": "عروض لفترة محدودة!",
@@ -204,7 +225,8 @@
     "continue": "استكمل",
     "completed": "مكتمل",
     "recommended_for_you": "مقترح لك",
-    "based_on_interests": "بناءً على اهتماماتك"
+    "based_on_interests": "بناءً على اهتماماتك",
+    "no_courses_available": "لا يوجد كورسات متاحة حاليا"
   },
   "course": {
     "course": "دورة",
@@ -268,6 +290,8 @@
     "add": "أضف",
     "added_to_cart": "تمت الإضافة للسلة بنجاح",
     "already_in_cart": "هذه الدورة موجودة بالفعل في السلة",
+    "already_enrolled": "أنت مشترك بالفعل في هذه الدورة",
+    "pending_enrollment": "يوجد طلب بالفعل، يرجى انتظار موافقة الإدارة",
     "clear_cart_confirm": "هل تريد حذف جميع العناصر من السلة؟",
     "add_failed": "فشل في الإضافة للسلة",
     "free": "مجاني",
@@ -296,7 +320,16 @@
     "order_id": "رقم الطلب:",
     "start_learning": "ابدأ التعلم",
     "back_to_home": "العودة للرئيسية",
-    "pending_confirmation": "الدفع قيد التأكيد. سيتم تفعيل الاشتراك بعد تأكيد البنك."
+    "pending_confirmation": "الدفع قيد التأكيد. سيتم تفعيل الاشتراك بعد تأكيد البنك.",
+    "request_submitted": "تم تقديم الطلب",
+    "manual_request_subtitle": "تواصل مع المدرب على واتساب وأرسل رقم العملية لإتمام الدفع وتفعيل الكورس.",
+    "operation_id": "رقم العملية",
+    "admin_whatsapp": "واتساب الإدارة",
+    "instructor_whatsapp": "واتساب المدرب",
+    "instructor_whatsapp_unavailable": "رقم المدرب غير متاح حالياً",
+    "contact_whatsapp": "تواصل على واتساب",
+    "whatsapp_message": "مرحبا، أريد إتمام دفع طلب شهاب تك. رقم العملية: {orderId}",
+    "copied": "تم النسخ"
   },
   "my_learning": {
     "title": "دوراتي",
@@ -486,6 +519,7 @@
     "total_points": "إجمالي النقاط",
     "time_spent": "الوقت المستغرق",
     "retry": "حاول مرة أخرى",
+    "try_again": "حاول مرة أخرى",
     "back_to_course": "العودة للدورة",
     "correct_answer": "الإجابة الصحيحة",
     "your_answer": "إجابتك",
@@ -536,7 +570,9 @@
     "not_found": "لم يتم العثور على الدورة",
     "preview_not_available": "فيديو المعاينة غير متاح حالياً",
     "invalid_preview_link": "رابط فيديو المعاينة غير صالح",
-    "cannot_open_preview": "تعذر فتح فيديو المعاينة"
+    "cannot_open_preview": "تعذر فتح فيديو المعاينة",
+    "courses": "دورة",
+    "get_for_free": "احصل عليه مجاناً"
   },
   "instructor": {
     "instructor": "المدرس",
@@ -583,7 +619,8 @@
     "loading": "جاري تحميل الدورة...",
     "error": "حدث خطأ في تحميل الدورة",
     "section": "القسم",
-    "lesson": "الدرس",
+    "lesson": "المحاضرة",
+    "lesson_list": "قائمة المحاضرات",
     "lectures": "المحاضرات",
     "more": "المزيد",
     "qa": "الأسئلة",
@@ -648,7 +685,18 @@
     "playback_speed": "سرعة التشغيل",
     "fullscreen": "تكبير الشاشة",
     "video_unavailable": "الفيديو غير متاح",
-    "video_unavailable_desc": "عذراً، هذا الفيديو غير متاح حالياً أو تم حذفه"
+    "video_unavailable_desc": "عذراً، هذا الفيديو غير متاح حالياً أو تم حذفه",
+    "select_rating": "يرجى اختيار تقييم",
+    "rating_submit_error": "تعذر إرسال التقييم. حاول مرة أخرى.",
+    "review_count": "{} تقييم",
+    "you": "أنت",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "days_ago": "منذ {} أيام",
+    "weeks_ago": "منذ {} أسابيع",
+    "months_ago": "منذ {} أشهر",
+    "years_ago": "منذ {} سنة",
+    "report": "الإبلاغ"
   },
   "search": {
     "search_courses": "ابحث عن دورات...",
@@ -838,7 +886,9 @@
       "create_quiz": "إنشاء اختبار",
       "edit_quiz": "تعديل الاختبار",
       "quiz_attempts": "محاولات الاختبار",
-      "preview_quiz": "معاينة الاختبار"
+      "preview_quiz": "معاينة الاختبار",
+      "delete_course_title": "حذف الكورس نهائياً",
+      "delete_course_confirm": "هل أنت متأكد من حذف كورس ({title})؟\n\n⚠️ سيتم حذف الكورس بجميع دروسه، أقسامه، ملفاته، ومحتوياته بالكامل نهائياً من النظام!"
     },
     "common": {
       "search": "بحث...",
@@ -924,5 +974,62 @@
       "no_violation": "لم نجد انتهاكاً لسياسات المنصة في هذا المحتوى.",
       "duplicate_report": "تم الإبلاغ بالفعل واتخاذ الإجراء."
     }
+  },
+  "course_editor": {
+    "next_settings": "التالي (الإعدادات)",
+    "publish_course": "نشر الكورس",
+    "publish": "نشر",
+    "save_draft": "حفظ مسودة",
+    "publish_missing_title": "بيانات ناقصة قبل النشر",
+    "publish_missing_message": "أكمل البيانات التالية ثم حاول النشر مرة أخرى:",
+    "publish_confirm_title": "نشر الكورس",
+    "publish_confirm_message": "هل أنت متأكد من نشر هذا الكورس؟",
+    "publish_success": "تم نشر الكورس بنجاح",
+    "publish_failed": "فشل في نشر الكورس",
+    "published_available": "تم نشر الكورس وأصبح متاحا للطلاب الآن",
+    "publishing": "جاري نشر الكورس...",
+    "validation_title_ar": "العنوان العربي",
+    "validation_title_en": "العنوان الإنجليزي",
+    "validation_description_ar": "الوصف العربي",
+    "validation_description_en": "الوصف الإنجليزي",
+    "validation_category": "التصنيف",
+    "validation_course_availability": "وقت إتاحة الكورس يجب أن يكون صحيحا",
+    "validation_section_required": "أضف قسما واحدا على الأقل",
+    "validation_section_fallback": "القسم {number}",
+    "validation_lesson_fallback": "الدرس {number}",
+    "validation_section_empty": "{section} لا يحتوي على دروس",
+    "validation_lesson_availability": "وقت إتاحة {lesson} داخل {section} غير صحيح",
+    "ai_import_title": "إضافة أسئلة من AI",
+    "ai_import_tab_prompt": "الـ Prompt",
+    "ai_import_tab_paste": "لصق ومعاينة",
+    "ai_import_how_title": "كيف تستخدم هذه الميزة؟",
+    "ai_import_step1": "انسخ الـ Prompt بالزر أدناه",
+    "ai_import_step2": "أرسله لأي AI (شات جيبيت، جيميناي، كلود...)",
+    "ai_import_step3": "غيّر الموضوع وعدد الأسئلة في نهاية الـ Prompt",
+    "ai_import_step4": "انسخ الـ JSON الناتج من الـ AI",
+    "ai_import_step5": "الصق JSON في تبويب \"لصق ومعاينة\"",
+    "ai_import_copy_prompt": "نسخ الـ Prompt",
+    "ai_import_copied": "تم النسخ! ✓",
+    "ai_import_hint": "بعد نسخ الـ Prompt، اذهب لتبويب \"لصق ومعاينة\"",
+    "ai_import_paste_label": "الصق JSON من الـ AI هنا:",
+    "ai_import_paste_hint": "[ { \"question_ar\": \"...\", ... } ]",
+    "ai_import_preview_btn": "معاينة الأسئلة",
+    "ai_import_ready": "{count} أسئلة جاهزة للإضافة ✓",
+    "ai_import_add_btn": "إضافة {count} أسئلة",
+    "ai_import_adding": "جاري الإضافة...",
+    "ai_import_success": "تم إضافة {count} من {total} أسئلة بنجاح ✓",
+    "ai_import_err_empty": "الرجاء لصق JSON هنا أولاً",
+    "ai_import_err_not_array": "JSON يجب أن يكون مصفوفة [ ... ]",
+    "ai_import_err_no_questions": "لم يتم إيجاد أسئلة في JSON",
+    "ai_import_err_invalid": "JSON غير صالح: {msg}",
+    "ai_import_fab_label": "إضافة من AI (JSON)",
+    "ai_import_fab_subtitle": "أرسل Prompt لأي AI والصق النتيجة",
+    "ai_import_type_single": "اختيار واحد",
+    "ai_import_type_multiple": "اختيار متعدد",
+    "ai_import_type_tf": "صح / خطأ",
+    "ai_import_type_text": "إجابة نصية",
+    "ai_import_points": "{n} نقطة"
   }
 }
+
+

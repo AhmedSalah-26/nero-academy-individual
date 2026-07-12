@@ -63,6 +63,7 @@ class _CartContentState extends State<CartContent> {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         // App Bar
         CartAppBar(

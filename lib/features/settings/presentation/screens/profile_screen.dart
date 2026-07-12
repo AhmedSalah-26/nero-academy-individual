@@ -30,11 +30,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfile();
   }
 
-  void _loadProfile() {
+  Future<void> _loadProfile() async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId != null) {
-      context.read<ProfileCubit>().loadProfile(userId);
+      await context.read<ProfileCubit>().loadProfile(userId);
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await _loadProfile();
   }
 
   @override
@@ -44,16 +49,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor:
           isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      body: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const AppLoadingState();
-          }
-          if (state.isError) {
-            return _buildError(state, isDark);
-          }
-          return _buildContent(state, isDark);
-        },
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox(height: 500, child: AppLoadingState()),
+              );
+            }
+            if (state.isError) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  child: _buildError(state, isDark),
+                ),
+              );
+            }
+            return _buildContent(state, isDark);
+          },
+        ),
       ),
     );
   }
@@ -68,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildContent(ProfileState state, bool isDark) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
           _buildHeader(state, isDark),
@@ -154,9 +174,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildStatItem(
                 '${state.coursesCount}', 'profile.courses'.tr(), isDark),
             _buildStatDivider(isDark),
-            _buildStatItem(
-                state.formattedWatchTime, 'profile.watch_time'.tr(), isDark),
-            _buildStatDivider(isDark),
             _buildStatItem('${state.dayStreak}', 'profile.streak'.tr(), isDark),
           ],
         ),
@@ -226,6 +243,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   );
                 }
+                // Student learning profile
+                if (role == 'student') {
+                  return Column(
+                    children: [
+                      _buildMenuItem(
+                        icon: Icons.analytics_outlined,
+                        title: isArabic ? 'ملف التعلم' : 'Learning Profile',
+                        onTap: () => AppRouter.goToStudentProfile(context),
+                        isDark: isDark,
+                      ),
+                      _buildDivider(isDark),
+                    ],
+                  );
+                }
                 return const SizedBox.shrink();
               },
             ),
@@ -247,6 +278,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.menu_book_outlined,
               title: 'my_learning.my_learning'.tr(),
               onTap: () => AppRouter.goToMyLearning(context),
+              isDark: isDark,
+            ),
+            _buildDivider(isDark),
+            _buildMenuItem(
+              icon: Icons.receipt_long_outlined,
+              title: isArabic ? 'حالة الطلبات' : 'Orders Status',
+              onTap: () => AppRouter.goToOrdersStatus(context),
               isDark: isDark,
             ),
             _buildDivider(isDark),

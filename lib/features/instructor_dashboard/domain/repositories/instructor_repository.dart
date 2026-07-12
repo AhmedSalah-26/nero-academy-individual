@@ -1,4 +1,5 @@
 import '../entities/instructor_entities.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../data/models/instructor_models.dart';
 import '../../data/models/instructor_balance_model.dart';
 
@@ -225,6 +226,10 @@ class CourseDetails {
   final bool isFlashSale;
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
   final List<SectionDto> sections;
 
   const CourseDetails({
@@ -247,6 +252,10 @@ class CourseDetails {
     this.isFlashSale = false,
     this.flashSaleStart,
     this.flashSaleEnd,
+    this.availableFrom,
+    this.availableUntil,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
     this.sections = const [],
   });
 }
@@ -271,6 +280,10 @@ class CourseCreateDto {
   final bool isFlashSale;
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
 
   const CourseCreateDto({
     required this.titleAr,
@@ -291,6 +304,10 @@ class CourseCreateDto {
     this.isFlashSale = false,
     this.flashSaleStart,
     this.flashSaleEnd,
+    this.availableFrom,
+    this.availableUntil,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
   });
 
   Map<String, dynamic> toJson() => {
@@ -314,6 +331,13 @@ class CourseCreateDto {
           'flash_sale_start': flashSaleStart!.toIso8601String(),
         if (flashSaleEnd != null)
           'flash_sale_end': flashSaleEnd!.toIso8601String(),
+        'available_from': availableFrom?.toIso8601String(),
+        'available_until': availableUntil?.toIso8601String(),
+        'pricing_options': pricingOptions
+            .where((option) => option.isValid)
+            .map((option) => option.toJson())
+            .toList(),
+        'group_links': groupLinks.toJson(),
       };
 }
 
@@ -337,9 +361,16 @@ class CourseUpdateDto {
   final bool? isFlashSale;
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final bool clearDiscountPrice;
   final bool clearBadge;
   final bool clearFlashSaleData;
+  final bool clearAvailabilityWindow;
+  final List<CoursePricingOption>? pricingOptions;
+  final CourseGroupLinks? groupLinks;
+  final bool clearPricingOptions;
+  final bool clearGroupLinks;
 
   const CourseUpdateDto({
     this.titleAr,
@@ -360,9 +391,16 @@ class CourseUpdateDto {
     this.isFlashSale,
     this.flashSaleStart,
     this.flashSaleEnd,
+    this.availableFrom,
+    this.availableUntil,
     this.clearDiscountPrice = false,
     this.clearBadge = false,
     this.clearFlashSaleData = false,
+    this.clearAvailabilityWindow = false,
+    this.pricingOptions,
+    this.groupLinks,
+    this.clearPricingOptions = false,
+    this.clearGroupLinks = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -402,6 +440,30 @@ class CourseUpdateDto {
         map['flash_sale_end'] = flashSaleEnd!.toIso8601String();
       }
     }
+    if (clearAvailabilityWindow) {
+      map['available_from'] = null;
+      map['available_until'] = null;
+    } else {
+      if (availableFrom != null) {
+        map['available_from'] = availableFrom!.toIso8601String();
+      }
+      if (availableUntil != null) {
+        map['available_until'] = availableUntil!.toIso8601String();
+      }
+    }
+    if (clearPricingOptions) {
+      map['pricing_options'] = <Map<String, dynamic>>[];
+    } else if (pricingOptions != null) {
+      map['pricing_options'] = pricingOptions!
+          .where((option) => option.isValid)
+          .map((option) => option.toJson())
+          .toList();
+    }
+    if (clearGroupLinks) {
+      map['group_links'] = <String, dynamic>{};
+    } else if (groupLinks != null) {
+      map['group_links'] = groupLinks!.toJson();
+    }
     return map;
   }
 }
@@ -435,12 +497,15 @@ class LessonDto {
   final int durationMinutes;
   final bool isFree;
   final bool isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final String? videoUrl;
   final String? articleContent;
   final String? fileUrl;
   final String? fileName;
   final int? fileSize;
   final String? fileType;
+  final String? quizId;
 
   const LessonDto({
     this.id,
@@ -451,12 +516,15 @@ class LessonDto {
     this.durationMinutes = 0,
     this.isFree = false,
     this.isPublished = true,
+    this.availableFrom,
+    this.availableUntil,
     this.videoUrl,
     this.articleContent,
     this.fileUrl,
     this.fileName,
     this.fileSize,
     this.fileType,
+    this.quizId,
   });
 }
 
@@ -536,6 +604,8 @@ class LessonCreateDto {
   final String? fileType;
   final bool isPreview;
   final bool isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final bool isMandatory;
 
   const LessonCreateDto({
@@ -556,6 +626,8 @@ class LessonCreateDto {
     this.fileType,
     this.isPreview = false,
     this.isPublished = true,
+    this.availableFrom,
+    this.availableUntil,
     this.isMandatory = true,
   });
 
@@ -577,6 +649,8 @@ class LessonCreateDto {
         if (fileType != null) 'file_type': fileType,
         'is_preview': isPreview,
         'is_published': isPublished,
+        'available_from': availableFrom?.toIso8601String(),
+        'available_until': availableUntil?.toIso8601String(),
         'is_mandatory': isMandatory,
       };
 }
@@ -600,6 +674,9 @@ class LessonUpdateDto {
   final String? fileType;
   final bool? isPreview;
   final bool? isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
+  final bool clearAvailabilityWindow;
   final bool? isMandatory;
 
   const LessonUpdateDto({
@@ -620,6 +697,9 @@ class LessonUpdateDto {
     this.fileType,
     this.isPreview,
     this.isPublished,
+    this.availableFrom,
+    this.availableUntil,
+    this.clearAvailabilityWindow = false,
     this.isMandatory,
   });
 
@@ -642,6 +722,17 @@ class LessonUpdateDto {
     if (fileType != null) map['file_type'] = fileType;
     if (isPreview != null) map['is_preview'] = isPreview;
     if (isPublished != null) map['is_published'] = isPublished;
+    if (clearAvailabilityWindow) {
+      map['available_from'] = null;
+      map['available_until'] = null;
+    } else {
+      if (availableFrom != null) {
+        map['available_from'] = availableFrom!.toIso8601String();
+      }
+      if (availableUntil != null) {
+        map['available_until'] = availableUntil!.toIso8601String();
+      }
+    }
     if (isMandatory != null) map['is_mandatory'] = isMandatory;
     return map;
   }

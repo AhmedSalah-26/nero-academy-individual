@@ -21,6 +21,9 @@ class EnrollmentModel extends EnrollmentEntity {
     required super.enrolledAt,
     super.lastAccessedAt,
     super.completedAt,
+    super.accessExpiresAt,
+    super.availableFrom,
+    super.availableUntil,
     super.rating,
     super.ratingCount,
   });
@@ -50,6 +53,8 @@ class EnrollmentModel extends EnrollmentEntity {
       status = EnrollmentStatus.completed;
     } else if (statusStr == 'expired') {
       status = EnrollmentStatus.expired;
+    } else if (statusStr == 'refunded') {
+      status = EnrollmentStatus.refunded;
     }
 
     // Calculate remaining minutes
@@ -80,6 +85,15 @@ class EnrollmentModel extends EnrollmentEntity {
       completedAt: json['completed_at'] != null
           ? DateTime.parse(json['completed_at'] as String)
           : null,
+      accessExpiresAt: json['access_expires_at'] != null
+          ? DateTime.parse(json['access_expires_at'] as String)
+          : null,
+      availableFrom: course?['available_from'] != null
+          ? DateTime.parse(course!['available_from'] as String)
+          : null,
+      availableUntil: course?['available_until'] != null
+          ? DateTime.parse(course!['available_until'] as String)
+          : null,
       rating: (course?['rating'] as num?)?.toDouble() ?? 0,
       ratingCount: course?['rating_count'] as int? ?? 0,
     );
@@ -96,6 +110,9 @@ class EnrollmentModel extends EnrollmentEntity {
       'enrolled_at': enrolledAt.toIso8601String(),
       'last_accessed_at': lastAccessedAt?.toIso8601String(),
       'completed_at': completedAt?.toIso8601String(),
+      'access_expires_at': accessExpiresAt?.toIso8601String(),
+      'available_from': availableFrom?.toIso8601String(),
+      'available_until': availableUntil?.toIso8601String(),
     };
   }
 
@@ -123,6 +140,9 @@ class EnrollmentModel extends EnrollmentEntity {
       enrolledAt: enrolledAt,
       lastAccessedAt: lastAccessedAt,
       completedAt: completedAt,
+      accessExpiresAt: accessExpiresAt,
+      availableFrom: availableFrom,
+      availableUntil: availableUntil,
       rating: rating,
       ratingCount: ratingCount,
     );

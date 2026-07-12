@@ -52,7 +52,7 @@ class SupabaseServiceImpl implements SupabaseService {
       debugPrint('🔄 [SupabaseService] Initializing...');
       await Supabase.initialize(
         url: AppConstants.supabaseUrl,
-        anonKey: AppConstants.supabaseAnonKey,
+        publishableKey: AppConstants.supabaseAnonKey,
         authOptions: const FlutterAuthClientOptions(
           autoRefreshToken: true,
           authFlowType: AuthFlowType.implicit,

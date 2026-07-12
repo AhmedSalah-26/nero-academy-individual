@@ -78,6 +78,8 @@ class QuizState extends Equatable {
   // Attempt helpers
   bool get hasAttempts => previousAttempts.isNotEmpty;
   bool get canStartQuiz {
+    if (quiz?.isAvailableNow == false) return false;
+
     // If remainingAttempts is 0 (default/not loaded), allow starting
     // -1 means unlimited, > 0 means has attempts left
     if (remainingAttempts == -1 || remainingAttempts > 0) return true;

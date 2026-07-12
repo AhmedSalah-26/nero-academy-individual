@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/animations/animations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/services/app_logger.dart';
 import '../../../../core/services/screen_protection_service.dart';
+import '../../../../core/services/video_player_notifier_service.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../quizzes/domain/entities/quiz_entity.dart';
 import '../../../quizzes/domain/repositories/quizzes_repository.dart';
 import '../cubit/course_player_cubit.dart';
 import '../cubit/course_player_state.dart';
@@ -57,15 +58,19 @@ class CoursePlayerScreen extends StatefulWidget {
 }
 
 class _CoursePlayerScreenState extends State<CoursePlayerScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   bool _isPlaying = false;
   int _currentPosition = 0;
   final int _totalDuration = 765;
   Timer? _progressTimer;
+  // Persistent controller so tab changes don't reset scroll to top
+  final ScrollController _playerScrollController = ScrollController();
+  late final Future<List<QuizEntity>> _courseQuizzesFuture;
 
   @override
   void initState() {
     super.initState();
+    _courseQuizzesFuture = _fetchCourseQuizzes();
     WidgetsBinding.instance.addObserver(this);
     // Prevent screen recording while watching videos
     ScreenProtectionService.enable();
@@ -76,17 +81,56 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     });
     _startProgressTimer();
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+  }
+
+  Future<List<QuizEntity>> _fetchCourseQuizzes() async {
+    final result = await di.sl<QuizzesRepository>().getCourseQuizzes(
+          courseId: widget.courseId,
+        );
+    return result.fold(
+      (failure) {
+        AppLogger.e(
+            '[Screen] Failed to load course quizzes: ${failure.message}');
+        return <QuizEntity>[];
+      },
+      (quizzes) => quizzes,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<void>) {
+      AppRouter.routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPushNext() {
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
+    super.didPushNext();
+  }
+
+  @override
+  void didPopNext() {
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+    super.didPopNext();
   }
 
   @override
   void dispose() {
+    AppRouter.routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     _progressTimer?.cancel();
     _progressTimer = null;
+    _playerScrollController.dispose();
     // Save progress before disposing
     _saveProgress();
     // Re-allow screen recording when leaving player
     ScreenProtectionService.disable();
+    di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(false);
     super.dispose();
   }
 
@@ -148,6 +192,24 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         );
   }
 
+  Future<void> _onRefresh() async {
+    AppLogger.i('[CoursePlayer] Pull-to-refresh triggered');
+    try {
+      final cubit = context.read<CoursePlayerCubit>();
+      await cubit.initialize(
+        courseId: widget.courseId,
+        enrollmentId: widget.enrollmentId,
+        courseTitle: widget.courseTitle,
+        initialLessonId: cubit.state.currentLesson?.id ?? widget.initialLessonId,
+        instructorId: widget.instructorId,
+        instructorName: widget.instructorName,
+        instructorAvatar: widget.instructorAvatar,
+      );
+    } catch (e) {
+      AppLogger.e('[CoursePlayer] Refresh failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -166,44 +228,80 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
               isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 64,
+          toolbarHeight: 78,
           leading: AppBackButton(
             onPressed: _handleBack,
           ),
-          title: Directionality(
-            textDirection: ui.TextDirection.rtl,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'كيمياء - الصف الثالث الثانوي',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
+          title: BlocBuilder<CoursePlayerCubit, CoursePlayerState>(
+            builder: (context, state) {
+              final isArabic =
+                  Localizations.localeOf(context).languageCode == 'ar';
+              String subtitle = '';
+              final lessonTitle = state.currentLesson?.getTitle(
+                isArabic ? 'ar' : 'en',
+              );
+              if (state.currentLesson != null) {
+                for (final section in state.sections) {
+                  if (section.lessons
+                      .any((l) => l.id == state.currentLesson!.id)) {
+                    subtitle =
+                        isArabic ? section.titleAr : (section.titleEn ?? '');
+                    break;
+                  }
+                }
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.courseTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: isDark
+                          ? AppColors.textMainDark
+                          : AppColors.textMainLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'الباب الأول: البناء الذري والجدول الدوري',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (lessonTitle != null && lessonTitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      lessonTitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? AppColors.primaryOnDark
+                            : AppColors.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
           centerTitle: true,
         ),
@@ -244,40 +342,73 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     }
 
+    // Like the Home screen: video+header collapse on scroll, tabs stick at top
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (state.currentLesson != null)
-                  VideoPlayerSection(
-                    lesson: state.currentLesson!,
-                    currentPosition: _currentPosition,
-                    totalDuration: _totalDuration,
-                    isPlaying: _isPlaying,
-                    isDark: isDark,
-                    onPlayPause: _togglePlayPause,
-                    onReplay10: _replay10,
-                    onForward10: _forward10,
-                    onFullscreen: () => HapticFeedback.mediumImpact(),
-                    onCast: () {},
-                    onSeek: _onSeek,
-                    onSpeedTap: () {},
-                    onBack: _handleBack,
-                    courseTitle: state.courseTitle,
-                    sectionIndex: sectionIndex,
-                    lessonIndex: lessonIndex,
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primary,
+            backgroundColor:
+                isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+            displacement: 60,
+            child: CustomScrollView(
+              // Persistent controller: keeps scroll position when tabs change
+              controller: _playerScrollController,
+              // Must be scrollable even when content fits screen for pull-to-refresh
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // ── Collapsible: video player + lesson header ────────────
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      if (state.currentLesson != null)
+                        VideoPlayerSection(
+                          lesson: state.currentLesson!,
+                          currentPosition: _currentPosition,
+                          totalDuration: _totalDuration,
+                          isPlaying: _isPlaying,
+                          isDark: isDark,
+                          onPlayPause: _togglePlayPause,
+                          onReplay10: _replay10,
+                          onForward10: _forward10,
+                          onFullscreen: () => HapticFeedback.mediumImpact(),
+                          onCast: () {},
+                          onSeek: _onSeek,
+                          onSpeedTap: () {},
+                          onBack: _handleBack,
+                          courseTitle: state.courseTitle,
+                          sectionIndex: sectionIndex,
+                          lessonIndex: lessonIndex,
+                          // For document/resource lessons, open the file URL
+                          onOpenFile: state.currentLesson!.fileUrl != null &&
+                                  state.currentLesson!.fileUrl!.isNotEmpty
+                              ? () => _openUrl(state.currentLesson!.fileUrl!)
+                              : null,
+                        ),
+                      if (state.currentLesson != null)
+                        _buildLessonHeader(state, isDark),
+                      if (state.groupLinks.hasAny)
+                        _buildCourseGroupLinks(state, isDark),
+                    ],
                   ),
-                if (state.currentLesson != null)
-                  _buildLessonHeader(state, isDark),
-                ContentTabs(
-                  currentIndex: state.currentTabIndex,
-                  isDark: isDark,
-                  onTabChanged: (i) =>
-                      context.read<CoursePlayerCubit>().changeTab(i),
                 ),
-                _buildTabContent(state, isDark),
+                // ── Sticky: tab bar (like search bar in home) ────────────
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyTabBarDelegate(
+                    isDark: isDark,
+                    child: ContentTabs(
+                      currentIndex: state.currentTabIndex,
+                      isDark: isDark,
+                      onTabChanged: _changeContentTab,
+                    ),
+                  ),
+                ),
+                // ── Scrollable: tab content (no fixed height = all lessons show) ─
+                SliverToBoxAdapter(
+                  child: _buildCurrentTabContent(state, isDark),
+                ),
               ],
             ),
           ),
@@ -345,14 +476,62 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     );
   }
 
+  Widget _buildCourseGroupLinks(CoursePlayerState state, bool isDark) {
+    final links = <_GroupLinkAction>[
+      if (state.groupLinks.whatsapp != null)
+        _GroupLinkAction(
+          label: 'WhatsApp',
+          icon: Icons.chat_outlined,
+          color: const Color(0xFF25D366),
+          url: state.groupLinks.whatsapp!,
+        ),
+      if (state.groupLinks.telegram != null)
+        _GroupLinkAction(
+          label: 'Telegram',
+          icon: Icons.send_outlined,
+          color: const Color(0xFF229ED9),
+          url: state.groupLinks.telegram!,
+        ),
+      if (state.groupLinks.facebook != null)
+        _GroupLinkAction(
+          label: 'Facebook',
+          icon: Icons.groups_outlined,
+          color: const Color(0xFF1877F2),
+          url: state.groupLinks.facebook!,
+        ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+      color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: links.map((link) {
+          return OutlinedButton.icon(
+            onPressed: () => _openUrl(link.url),
+            icon: Icon(link.icon, size: 18, color: link.color),
+            label: Text(link.label),
+            style: OutlinedButton.styleFrom(
+              foregroundColor:
+                  isDark ? AppColors.textMainDark : AppColors.textMainLight,
+              side: BorderSide(color: link.color.withValues(alpha: 0.45)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   void _handleBack() {
     _navigateBackFromPlayer();
   }
 
   void _navigateBackFromPlayer() {
-    if (mounted) {
-      setState(() => _isPlaying = false);
-    }
     _saveProgress();
     if (context.canPop()) {
       context.pop();
@@ -361,76 +540,99 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     context.go('/my-learning');
   }
 
-  Widget _buildTabContent(CoursePlayerState state, bool isDark) {
-    // Use AnimatedTabView for smooth transitions between tabs
-    return AnimatedTabView(
-      currentIndex: state.currentTabIndex,
-      duration: const Duration(milliseconds: 300),
-      children: [
-        // Tab 0: Curriculum
-        CurriculumList(
-          sections: state.sections,
-          currentLesson: state.currentLesson,
-          completedLessons: const {},
-          isDark: isDark,
-          onLessonTap: (lesson) {
-            HapticFeedback.lightImpact();
-            context.read<CoursePlayerCubit>().selectLesson(lesson);
+  /// Build the content for the currently selected tab.
+  /// No fixed height — all content is naturally sized so all lessons show.
+  Widget _buildCurrentTabContent(CoursePlayerState state, bool isDark) {
+    final maxH = MediaQuery.of(context).size.height * 0.75;
+    switch (state.currentTabIndex) {
+      case 0: // Curriculum — shrinkWrap, no height cap needed
+        return FutureBuilder<List<QuizEntity>>(
+          future: _courseQuizzesFuture,
+          builder: (context, snapshot) {
+            return CurriculumList(
+              sections: state.sections,
+              currentLesson: state.currentLesson,
+              completedLessons: const {},
+              quizzes: snapshot.data ?? const [],
+              isDark: isDark,
+              onLessonTap: (lesson) {
+                HapticFeedback.lightImpact();
+                context.read<CoursePlayerCubit>().selectLesson(lesson);
+              },
+              isLessonCompleted: state.isLessonCompleted,
+              getSectionCompletedCount: state.getSectionCompletedCount,
+            );
           },
-          isLessonCompleted: state.isLessonCompleted,
-          getSectionCompletedCount: state.getSectionCompletedCount,
-        ),
-        // Tab 1: More
-        MoreTab(
+        );
+      case 1: // More
+        return MoreTab(
           isDark: isDark,
           onNotesTap: _showNotes,
           onBookmarksTap: _showBookmarks,
           onAnnouncementsTap: _showAnnouncements,
           onAttachmentsTap: () => _showAttachments(state),
-        ),
-        // Tab 2: Q&A
-        if (state.courseId != null && state.enrollmentId != null)
-          QASection(
-            isDark: isDark,
-            courseId: state.courseId!,
-            enrollmentId: state.enrollmentId!,
-            lessonId: state.currentLesson?.id,
-            repository: context.read<CoursePlayerCubit>().repository,
-          )
-        else
-          const SizedBox.shrink(),
-        // Tab 3: Quizzes
-        if (state.courseId != null)
-          QuizzesSection(
-            isDark: isDark,
-            courseId: state.courseId!,
-            repository: di.sl<QuizzesRepository>(),
-            onQuizTap: (quiz) {
-              AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
-              context.goNamed(
-                'quiz-info',
-                pathParameters: {'quizId': quiz.id},
-                queryParameters: _buildQuizNavigationQueryParameters(state),
-              );
-            },
-          )
-        else
-          const SizedBox.shrink(),
-        // Tab 4: Rating
-        if (state.courseId != null && state.enrollmentId != null)
-          RatingSection(
-            isDark: isDark,
-            courseId: state.courseId!,
-            enrollmentId: state.enrollmentId!,
-          )
-        else
-          const SizedBox.shrink(),
-      ],
-    );
+        );
+      case 2: // Q&A
+        if (state.courseId != null && state.enrollmentId != null) {
+          return SizedBox(
+            height: maxH,
+            child: QASection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              enrollmentId: state.enrollmentId!,
+              lessonId: state.currentLesson?.id,
+              repository: context.read<CoursePlayerCubit>().repository,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      case 3: // Quizzes
+        if (state.courseId != null) {
+          return SizedBox(
+            height: maxH,
+            child: QuizzesSection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              sections: state.sections,
+              repository: di.sl<QuizzesRepository>(),
+              onQuizTap: (quiz) {
+                AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
+                context.goNamed(
+                  'quiz-info',
+                  pathParameters: {'quizId': quiz.id},
+                  queryParameters:
+                      _buildQuizNavigationQueryParameters(state, quiz),
+                );
+              },
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      case 4: // Rating
+        if (state.courseId != null && state.enrollmentId != null) {
+          return SizedBox(
+            height: maxH,
+            child: RatingSection(
+              isDark: isDark,
+              courseId: state.courseId!,
+              enrollmentId: state.enrollmentId!,
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  void _changeContentTab(int index) {
+    context.read<CoursePlayerCubit>().changeTab(index);
   }
 
   Map<String, String> _buildQuizNavigationQueryParameters(
-      CoursePlayerState state) {
+    CoursePlayerState state,
+    QuizEntity quiz,
+  ) {
     final params = <String, String>{
       'enrollment': state.enrollmentId ?? '',
     };
@@ -441,9 +643,9 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     if (state.courseId != null && state.courseId!.trim().isNotEmpty) {
       params['courseId'] = state.courseId!;
     }
-    if (state.currentLesson?.id != null &&
-        state.currentLesson!.id.trim().isNotEmpty) {
-      params['lesson'] = state.currentLesson!.id;
+    final quizLessonId = quiz.lessonId;
+    if (quizLessonId != null && quizLessonId.trim().isNotEmpty) {
+      params['lesson'] = quizLessonId;
     }
     if (state.instructorId != null && state.instructorId!.trim().isNotEmpty) {
       params['instructorId'] = state.instructorId!;
@@ -675,4 +877,43 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
       }
     }
   }
+}
+
+// ── Sticky tab bar delegate (same pattern as home search bar) ─────────────────
+class _GroupLinkAction {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final String url;
+
+  const _GroupLinkAction({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.url,
+  });
+}
+
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final bool isDark;
+
+  const _StickyTabBarDelegate({required this.child, required this.isDark});
+
+  static const double _height = 48.0;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  double get minExtent => _height;
+
+  @override
+  bool shouldRebuild(covariant _StickyTabBarDelegate oldDelegate) => true;
 }

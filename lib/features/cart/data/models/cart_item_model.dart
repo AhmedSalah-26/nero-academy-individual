@@ -1,4 +1,5 @@
 import '../../domain/entities/cart_item_entity.dart';
+import '../../../../core/models/course_commerce_models.dart';
 
 /// Cart Item Model - Data Model with JSON serialization
 class CartItemModel extends CartItemEntity {
@@ -16,6 +17,7 @@ class CartItemModel extends CartItemEntity {
     super.priceAtAdd,
     super.currency,
     super.isFree,
+    super.pricingOption,
     required super.addedAt,
   });
 
@@ -59,6 +61,11 @@ class CartItemModel extends CartItemEntity {
           json['currency'] as String? ??
           'EGP',
       isFree: course?['is_free'] as bool? ?? json['is_free'] as bool? ?? false,
+      pricingOption: json['pricing_option'] is Map<String, dynamic>
+          ? CoursePricingOption.fromJson(
+              json['pricing_option'] as Map<String, dynamic>,
+            )
+          : null,
       addedAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -80,6 +87,7 @@ class CartItemModel extends CartItemEntity {
       'price_at_add': priceAtAdd,
       'currency': currency,
       'is_free': isFree,
+      'pricing_option': pricingOption?.toJson(),
       'created_at': addedAt.toIso8601String(),
     };
   }

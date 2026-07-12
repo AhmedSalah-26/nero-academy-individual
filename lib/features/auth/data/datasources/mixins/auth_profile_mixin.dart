@@ -1,10 +1,11 @@
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
+import '../../../../../core/utils/phone_utils.dart';
 import '../../models/user_model.dart';
 // import 'auth_helpers_mixin.dart';
+
 
 mixin AuthProfileMixin {
   // Dependencies
@@ -15,14 +16,33 @@ mixin AuthProfileMixin {
 
   Future<void> forgotPassword(String email) async {
     try {
-      await supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo: AppConstants.passwordResetRedirectUrl,
+      // 1) Verify if the email exists in profiles table first (ilike for case-insensitivity)
+      final profile = await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('email', email.trim())
+          .maybeSingle();
+
+      if (profile == null) {
+        throw const app_exceptions.AuthException(
+          'auth.errors.email_not_registered',
+          code: 'email_not_registered',
+        );
+      }
+
+      // 2) Use signInWithOtp to send a 6-digit OTP code to the user's email.
+      // resetPasswordForEmail sends a magic link, not an OTP code.
+      await supabase.auth.signInWithOtp(
+        email: email.trim(),
+        shouldCreateUser: false,
       );
+    } on app_exceptions.AuthException {
+      rethrow;
     } on AuthApiException catch (e) {
       throw handleAuthError(e);
     }
   }
+
 
   Future<void> resetPassword(
       {required String token, required String newPassword}) async {
@@ -58,7 +78,17 @@ mixin AuthProfileMixin {
         'updated_at': DateTime.now().toIso8601String()
       };
       if (name != null) updates['name'] = name;
-      if (phone != null) updates['phone'] = phone;
+      if (phone != null) {
+        // Normalize phone number to remove spaces and format correctly
+        final normalizedPhone = PhoneUtils.normalizeWhatsappNumber(phone);
+        if (normalizedPhone == null) {
+          throw const app_exceptions.AuthException(
+            'رقم الهاتف غير صحيح. برجاء كتابة رقم مصري صحيح مثل 01012345678.',
+            code: 'invalid_phone',
+          );
+        }
+        updates['phone'] = '+$normalizedPhone';
+      }
       if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
 
       await supabase.from('profiles').update(updates).eq('id', userId);

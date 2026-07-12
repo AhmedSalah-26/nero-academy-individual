@@ -5,14 +5,16 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'منصة التعليم';
-  static const String appNameEn = 'Learning Platform';
+  static const String appName = '\u0646\u0633\u0642';
+  static const String appNameEn = 'Nasaq';
   static const String appVersion = '1.0.0';
 
   // Supabase Configuration
   static const String supabaseUrl = 'https://ubjhdafxmncfbaldfivd.supabase.co';
   static const String supabaseAnonKey =
-      'sb_publishable_wJvu57s6WvTFFi9JTZhBbg_mS3tYCE7';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ndWRhbHNjY25yYWd1YWppcWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTkxOTksImV4cCI6MjA5OTQzNTE5OX0.umuFbHzz_ZR0OauUhJaUaqzu9ByWmEMHJGOkZ4Vxsro';
+  static const String googleWebClientId =
+      '1083887222364-3jlne3f2n5jqdht1nvbp4i0trev8sgca.apps.googleusercontent.com';
 
   // Storage Buckets
   static const String avatarsBucket = 'avatars';
@@ -60,6 +62,32 @@ class AppConstants {
   }
 
   // Password Reset Web Page
-  static String get passwordResetRedirectUrl => authRedirectUrl;
-}
+  static String get passwordResetRedirectUrl {
+    if (kIsWeb) {
+      try {
+        final uri = Uri.base;
+        final baseSegments = <String>[];
 
+        // GitHub Pages project sites are hosted under /repo-name/.
+        // Keep that first segment so /reset-password resolves inside the app.
+        if (uri.host.endsWith('github.io') && uri.pathSegments.isNotEmpty) {
+          final first = uri.pathSegments.first;
+          if (first.isNotEmpty) {
+            baseSegments.add(first);
+          }
+        }
+
+        return Uri(
+          scheme: uri.scheme,
+          host: uri.host,
+          port: uri.hasPort ? uri.port : null,
+          pathSegments: [...baseSegments, 'reset-password'],
+        ).toString();
+      } catch (_) {
+        return 'https://ahmedsalah-26.github.io/nero-academy-individual-web-app/reset-password';
+      }
+    }
+
+    return 'https://ahmedsalah-26.github.io/nero-academy-individual-web-app/reset-password';
+  }
+}

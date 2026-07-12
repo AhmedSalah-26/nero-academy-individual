@@ -101,6 +101,15 @@ class ContinueLearningCard extends StatelessWidget {
                                 isDark ? AppColors.grey400 : AppColors.grey500,
                           ),
                         ),
+                      if (!enrollment.isCurrentlyAvailable) ...[
+                        const SizedBox(height: 12),
+                        _buildInactiveBadge(locale),
+                      ],
+                      if (enrollment.accessExpiresAt != null) ...[
+                        const SizedBox(height: 12),
+                        _buildExpirationBadge(
+                            enrollment.accessExpiresAt!, locale, isDark),
+                      ],
                       const SizedBox(height: 16),
                       _buildProgressSection(progress, remaining, isDark),
                       const SizedBox(height: 16),
@@ -235,18 +244,26 @@ class ContinueLearningCard extends StatelessWidget {
   }
 
   Widget _buildResumeButton() {
+    final isActive = enrollment.isCurrentlyAvailable;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          onResume();
-        },
-        icon: const Icon(Icons.play_arrow_rounded, size: 22),
+        onPressed: isActive
+            ? () {
+                HapticFeedback.mediumImpact();
+                onResume();
+              }
+            : null,
+        icon: Icon(
+          isActive ? Icons.play_arrow_rounded : Icons.lock_clock_outlined,
+          size: 22,
+        ),
         label: Text(
-          'my_learning.resume_lesson'.tr(args: [
-            (enrollment.completedLessons + 1).toString(),
-          ]),
+          isActive
+              ? 'my_learning.resume_lesson'.tr(args: [
+                  (enrollment.completedLessons + 1).toString(),
+                ])
+              : (locale == 'ar' ? 'غير مفعل حاليا' : 'Inactive now'),
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
@@ -258,6 +275,69 @@ class ContinueLearningCard extends StatelessWidget {
           ),
           elevation: 0,
         ),
+      ),
+    );
+  }
+
+  Widget _buildInactiveBadge(String locale) {
+    final isArabic = locale == 'ar';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.lock_clock_outlined,
+              size: 14, color: AppColors.warning),
+          const SizedBox(width: 6),
+          Text(
+            isArabic ? 'غير مفعل حاليا' : 'Inactive now',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.warning,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpirationBadge(DateTime expiresAt, String locale, bool isDark) {
+    final daysLeft = expiresAt.difference(DateTime.now()).inDays;
+    final isArabic = locale == 'ar';
+    final text = daysLeft > 0
+        ? (isArabic
+            ? 'ينتهي الاشتراك خلال $daysLeft يوم'
+            : 'Subscription expires in $daysLeft days')
+        : (isArabic ? 'ينتهي الاشتراك اليوم' : 'Subscription expires today');
+    final color = daysLeft <= 3 ? AppColors.error : AppColors.warning;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

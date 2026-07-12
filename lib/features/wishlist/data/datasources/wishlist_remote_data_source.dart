@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/services/teacher_context_service.dart';
 import '../models/wishlist_item_model.dart';
 
 /// Wishlist Remote Data Source - API calls to Supabase
@@ -25,15 +26,21 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
     AppLogger.i('❤️ [WishlistRemote] Getting wishlist for user: $userId');
     try {
       // Get wishlist items with course details
-      final wishlistResponse = await supabase.from('wishlist').select('''
+      final teacherId = TeacherContextService.instance.selectedTeacherId;
+      var query = supabase.from('wishlist').select('''
             *,
             courses!inner (
-              id, title_ar, title_en, thumbnail_url, price, discount_price,
+              id, teacher_id, title_ar, title_en, thumbnail_url, price, discount_price,
               is_flash_sale, flash_sale_start, flash_sale_end,
               currency, is_free, rating, rating_count,
               profiles:instructor_id (name, avatar_url)
             )
-          ''').eq('user_id', userId).order('created_at', ascending: false);
+          ''').eq('user_id', userId);
+      if (teacherId != null) {
+        query = query.eq('courses.teacher_id', teacherId);
+      }
+      final wishlistResponse =
+          await query.order('created_at', ascending: false);
 
       // Check enrollment for each course
       final List<Map<String, dynamic>> result = [];

@@ -38,9 +38,12 @@ abstract class CourseDetailsRepository {
   /// Check if course is in cart
   Future<Either<Failure, bool>> isInCart(String courseId, String userId);
 
-  /// Get enrollment status
   Future<Either<Failure, EnrollmentStatus>> getEnrollmentStatus(
     String courseId,
     String userId,
   );
+
+  /// Enroll in a free course directly
+  Future<Either<Failure, void>> enrollFreeCourse(
+      String courseId, String userId);
 }

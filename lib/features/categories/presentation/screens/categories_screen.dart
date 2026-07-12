@@ -190,7 +190,7 @@ const _categories = [
     id: 'personal-dev',
     name: 'Personal Dev',
     icon: Icons.psychology_rounded,
-    color: Color(0xFF9333EA),
+    color: AppColors.primary,
     courseCount: 134,
   ),
   _Category(

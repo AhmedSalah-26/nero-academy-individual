@@ -29,12 +29,12 @@ class CategoryModel {
       id: json['id'] as String,
       nameAr: json['name_ar'] as String? ?? '',
       nameEn: json['name_en'] as String?,
-      description: json['description'] as String?,
-      icon: json['icon'] as String?,
+      description: (json['description_ar'] ?? json['description']) as String?,
+      icon: (json['icon_name'] ?? json['icon']) as String?,
       parentId: json['parent_id'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       sortOrder: json['sort_order'] as int? ?? 0,
-      courseCount: json['course_count'] as int? ?? 0,
+      courseCount: (json['courses_count'] ?? json['course_count'] ?? 0) as int,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -44,12 +44,12 @@ class CategoryModel {
       'id': id,
       'name_ar': nameAr,
       'name_en': nameEn,
-      'description': description,
-      'icon': icon,
+      'description_ar': description,
+      'icon_name': icon,
       'parent_id': parentId,
       'is_active': isActive,
       'sort_order': sortOrder,
-      'course_count': courseCount,
+      'courses_count': courseCount,
       'created_at': createdAt.toIso8601String(),
     };
   }

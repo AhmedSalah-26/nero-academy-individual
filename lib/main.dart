@@ -6,12 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
 
 import 'core/core.dart';
-import 'core/config/paymob_config.dart';
 import 'core/di/injection_container.dart';
 import 'core/routing/app_router.dart';
 import 'core/services/dev_http_overrides.dart';
+import 'core/services/teacher_context_service.dart';
 import 'core/services/theme_service.dart';
-import 'features/payment/data/services/paymob_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,19 +36,10 @@ void main() async {
   // Initialize Dependencies
   await initDependencies();
 
-  // Initialize Paymob (only if configured)
-  if (PaymobConfig.isConfigured) {
-    await PaymobService.initialize(
-      apiKey: PaymobConfig.apiKey,
-      integrationId: PaymobConfig.integrationId,
-      iFrameId: PaymobConfig.iFrameId,
-      walletIntegrationId: PaymobConfig.walletIntegrationId,
-    );
-    debugPrint('✅ [Main] Paymob initialized successfully');
-  }
-
   // Initialize Theme Service
   await ThemeService.instance.init();
+  await TeacherContextService.instance
+      .init(SupabaseServiceImpl.instance.client);
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
@@ -73,9 +63,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: ThemeService.instance.isDarkMode,
-      builder: (context, isDark, _) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        ThemeService.instance.isDarkMode,
+        TeacherContextService.instance.selectedTeacher,
+      ]),
+      builder: (context, _) {
+        final isDark = ThemeService.instance.isDarkMode.value;
+        final teacherTheme =
+            TeacherContextService.instance.selectedTeacher.value?.theme;
+        final lightTheme = _applyTeacherTheme(
+          AppTheme.lightTheme,
+          teacherTheme,
+        );
+        final darkTheme = _applyTeacherTheme(
+          AppTheme.darkTheme,
+          teacherTheme,
+        );
+
         return ToastificationWrapper(
           child: MaterialApp.router(
             title: 'app_name'.tr(),
@@ -89,8 +94,8 @@ class MyApp extends StatelessWidget {
             supportedLocales: context.supportedLocales,
             locale: context.locale,
             // Theme
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: lightTheme,
+            darkTheme: darkTheme,
             themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
             // Router
             routerConfig: AppRouter.router,
@@ -108,6 +113,45 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  ThemeData _applyTeacherTheme(
+    ThemeData baseTheme,
+    TeacherThemeConfig? teacherTheme,
+  ) {
+    if (teacherTheme == null || !teacherTheme.hasColors) return baseTheme;
+
+    final primary = teacherTheme.primaryColor ?? baseTheme.colorScheme.primary;
+    final secondary =
+        teacherTheme.secondaryColor ?? baseTheme.colorScheme.secondary;
+    final background =
+        teacherTheme.backgroundColor ?? baseTheme.scaffoldBackgroundColor;
+
+    return baseTheme.copyWith(
+      primaryColor: primary,
+      scaffoldBackgroundColor: background,
+      colorScheme: baseTheme.colorScheme.copyWith(
+        primary: primary,
+        secondary: secondary,
+        surface: background,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: baseTheme.elevatedButtonTheme.style?.copyWith(
+          backgroundColor: WidgetStatePropertyAll(primary),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: baseTheme.textButtonTheme.style?.copyWith(
+          foregroundColor: WidgetStatePropertyAll(primary),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: baseTheme.outlinedButtonTheme.style?.copyWith(
+          foregroundColor: WidgetStatePropertyAll(primary),
+          side: WidgetStatePropertyAll(BorderSide(color: primary)),
+        ),
+      ),
     );
   }
 }

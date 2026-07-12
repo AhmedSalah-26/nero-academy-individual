@@ -44,7 +44,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
 
       final response = await _supabase
           .from('coupons')
-          .select()
+          .select('*, coupon_courses(course_id)')
           .eq('instructor_id', userId)
           .order('created_at', ascending: false)
           .range(
@@ -109,6 +109,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
     DateTime? startDate,
     DateTime? endDate,
     String scope = 'all',
+    List<String>? courseIds,
   }) async {
     AppLogger.i(
         '📋 [$_tag] createCoupon: code=$code, nameAr=$nameAr, discountType=$discountType, discountValue=$discountValue');
@@ -133,15 +134,25 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
         'min_order_amount': minOrderAmount ?? 0,
         'usage_limit': usageLimit,
         'usage_limit_per_user': usageLimitPerUser ?? 1,
-        'start_date': (startDate ?? DateTime.now()).toUtc().toIso8601String(),
-        'end_date': endDate?.toUtc().toIso8601String(),
+        if (startDate != null) 'start_date': startDate.toUtc().toIso8601String(),
+        'end_date': _toUtcEndOfDay(endDate),
         'scope': scope,
         'is_active': true,
       };
 
       AppLogger.d('[$_tag] createCoupon: Inserting: $insertData');
 
-      await _supabase.from('coupons').insert(insertData);
+      final created = await _supabase
+          .from('coupons')
+          .insert(insertData)
+          .select('id')
+          .single();
+
+      await _syncCouponCourses(
+        created['id'] as String,
+        scope: scope,
+        courseIds: courseIds,
+      );
 
       AppLogger.success('[$_tag] createCoupon: Coupon created successfully');
       await loadCoupons(refresh: true);
@@ -170,6 +181,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
     DateTime? startDate,
     DateTime? endDate,
     String? scope,
+    List<String>? courseIds,
     bool? isActive,
   }) async {
     AppLogger.i('📋 [$_tag] updateCoupon: couponId=$couponId');
@@ -195,7 +207,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
         updates['start_date'] = startDate.toUtc().toIso8601String();
       }
       if (endDate != null) {
-        updates['end_date'] = endDate.toUtc().toIso8601String();
+        updates['end_date'] = _toUtcEndOfDay(endDate);
       }
       if (scope != null) updates['scope'] = scope;
       if (isActive != null) updates['is_active'] = isActive;
@@ -203,6 +215,12 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
       AppLogger.d('[$_tag] updateCoupon: Updates: $updates');
 
       await _supabase.from('coupons').update(updates).eq('id', couponId);
+
+      await _syncCouponCourses(
+        couponId,
+        scope: scope,
+        courseIds: courseIds,
+      );
 
       AppLogger.success('[$_tag] updateCoupon: Coupon updated successfully');
       await loadCoupons(refresh: true);
@@ -212,6 +230,43 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
       emit(state.copyWith(errorMessage: e.toString()));
       return false;
     }
+  }
+
+  Future<void> _syncCouponCourses(
+    String couponId, {
+    String? scope,
+    List<String>? courseIds,
+  }) async {
+    if (scope == null) return;
+
+    await _supabase.from('coupon_courses').delete().eq('coupon_id', couponId);
+
+    if (scope != 'courses' || courseIds == null || courseIds.isEmpty) return;
+
+    await _supabase.from('coupon_courses').insert(
+          courseIds
+              .map((courseId) => {
+                    'coupon_id': couponId,
+                    'course_id': courseId,
+                  })
+              .toList(),
+        );
+  }
+
+  String? _toUtcEndOfDay(DateTime? value) {
+    if (value == null) return null;
+
+    final endOfDay = DateTime(
+      value.year,
+      value.month,
+      value.day,
+      23,
+      59,
+      59,
+      999,
+      999,
+    );
+    return endOfDay.toUtc().toIso8601String();
   }
 
   /// Toggle coupon status
@@ -243,6 +298,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
             startDate: c.startDate,
             endDate: c.endDate,
             scope: c.scope,
+            courseIds: c.courseIds,
             isActive: isActive,
             isSuspended: c.isSuspended,
             createdAt: c.createdAt,

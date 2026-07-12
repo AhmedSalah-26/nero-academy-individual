@@ -43,7 +43,7 @@ class UserRoleService {
   /// Check if current user is admin
   static Future<bool> isAdmin() async {
     final role = await getCurrentUserRole();
-    return role == 'instructor' || role == 'admin';
+    return role == 'admin';
   }
 
   /// Check if current user is instructor

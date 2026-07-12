@@ -256,7 +256,7 @@ class _CourseSearchScreenState extends State<CourseSearchScreen> {
   Widget _buildErrorState(CourseSearchState state) {
     return ErrorState(
       type: ErrorType.generic,
-      message: state.errorMessage ?? LocaleKeys.error.tr(),
+      message: state.errorMessage ?? LocaleKeys.common_error.tr(),
       onRetry: () {
         context.read<CourseSearchCubit>().search(_searchController.text);
       },

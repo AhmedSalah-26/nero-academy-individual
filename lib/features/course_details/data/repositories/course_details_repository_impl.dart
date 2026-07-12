@@ -143,4 +143,17 @@ class CourseDetailsRepositoryImpl implements CourseDetailsRepository {
     // This would be implemented with actual enrollment check
     return const Right(EnrollmentStatus.notEnrolled);
   }
+
+  @override
+  Future<Either<Failure, void>> enrollFreeCourse(
+      String courseId, String userId) async {
+    try {
+      await remoteDataSource.enrollFreeCourse(courseId, userId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../generated/locale_keys.g.dart';
 import '../../cubit/instructor_quizzes_cubit.dart';
 
 class QuizQuestionsEmptyState extends StatelessWidget {
   final bool isArabic;
   final bool isDark;
-  final VoidCallback onAddQuestion;
 
   const QuizQuestionsEmptyState({
     super.key,
     required this.isArabic,
     required this.isDark,
-    required this.onAddQuestion,
   });
 
   @override
@@ -51,17 +51,6 @@ class QuizQuestionsEmptyState extends StatelessWidget {
               color: isDark
                   ? AppColors.textSecondaryDark
                   : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: onAddQuestion,
-            icon: const Icon(Icons.add),
-            label: Text(isArabic ? 'إضافة سؤال' : 'Add Question'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             ),
           ),
         ],
@@ -401,12 +390,14 @@ class QuizQuestionsFabRow extends StatelessWidget {
   final bool isArabic;
   final VoidCallback onAddImageQuestions;
   final VoidCallback onAddQuestion;
+  final VoidCallback onAddFromAi;
 
   const QuizQuestionsFabRow({
     super.key,
     required this.isArabic,
     required this.onAddImageQuestions,
     required this.onAddQuestion,
+    required this.onAddFromAi,
   });
 
   @override
@@ -439,6 +430,20 @@ class QuizQuestionsFabRow extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(ctx);
                   onAddQuestion();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.auto_awesome_rounded),
+                title: Text(
+                  LocaleKeys.course_editor_ai_import_fab_label.tr(),
+                ),
+                subtitle: Text(
+                  LocaleKeys.course_editor_ai_import_fab_subtitle.tr(),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onAddFromAi();
                 },
               ),
               ListTile(

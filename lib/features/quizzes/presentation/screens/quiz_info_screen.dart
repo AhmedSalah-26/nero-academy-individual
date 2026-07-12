@@ -105,7 +105,7 @@ class _QuizInfoScreenState extends State<QuizInfoScreen> {
     return ErrorState(
       type: ErrorType.generic,
       display: ErrorStateDisplay.section,
-      message: state.errorMessage ?? LocaleKeys.error.tr(),
+      message: state.errorMessage ?? LocaleKeys.common_error.tr(),
       onRetry: _loadQuiz,
     );
   }
@@ -211,9 +211,7 @@ class _QuizInfoScreenState extends State<QuizInfoScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                state.canStartQuiz
-                    ? LocaleKeys.quiz_start.tr()
-                    : LocaleKeys.quiz_no_attempts.tr(),
+                _startButtonText(state),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: AppColors.white,
@@ -225,6 +223,25 @@ class _QuizInfoScreenState extends State<QuizInfoScreen> {
         ),
       ),
     );
+  }
+
+  String _startButtonText(QuizState state) {
+    if (state.canStartQuiz) return LocaleKeys.quiz_start.tr();
+    final quiz = state.quiz;
+    if (quiz?.isScheduled == true) {
+      final startsAt = DateFormat.yMMMd(context.locale.languageCode)
+          .add_jm()
+          .format(quiz!.availableFrom!.toLocal());
+      return context.locale.languageCode == 'ar'
+          ? 'يبدأ في $startsAt'
+          : 'Starts $startsAt';
+    }
+    if (quiz?.isExpired == true) {
+      return context.locale.languageCode == 'ar'
+          ? 'انتهى وقت الاختبار'
+          : 'Quiz closed';
+    }
+    return LocaleKeys.quiz_no_attempts.tr();
   }
 
   Future<void> _startQuiz(BuildContext context) async {

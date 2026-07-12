@@ -84,13 +84,38 @@ class InstructorCourseListItem extends StatelessWidget {
                       : _buildPlaceholder(isDark),
                 ),
               ),
-              // Status badge on top of image
+              // Status badge on top of image (top-right)
               Positioned(
                 top: 8,
-                right: isArabic ? null : 8,
-                left: isArabic ? 8 : null,
+                right: 8,
                 child: _buildStatusBadge(isDark, isArabic),
               ),
+              // Delete icon button on top of image (top-left) if onDelete is available
+              if (onDelete != null)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.delete_rounded,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: onDelete,
+                      tooltip: isArabic ? 'حذف الكورس نهائياً' : 'Delete Course Permanently',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           // Course info

@@ -8,6 +8,8 @@ import 'package:video_player/video_player.dart';
 import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../cubit/course_player_cubit.dart';
+import '../../../../../core/di/injection_container.dart';
+import '../../../../../core/services/video_player_notifier_service.dart';
 
 class DirectVideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
@@ -27,7 +29,7 @@ class DirectVideoPlayerWidget extends StatefulWidget {
 }
 
 class _DirectVideoPlayerWidgetState extends State<DirectVideoPlayerWidget> {
-  late final VideoPlayerController _controller;
+  late VideoPlayerController _controller;
   Timer? _progressTimer;
   bool _hasError = false;
   int _lastSavedPosition = 0;
@@ -40,15 +42,42 @@ class _DirectVideoPlayerWidgetState extends State<DirectVideoPlayerWidget> {
 
   Future<void> _initialize() async {
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl),
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
+      final service = sl<VideoPlayerNotifierService>();
+      final isExisting = service.videoUrl == widget.videoUrl && service.controller != null && service.controller!.value.isInitialized;
 
-      await _controller.initialize();
+      if (isExisting) {
+        _controller = service.controller!;
+        AppLogger.i('[DirectVideoPlayer] Reusing existing video player controller');
+      } else {
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(widget.videoUrl),
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
+
+        await _controller.initialize();
+
+        if (!mounted) return;
+
+        // Register the new controller
+        final cubitState = context.read<CoursePlayerCubit>().state;
+        service.registerPlayer(
+          _controller,
+          widget.videoUrl,
+          courseId: cubitState.courseId ?? '',
+          enrollmentId: cubitState.enrollmentId ?? '',
+          courseTitle: cubitState.courseTitle ?? '',
+          lessonId: cubitState.currentLesson?.id ?? '',
+          lessonTitle: cubitState.currentLesson?.titleAr ?? '',
+          instructorId: cubitState.instructorId,
+          instructorName: cubitState.instructorName,
+          instructorAvatar: cubitState.instructorAvatar,
+        );
+      }
+
+      if (!mounted) return;
 
       final initialPosition = widget.initialPosition ?? 0;
-      if (initialPosition > 0) {
+      if (!isExisting && initialPosition > 0) {
         await _controller.seekTo(Duration(seconds: initialPosition));
       }
 
@@ -137,7 +166,11 @@ class _DirectVideoPlayerWidgetState extends State<DirectVideoPlayerWidget> {
   void dispose() {
     _progressTimer?.cancel();
     _controller.removeListener(_onPlayerChanged);
-    _controller.dispose();
+    
+    final service = sl<VideoPlayerNotifierService>();
+    if (service.controller != _controller) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 

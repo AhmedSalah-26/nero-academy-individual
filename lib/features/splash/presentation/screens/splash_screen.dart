@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:video_player/video_player.dart';
+
+import '../../../../core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,78 +13,30 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  late final VideoPlayerController _videoController;
-  bool _isVideoReady = false;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
   bool _hasNavigated = false;
-  bool _isFadingOut = false;
 
   @override
   void initState() {
     super.initState();
-    _videoController = _createVideoController();
-    _initializeVideo();
-  }
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+    _scaleAnimation = Tween<double>(begin: 0.94, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
 
-  VideoPlayerController _createVideoController() {
-    if (kIsWeb) {
-      // On web, load asset as a URL from the compiled assets directory.
-      final webVideoUrl =
-          Uri.base.resolve('assets/assets/splach.mp4').toString();
-      return VideoPlayerController.networkUrl(Uri.parse(webVideoUrl));
-    }
-    return VideoPlayerController.asset('assets/splach.mp4');
-  }
-
-  Future<void> _initializeVideo() async {
-    try {
-      await _videoController.initialize().timeout(const Duration(seconds: 8));
-      if (!mounted) return;
-
-      await _videoController.setLooping(false);
-      if (kIsWeb) {
-        // Web autoplay usually requires muted playback.
-        await _videoController.setVolume(0);
-      }
-      _videoController.addListener(_handleVideoProgress);
-      await _videoController.play();
-
-      setState(() => _isVideoReady = true);
-
-      // Safety fallback in case duration metadata is not readable.
-      if (_videoController.value.duration == Duration.zero) {
-        Future.delayed(const Duration(seconds: 2), _navigateNext);
-      }
-    } catch (_) {
-      _navigateNext();
-    }
-  }
-
-  void _handleVideoProgress() {
-    if (!_videoController.value.isInitialized) return;
-    final position = _videoController.value.position;
-    final duration = _videoController.value.duration;
-    if (duration == Duration.zero) return;
-
-    // Fade out 600ms before video ends for a smooth transition
-    final startFading =
-        position >= duration - const Duration(milliseconds: 600);
-
-    if (startFading && !_isFadingOut && !_hasNavigated) {
-      setState(() {
-        _isFadingOut = true;
-      });
-      // Navigate slightly after fade completes
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) _navigateNext();
-      });
-    }
-
-    // Fallback: immediate navigation if we reached the very end
-    final isEnded = position >= duration - const Duration(milliseconds: 50);
-    if (isEnded && !_hasNavigated && !_isFadingOut) {
-      _navigateNext();
-    }
+    _controller.forward();
+    Future.delayed(const Duration(milliseconds: 1800), _navigateNext);
   }
 
   Future<void> _navigateNext() async {
@@ -92,22 +45,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
-        if (mounted) context.go('/home');
-      } else {
-        if (mounted) context.go('/login');
-      }
-    } catch (e) {
-      // Handle any errors during navigation (e.g., after logout)
+      if (!mounted) return;
+      context.go(user != null ? '/home' : '/login');
+    } catch (_) {
       if (mounted) context.go('/login');
     }
   }
 
   @override
   void dispose() {
-    _videoController
-      ..removeListener(_handleVideoProgress)
-      ..dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -116,23 +63,183 @@ class _SplashScreenState extends State<SplashScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: _isVideoReady
-            ? AnimatedOpacity(
-                opacity: _isFadingOut ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 600),
-                child: SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _videoController.value.size.width,
-                      height: _videoController.value.size.height,
-                      child: VideoPlayer(_videoController),
-                    ),
+        body: _SplashBody(
+          fadeAnimation: _fadeAnimation,
+          scaleAnimation: _scaleAnimation,
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashBody extends StatelessWidget {
+  const _SplashBody({
+    required this.fadeAnimation,
+    required this.scaleAnimation,
+  });
+
+  final Animation<double> fadeAnimation;
+  final Animation<double> scaleAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.backgroundDark,
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -size.width * 0.24,
+            right: -size.width * 0.22,
+            child: _SoftCircle(size: size.width * 0.62),
+          ),
+          Positioned(
+            bottom: -size.width * 0.30,
+            left: -size.width * 0.20,
+            child: _SoftCircle(size: size.width * 0.70),
+          ),
+          SafeArea(
+            child: Center(
+              child: FadeTransition(
+                opacity: fadeAnimation,
+                child: ScaleTransition(
+                  scale: scaleAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _LogoMark(),
+                      const SizedBox(height: 22),
+                      Text(
+                        'app_name'.tr(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'splash_slogan'.tr(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.82),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 34),
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.6,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              )
-            : const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LogoMark extends StatelessWidget {
+  const _LogoMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 154,
+      height: 154,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryOnDark, width: 2),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryOnDark.withValues(alpha: 0.18),
+            AppColors.primaryDark.withValues(alpha: 0.08),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryOnDark.withValues(alpha: 0.26),
+            blurRadius: 28,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: const Stack(
+        children: [
+          Positioned(
+            top: 14,
+            right: 16,
+            child: Text(
+              '92',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Center(
+            child: Text(
+              'U',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 86,
+                fontWeight: FontWeight.w900,
+                height: 1,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 15,
+            bottom: 14,
+            child: Text(
+              '238.03',
+              style: TextStyle(
+                color: AppColors.primaryOnDark,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _SoftCircle extends StatelessWidget {
+  const _SoftCircle({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.10),
       ),
     );
   }

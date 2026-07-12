@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/services/app_logger.dart';
 import '../models/cart_item_model.dart';
 import '../models/cart_model.dart';
@@ -11,18 +12,24 @@ import '../../domain/entities/payment_method_entity.dart';
 /// Cart Remote Data Source - API calls to Supabase
 abstract class CartRemoteDataSource {
   Future<CartModel> getCart(String userId);
-  Future<CartItemModel> addToCart(String userId, String courseId);
+  Future<CartItemModel> addToCart(
+    String userId,
+    String courseId, {
+    CoursePricingOption? pricingOption,
+  });
   Future<void> removeFromCart(String userId, String cartItemId);
   Future<void> clearCart(String userId);
   Future<CouponModel> applyCoupon(String userId, String couponCode);
   Future<void> removeCoupon(String userId);
-  Future<CouponModel> validateCoupon(String couponCode);
+  Future<CouponModel> validateCoupon(String couponCode, {String? userId});
   Future<List<SavedPaymentMethodModel>> getSavedPaymentMethods(String userId);
   Future<OrderModel> checkout({
     required String userId,
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   });
   Future<List<CartItemModel>> getRecommendedCourses(String userId, int limit);
@@ -81,7 +88,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CartItemModel> addToCart(String userId, String courseId) async {
+  Future<CartItemModel> addToCart(
+    String userId,
+    String courseId, {
+    CoursePricingOption? pricingOption,
+  }) async {
     try {
       // Check if user is already enrolled in this course
       final enrollment = await supabase
@@ -94,15 +105,29 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (enrollment != null) {
         final status = enrollment['status'] as String?;
         if (status == 'active' || status == 'completed') {
-          throw const ValidationException(
-              'You are already enrolled in this course');
+          throw const ValidationException('cart.already_enrolled');
+        } else if (status == 'pending') {
+          throw const ValidationException('cart.pending_enrollment');
         }
+      }
+
+      final pendingOrderItem = await supabase
+          .from('manual_purchase_request_items')
+          .select('id, parent_enrollments!inner(user_id, payment_status)')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .eq('parent_enrollments.payment_status', 'pending_manual_payment')
+          .limit(1)
+          .maybeSingle();
+
+      if (pendingOrderItem != null) {
+        throw const ValidationException('cart.pending_enrollment');
       }
 
       final course = await supabase
           .from('courses')
           .select(
-              'price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end')
+              'price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
           .eq('id', courseId)
           .single();
 
@@ -124,7 +149,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       double priceAtAdd = 0.0;
       if (!isFree) {
-        if (discountPrice != null && (!isFlashSale || isFlashSaleActive)) {
+        final selectedOption = _resolveSelectedPricingOption(
+          pricingOption,
+          course['pricing_options'],
+        );
+        if (selectedOption != null) {
+          priceAtAdd = selectedOption.price;
+        } else if (discountPrice != null &&
+            (!isFlashSale || isFlashSaleActive)) {
           priceAtAdd = double.tryParse(discountPrice.toString()) ?? 0.0;
         } else if (price != null) {
           priceAtAdd = double.tryParse(price.toString()) ?? 0.0;
@@ -139,6 +171,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'user_id': userId,
         'course_id': courseId,
         'price_at_add': priceAtAdd,
+        if (pricingOption != null) 'pricing_option': pricingOption.toJson(),
       }).select('''
             *,
             courses (
@@ -187,12 +220,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<CouponModel> validateCoupon(String couponCode) async {
+  Future<CouponModel> validateCoupon(String couponCode,
+      {String? userId}) async {
     try {
+      final normalizedCode = couponCode.trim().toUpperCase();
       final response = await supabase
           .from('coupons')
           .select()
-          .eq('code', couponCode.toUpperCase())
+          .eq('code', normalizedCode)
           .eq('is_active', true)
           .single();
 
@@ -200,6 +235,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       if (!coupon.isValid) {
         throw const ValidationException('Coupon is expired or invalid');
       }
+
+      if (userId != null) {
+        await _validateCouponUsage(coupon, userId);
+        await _validateCouponScope(response, userId);
+      }
+
       return coupon;
     } on PostgrestException catch (e) {
       if (e.code == 'PGRST116') {
@@ -215,7 +256,66 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   @override
   Future<CouponModel> applyCoupon(String userId, String couponCode) async {
     // Coupon validation only - no storage (table doesn't exist)
-    return await validateCoupon(couponCode);
+    return await validateCoupon(couponCode, userId: userId);
+  }
+
+  Future<void> _validateCouponUsage(CouponModel coupon, String userId) async {
+    final usageLimit = coupon.usageLimit;
+    if (usageLimit != null && coupon.usageCount >= usageLimit) {
+      throw const ValidationException('Coupon usage limit reached');
+    }
+
+    final usageLimitPerUser = coupon.usageLimitPerUser;
+    if (usageLimitPerUser <= 0) return;
+
+    final usages = await supabase
+        .from('coupon_usages')
+        .select('id')
+        .eq('coupon_id', coupon.id)
+        .eq('user_id', userId);
+
+    if ((usages as List).length >= usageLimitPerUser) {
+      throw const ValidationException('You already used this coupon');
+    }
+  }
+
+  Future<void> _validateCouponScope(
+    Map<String, dynamic> couponJson,
+    String userId,
+  ) async {
+    final scope = couponJson['scope'] as String? ?? 'all';
+    if (scope != 'courses') return;
+
+    final couponId = couponJson['id'] as String;
+    final couponCourses = await supabase
+        .from('coupon_courses')
+        .select('course_id')
+        .eq('coupon_id', couponId);
+
+    final allowedCourseIds = (couponCourses as List)
+        .map((item) => item['course_id'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    if (allowedCourseIds.isEmpty) {
+      throw const ValidationException('Coupon is not assigned to any course');
+    }
+
+    final cartItems = await supabase
+        .from('cart_items')
+        .select('course_id')
+        .eq('user_id', userId);
+
+    final cartCourseIds = (cartItems as List)
+        .map((item) => item['course_id'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    final hasMatchingCourse =
+        cartCourseIds.any((courseId) => allowedCourseIds.contains(courseId));
+    if (!hasMatchingCourse) {
+      throw const ValidationException('Coupon is not valid for these courses');
+    }
   }
 
   @override
@@ -236,6 +336,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     required PaymentMethodType paymentMethod,
     String? savedPaymentMethodId,
     Map<String, dynamic>? cardDetails,
+    String? couponId,
+    String? couponCode,
     double couponDiscountTotal = 0,
   }) async {
     try {
@@ -244,7 +346,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       // Get cart items
       final cartItems = await supabase
           .from('cart_items')
-          .select('course_id, price_at_add')
+          .select('course_id, price_at_add, pricing_option')
           .eq('user_id', userId);
 
       if ((cartItems as List).isEmpty) {
@@ -261,9 +363,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           .eq('user_id', userId)
           .inFilter('status', ['active', 'completed']);
 
-      final alreadyEnrolledIds = (enrolledCheck as List)
-          .map((e) => e['course_id'] as String)
-          .toSet();
+      final alreadyEnrolledIds =
+          (enrolledCheck as List).map((e) => e['course_id'] as String).toSet();
 
       final filteredCartItems = (cartItems as List)
           .where((item) => !alreadyEnrolledIds.contains(item['course_id']))
@@ -289,6 +390,28 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             '🛒 [Checkout] Removed ${toRemove.length} already-enrolled course(s) from cart');
       }
 
+      // ✅ CHECK: منع إرسال طلب جديد لو في طلب pending على نفس الكورسات
+      final cartCourseIds =
+          filteredCartItems.map((item) => item['course_id'] as String).toList();
+
+      final pendingOrderItems = await supabase
+          .from('manual_purchase_request_items')
+          .select(
+              'course_id, parent_enrollments!inner(user_id, payment_status)')
+          .eq('parent_enrollments.user_id', userId)
+          .eq('parent_enrollments.payment_status', 'pending_manual_payment')
+          .inFilter('course_id', cartCourseIds);
+
+      if ((pendingOrderItems as List).isNotEmpty) {
+        final pendingCourseIds =
+            pendingOrderItems.map((e) => e['course_id'] as String).toList();
+        AppLogger.w(
+            '🛒 [Checkout] User already has pending orders for: $pendingCourseIds');
+        throw const ValidationException(
+            'You already have a pending purchase request for one or more of these courses. '
+            'Please wait for admin review before submitting again.');
+      }
+
       // Calculate total using current effective prices (considering flash sales)
       double total = 0;
       final List<Map<String, dynamic>> processedItems = [];
@@ -301,11 +424,24 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final courseData = await supabase
             .from('courses')
             .select(
-                'instructor_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end')
+                'teacher_id, instructor_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
             .eq('id', courseId)
             .single();
 
+        var teacherId = courseData['teacher_id'] as String?;
         final instructorId = courseData['instructor_id'] as String?;
+        if (teacherId == null && instructorId != null) {
+          final teacher = await supabase
+              .from('teachers')
+              .select('id')
+              .eq('profile_id', instructorId)
+              .maybeSingle();
+          teacherId = teacher?['id'] as String?;
+        }
+        if (teacherId == null) {
+          throw const ValidationException(
+              'Course is not assigned to an active teacher.');
+        }
         final isFree = courseData['is_free'] == true;
         final price = (courseData['price'] as num?)?.toDouble() ?? 0;
         final discountPrice =
@@ -318,11 +454,23 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             (flashSaleStart == null || !now.isBefore(flashSaleStart)) &&
             (flashSaleEnd == null || !now.isAfter(flashSaleEnd));
 
+        final requestedOption = item['pricing_option'] is Map<String, dynamic>
+            ? CoursePricingOption.fromJson(
+                item['pricing_option'] as Map<String, dynamic>,
+              )
+            : null;
+        final selectedOption = _resolveSelectedPricingOption(
+          requestedOption,
+          courseData['pricing_options'],
+        );
+
         // Calculate current effective price
         double currentEffectivePrice = 0.0;
         if (!isFree) {
-          // Discount applies if: permanent (no flash sale) OR flash sale is active
-          if (discountPrice != null && (!isFlashSale || isFlashSaleActive)) {
+          if (selectedOption != null) {
+            currentEffectivePrice = selectedOption.price;
+          } else if (discountPrice != null &&
+              (!isFlashSale || isFlashSaleActive)) {
             currentEffectivePrice = discountPrice;
           } else {
             currentEffectivePrice = price;
@@ -349,12 +497,22 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           'courseId': courseId,
           'effectivePrice': roundedPrice,
           'originalPrice': price, // Always pass the original course price
+          'teacherId': teacherId,
           'instructorId': instructorId,
+          'pricingOption': item['pricing_option'],
         });
       }
 
       final finalTotal =
           (total - couponDiscountTotal).clamp(0, double.infinity);
+      final isFreeOrder = finalTotal == 0;
+      final teacherIds =
+          processedItems.map((item) => item['teacherId'] as String).toSet();
+      if (teacherIds.length != 1) {
+        throw const ValidationException(
+            'Cart must contain courses from one teacher only.');
+      }
+      final orderTeacherId = teacherIds.first;
 
       AppLogger.i(
           '🛒 [Checkout] Total amount: $total, couponDiscount: $couponDiscountTotal, finalTotal: $finalTotal');
@@ -367,11 +525,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'total': finalTotal,
             'subtotal': total,
             'discount': couponDiscountTotal,
+            'coupon_id': couponId,
+            'coupon_code': couponCode,
             'coupon_discount': couponDiscountTotal,
-            'payment_method': paymentMethod.name,
-            'payment_status': finalTotal == 0 ? 'paid' : 'pending',
-            'paid_at':
-                finalTotal == 0 ? DateTime.now().toIso8601String() : null,
+            'teacher_id': orderTeacherId,
+            'payment_method': isFreeOrder ? 'free' : 'manual',
+            'payment_status': isFreeOrder ? 'paid' : 'pending_manual_payment',
+            'paid_at': isFreeOrder ? DateTime.now().toIso8601String() : null,
           })
           .select('id')
           .single();
@@ -393,16 +553,34 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
-      // Create enrollments for each course
+      // Free orders are enrolled immediately. Paid manual requests only create
+      // order items; enrollments are created by the instructor approval RPC.
       for (final processed in processedItems) {
         final courseId = processed['courseId'] as String;
         final priceAtAdd = processed['effectivePrice'] as double;
         final originalPrice = processed['originalPrice'] as double;
+        final teacherId = processed['teacherId'] as String;
         final instructorId = processed['instructorId'] as String?;
+        final pricingOption = processed['pricingOption'];
         final itemCouponDiscount = processed['couponDiscount'] as double;
 
         AppLogger.i(
             '🛒 [Checkout] Processing course: $courseId, price: $priceAtAdd, originalPrice: $originalPrice, couponDiscount: $itemCouponDiscount');
+
+        if (!isFreeOrder) {
+          await supabase.from('manual_purchase_request_items').insert({
+            'parent_enrollment_id': parentEnrollmentId,
+            'user_id': userId,
+            'course_id': courseId,
+            'teacher_id': teacherId,
+            'instructor_id': instructorId,
+            'price': priceAtAdd,
+            'original_price': originalPrice,
+            'discount': itemCouponDiscount,
+            'pricing_option': pricingOption,
+          });
+          continue;
+        }
 
         final existing = await supabase
             .from('enrollments')
@@ -414,7 +592,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         if (existing == null) {
           AppLogger.i('🛒 [Checkout] Creating new enrollment...');
 
-          // Create enrollment with pending status if payment required
+          // This path is only for free orders; paid manual orders continue above.
           final enrollmentResponse = await supabase
               .from('enrollments')
               .insert({
@@ -422,10 +600,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                 'course_id': courseId,
                 'instructor_id': instructorId,
                 'parent_enrollment_id': parentEnrollmentId,
-                'status': finalTotal == 0 ? 'active' : 'pending',
+                'status': 'active',
                 'progress_percentage': 0,
                 'completed_lessons': 0,
                 'price': priceAtAdd,
+                'pricing_option': pricingOption,
                 'discount': itemCouponDiscount,
                 'total_watch_time': 0,
                 'enrolled_at': DateTime.now().toIso8601String(),
@@ -494,11 +673,13 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         } else {
           final existingStatus = existing['status'] as String?;
           if (existingStatus == 'pending') {
-            AppLogger.i('🛒 [Checkout] Updating existing pending enrollment...');
+            AppLogger.i(
+                '🛒 [Checkout] Updating existing pending enrollment...');
             await supabase.from('enrollments').update({
               'parent_enrollment_id': parentEnrollmentId,
-              'status': finalTotal == 0 ? 'active' : 'pending',
+              'status': 'active',
               'price': priceAtAdd,
+              'pricing_option': pricingOption,
               'discount': itemCouponDiscount,
               'enrolled_at': DateTime.now().toIso8601String(),
             }).eq('id', existing['id']);
@@ -509,11 +690,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
-      // If free (total = 0), activate immediately and clear cart
-      if (finalTotal == 0) {
-        await supabase.from('cart_items').delete().eq('user_id', userId);
-        AppLogger.i('🛒 [Checkout] Free order - Cart cleared');
-      }
+      await supabase.from('cart_items').delete().eq('user_id', userId);
+      AppLogger.i('🛒 [Checkout] Cart cleared after order request');
 
       AppLogger.success('🛒 [Checkout] Checkout completed successfully!');
 
@@ -522,8 +700,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'user_id': userId,
         'total_amount': finalTotal,
         'currency': 'EGP',
-        'status': finalTotal == 0 ? 'completed' : 'pending_payment',
-        'payment_method': paymentMethod.name,
+        'status': isFreeOrder ? 'completed' : 'pending',
+        'payment_method': isFreeOrder ? 'free' : 'manual',
         'created_at': DateTime.now().toIso8601String(),
       });
     } on PostgrestException catch (e) {
@@ -584,5 +762,24 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
+  }
+
+  CoursePricingOption? _resolveSelectedPricingOption(
+    CoursePricingOption? requested,
+    dynamic rawOptions,
+  ) {
+    if (requested == null) return null;
+
+    final options = parseCoursePricingOptions(rawOptions);
+    for (final option in options) {
+      final sameLabel = option.label.trim() == requested.label.trim();
+      final sameDays = option.durationDays == requested.durationDays;
+      final samePrice = option.price.round() == requested.price.round();
+      if (sameLabel && sameDays && samePrice) {
+        return option;
+      }
+    }
+
+    throw const ValidationException('Invalid pricing option');
   }
 }

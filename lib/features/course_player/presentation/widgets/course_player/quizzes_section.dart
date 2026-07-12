@@ -1,16 +1,35 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/shared_widgets/empty_state.dart';
 import '../../../../../core/shared_widgets/loading_state.dart';
+import '../../../domain/entities/section_entity.dart';
 import '../../../../quizzes/domain/entities/quiz_entity.dart';
 import '../../../../quizzes/domain/repositories/quizzes_repository.dart';
+
+final _mojibakePattern = RegExp(r'[ØÙÃÅâ]');
+
+String _cleanDisplayText(String value) {
+  if (!_mojibakePattern.hasMatch(value)) return value;
+
+  try {
+    final decoded = utf8.decode(latin1.encode(value));
+    if (decoded.trim().isNotEmpty) return decoded;
+  } catch (_) {
+    // Keep the original string if it was not Latin-1 mojibake.
+  }
+
+  return value;
+}
 
 /// Quizzes Section Widget - Shows all quizzes for the course
 class QuizzesSection extends StatefulWidget {
   final bool isDark;
   final String courseId;
+  final List<SectionEntity> sections;
   final QuizzesRepository repository;
   final Function(QuizEntity quiz) onQuizTap;
 
@@ -18,6 +37,7 @@ class QuizzesSection extends StatefulWidget {
     super.key,
     required this.isDark,
     required this.courseId,
+    required this.sections,
     required this.repository,
     required this.onQuizTap,
   });
@@ -71,12 +91,50 @@ class _QuizzesSectionState extends State<QuizzesSection> {
         final quizzes = snapshot.data ?? [];
         if (quizzes.isEmpty) return _buildEmptyState();
 
-        return ListView.builder(
+        final sectionQuizzes =
+            quizzes.where((quiz) => quiz.isSectionLevelQuiz).toList();
+        final lessonQuizzes =
+            quizzes.where((quiz) => quiz.lessonId != null).toList();
+        final courseQuizzes =
+            quizzes.where((quiz) => quiz.isCourseLevelQuiz).toList();
+        final sectionQuizGroups = _groupSectionQuizzes(sectionQuizzes);
+        final lessonQuizGroups = _groupLessonQuizzes(lessonQuizzes);
+
+        return ListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-          itemCount: quizzes.length,
-          itemBuilder: (_, index) => _buildQuizItem(quizzes[index]),
+          children: [
+            if (sectionQuizzes.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'اختبارات السيكشنات',
+                subtitle: 'اختبارات مرتبطة بسيكشن كامل',
+                icon: Icons.view_agenda_outlined,
+              ),
+              const SizedBox(height: 12),
+              ...sectionQuizGroups.map(_buildSectionQuizGroup),
+              const SizedBox(height: 20),
+            ],
+            if (lessonQuizzes.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'اختبارات الدروس',
+                subtitle: 'اختبارات مرتبطة بدروس محددة داخل الكورس',
+                icon: Icons.menu_book_outlined,
+              ),
+              const SizedBox(height: 12),
+              ...lessonQuizGroups.map(_buildLessonQuizGroup),
+              const SizedBox(height: 20),
+            ],
+            if (courseQuizzes.isNotEmpty) ...[
+              _buildSectionHeader(
+                title: 'اختبار شامل',
+                subtitle: 'اختبارات على محتوى الكورس بالكامل',
+                icon: Icons.school_outlined,
+              ),
+              const SizedBox(height: 12),
+              ...courseQuizzes.map(_buildQuizItem),
+            ],
+          ],
         );
       },
     );
@@ -90,11 +148,277 @@ class _QuizzesSectionState extends State<QuizzesSection> {
     );
   }
 
-  Widget _buildQuizItem(QuizEntity quiz) {
+  Widget _buildSectionHeader({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 22),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color:
+                      widget.isDark ? AppColors.white : AppColors.textMainLight,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<_LessonQuizGroup> _groupLessonQuizzes(List<QuizEntity> lessonQuizzes) {
+    final quizzesByLessonId = <String, List<QuizEntity>>{};
+    final orphanQuizzes = <QuizEntity>[];
+
+    for (final quiz in lessonQuizzes) {
+      final lessonId = quiz.lessonId;
+      if (lessonId == null || lessonId.trim().isEmpty) {
+        orphanQuizzes.add(quiz);
+        continue;
+      }
+      quizzesByLessonId.putIfAbsent(lessonId, () => []).add(quiz);
+    }
+
+    final groups = <_LessonQuizGroup>[];
+    for (final section in widget.sections) {
+      for (final lesson in section.lessons) {
+        final quizzes = quizzesByLessonId.remove(lesson.id);
+        if (quizzes == null || quizzes.isEmpty) continue;
+        groups.add(_LessonQuizGroup(
+          lessonId: lesson.id,
+          lessonTitleAr: lesson.titleAr,
+          lessonTitleEn: lesson.titleEn,
+          quizzes: quizzes,
+        ));
+      }
+    }
+
+    for (final entry in quizzesByLessonId.entries) {
+      groups.add(_LessonQuizGroup(
+        lessonId: entry.key,
+        lessonTitleAr: 'درس غير موجود',
+        lessonTitleEn: 'Missing lesson',
+        quizzes: entry.value,
+      ));
+    }
+
+    if (orphanQuizzes.isNotEmpty) {
+      groups.add(_LessonQuizGroup(
+        lessonId: 'unassigned',
+        lessonTitleAr: 'اختبارات غير مرتبطة',
+        lessonTitleEn: 'Unassigned quizzes',
+        quizzes: orphanQuizzes,
+      ));
+    }
+
+    return groups;
+  }
+
+  List<_SectionQuizGroup> _groupSectionQuizzes(
+      List<QuizEntity> sectionQuizzes) {
+    final quizzesBySectionId = <String, List<QuizEntity>>{};
+    final orphanQuizzes = <QuizEntity>[];
+
+    for (final quiz in sectionQuizzes) {
+      final sectionId = quiz.sectionId;
+      if (sectionId == null || sectionId.trim().isEmpty) {
+        orphanQuizzes.add(quiz);
+        continue;
+      }
+      quizzesBySectionId.putIfAbsent(sectionId, () => []).add(quiz);
+    }
+
+    final groups = <_SectionQuizGroup>[];
+    for (final section in widget.sections) {
+      final quizzes = quizzesBySectionId.remove(section.id);
+      if (quizzes == null || quizzes.isEmpty) continue;
+      groups.add(_SectionQuizGroup(section: section, quizzes: quizzes));
+    }
+
+    for (final entry in quizzesBySectionId.entries) {
+      groups.add(_SectionQuizGroup(
+        section: SectionEntity(
+          id: entry.key,
+          courseId: widget.courseId,
+          titleAr: 'سيكشن غير موجود',
+          titleEn: 'Missing section',
+        ),
+        quizzes: entry.value,
+      ));
+    }
+
+    if (orphanQuizzes.isNotEmpty) {
+      groups.add(_SectionQuizGroup(
+        section: SectionEntity(
+          id: 'unassigned',
+          courseId: widget.courseId,
+          titleAr: 'اختبارات غير مرتبطة',
+          titleEn: 'Unassigned quizzes',
+        ),
+        quizzes: orphanQuizzes,
+      ));
+    }
+
+    return groups;
+  }
+
+  Widget _buildSectionQuizGroup(_SectionQuizGroup group) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final quizCount = group.quizzes.length;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: widget.isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: widget.isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.info.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.view_agenda_outlined,
+              color: AppColors.info,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            _cleanDisplayText(group.section.getTitle(locale)),
+            style: TextStyle(
+              color: widget.isDark ? AppColors.white : AppColors.textMainLight,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}',
+              style: TextStyle(
+                color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          iconColor: AppColors.info,
+          collapsedIconColor:
+              widget.isDark ? AppColors.grey400 : AppColors.grey600,
+          children: group.quizzes.map(_buildQuizItem).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLessonQuizGroup(_LessonQuizGroup group) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final quizCount = group.quizzes.length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: widget.isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: widget.isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.play_lesson_outlined,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            _cleanDisplayText(group.getLessonTitle(locale)),
+            style: TextStyle(
+              color: widget.isDark ? AppColors.white : AppColors.textMainLight,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}',
+              style: TextStyle(
+                color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          iconColor: AppColors.primary,
+          collapsedIconColor:
+              widget.isDark ? AppColors.grey400 : AppColors.grey600,
+          children: group.quizzes.map(_buildQuizItem).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuizItem(QuizEntity quiz) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: widget.isDark
+            ? AppColors.surfaceDark
+            : AppColors.backgroundLight.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: widget.isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -142,7 +466,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          quiz.titleAr,
+          _cleanDisplayText(quiz.titleAr),
           style: TextStyle(
             color: widget.isDark ? AppColors.white : AppColors.textMainLight,
             fontWeight: FontWeight.w600,
@@ -150,6 +474,47 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           ),
         ),
         const SizedBox(height: 4),
+        if (quiz.isSectionLevelQuiz) ...[
+          Row(
+            children: [
+              Icon(
+                Icons.view_agenda_outlined,
+                size: 14,
+                color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'اختبار سيكشن',
+                style: TextStyle(
+                  color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+        ] else if (!quiz.isCourseLevelQuiz) ...[
+          Row(
+            children: [
+              Icon(
+                Icons.menu_book_outlined,
+                size: 14,
+                color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'اختبار درس',
+                style: TextStyle(
+                  color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+        ],
         Row(
           children: [
             Icon(
@@ -173,7 +538,9 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ),
             const SizedBox(width: 4),
             Text(
-              '${quiz.timeLimit ?? 0} ${'course_player.minutes'.tr()}',
+              quiz.hasTimeLimit
+                  ? '${quiz.timeLimit} ${'course_player.minutes'.tr()}'
+                  : 'quiz.no_limit'.tr(),
               style: TextStyle(
                 color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                 fontSize: 12,
@@ -194,10 +561,46 @@ class _QuizzesSectionState extends State<QuizzesSection> {
   }
 
   Widget _buildQuizStatus(QuizEntity quiz) {
-    // TODO: Check if quiz is completed from attempts
+    if (quiz.isScheduled) {
+      return const Icon(Icons.schedule_rounded, color: AppColors.warning);
+    }
+    if (quiz.isExpired) {
+      return const Icon(Icons.lock_clock_rounded, color: AppColors.error);
+    }
     return Icon(
       Icons.chevron_right,
       color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
     );
   }
+}
+
+class _LessonQuizGroup {
+  final String lessonId;
+  final String lessonTitleAr;
+  final String? lessonTitleEn;
+  final List<QuizEntity> quizzes;
+
+  const _LessonQuizGroup({
+    required this.lessonId,
+    required this.lessonTitleAr,
+    required this.lessonTitleEn,
+    required this.quizzes,
+  });
+
+  String getLessonTitle(String locale) {
+    if (locale == 'en' && lessonTitleEn != null && lessonTitleEn!.isNotEmpty) {
+      return lessonTitleEn!;
+    }
+    return lessonTitleAr;
+  }
+}
+
+class _SectionQuizGroup {
+  final SectionEntity section;
+  final List<QuizEntity> quizzes;
+
+  const _SectionQuizGroup({
+    required this.section,
+    required this.quizzes,
+  });
 }

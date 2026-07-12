@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/di/injection_container.dart';
@@ -43,7 +46,9 @@ class AttachmentsStep extends StatelessWidget {
           Icon(Icons.attach_file, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            isArabic ? 'لا توجد مرفقات بعد' : 'No attachments yet',
+            isArabic
+                ? 'لا توجد مرفقات بعد'
+                : 'No attachments yet',
             style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
@@ -172,15 +177,18 @@ class AttachmentsStep extends StatelessWidget {
         spacing: 12,
         runSpacing: 12,
         alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           OutlinedButton.icon(
-            onPressed: () => cubit.setStep(3), // Go to Settings step
+            onPressed: () => cubit.setStep(2),
             icon: Icon(isArabic ? Icons.arrow_forward : Icons.arrow_back),
             label: Text(isArabic ? 'السابق' : 'Previous'),
           ),
           Wrap(
             spacing: 12,
             runSpacing: 12,
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               OutlinedButton(
                 onPressed: () async {
@@ -189,8 +197,12 @@ class AttachmentsStep extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(success
-                            ? (isArabic ? 'تم حفظ المسودة' : 'Draft saved')
-                            : (isArabic ? 'فشل في الحفظ' : 'Failed to save')),
+                            ? (isArabic
+                                ? 'تم حفظ المسودة'
+                                : 'Draft saved')
+                            : (isArabic
+                                ? 'فشل في الحفظ'
+                                : 'Failed to save')),
                         backgroundColor:
                             success ? AppColors.success : AppColors.error,
                       ),
@@ -200,13 +212,11 @@ class AttachmentsStep extends StatelessWidget {
                 child: Text(isArabic ? 'حفظ كمسودة' : 'Save as Draft'),
               ),
               ElevatedButton.icon(
-                onPressed: state.canPublish
-                    ? () => _showPublishConfirmation(context, cubit, isArabic)
-                    : null,
-                icon: const Icon(Icons.publish),
-                label: Text(isArabic ? 'نشر الكورس' : 'Publish Course'),
+                onPressed: () => cubit.setStep(4),
+                icon: Icon(isArabic ? Icons.arrow_back : Icons.arrow_forward),
+                label: Text('course_editor.next_settings'.tr()),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -251,7 +261,9 @@ class AttachmentsStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Text(isArabic ? 'جاري رفع الملف...' : 'Uploading file...'),
+                Text(isArabic
+                    ? 'جاري رفع الملف...'
+                    : 'Uploading file...'),
               ],
             ),
             duration: const Duration(seconds: 30),
@@ -295,8 +307,9 @@ class AttachmentsStep extends StatelessWidget {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-                isArabic ? 'تم رفع الملف بنجاح' : 'File uploaded successfully'),
+            content: Text(isArabic
+                ? 'تم رفع الملف بنجاح'
+                : 'File uploaded successfully'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -351,59 +364,6 @@ class AttachmentsStep extends StatelessWidget {
     }
   }
 
-  void _showPublishConfirmation(
-      BuildContext context, CourseEditorCubit cubit, bool isArabic) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
-      builder: (ctx) => AlertDialog(
-        title: Text(isArabic ? 'نشر الكورس' : 'Publish Course'),
-        content: Text(isArabic
-            ? 'هل أنت متأكد من نشر هذا الكورس؟ سيكون متاحاً للطلاب بعد النشر.'
-            : 'Are you sure you want to publish this course? It will be available to students after publishing.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(isArabic ? 'إلغاء' : 'Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await cubit.publishCourse();
-              if (context.mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isArabic
-                          ? 'تم نشر الكورس بنجاح'
-                          : 'Course published successfully'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                  Navigator.of(context).pop(); // Go back to courses list
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isArabic
-                          ? 'فشل في نشر الكورس'
-                          : 'Failed to publish course'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(isArabic ? 'نشر' : 'Publish'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showEditDialog(BuildContext context, CourseEditorCubit cubit, int index,
       CourseAttachmentData attachment, bool isArabic) {
     final fileNameController = TextEditingController(text: attachment.fileName);
@@ -422,17 +382,19 @@ class AttachmentsStep extends StatelessWidget {
               TextField(
                 controller: fileNameController,
                 decoration: InputDecoration(
-                  labelText:
-                      isArabic ? 'اسم الملف (إنجليزي)' : 'File Name (English)',
+                  labelText: isArabic
+                      ? 'اسم الملف (إنجليزي)'
+                      : 'File Name (English)',
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: fileNameArController,
-                textDirection: TextDirection.rtl,
+                textDirection: ui.TextDirection.rtl,
                 decoration: InputDecoration(
-                  labelText:
-                      isArabic ? 'اسم الملف (عربي)' : 'File Name (Arabic)',
+                  labelText: isArabic
+                      ? 'اسم الملف (عربي)'
+                      : 'File Name (Arabic)',
                 ),
               ),
             ],
@@ -604,7 +566,7 @@ class _AttachmentCard extends StatelessWidget {
         return Colors.orange;
       case 'zip':
       case 'rar':
-        return Colors.purple;
+        return Colors.blue;
       case 'jpg':
       case 'jpeg':
       case 'png':

@@ -1,6 +1,6 @@
 {
-  "app_name": "Nero Academy",
-  "splash_slogan": "We will continue the journey together",
+  "app_name": "Dr UneXpected",
+  "splash_slogan": "Chemistry, the unexpected way",
   "clear_all": "Clear All",
   "common": {
     "loading": "Loading...",
@@ -40,7 +40,8 @@
     "months_ago": "months ago",
     "learn_more": "Learn More",
     "read_more": "Read More",
-    "select_country": "Select Country"
+    "select_country": "Select Country",
+    "copy": "Copy"
   },
   "errors": {
     "network": "No internet connection",
@@ -134,7 +135,8 @@
       "email_not_confirmed": "Please confirm your email first",
       "session_expired": "Session expired, please login again",
       "user_banned": "Your account is banned",
-      "user_inactive": "Your account is inactive. Contact support"
+      "user_inactive": "Your account is inactive. Contact support",
+      "email_not_registered": "This email is not registered in the system. Please verify or create a new account."
     },
     "login_required": "Please login first",
     "login_with_phone": "Login with Phone",
@@ -184,13 +186,32 @@
     "add_photo": "Add Your Photo",
     "photo_subtitle": "Help others recognize you",
     "instructor_info": "Instructor Information",
-    "instructor_subtitle": "Tell us more about your expertise"
+    "instructor_subtitle": "Tell us more about your expertise",
+    "reset_password_done_title": "Password changed successfully",
+    "reset_password_done_subtitle": "You can now sign in with your new password.",
+    "reset_password_new_title": "Set a new password",
+    "reset_password_new_subtitle": "Enter the new password for your account.",
+    "new_password": "New password",
+    "change_password": "Change password",
+    "reset_link_invalid": "Invalid or expired reset link.",
+    "reset_password_failed": "Could not change password. Please request a new link.",
+    "password_min_8": "Password must be at least 8 characters",
+    "reset_otp_subtitle": "Enter your email and we will send you a verification code.",
+    "reset_otp_sent": "Verification code has been sent to your email",
+    "enter_reset_code": "Enter the verification code and your new password.",
+    "otp_code": "Verification code",
+    "otp_code_hint": "6-digit code",
+    "otp_required": "Verification code is required",
+    "verify_and_change_password": "Verify and change password",
+    "reset_success": "Password changed successfully",
+    "resend_code": "Resend code",
+    "send_reset_code": "Send Code"
   },
   "home": {
     "hello": "Hello",
     "greeting": "Hello, Student",
     "explore_courses": "Explore Courses",
-    "search_placeholder": "Search for anything...",
+    "search_placeholder": "Search for a lesson, exam, note...",
     "all": "All",
     "flash_sale": "Flash Sale",
     "flash_sale_subtitle": "Limited time offers!",
@@ -204,7 +225,8 @@
     "continue": "Continue",
     "completed": "completed",
     "recommended_for_you": "Recommended for You",
-    "based_on_interests": "Based on your interests"
+    "based_on_interests": "Based on your interests",
+    "no_courses_available": "No courses currently available"
   },
   "course": {
     "course": "Course",
@@ -296,7 +318,16 @@
     "order_id": "Order ID:",
     "start_learning": "Start Learning",
     "back_to_home": "Back to Home",
-    "pending_confirmation": "Payment is still being confirmed. Your subscription will activate after the bank confirms the payment."
+    "pending_confirmation": "Payment is still being confirmed. Your subscription will activate after the bank confirms the payment.",
+    "request_submitted": "Request submitted",
+    "manual_request_subtitle": "Contact the instructor on WhatsApp and send the operation ID to complete payment and activate your course.",
+    "operation_id": "Operation ID",
+    "admin_whatsapp": "Admin WhatsApp",
+    "instructor_whatsapp": "Instructor WhatsApp",
+    "instructor_whatsapp_unavailable": "Instructor phone is not available right now",
+    "contact_whatsapp": "Contact on WhatsApp",
+    "whatsapp_message": "Hello, I want to complete my Dr UneXpected payment. Operation ID: {orderId}",
+    "copied": "Copied"
   },
   "my_learning": {
     "title": "My Learning",
@@ -461,7 +492,33 @@
     "back_to_course": "Back to Course",
     "correct_answer": "Correct Answer",
     "your_answer": "Your Answer",
-    "explanation": "Explanation"
+    "explanation": "Explanation",
+    "title": "Quiz",
+    "start": "Start Quiz",
+    "pass_score": "Pass score",
+    "no_limit": "No limit",
+    "minutes": "minutes",
+    "remaining": "remaining",
+    "no_attempts": "No attempts left",
+    "passed_message": "You passed the quiz successfully",
+    "failed_message": "You did not pass this attempt",
+    "total_points": "Total points",
+    "retry": "Retry",
+    "history": "History",
+    "previous": "Previous",
+    "next": "Next",
+    "review": "Review",
+    "review_answers": "Review answers",
+    "expand_all": "Expand all",
+    "answered": "Answered",
+    "unanswered": "Unanswered",
+    "submit_title": "Submit quiz?",
+    "submit_confirm": "Submit now",
+    "submit_warning": "You cannot change answers after submitting.",
+    "exit_title": "Exit quiz?",
+    "exit_message": "Your current progress may be lost.",
+    "exit_confirm": "Exit",
+    "not_found": "Quiz not found"
   },
   "course_details": {
     "certificate": "Certificate of Completion",
@@ -493,7 +550,9 @@
     "not_found": "Course not found",
     "preview_not_available": "Preview video is not available right now",
     "invalid_preview_link": "Invalid preview video link",
-    "cannot_open_preview": "Couldn't open preview video"
+    "cannot_open_preview": "Couldn't open preview video",
+    "courses": "course",
+    "get_for_free": "Get for Free"
   },
   "instructor": {
     "instructor": "Instructor",
@@ -541,6 +600,7 @@
     "error": "Error loading course",
     "section": "Section",
     "lesson": "Lesson",
+    "lesson_list": "Lesson list",
     "lectures": "Lectures",
     "more": "More",
     "qa": "Q&A",
@@ -601,7 +661,20 @@
     "replay_10": "Replay 10 seconds",
     "forward_10": "Forward 10 seconds",
     "playback_speed": "Playback speed",
-    "fullscreen": "Fullscreen"
+    "fullscreen": "Fullscreen",
+    "video_unavailable": "Video unavailable",
+    "video_unavailable_desc": "Sorry, this video is currently unavailable or has been removed.",
+    "select_rating": "Please choose a rating",
+    "rating_submit_error": "Could not submit your rating. Please try again.",
+    "review_count": "{} reviews",
+    "you": "You",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "days_ago": "{} days ago",
+    "weeks_ago": "{} weeks ago",
+    "months_ago": "{} months ago",
+    "years_ago": "{} years ago",
+    "report": "Report"
   },
   "portfolio": {
     "title": "My Portfolio",
@@ -821,7 +894,9 @@
       "create_quiz": "Create Quiz",
       "edit_quiz": "Edit Quiz",
       "quiz_attempts": "Quiz Attempts",
-      "preview_quiz": "Preview Quiz"
+      "preview_quiz": "Preview Quiz",
+      "delete_course_title": "Delete Course Permanently",
+      "delete_course_confirm": "Are you sure you want to delete the course ({title})?\n\n⚠️ This will permanently delete the course, along with all its lessons, sections, attachments, and content from the system!"
     },
     "common": {
       "search": "Search...",
@@ -889,5 +964,62 @@
       "no_violation": "We did not find a policy violation in this content.",
       "duplicate_report": "This has already been reported and action has been taken."
     }
+  },
+  "course_editor": {
+    "next_settings": "Next (Settings)",
+    "publish_course": "Publish Course",
+    "publish": "Publish",
+    "save_draft": "Save Draft",
+    "publish_missing_title": "Missing items",
+    "publish_missing_message": "Complete the following items, then try publishing again:",
+    "publish_confirm_title": "Publish Course",
+    "publish_confirm_message": "Are you sure you want to publish this course?",
+    "publish_success": "Course published successfully",
+    "publish_failed": "Failed to publish course",
+    "published_available": "Your course is now live and available to students",
+    "publishing": "Publishing course...",
+    "validation_title_ar": "Arabic title",
+    "validation_title_en": "English title",
+    "validation_description_ar": "Arabic description",
+    "validation_description_en": "English description",
+    "validation_category": "Category",
+    "validation_course_availability": "Course availability window must be valid",
+    "validation_section_required": "Add at least one section",
+    "validation_section_fallback": "Section {number}",
+    "validation_lesson_fallback": "Lesson {number}",
+    "validation_section_empty": "{section} has no lessons",
+    "validation_lesson_availability": "{lesson} availability in {section} is invalid",
+    "ai_import_title": "Add Questions from AI",
+    "ai_import_tab_prompt": "The Prompt",
+    "ai_import_tab_paste": "Paste & Preview",
+    "ai_import_how_title": "How to use this feature?",
+    "ai_import_step1": "Copy the Prompt using the button below",
+    "ai_import_step2": "Send it to any AI (ChatGPT, Gemini, Claude...)",
+    "ai_import_step3": "Change the topic and number of questions at the end",
+    "ai_import_step4": "Copy the JSON result from the AI",
+    "ai_import_step5": "Paste JSON in the \"Paste & Preview\" tab",
+    "ai_import_copy_prompt": "Copy the Prompt",
+    "ai_import_copied": "Copied! ✓",
+    "ai_import_hint": "After copying the Prompt, go to the \"Paste & Preview\" tab",
+    "ai_import_paste_label": "Paste JSON from AI here:",
+    "ai_import_paste_hint": "[ { \"question_ar\": \"...\", ... } ]",
+    "ai_import_preview_btn": "Preview Questions",
+    "ai_import_ready": "{count} questions ready to import ✓",
+    "ai_import_add_btn": "Add {count} Questions",
+    "ai_import_adding": "Adding...",
+    "ai_import_success": "Added {count} of {total} questions successfully ✓",
+    "ai_import_err_empty": "Please paste JSON here first",
+    "ai_import_err_not_array": "JSON must be an array [ ... ]",
+    "ai_import_err_no_questions": "No questions found in JSON",
+    "ai_import_err_invalid": "Invalid JSON: {msg}",
+    "ai_import_fab_label": "Import from AI (JSON)",
+    "ai_import_fab_subtitle": "Send prompt to any AI and paste the result",
+    "ai_import_type_single": "Single Choice",
+    "ai_import_type_multiple": "Multiple Choice",
+    "ai_import_type_tf": "True / False",
+    "ai_import_type_text": "Text Answer",
+    "ai_import_points": "{n} pts"
   }
 }
+
+

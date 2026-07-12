@@ -50,6 +50,7 @@ class InstructorQuizzesState extends Equatable {
 class InstructorQuizModel extends Equatable {
   final String id;
   final String courseId;
+  final String? sectionId;
   final String? lessonId;
   final String? courseTitleAr;
   final String? courseTitleEn;
@@ -68,11 +69,14 @@ class InstructorQuizModel extends Equatable {
   final int attemptsCount;
   final double averageScore;
   final bool isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final DateTime createdAt;
 
   const InstructorQuizModel({
     required this.id,
     required this.courseId,
+    this.sectionId,
     this.lessonId,
     this.courseTitleAr,
     this.courseTitleEn,
@@ -91,6 +95,8 @@ class InstructorQuizModel extends Equatable {
     this.attemptsCount = 0,
     this.averageScore = 0,
     this.isPublished = true,
+    this.availableFrom,
+    this.availableUntil,
     required this.createdAt,
   });
 
@@ -100,6 +106,7 @@ class InstructorQuizModel extends Equatable {
     return InstructorQuizModel(
       id: json['id'] as String,
       courseId: json['course_id'] as String,
+      sectionId: json['section_id'] as String?,
       lessonId: json['lesson_id'] as String?,
       courseTitleAr: course?['title_ar'] as String?,
       courseTitleEn: course?['title_en'] as String?,
@@ -118,6 +125,12 @@ class InstructorQuizModel extends Equatable {
       attemptsCount: json['attempts_count'] as int? ?? 0,
       averageScore: (json['average_score'] as num?)?.toDouble() ?? 0,
       isPublished: json['is_published'] as bool? ?? true,
+      availableFrom: json['available_from'] != null
+          ? DateTime.parse(json['available_from'] as String)
+          : null,
+      availableUntil: json['available_until'] != null
+          ? DateTime.parse(json['available_until'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -126,6 +139,7 @@ class InstructorQuizModel extends Equatable {
   List<Object?> get props => [
         id,
         courseId,
+        sectionId,
         lessonId,
         titleAr,
         titleEn,
@@ -134,6 +148,9 @@ class InstructorQuizModel extends Equatable {
         questionsCount,
         attemptsCount,
         averageScore,
+        isPublished,
+        availableFrom,
+        availableUntil,
         createdAt,
       ];
 }

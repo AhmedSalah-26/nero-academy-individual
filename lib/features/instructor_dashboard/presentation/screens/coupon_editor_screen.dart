@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubit/instructor_coupons_cubit.dart';
 import '../widgets/dialogs/course_selection_dialog.dart';
@@ -54,7 +55,30 @@ class _CouponEditorScreenState extends State<CouponEditorScreen> {
     );
     _discountType = widget.coupon?.discountType ?? 'percentage';
     _scope = widget.coupon?.scope ?? 'all';
+    _selectedCourseIds = widget.coupon?.courseIds.toSet() ?? {};
     _endDate = widget.coupon?.endDate;
+    _loadSelectedCoursesData();
+  }
+
+  Future<void> _loadSelectedCoursesData() async {
+    if (_selectedCourseIds.isEmpty) return;
+
+    try {
+      final response = await Supabase.instance.client
+          .from('courses')
+          .select('id, title_ar, title_en, thumbnail_url')
+          .inFilter('id', _selectedCourseIds.toList());
+
+      if (!mounted) return;
+      setState(() {
+        _selectedCoursesData = {
+          for (final course in response as List)
+            course['id'] as String: Map<String, dynamic>.from(course),
+        };
+      });
+    } catch (e) {
+      debugPrint('Error loading selected coupon courses: $e');
+    }
   }
 
   @override

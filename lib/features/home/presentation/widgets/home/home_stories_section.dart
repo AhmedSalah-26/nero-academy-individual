@@ -91,7 +91,7 @@ class _StoryAvatar extends StatelessWidget {
                             colors: [Color(0xFFFF0000), Color(0xFFFF6B6B)],
                           )
                         : const LinearGradient(
-                            colors: [AppColors.primary, Color(0xFFE040FB)],
+                            colors: [AppColors.primary, AppColors.info],
                           ),
                 border: story.isViewed
                     ? Border.all(

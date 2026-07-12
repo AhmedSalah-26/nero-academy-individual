@@ -1,12 +1,16 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:flutter/services.dart';
 import 'app_logger.dart';
 
 /// Service to prevent screen recording and screenshots.
-/// Uses FLAG_SECURE on Android. iOS uses UIScreen recording detection.
+///
+/// Android: Sets [WindowManager.FLAG_SECURE] via a MethodChannel.
+/// iOS:     Activates a secure UITextField layer that iOS blurs on capture.
+/// Web:     No-op (not supported by browsers).
 class ScreenProtectionService {
   ScreenProtectionService._();
+
+  static const _channel = MethodChannel('nero_academy/screen_secure');
 
   static bool _isProtected = false;
 
@@ -16,14 +20,9 @@ class ScreenProtectionService {
     if (kIsWeb) return;
 
     try {
-      if (Platform.isAndroid) {
-        await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
-        _isProtected = true;
-        AppLogger.i('🔒 [ScreenProtection] Enabled FLAG_SECURE');
-      }
-      // iOS: The YouTube player webview itself helps, but there's no
-      // built‑in FLAG_SECURE equivalent. Recording detection can be
-      // added with platform channels if needed in the future.
+      await _channel.invokeMethod<void>('setScreenSecure', {'enable': true});
+      _isProtected = true;
+      AppLogger.i('🔒 [ScreenProtection] Enabled');
     } catch (e) {
       AppLogger.e('🔒 [ScreenProtection] Failed to enable: $e');
     }
@@ -35,13 +34,14 @@ class ScreenProtectionService {
     if (kIsWeb) return;
 
     try {
-      if (Platform.isAndroid) {
-        await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
-        _isProtected = false;
-        AppLogger.i('🔓 [ScreenProtection] Disabled FLAG_SECURE');
-      }
+      await _channel.invokeMethod<void>('setScreenSecure', {'enable': false});
+      _isProtected = false;
+      AppLogger.i('🔓 [ScreenProtection] Disabled');
     } catch (e) {
       AppLogger.e('🔓 [ScreenProtection] Failed to disable: $e');
     }
   }
+
+  /// Returns whether screen protection is currently active.
+  static bool get isProtected => _isProtected;
 }

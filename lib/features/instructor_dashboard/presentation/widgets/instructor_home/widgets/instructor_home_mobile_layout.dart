@@ -205,14 +205,14 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             '${stats.totalEarnings.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
         icon: Icons.attach_money_rounded,
         color: AppColors.success,
-        onTap: () => _navigateTo(5),
+        onTap: () => _navigateTo(6), // Earnings = index 6
       ),
       StatsCardData(
         title: isArabic ? 'متوسط التقييم' : 'Average Rating',
         value: stats.averageRating.toStringAsFixed(1),
         icon: Icons.star_rounded,
         color: AppColors.warning,
-        onTap: () => _navigateTo(9),
+        onTap: () => _navigateTo(10), // Reviews = index 10
       ),
       StatsCardData(
         title: isArabic ? 'الرصيد المتاح' : 'Available Balance',
@@ -220,14 +220,14 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             '${stats.availableBalance.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
         icon: Icons.account_balance_wallet_rounded,
         color: AppColors.warning,
-        onTap: () => _navigateTo(5),
+        onTap: () => _navigateTo(6), // Earnings = index 6
       ),
       StatsCardData(
         title: isArabic ? 'أسئلة بدون إجابة' : 'Unanswered Q&A',
         value: stats.unansweredQuestions.toString(),
         icon: Icons.question_answer_rounded,
         color: AppColors.error,
-        onTap: () => _navigateTo(8),
+        onTap: () => _navigateTo(9), // Q&A = index 9
       ),
     ];
   }
@@ -304,7 +304,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'الكوبونات' : 'Coupons',
             icon: Icons.local_offer_rounded,
             color: Colors.teal,
-            onTap: () => _navigateTo(6),
+            onTap: () => _navigateTo(7), // Coupons = index 7
             textColor: textMain,
             bgColor: surface,
           ),
@@ -312,7 +312,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'الطلاب' : 'Students',
             icon: Icons.groups_rounded,
             color: AppColors.info,
-            onTap: () => _navigateTo(2),
+            onTap: () => _navigateTo(2), // Students = index 2
             textColor: textMain,
             bgColor: surface,
           ),
@@ -320,7 +320,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'الأرباح' : 'Earnings',
             icon: Icons.account_balance_wallet_rounded,
             color: AppColors.success,
-            onTap: () => _navigateTo(5),
+            onTap: () => _navigateTo(6), // Earnings = index 6
             textColor: textMain,
             bgColor: surface,
           ),
@@ -328,7 +328,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'الأسئلة' : 'Q&A',
             icon: Icons.question_answer_rounded,
             color: AppColors.error,
-            onTap: () => _navigateTo(8),
+            onTap: () => _navigateTo(9), // Q&A = index 9
             textColor: textMain,
             bgColor: surface,
           ),
@@ -336,7 +336,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'التقييمات' : 'Reviews',
             icon: Icons.star_rounded,
             color: AppColors.warning,
-            onTap: () => _navigateTo(9),
+            onTap: () => _navigateTo(10), // Reviews = index 10
             textColor: textMain,
             bgColor: surface,
           ),
@@ -344,7 +344,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'المنتديات' : 'Forums',
             icon: Icons.forum_rounded,
             color: AppColors.primary,
-            onTap: () => _navigateTo(3),
+            onTap: () => _navigateTo(3), // Forums = index 3
             textColor: textMain,
             bgColor: surface,
           ),
@@ -352,7 +352,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
             label: isArabic ? 'الاختبارات' : 'Quizzes',
             icon: Icons.quiz_rounded,
             color: AppColors.primaryDark,
-            onTap: () => _navigateTo(7),
+            onTap: () => _navigateTo(8), // Quizzes = index 8
             textColor: textMain,
             bgColor: surface,
           ),
@@ -451,7 +451,7 @@ class InstructorHomeMobileLayout extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: onNavigate == null ? null : () => _navigateTo(5),
+                  onPressed: onNavigate == null ? null : () => _navigateTo(6), // Earnings = index 6
                   icon: const Icon(Icons.paid_rounded, size: 18),
                   label: Text(isArabic ? 'الأرباح' : 'Earnings'),
                 ),

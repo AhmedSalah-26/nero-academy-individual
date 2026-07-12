@@ -200,14 +200,14 @@ class InstructorHomeContent extends StatelessWidget {
               '${stats.totalEarnings.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
           icon: Icons.attach_money_rounded,
           color: AppColors.success,
-          onTap: onNavigate != null ? () => onNavigate!(5) : null,
+          onTap: onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
         ),
         StatsCardData(
           title: isArabic ? 'متوسط التقييم' : 'Average Rating',
           value: stats.averageRating.toStringAsFixed(1),
           icon: Icons.star_rounded,
           color: AppColors.warning,
-          onTap: onNavigate != null ? () => onNavigate!(9) : null,
+          onTap: onNavigate != null ? () => onNavigate!(10) : null, // Reviews = 10
         ),
         StatsCardData(
           title: isArabic ? 'الرصيد المتاح' : 'Available Balance',
@@ -215,14 +215,14 @@ class InstructorHomeContent extends StatelessWidget {
               '${stats.availableBalance.toStringAsFixed(0)} ${isArabic ? 'ج.م' : 'EGP'}',
           icon: Icons.account_balance_wallet_rounded,
           color: AppColors.warning,
-          onTap: onNavigate != null ? () => onNavigate!(5) : null,
+          onTap: onNavigate != null ? () => onNavigate!(6) : null, // Earnings = 6
         ),
         StatsCardData(
           title: isArabic ? 'أسئلة بدون إجابة' : 'Unanswered Q&A',
           value: stats.unansweredQuestions.toString(),
           icon: Icons.question_answer_rounded,
           color: AppColors.error,
-          onTap: onNavigate != null ? () => onNavigate!(8) : null,
+          onTap: onNavigate != null ? () => onNavigate!(9) : null, // Q&A = 9
         ),
       ],
     );

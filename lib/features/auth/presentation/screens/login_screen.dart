@@ -19,6 +19,7 @@ import '../widgets/login/auth_tab_bar.dart';
 import '../widgets/login/auth_text_field.dart';
 import '../widgets/login/avatar_picker.dart';
 import '../widgets/login/multi_stage_register.dart';
+import '../widgets/login/social_login_buttons.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,8 +85,11 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (ctx, state) {
           if (state.isError && state.errorMessage != null) {
-            ToastUtils.showError(state.errorMessage!);
-            ctx.read<AuthCubit>().clearError();
+            final isCurrent = ModalRoute.of(ctx)?.isCurrent ?? false;
+            if (isCurrent) {
+              ToastUtils.showError(state.errorMessage!.tr());
+              ctx.read<AuthCubit>().clearError();
+            }
           }
           if (state.isAwaitingEmailVerification) {
             setState(() {
@@ -161,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   const SizedBox(height: 24),
                                                   _submitBtn(),
                                                   const SizedBox(height: 16),
-                                                  _parentLoginBtn(isDark),
+                                                  _googleAuthSection(),
                                                   const SizedBox(height: 32),
                                                   _terms(),
                                                 ],
@@ -202,6 +206,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   if (!_isLogin) ...[
                                     const SizedBox(height: 16),
                                     FadeIn(
+                                      delay: const Duration(milliseconds: 350),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24),
+                                        child: _googleAuthSection(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    FadeIn(
                                       delay: const Duration(milliseconds: 400),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
@@ -227,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _titleSection(bool d, bool isArabic) => Column(
         children: [
-          _brandNameText(isArabic, d),
+          _brandNameText(d),
           const SizedBox(height: 14),
           Text(
             _isLogin ? 'auth.login'.tr() : 'auth.join_community'.tr(),
@@ -250,8 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       );
 
-  Widget _brandNameText(bool isArabic, bool isDark) {
-    final brandName = isArabic ? 'نيرو اكاديمى' : 'Nero Academy';
+  Widget _brandNameText(bool isDark) {
     final gradient = isDark
         ? const LinearGradient(
             colors: [
@@ -276,10 +288,10 @@ class _LoginScreenState extends State<LoginScreen> {
       shaderCallback: (bounds) => gradient.createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: Text(
-        brandName,
+      child: const Text(
+        'Dr UneXpected',
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Almarai',
           fontSize: 22,
           fontWeight: FontWeight.w800,
@@ -387,39 +399,23 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-  Widget _parentLoginBtn(bool isDark) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed: () => context.push('/parent_entrance'),
-        icon: Icon(
-          Icons.family_restroom_rounded,
-          size: 20,
-          color: isDark ? AppColors.white : AppColors.primary,
-        ),
-        label: Text(
-          context.locale.languageCode == 'ar'
-              ? 'دخول كولي أمر'
-              : 'Login as Parent',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.white : AppColors.primary,
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: isDark ? AppColors.grey700 : AppColors.primary,
-            width: 1.5,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _googleAuthSection() => BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, state) {
+          return SocialLoginButtons(
+            isLoading: state.isLoading,
+            showApple: false,
+            showFacebook: false,
+            googleLabel: _isLogin
+                ? (context.locale.languageCode == 'ar'
+                    ? 'الدخول بحساب Google'
+                    : 'Continue with Google')
+                : (context.locale.languageCode == 'ar'
+                    ? 'التسجيل بحساب Google'
+                    : 'Sign up with Google'),
+            onGoogleTap: () => context.read<AuthCubit>().loginWithGoogle(),
+          );
+        },
+      );
 
   Widget _terms() => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -473,8 +469,9 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _getFullPhoneNumber() {
     final phone = _phoneCtrl.text.trim();
     if (phone.isEmpty) return null;
-    final cleanPhone = phone.startsWith('0') ? phone.substring(1) : phone;
-    return '$_countryDialCode$cleanPhone';
+    final cleanDialCode = _countryDialCode.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return '$cleanDialCode$cleanPhone';
   }
 
   Widget _buildAwaitingVerificationView(bool isDark) {
@@ -628,3 +625,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

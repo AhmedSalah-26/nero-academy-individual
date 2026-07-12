@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/services/teacher_context_service.dart';
 import '../../domain/entities/enrollment_entity.dart';
 import '../models/enrollment_model.dart';
 import '../models/learning_progress_model.dart';
@@ -53,6 +54,7 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
     enrolled_at,
     last_accessed_at,
     completed_at,
+    access_expires_at,
     courses!inner (
       title_ar,
       title_en,
@@ -61,6 +63,9 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       total_duration,
       rating,
       rating_count,
+      available_from,
+      available_until,
+      teacher_id,
       instructor_id,
       profiles!courses_instructor_id_fkey (id, name, avatar_url)
     )
@@ -74,10 +79,17 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
     int limit = 20,
   }) async {
     try {
+      final teacherId = TeacherContextService.instance.selectedTeacherId;
       var query = _client
           .from('enrollments')
           .select(_enrollmentSelect)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .neq('status', 'refunded') // exclude refunded enrollments
+          .or('access_expires_at.is.null,access_expires_at.gt.${DateTime.now().toUtc().toIso8601String()}');
+
+      if (teacherId != null) {
+        query = query.eq('courses.teacher_id', teacherId);
+      }
 
       if (status != null) {
         query = query.eq('status', status.name);
@@ -117,12 +129,18 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
   @override
   Future<EnrollmentModel?> getContinueLearning(String userId) async {
     try {
-      final response = await _client
+      final teacherId = TeacherContextService.instance.selectedTeacherId;
+      var query = _client
           .from('enrollments')
           .select(_enrollmentSelect)
           .eq('user_id', userId)
           .eq('status', 'active')
-          .gt('progress_percentage', 0)
+          .or('access_expires_at.is.null,access_expires_at.gt.${DateTime.now().toUtc().toIso8601String()}')
+          .gt('progress_percentage', 0);
+      if (teacherId != null) {
+        query = query.eq('courses.teacher_id', teacherId);
+      }
+      final response = await query
           .order('last_accessed_at', ascending: false)
           .limit(1)
           .maybeSingle();

@@ -105,6 +105,9 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
   final videoUrlController = TextEditingController();
   bool isFree = false;
   bool isPublished = true;
+  bool useScheduledPublish = false;
+  DateTime? publishAt;
+  DateTime? unpublishAt;
   String lessonType = 'video';
   bool isUploading = false;
 
@@ -115,7 +118,7 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (dialogContext, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'إضافة درس جديد' : 'Add New Lesson'),
@@ -291,6 +294,36 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
               activeTrackColor: AppColors.success,
               contentPadding: EdgeInsets.zero,
             ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              value: useScheduledPublish,
+              onChanged: (value) => setState(() => useScheduledPublish = value),
+              title: Text(isArabic ? 'جدولة ظهور الدرس' : 'Schedule Lesson'),
+              subtitle: Text(
+                isArabic
+                    ? 'حدد وقت ظهور واختفاء الدرس للطلاب'
+                    : 'Set when students can see this lesson',
+                style: const TextStyle(fontSize: 12),
+              ),
+              activeTrackColor: AppColors.primary,
+              contentPadding: EdgeInsets.zero,
+            ),
+            if (useScheduledPublish) ...[
+              const SizedBox(height: 16),
+              ScheduledDateTimePicker(
+                label: isArabic ? 'يظهر من' : 'Visible From',
+                selectedDateTime: publishAt,
+                isArabic: isArabic,
+                onChanged: (dt) => setState(() => publishAt = dt),
+              ),
+              const SizedBox(height: 12),
+              ScheduledDateTimePicker(
+                label: isArabic ? 'يختفي في' : 'Visible Until',
+                selectedDateTime: unpublishAt,
+                isArabic: isArabic,
+                onChanged: (dt) => setState(() => unpublishAt = dt),
+              ),
+            ],
           ],
         ),
         actions: [
@@ -314,6 +347,9 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           order: 0,
                           isFree: isFree,
                           isPublished: isPublished,
+                          availableFrom: useScheduledPublish ? publishAt : null,
+                          availableUntil:
+                              useScheduledPublish ? unpublishAt : null,
                           videoUrl: lessonType == 'video'
                               ? (videoUrlController.text.isEmpty
                                   ? null
@@ -348,9 +384,10 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
   final videoUrlController = TextEditingController(text: lesson.videoUrl ?? '');
   bool isFree = lesson.isFree;
   bool isPublished = lesson.isPublished;
-  bool useScheduledPublish = false;
-  DateTime? publishAt;
-  DateTime? unpublishAt;
+  bool useScheduledPublish =
+      lesson.availableFrom != null || lesson.availableUntil != null;
+  DateTime? publishAt = lesson.availableFrom;
+  DateTime? unpublishAt = lesson.availableUntil;
 
   String lessonType = lesson.type == 'document' ? 'document' : 'video';
   bool isUploading = false;
@@ -362,7 +399,7 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
 
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => StatefulBuilder(
       builder: (dialogContext, setState) => ResponsiveDialog(
         title: Text(isArabic ? 'تعديل الدرس' : 'Edit Lesson'),
@@ -592,6 +629,11 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           type: lessonType,
                           isFree: isFree,
                           isPublished: isPublished,
+                          availableFrom: useScheduledPublish ? publishAt : null,
+                          clearAvailableFrom: !useScheduledPublish,
+                          availableUntil:
+                              useScheduledPublish ? unpublishAt : null,
+                          clearAvailableUntil: !useScheduledPublish,
                           videoUrl: lessonType == 'video'
                               ? (videoUrlController.text.isEmpty
                                   ? null
@@ -623,7 +665,7 @@ void confirmDeleteLesson(BuildContext context, CourseEditorCubit cubit,
     int sectionIndex, int lessonIndex, bool isArabic) {
   showDialog(
     context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
+    barrierColor: Colors.black.withValues(alpha: 0.7),
     builder: (ctx) => ResponsiveAlertDialog(
       title: isArabic ? 'حذف الدرس' : 'Delete Lesson',
       content: isArabic

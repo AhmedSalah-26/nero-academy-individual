@@ -1,11 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../domain/repositories/instructor_repository.dart';
 import '../../cubit/course_editor_cubit.dart';
+import 'availability_schedule_card.dart';
+import 'course_summary_card.dart';
+import 'publish_checklist_card.dart';
 
-/// Settings Step - Requirements, objectives, and publish validation
+/// Settings Step – review, availability scheduling, and publish/draft actions.
 class SettingsStep extends StatelessWidget {
   const SettingsStep({super.key});
 
@@ -43,68 +46,26 @@ class SettingsStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              _buildPublishChecklist(context, state, isArabic, isDark),
+              PublishChecklistCard(
+                state: state,
+                isArabic: isArabic,
+                isDark: isDark,
+              ),
               const SizedBox(height: 24),
-              _buildCourseSummary(state, isArabic, isDark),
+              CourseSummaryCard(
+                state: state,
+                isArabic: isArabic,
+                isDark: isDark,
+              ),
+              const SizedBox(height: 24),
+              AvailabilityScheduleCard(
+                state: state,
+                cubit: cubit,
+                isArabic: isArabic,
+                isDark: isDark,
+              ),
               const SizedBox(height: 32),
-              if (!state.isEditing)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.spaceBetween,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () => cubit.setStep(2),
-                      icon: Icon(
-                          isArabic ? Icons.arrow_forward : Icons.arrow_back),
-                      label: Text(isArabic ? 'السابق' : 'Previous'),
-                    ),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        OutlinedButton(
-                          onPressed: () async {
-                            AppLogger.i('📝 [SettingsStep] Save Draft pressed');
-                            final success = await cubit.saveDraft();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(success
-                                      ? (isArabic
-                                          ? 'تم حفظ المسودة'
-                                          : 'Draft saved')
-                                      : (isArabic
-                                          ? 'فشل في الحفظ'
-                                          : 'Failed to save')),
-                                  backgroundColor: success
-                                      ? AppColors.success
-                                      : AppColors.error,
-                                ),
-                              );
-                            }
-                          },
-                          child:
-                              Text(isArabic ? 'حفظ كمسودة' : 'Save as Draft'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () =>
-                              cubit.setStep(4), // Go to Attachments
-                          icon: Icon(isArabic
-                              ? Icons.arrow_back
-                              : Icons.arrow_forward),
-                          label: Text(isArabic
-                              ? 'التالي (المرفقات)'
-                              : 'Next (Attachments)'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              if (!state.isEditing) _buildActionButtons(context, cubit, state, isArabic),
             ],
           ),
         );
@@ -112,275 +73,145 @@ class SettingsStep extends StatelessWidget {
     );
   }
 
-  Widget _buildPublishChecklist(BuildContext context, CourseEditorState state,
-      bool isArabic, bool isDark) {
-    final checks = [
-      _CheckItem(
-        title: isArabic ? 'العنوان (عربي)' : 'Title (Arabic)',
-        isComplete: state.titleAr.isNotEmpty,
-      ),
-      _CheckItem(
-        title: isArabic ? 'العنوان (إنجليزي)' : 'Title (English)',
-        isComplete: state.titleEn.isNotEmpty,
-      ),
-      _CheckItem(
-        title: isArabic ? 'الوصف (عربي)' : 'Description (Arabic)',
-        isComplete: state.descriptionAr.isNotEmpty,
-      ),
-      _CheckItem(
-        title: isArabic ? 'الوصف (إنجليزي)' : 'Description (English)',
-        isComplete: state.descriptionEn.isNotEmpty,
-      ),
-      _CheckItem(
-        title: isArabic ? 'التصنيف' : 'Category',
-        isComplete: state.categoryId != null,
-      ),
-      _CheckItem(
-        title: isArabic ? 'الأقسام' : 'Sections',
-        isComplete: state.sections.isNotEmpty,
-      ),
-      _CheckItem(
-        title: isArabic ? 'الدروس' : 'Lessons',
-        isComplete: state.sections.any((s) => s.lessons.isNotEmpty),
-      ),
-    ];
-
-    final completedCount = checks.where((c) => c.isComplete).length;
-    final progress = completedCount / checks.length;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+  Widget _buildActionButtons(
+    BuildContext context,
+    CourseEditorCubit cubit,
+    CourseEditorState state,
+    bool isArabic,
+  ) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      alignment: WrapAlignment.spaceBetween,
+      children: [
+        OutlinedButton.icon(
+          onPressed: () => cubit.setStep(3),
+          icon: Icon(isArabic ? Icons.arrow_forward : Icons.arrow_back),
+          label: Text(isArabic ? 'السابق' : 'Previous'),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isArabic ? 'قائمة التحقق للنشر' : 'Publish Checklist',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
-                ),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            OutlinedButton(
+              onPressed: () async {
+                AppLogger.i('📝 [SettingsStep] Save Draft pressed');
+                final success = await cubit.saveDraft();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(success
+                          ? (isArabic ? 'تم حفظ المسودة' : 'Draft saved')
+                          : (isArabic ? 'فشل في الحفظ' : 'Failed to save')),
+                      backgroundColor:
+                          success ? AppColors.success : AppColors.error,
+                    ),
+                  );
+                }
+              },
+              child: Text(isArabic ? 'حفظ كمسودة' : 'Save as Draft'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () =>
+                  _handlePublish(context, cubit, state, isArabic),
+              icon: const Icon(Icons.publish),
+              label: Text('course_editor.publish_course'.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: Colors.white,
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: progress == 1
-                      ? AppColors.success.withValues(alpha: 0.1)
-                      : AppColors.warning.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  '$completedCount/${checks.length}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color:
-                        progress == 1 ? AppColors.success : AppColors.warning,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handlePublish(
+    BuildContext context,
+    CourseEditorCubit cubit,
+    CourseEditorState state,
+    bool isArabic,
+  ) async {
+    final missingItems = state.publishValidationMessages(isArabic: isArabic);
+    if (missingItems.isNotEmpty) {
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('course_editor.publish_missing_title'.tr()),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('course_editor.publish_missing_message'.tr()),
+                const SizedBox(height: 12),
+                ...missingItems.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            size: 18, color: AppColors.warning),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(item)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: isDark ? AppColors.borderDark : AppColors.grey200,
-            valueColor: AlwaysStoppedAnimation(
-              progress == 1 ? AppColors.success : AppColors.warning,
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-          ...checks.map((check) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Icon(
-                      check.isComplete
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: check.isComplete
-                          ? AppColors.success
-                          : Colors.grey[400],
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      check.title,
-                      style: TextStyle(
-                        color: check.isComplete
-                            ? (isDark
-                                ? AppColors.textMainDark
-                                : AppColors.textMainLight)
-                            : Colors.grey[500],
-                        decoration: check.isComplete
-                            ? null
-                            : TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCourseSummary(
-      CourseEditorState state, bool isArabic, bool isDark) {
-    final totalLessons =
-        state.sections.fold<int>(0, (sum, s) => sum + s.lessons.length);
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('common.ok'.tr()),
+            ),
+          ],
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isArabic ? 'ملخص الكورس' : 'Course Summary',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildSummaryRow(
-            icon: Icons.title,
-            label: isArabic ? 'العنوان' : 'Title',
-            value: isArabic ? state.titleAr : state.titleEn,
-            isDark: isDark,
-          ),
-          _buildSummaryRow(
-            icon: Icons.category_outlined,
-            label: isArabic ? 'التصنيف' : 'Category',
-            value: state.categoryId != null
-                ? state.categories
-                    .firstWhere(
-                      (c) => c.id == state.categoryId,
-                      orElse: () => const CategoryOption(
-                          id: '', nameAr: '-', nameEn: '-'),
-                    )
-                    .let((c) => isArabic ? c.nameAr : c.nameEn)
-                : '-',
-            isDark: isDark,
-          ),
-          _buildSummaryRow(
-            icon: Icons.signal_cellular_alt,
-            label: isArabic ? 'المستوى' : 'Level',
-            value: _getLevelLabel(state.level, isArabic),
-            isDark: isDark,
-          ),
-          _buildSummaryRow(
-            icon: Icons.folder_outlined,
-            label: isArabic ? 'الأقسام' : 'Sections',
-            value: '${state.sections.length}',
-            isDark: isDark,
-          ),
-          _buildSummaryRow(
-            icon: Icons.play_lesson_outlined,
-            label: isArabic ? 'الدروس' : 'Lessons',
-            value: '$totalLessons',
-            isDark: isDark,
-          ),
-          _buildSummaryRow(
-            icon: Icons.attach_money,
-            label: isArabic ? 'السعر' : 'Price',
-            value: state.price > 0
-                ? '${state.price.toStringAsFixed(0)} ${state.currency}'
-                : (isArabic ? 'مجاني' : 'Free'),
-            isDark: isDark,
-          ),
-          if (state.badge != null && state.badge!.isNotEmpty)
-            _buildSummaryRow(
-              icon: Icons.local_offer,
-              label: isArabic ? 'الشارة' : 'Badge',
-              value: state.badge!,
-              isDark: isDark,
-            ),
-        ],
-      ),
-    );
-  }
+      );
+      return;
+    }
 
-  Widget _buildSummaryRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required bool isDark,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('course_editor.publish_confirm_title'.tr()),
+        content: Text('course_editor.publish_confirm_message'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
           ),
-          const SizedBox(width: 12),
-          Text(
-            '$label:',
-            style: TextStyle(
-              color:
-                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value.isEmpty ? '-' : value,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color:
-                    isDark ? AppColors.textMainDark : AppColors.textMainLight,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text('course_editor.publish_course'.tr()),
           ),
         ],
       ),
     );
-  }
 
-  String _getLevelLabel(String level, bool isArabic) {
-    switch (level) {
-      case 'beginner':
-        return isArabic ? 'مبتدئ' : 'Beginner';
-      case 'intermediate':
-        return isArabic ? 'متوسط' : 'Intermediate';
-      case 'advanced':
-        return isArabic ? 'متقدم' : 'Advanced';
-      default:
-        return level;
+    if (confirmed != true) return;
+
+    final success = await cubit.publishCourse();
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success
+            ? 'course_editor.publish_success'.tr()
+            : 'course_editor.publish_failed'.tr()),
+        backgroundColor: success ? AppColors.success : AppColors.error,
+      ),
+    );
+
+    if (success && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
     }
   }
-}
-
-class _CheckItem {
-  final String title;
-  final bool isComplete;
-
-  const _CheckItem({required this.title, required this.isComplete});
-}
-
-extension _Let<T> on T {
-  R let<R>(R Function(T) block) => block(this);
 }

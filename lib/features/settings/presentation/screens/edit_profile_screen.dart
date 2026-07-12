@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/shared_widgets/phone_input_field.dart';
 import '../../../../core/utils/toast_utils.dart';
+import '../../../../core/utils/phone_utils.dart';
 import '../../../auth/presentation/widgets/login/avatar_picker.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -25,9 +26,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  final _parentPhoneCtrl = TextEditingController();
   String _countryDialCode = '+20'; // كود الدولة الافتراضي
-  String _parentCountryDialCode = '+20';
   // Instructor fields
   final _displayNameCtrl = TextEditingController();
   final _headlineArCtrl = TextEditingController();
@@ -80,38 +79,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
 
       if (profile.phone != null) {
-        // استخراج كود الدولة من الرقم الكامل
         final phone = profile.phone!;
-        if (phone.startsWith('+')) {
-          // محاولة استخراج كود الدولة (أول 2-4 أرقام بعد +)
-          final match = RegExp(r'^\+(\d{1,4})(.*)').firstMatch(phone);
-          if (match != null) {
-            _countryDialCode = '+${match.group(1)}';
-            _phoneCtrl.text = match.group(2) ?? '';
-          } else {
-            _phoneCtrl.text = phone;
-          }
+        final normalized = PhoneUtils.normalizeWhatsappNumber(phone);
+        if (normalized != null && normalized.startsWith('20')) {
+          _countryDialCode = '+20';
+          _phoneCtrl.text = '0${normalized.substring(2)}';
         } else {
-          _phoneCtrl.text = phone;
+          _phoneCtrl.text = phone.replaceFirst(RegExp(r'^\+?20'), '0');
         }
       }
 
-      if (profile.parentPhone != null) {
-        // استخراج كود الدولة من الرقم الكامل
-        final parentPhone = profile.parentPhone!;
-        if (parentPhone.startsWith('+')) {
-          // محاولة استخراج كود الدولة (أول 2-4 أرقام بعد +)
-          final match = RegExp(r'^\+(\d{1,4})(.*)').firstMatch(parentPhone);
-          if (match != null) {
-            _parentCountryDialCode = '+${match.group(1)}';
-            _parentPhoneCtrl.text = match.group(2) ?? '';
-          } else {
-            _parentPhoneCtrl.text = parentPhone;
-          }
-        } else {
-          _parentPhoneCtrl.text = parentPhone;
-        }
-      }
+
 
       if (_isInstructor) {
         _displayNameCtrl.text = profile.displayName ?? profile.name;
@@ -137,7 +115,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
-    _parentPhoneCtrl.dispose();
     _displayNameCtrl.dispose();
     _headlineArCtrl.dispose();
     _headlineEnCtrl.dispose();
@@ -263,11 +240,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final success = await context.read<ProfileCubit>().updateProfile(
           name: _nameCtrl.text.trim(),
           phone: _phoneCtrl.text.trim().isNotEmpty
-              ? '$_countryDialCode${_phoneCtrl.text.trim()}'
+              ? _buildFullPhone(_countryDialCode, _phoneCtrl.text.trim())
               : null,
-          parentPhone: !_isInstructor && _parentPhoneCtrl.text.trim().isNotEmpty
-              ? '$_parentCountryDialCode${_parentPhoneCtrl.text.trim()}'
-              : null,
+          parentPhone: null,
           avatarUrl: avatarUrl,
           displayName: _isInstructor && _displayNameCtrl.text.trim().isNotEmpty
               ? _displayNameCtrl.text.trim()
@@ -451,6 +426,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  /// بناء رقم الهاتف الكامل مع كود الدولة (مع التنظيف والتحقق)
+  String? _buildFullPhone(String dialCode, String localPhone) {
+    final cleanDialCode = dialCode.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanLocalPhone = localPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final fullPhone = '$cleanDialCode$cleanLocalPhone';
+    final normalized = PhoneUtils.normalizeWhatsappNumber(fullPhone);
+    return normalized != null ? '+$normalized' : null;
+  }
+
   Widget _buildBasicFields(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -470,24 +454,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         const SizedBox(height: 20),
         _buildPhoneFieldWithCountryCode(isDark),
-        if (!_isInstructor) ...[
-          const SizedBox(height: 20),
-          _buildParentPhoneFieldWithCountryCode(isDark),
-        ],
       ],
-    );
-  }
-
-  Widget _buildParentPhoneFieldWithCountryCode(bool isDark) {
-    final isArabic = context.locale.languageCode == 'ar';
-    return PhoneInputField(
-      controller: _parentPhoneCtrl,
-      label: isArabic ? 'رقم هاتف ولي الأمر' : 'Parent Phone Number',
-      onCountryCodeChanged: (code) {
-        setState(() {
-          _parentCountryDialCode = code;
-        });
-      },
     );
   }
 
@@ -495,6 +462,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return PhoneInputField(
       controller: _phoneCtrl,
       label: 'auth.phone'.tr(),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'auth.phone_required'.tr();
+        }
+        return null;
+      },
       onCountryCodeChanged: (code) {
         setState(() {
           _countryDialCode = code;

@@ -1,3 +1,4 @@
+import '../../../../core/models/course_commerce_models.dart';
 import '../../domain/entities/course_entity.dart';
 
 /// Course Model - Data Model with JSON serialization
@@ -31,8 +32,11 @@ class CourseModel extends CourseEntity {
     super.isFeatured,
     super.isPublished,
     super.publishedAt,
+    super.availableFrom,
+    super.availableUntil,
     required super.createdAt,
     super.badge,
+    super.pricingOptions,
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
@@ -74,8 +78,15 @@ class CourseModel extends CourseEntity {
       publishedAt: json['published_at'] != null
           ? DateTime.parse(json['published_at'] as String)
           : null,
+      availableFrom: json['available_from'] != null
+          ? DateTime.parse(json['available_from'] as String)
+          : null,
+      availableUntil: json['available_until'] != null
+          ? DateTime.parse(json['available_until'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       badge: json['badge'] as String?,
+      pricingOptions: parseCoursePricingOptions(json['pricing_options']),
     );
   }
 
@@ -107,6 +118,8 @@ class CourseModel extends CourseEntity {
       'is_featured': isFeatured,
       'is_published': isPublished,
       'published_at': publishedAt?.toIso8601String(),
+      'available_from': availableFrom?.toIso8601String(),
+      'available_until': availableUntil?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'badge': badge,
     };

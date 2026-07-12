@@ -14,6 +14,26 @@ class EarningsHistoryScreen extends StatefulWidget {
   State<EarningsHistoryScreen> createState() => _EarningsHistoryScreenState();
 }
 
+class _GroupedHistoryTransaction {
+  final String courseId;
+  final String courseName;
+  final int count;
+  final double netAmount;
+  final double commission;
+  final DateTime latestDate;
+  final EarningStatus status;
+
+  _GroupedHistoryTransaction({
+    required this.courseId,
+    required this.courseName,
+    required this.count,
+    required this.netAmount,
+    required this.commission,
+    required this.latestDate,
+    required this.status,
+  });
+}
+
 class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
   String _selectedFilter = 'all';
   DateTime? _startDate;
@@ -379,12 +399,44 @@ class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
           );
         }
 
+        final Map<String, _GroupedHistoryTransaction> grouped = {};
+        for (final e in filteredEarnings) {
+          final key = '${e.courseId ?? e.courseName}_${e.status.name}';
+          if (grouped.containsKey(key)) {
+            final existing = grouped[key]!;
+            grouped[key] = _GroupedHistoryTransaction(
+              courseId: existing.courseId,
+              courseName: existing.courseName,
+              count: existing.count + 1,
+              netAmount: existing.netAmount + e.netAmount,
+              commission: existing.commission + e.commission,
+              latestDate: e.createdAt.isAfter(existing.latestDate)
+                  ? e.createdAt
+                  : existing.latestDate,
+              status: existing.status,
+            );
+          } else {
+            grouped[key] = _GroupedHistoryTransaction(
+              courseId: e.courseId ?? e.courseName,
+              courseName: e.courseName,
+              count: 1,
+              netAmount: e.netAmount,
+              commission: e.commission,
+              latestDate: e.createdAt,
+              status: e.status,
+            );
+          }
+        }
+
+        final groupedList = grouped.values.toList()
+          ..sort((a, b) => b.latestDate.compareTo(a.latestDate));
+
         return ListView.separated(
           padding: const EdgeInsets.all(16),
-          itemCount: filteredEarnings.length,
+          itemCount: groupedList.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
-            final earning = filteredEarnings[index];
+            final earning = groupedList[index];
             return _buildEarningItem(earning, isArabic, isDark);
           },
         );
@@ -413,7 +465,7 @@ class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
   }
 
   Widget _buildEarningItem(
-      EarningsTransactionModel earning, bool isArabic, bool isDark) {
+      _GroupedHistoryTransaction earning, bool isArabic, bool isDark) {
     final statusColor = _getStatusColor(earning.status);
 
     return Container(
@@ -474,7 +526,7 @@ class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
                     const SizedBox(width: 6),
                     Text(
                       DateFormat('d MMM yyyy', isArabic ? 'ar' : 'en')
-                          .format(earning.createdAt),
+                          .format(earning.latestDate),
                       style: TextStyle(
                         fontSize: 13,
                         color: isDark
@@ -482,6 +534,25 @@ class _EarningsHistoryScreenState extends State<EarningsHistoryScreen> {
                             : AppColors.textSecondary,
                       ),
                     ),
+                    if (earning.count > 1) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          isArabic ? '${earning.count} مرات' : '${earning.count}x',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 6),

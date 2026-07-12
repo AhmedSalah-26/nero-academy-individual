@@ -1,4 +1,5 @@
 import '../../../home/domain/entities/course_entity.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../domain/entities/course_details_entity.dart';
 import 'instructor_model.dart';
 import 'section_model.dart';
@@ -25,6 +26,8 @@ class CourseDetailsModel extends CourseDetailsEntity {
     super.flashSaleStart,
     super.flashSaleEnd,
     super.badge,
+    super.pricingOptions,
+    super.groupLinks,
     super.rating,
     super.ratingCount,
     super.enrolledCount,
@@ -113,6 +116,10 @@ class CourseDetailsModel extends CourseDetailsEntity {
           ? DateTime.parse(json['flash_sale_end'] as String)
           : null,
       badge: json['badge'] as String?,
+      pricingOptions: parseCoursePricingOptions(json['pricing_options']),
+      groupLinks: CourseGroupLinks.fromJson(
+        json['group_links'] as Map<String, dynamic>?,
+      ),
       rating: (json['rating'] as num?)?.toDouble() ?? 0,
       ratingCount: json['rating_count'] as int? ?? 0,
       enrolledCount: json['enrolled_count'] as int? ?? 0,

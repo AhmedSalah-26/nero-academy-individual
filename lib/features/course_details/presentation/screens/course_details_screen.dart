@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/animations/animations.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/di/injection_container.dart';
@@ -231,7 +232,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             child: BottomPriceBar(
               course: course,
               isLoading: _isAddingToCart,
-              onEnroll: () => _handleAddToCart(course),
+              onEnroll: () => _handleEnrollFree(course),
               onAddToCart: () => _handleAddToCart(course),
               onGoToCart: _navigateToCart,
               onStartLearning: () => _navigateToCoursePlayer(course.id),
@@ -306,25 +307,12 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             icon: const Icon(Icons.more_vert_rounded),
             onSelected: (value) {
               switch (value) {
-                case 'share':
-                  _shareCourse(course);
-                  break;
                 case 'report':
                   _reportCourse(course, locale);
                   break;
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'share',
-                child: Row(
-                  children: [
-                    const Icon(Icons.share_rounded, size: 20),
-                    const SizedBox(width: 12),
-                    Text(locale == 'ar' ? 'مشاركة' : 'Share'),
-                  ],
-                ),
-              ),
               PopupMenuItem(
                 value: 'report',
                 child: Row(
@@ -515,6 +503,36 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     }
   }
 
+  Future<void> _handleEnrollFree(CourseDetailsEntity course) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null) {
+      _showErrorSnackBar('auth.login_required'.tr());
+      return;
+    }
+
+    setState(() => _isAddingToCart = true);
+
+    try {
+      final success =
+          await context.read<CourseDetailsCubit>().enrollFreeCourse(userId);
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+        if (success) {
+          _showSuccessSnackBar('course_details.enrolled_successfully'.tr());
+          // Navigate to course player directly or let it reload and stay
+        } else {
+          _showErrorSnackBar('errors.unknown'.tr());
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+        _showErrorSnackBar('errors.unknown'.tr());
+      }
+    }
+  }
+
   Future<void> _handleAddToCart(CourseDetailsEntity course) async {
     // Get current user ID from Supabase
     final userId = Supabase.instance.client.auth.currentUser?.id;
@@ -555,7 +573,17 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       AppLogger.i(
           '🛒 [CourseDetails] Adding to cart - userId: $userId, courseId: ${course.id}');
 
-      final success = await cartCubit.addToCart(course.id);
+      final selectedOption = await _selectPricingOptionIfNeeded(course);
+      if (!mounted) return;
+      if (course.pricingOptions.isNotEmpty && selectedOption == null) {
+        setState(() => _isAddingToCart = false);
+        return;
+      }
+
+      final success = await cartCubit.addToCart(
+        course.id,
+        pricingOption: selectedOption,
+      );
 
       if (mounted) {
         setState(() => _isAddingToCart = false);
@@ -567,7 +595,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         } else {
           final errorMsg = cartCubit.state.addToCartError;
           if (errorMsg != null && errorMsg.isNotEmpty) {
-            _showErrorSnackBar(errorMsg);
+            _showErrorSnackBar(
+                errorMsg.contains('.') ? errorMsg.tr() : errorMsg);
           } else {
             // Course might be already in cart
             _showInfoSnackBar('cart.already_in_cart'.tr());
@@ -594,6 +623,138 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     );
   }
 
+  Future<CoursePricingOption?> _selectPricingOptionIfNeeded(
+    CourseDetailsEntity course,
+  ) async {
+    if (course.pricingOptions.isEmpty) return null;
+
+    final locale = context.locale.languageCode;
+    final isArabic = locale == 'ar';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isArabic ? 'اختر مدة الاشتراك' : 'Choose subscription option',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.textMainDark
+                        : AppColors.textMainLight,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...course.pricingOptions.map((option) {
+                  final hasDiscount = option.discountPrice != null &&
+                      option.discountPrice! < option.price;
+                  final discountPct = hasDiscount
+                      ? ((option.price - option.discountPrice!) /
+                              option.price *
+                              100)
+                          .round()
+                      : 0;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
+                        ),
+                      ),
+                      title: Text(option.label),
+                      subtitle: option.durationDays == null
+                          ? null
+                          : Text(
+                              isArabic
+                                  ? '${option.durationDays} يوم'
+                                  : '${option.durationDays} days',
+                            ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (hasDiscount) ...[
+                            Text(
+                              '${course.currency} ${option.discountPrice!.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                                fontSize: 15,
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${course.currency} ${option.price.toStringAsFixed(0)}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? AppColors.textMutedDark
+                                        : AppColors.textMutedLight,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        AppColors.error.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '-$discountPct%',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else
+                            Text(
+                              '${course.currency} ${option.price.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      onTap: () => Navigator.of(context).pop(option),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showSuccessSnackBar(String message) {
     AnimatedSnackbar.showSuccess(
       context: context,
@@ -606,10 +767,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       context: context,
       message: message,
     );
-  }
-
-  void _shareCourse(CourseDetailsEntity course) {
-    // TODO: Share course
   }
 
   void _reportCourse(CourseDetailsEntity course, String locale) {

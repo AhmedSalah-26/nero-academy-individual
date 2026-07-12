@@ -148,6 +148,21 @@ class CartItemCard extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
+        if (item.pricingOption != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            item.pricingOption!.durationDays == null
+                ? item.pricingOption!.label
+                : '${item.pricingOption!.label} - ${item.pricingOption!.durationDays} ${locale == 'ar' ? 'يوم' : 'days'}',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
         const SizedBox(height: 4),
         // Instructor & Rating in one row
         Row(

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/payment_entity.dart';
@@ -39,6 +41,9 @@ class PaymentCard extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+
+              _buildOrderNumberRow(theme, isRtl),
               const SizedBox(height: 12),
 
               // Courses
@@ -97,7 +102,7 @@ class PaymentCard extends StatelessWidget {
 
                   // Total amount
                   Text(
-                    '${payment.total.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+                    _formatAmount(payment.total, isRtl),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -125,6 +130,49 @@ class PaymentCard extends StatelessWidget {
     );
   }
 
+  Widget _buildOrderNumberRow(ThemeData theme, bool isRtl) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.confirmation_number_rounded,
+            size: 18,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            isRtl ? 'رقم الطلب' : 'Order number',
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          SelectableText(
+            _shortOrderId,
+            textDirection: ui.TextDirection.ltr,
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatusChip(ThemeData theme, bool isRtl) {
     Color backgroundColor;
     Color textColor;
@@ -135,7 +183,7 @@ class PaymentCard extends StatelessWidget {
     } else if (payment.isPending) {
       backgroundColor = Colors.orange.shade50;
       textColor = Colors.orange.shade700;
-    } else if (payment.isFailed) {
+    } else if (payment.isCancelled || payment.isFailed) {
       backgroundColor = Colors.red.shade50;
       textColor = Colors.red.shade700;
     } else {
@@ -161,11 +209,17 @@ class PaymentCard extends StatelessWidget {
   }
 
   IconData _getPaymentIcon() {
+    if (payment.isFree) return Icons.card_giftcard_rounded;
+
     switch (payment.paymentMethod) {
       case 'card':
         return Icons.credit_card;
       case 'wallet':
         return Icons.account_balance_wallet;
+      case 'manual':
+        return Icons.receipt_long_rounded;
+      case 'free':
+        return Icons.card_giftcard_rounded;
       case 'cash':
         return Icons.money;
       default:
@@ -210,6 +264,15 @@ class PaymentCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
+
+              // Order number
+              _buildDetailRow(
+                isRtl ? 'رقم الطلب' : 'Order Number',
+                _shortOrderId,
+                Icons.confirmation_number_rounded,
+                theme,
+                ltrValue: true,
+              ),
 
               // Date
               _buildDetailRow(
@@ -280,7 +343,7 @@ class PaymentCard extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '${course.price.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+                                _formatAmount(course.price, isRtl),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: theme.colorScheme.onSurface
@@ -349,7 +412,12 @@ class PaymentCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow(
-      String label, String value, IconData icon, ThemeData theme) {
+    String label,
+    String value,
+    IconData icon,
+    ThemeData theme, {
+    bool ltrValue = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -370,6 +438,7 @@ class PaymentCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
+                  textDirection: ltrValue ? ui.TextDirection.ltr : null,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -407,7 +476,7 @@ class PaymentCard extends StatelessWidget {
             ),
           ),
           Text(
-            '${amount.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}',
+            _formatAmount(amount, isRtl),
             style: TextStyle(
               fontSize: isTotal ? 18 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
@@ -422,4 +491,13 @@ class PaymentCard extends StatelessWidget {
       ),
     );
   }
+
+  String _formatAmount(double amount, bool isRtl) {
+    if (amount == 0) return 'Free';
+    return '${amount.toStringAsFixed(2)} ${isRtl ? 'ج.م' : 'EGP'}';
+  }
+
+  String get _shortOrderId => payment.id.length <= 8
+      ? payment.id.toUpperCase()
+      : payment.id.substring(0, 8).toUpperCase();
 }

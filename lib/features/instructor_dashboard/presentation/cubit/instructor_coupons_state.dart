@@ -78,6 +78,7 @@ class InstructorCouponModel extends Equatable {
   final DateTime startDate;
   final DateTime? endDate;
   final String scope; // all, categories, courses, instructors
+  final List<String> courseIds;
   final bool isActive;
   final bool isSuspended;
   final DateTime createdAt;
@@ -99,16 +100,31 @@ class InstructorCouponModel extends Equatable {
     required this.startDate,
     this.endDate,
     this.scope = 'all',
+    this.courseIds = const [],
     this.isActive = true,
     this.isSuspended = false,
     required this.createdAt,
   });
 
-  bool get isExpired => endDate != null && endDate!.isBefore(DateTime.now());
+  bool get isExpired =>
+      endDate != null && DateTime.now().isAfter(_effectiveEndDate(endDate!));
+
+  DateTime _effectiveEndDate(DateTime value) {
+    final isDateOnly = value.hour == 0 &&
+        value.minute == 0 &&
+        value.second == 0 &&
+        value.millisecond == 0 &&
+        value.microsecond == 0;
+    if (!isDateOnly) return value;
+
+    return DateTime(value.year, value.month, value.day, 23, 59, 59, 999, 999);
+  }
 
   bool get isMaxUsesReached => usageLimit != null && usageCount >= usageLimit!;
 
   factory InstructorCouponModel.fromJson(Map<String, dynamic> json) {
+    final couponCourses = json['coupon_courses'] as List?;
+
     return InstructorCouponModel(
       id: json['id'] as String,
       code: json['code'] as String,
@@ -130,6 +146,12 @@ class InstructorCouponModel extends Equatable {
           ? DateTime.parse(json['end_date'] as String)
           : null,
       scope: json['scope'] as String? ?? 'all',
+      courseIds: couponCourses == null
+          ? const []
+          : couponCourses
+              .map((item) => item['course_id'] as String?)
+              .whereType<String>()
+              .toList(),
       isActive: json['is_active'] as bool? ?? true,
       isSuspended: json['is_suspended'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -146,6 +168,7 @@ class InstructorCouponModel extends Equatable {
         usageLimit,
         usageCount,
         endDate,
+        courseIds,
         isActive,
         createdAt,
       ];

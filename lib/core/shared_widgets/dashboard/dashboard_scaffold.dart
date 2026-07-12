@@ -85,85 +85,97 @@ class _DashboardScaffoldState extends State<DashboardScaffold> {
         isArabic ? currentNavItem.labelAr : currentNavItem.label;
 
     if (isMobile) {
-      return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(currentTitle),
-          actions:
-              widget.headerActions != null ? [widget.headerActions!] : null,
-          leading: IconButton(
-            icon: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) {
-                return RotationTransition(
-                  turns: animation,
-                  child: child,
-                );
-              },
-              child: Icon(
-                _isDrawerOpen ? Icons.close : Icons.menu,
-                key: ValueKey<bool>(_isDrawerOpen),
-              ),
-            ),
-            onPressed: () {
-              if (_isDrawerOpen) {
-                _closeDrawer();
-              } else {
-                _openDrawer();
-              }
-            },
-          ),
-        ),
-        body: Stack(
-          children: [
-            // Main content
-            widget.content,
-            // Custom drawer that starts below AppBar
-            if (_isDrawerOpen) ...[
-              // Overlay with fade animation
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 250),
-                opacity: _isDrawerOpen ? 1.0 : 0.0,
-                child: GestureDetector(
-                  onTap: _closeDrawer,
-                  child: Container(
-                    color: Colors.black54,
-                  ),
+      return PopScope(
+        // If drawer is open → close it. If not on home → go home. Else → allow exit.
+        canPop: widget.selectedIndex == 0 && !_isDrawerOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (_isDrawerOpen) {
+            _closeDrawer();
+          } else if (widget.selectedIndex != 0) {
+            widget.onNavItemSelected(0);
+          }
+        },
+        child: Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            title: Text(currentTitle),
+            actions:
+                widget.headerActions != null ? [widget.headerActions!] : null,
+            leading: IconButton(
+              icon: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) {
+                  return RotationTransition(
+                    turns: animation,
+                    child: child,
+                  );
+                },
+                child: Icon(
+                  _isDrawerOpen ? Icons.close : Icons.menu,
+                  key: ValueKey<bool>(_isDrawerOpen),
                 ),
               ),
-              // Drawer with slide animation
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                left: isArabic ? null : (_isDrawerOpen ? 0 : -280),
-                right: isArabic ? (_isDrawerOpen ? 0 : -280) : null,
-                top: 0,
-                bottom: 0,
-                child: Material(
-                  elevation: 16,
-                  color: Theme.of(context).appBarTheme.backgroundColor ??
-                      Theme.of(context).primaryColor,
-                  child: SizedBox(
-                    width: 280,
-                    child: DashboardSidebar(
-                      items: widget.navItems,
-                      selectedIndex: widget.selectedIndex,
-                      onItemSelected: (index) {
-                        widget.onNavItemSelected(index);
-                        _closeDrawer();
-                      },
-                      isCollapsed: false,
-                      onToggleCollapse: () {},
-                      headerTitle: widget.title,
-                      headerTitleAr: widget.titleAr,
-                      showCollapseButton: false,
-                      showHeader: false,
+              onPressed: () {
+                if (_isDrawerOpen) {
+                  _closeDrawer();
+                } else {
+                  _openDrawer();
+                }
+              },
+            ),
+          ),
+          body: Stack(
+            children: [
+              // Main content
+              widget.content,
+              // Custom drawer that starts below AppBar
+              if (_isDrawerOpen) ...[
+                // Overlay with fade animation
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 250),
+                  opacity: _isDrawerOpen ? 1.0 : 0.0,
+                  child: GestureDetector(
+                    onTap: _closeDrawer,
+                    child: Container(
+                      color: Colors.black54,
                     ),
                   ),
                 ),
-              ),
+                // Drawer with slide animation
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  left: isArabic ? null : (_isDrawerOpen ? 0 : -280),
+                  right: isArabic ? (_isDrawerOpen ? 0 : -280) : null,
+                  top: 0,
+                  bottom: 0,
+                  child: Material(
+                    elevation: 16,
+                    color: Theme.of(context).appBarTheme.backgroundColor ??
+                        Theme.of(context).primaryColor,
+                    child: SizedBox(
+                      width: 280,
+                      child: DashboardSidebar(
+                        items: widget.navItems,
+                        selectedIndex: widget.selectedIndex,
+                        onItemSelected: (index) {
+                          widget.onNavItemSelected(index);
+                          _closeDrawer();
+                        },
+                        isCollapsed: false,
+                        onToggleCollapse: () {},
+                        headerTitle: widget.title,
+                        headerTitleAr: widget.titleAr,
+                        showCollapseButton: false,
+                        showHeader: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       );
     }

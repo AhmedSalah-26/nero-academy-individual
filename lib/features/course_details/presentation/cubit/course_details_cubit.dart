@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/base/base_state.dart';
 import '../../domain/usecases/get_course_details_usecase.dart';
 import '../../domain/usecases/get_course_reviews_usecase.dart';
+import '../../domain/usecases/enroll_free_course_usecase.dart';
 import '../../domain/entities/course_details_entity.dart';
 import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
 import 'course_details_state.dart';
@@ -10,11 +11,13 @@ import 'course_details_state.dart';
 class CourseDetailsCubit extends Cubit<CourseDetailsState> {
   final GetCourseDetailsUseCase getCourseDetailsUseCase;
   final GetCourseReviewsUseCase getCourseReviewsUseCase;
+  final EnrollFreeCourseUseCase enrollFreeCourseUseCase;
   final WishlistCubit wishlistCubit;
 
   CourseDetailsCubit({
     required this.getCourseDetailsUseCase,
     required this.getCourseReviewsUseCase,
+    required this.enrollFreeCourseUseCase,
     required this.wishlistCubit,
   }) : super(const CourseDetailsState());
 
@@ -114,6 +117,24 @@ class CourseDetailsCubit extends Cubit<CourseDetailsState> {
     emit(state.copyWith(expandedSections: expanded));
   }
 
+  /// Enroll in a free course directly
+  Future<bool> enrollFreeCourse(String userId) async {
+    if (_currentCourseId == null) return false;
+
+    // Ideally set a loading state specifically for enrollment if needed
+    // but here we just return a bool to show loading in the UI button
+    final result = await enrollFreeCourseUseCase(_currentCourseId!, userId);
+
+    return result.fold(
+      (failure) => false,
+      (_) {
+        // Upon success, reload the course details to reflect enrollment status
+        loadCourseDetails(_currentCourseId!, userId: userId);
+        return true;
+      },
+    );
+  }
+
   /// Check if section is expanded
   bool isSectionExpanded(int index) {
     return state.expandedSections.contains(index);
@@ -141,6 +162,8 @@ class CourseDetailsCubit extends Cubit<CourseDetailsState> {
       flashSaleStart: course.flashSaleStart,
       flashSaleEnd: course.flashSaleEnd,
       badge: course.badge,
+      pricingOptions: course.pricingOptions,
+      groupLinks: course.groupLinks,
       rating: course.rating,
       ratingCount: course.ratingCount,
       enrolledCount: course.enrolledCount,

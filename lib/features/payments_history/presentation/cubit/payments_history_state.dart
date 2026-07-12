@@ -24,6 +24,9 @@ class PaymentsHistoryLoaded extends PaymentsHistoryState {
     if (selectedStatus == null || selectedStatus == 'all') {
       return payments;
     }
+    if (selectedStatus == 'pending_manual_payment') {
+      return payments.where((p) => p.isPending).toList();
+    }
     return payments.where((p) => p.paymentStatus == selectedStatus).toList();
   }
 
@@ -31,11 +34,20 @@ class PaymentsHistoryLoaded extends PaymentsHistoryState {
   List<Object?> get props => [payments, selectedStatus];
 }
 
+enum PaymentsHistoryErrorType {
+  unauthorized,
+  server,
+}
+
 class PaymentsHistoryError extends PaymentsHistoryState {
   final String message;
+  final PaymentsHistoryErrorType type;
 
-  const PaymentsHistoryError(this.message);
+  const PaymentsHistoryError(
+    this.message, {
+    this.type = PaymentsHistoryErrorType.server,
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, type];
 }

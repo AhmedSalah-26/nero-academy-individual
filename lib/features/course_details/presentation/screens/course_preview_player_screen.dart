@@ -16,8 +16,7 @@ class CoursePreviewPlayerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasValidVideo =
-        YouTubeStreamService.extractVideoId(videoUrl) != null;
+    final hasValidVideo = YouTubeStreamService.extractVideoId(videoUrl) != null;
 
     return Scaffold(
       backgroundColor: Colors.black,

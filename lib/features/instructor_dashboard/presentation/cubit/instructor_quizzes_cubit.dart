@@ -113,9 +113,11 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     loadQuizzes(refresh: true);
   }
 
-  /// Create quiz (course-level)
+  /// Create quiz. When lessonId is null, the quiz is course-level.
   Future<bool> createQuiz({
     required String courseId,
+    String? sectionId,
+    String? lessonId,
     required String titleAr,
     required String titleEn,
     String? descriptionAr,
@@ -123,31 +125,37 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     required int passingScore,
     int? timeLimitMinutes,
     int? maxAttempts,
+    DateTime? availableFrom,
+    DateTime? availableUntil,
     bool shuffleQuestions = false,
     bool shuffleAnswers = false,
     bool showCorrectAnswers = true,
+    bool isPublished = false,
   }) async {
     AppLogger.i('📝 [$_tag] createQuiz: courseId=$courseId, title=$titleAr');
 
     try {
-      final response = await _supabase
-          .from('quizzes')
-          .insert({
-            'course_id': courseId,
-            'lesson_id': null, // Course-level quiz
-            'title_ar': titleAr,
-            'title_en': titleEn,
-            'description_ar': descriptionAr,
-            'description_en': descriptionEn,
-            'passing_score': passingScore,
-            'time_limit': timeLimitMinutes,
-            'max_attempts': maxAttempts,
-            'shuffle_questions': shuffleQuestions,
-            'shuffle_answers': shuffleAnswers,
-            'show_correct_answers': showCorrectAnswers,
-          })
-          .select()
-          .single();
+      final insertData = {
+        'course_id': courseId,
+        'lesson_id': lessonId,
+        'title_ar': titleAr,
+        'title_en': titleEn,
+        'description_ar': descriptionAr,
+        'description_en': descriptionEn,
+        'passing_score': passingScore,
+        'time_limit': timeLimitMinutes,
+        'max_attempts': maxAttempts,
+        'available_from': availableFrom?.toUtc().toIso8601String(),
+        'available_until': availableUntil?.toUtc().toIso8601String(),
+        'shuffle_questions': shuffleQuestions,
+        'shuffle_answers': shuffleAnswers,
+        'show_correct_answers': showCorrectAnswers,
+        'is_published': isPublished,
+      };
+      if (sectionId != null) insertData['section_id'] = sectionId;
+
+      final response =
+          await _supabase.from('quizzes').insert(insertData).select().single();
 
       AppLogger.success('[$_tag] Quiz created: ${response['id']}');
       await loadQuizzes(refresh: true);
@@ -169,9 +177,14 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     int? passingScore,
     int? timeLimitMinutes,
     int? maxAttempts,
+    DateTime? availableFrom,
+    DateTime? availableUntil,
+    bool clearAvailableFrom = false,
+    bool clearAvailableUntil = false,
     bool? shuffleQuestions,
     bool? shuffleAnswers,
     bool? showCorrectAnswers,
+    bool? isPublished,
   }) async {
     AppLogger.i('📝 [$_tag] updateQuiz: quizId=$quizId');
 
@@ -184,6 +197,16 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
       if (passingScore != null) updates['passing_score'] = passingScore;
       if (timeLimitMinutes != null) updates['time_limit'] = timeLimitMinutes;
       if (maxAttempts != null) updates['max_attempts'] = maxAttempts;
+      if (clearAvailableFrom) {
+        updates['available_from'] = null;
+      } else if (availableFrom != null) {
+        updates['available_from'] = availableFrom.toUtc().toIso8601String();
+      }
+      if (clearAvailableUntil) {
+        updates['available_until'] = null;
+      } else if (availableUntil != null) {
+        updates['available_until'] = availableUntil.toUtc().toIso8601String();
+      }
       if (shuffleQuestions != null) {
         updates['shuffle_questions'] = shuffleQuestions;
       }
@@ -191,6 +214,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
       if (showCorrectAnswers != null) {
         updates['show_correct_answers'] = showCorrectAnswers;
       }
+      if (isPublished != null) updates['is_published'] = isPublished;
       updates['updated_at'] = DateTime.now().toIso8601String();
 
       await _supabase.from('quizzes').update(updates).eq('id', quizId);
@@ -200,6 +224,54 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
       return true;
     } catch (e, s) {
       AppLogger.e('[$_tag] updateQuiz error', e, s);
+      emit(state.copyWith(errorMessage: e.toString()));
+      return false;
+    }
+  }
+
+  Future<bool> toggleQuizPublished(String quizId, bool isPublished) async {
+    AppLogger.i(
+        'ðŸ“ [$_tag] toggleQuizPublished: quizId=$quizId, isPublished=$isPublished');
+
+    try {
+      await _supabase.from('quizzes').update({
+        'is_published': isPublished,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', quizId);
+
+      final updatedQuizzes = state.quizzes.map((quiz) {
+        if (quiz.id != quizId) return quiz;
+        return InstructorQuizModel(
+          id: quiz.id,
+          courseId: quiz.courseId,
+          sectionId: quiz.sectionId,
+          lessonId: quiz.lessonId,
+          courseTitleAr: quiz.courseTitleAr,
+          courseTitleEn: quiz.courseTitleEn,
+          titleAr: quiz.titleAr,
+          titleEn: quiz.titleEn,
+          descriptionAr: quiz.descriptionAr,
+          descriptionEn: quiz.descriptionEn,
+          passingScore: quiz.passingScore,
+          timeLimitMinutes: quiz.timeLimitMinutes,
+          maxAttempts: quiz.maxAttempts,
+          shuffleQuestions: quiz.shuffleQuestions,
+          shuffleAnswers: quiz.shuffleAnswers,
+          showCorrectAnswers: quiz.showCorrectAnswers,
+          questionsCount: quiz.questionsCount,
+          totalPoints: quiz.totalPoints,
+          attemptsCount: quiz.attemptsCount,
+          averageScore: quiz.averageScore,
+          isPublished: isPublished,
+          availableFrom: quiz.availableFrom,
+          availableUntil: quiz.availableUntil,
+          createdAt: quiz.createdAt,
+        );
+      }).toList();
+      emit(state.copyWith(quizzes: updatedQuizzes));
+      return true;
+    } catch (e, s) {
+      AppLogger.e('[$_tag] toggleQuizPublished error', e, s);
       emit(state.copyWith(errorMessage: e.toString()));
       return false;
     }
@@ -244,6 +316,30 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     } catch (e, s) {
       AppLogger.e('[$_tag] getQuizQuestions error', e, s);
       return [];
+    }
+  }
+
+  Future<void> _refreshQuizQuestionTotals(String quizId) async {
+    try {
+      final response = await _supabase
+          .from('quiz_questions')
+          .select('points')
+          .eq('quiz_id', quizId);
+      final questions = response as List;
+      final totalPoints = questions.fold<int>(0, (sum, question) {
+        final points = question['points'];
+        if (points is int) return sum + points;
+        if (points is num) return sum + points.toInt();
+        return sum;
+      });
+
+      await _supabase.from('quizzes').update({
+        'total_questions': questions.length,
+        'total_points': totalPoints,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', quizId);
+    } catch (e, s) {
+      AppLogger.e('[$_tag] refresh quiz question totals error', e, s);
     }
   }
 
@@ -309,17 +405,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
           .single();
       AppLogger.d('📝 [$_tag] Insert response: $response');
 
-      // Update quiz total_questions count
-      AppLogger.d('📝 [$_tag] Updating quiz count...');
-      try {
-        await _supabase.rpc('increment_quiz_questions', params: {
-          'p_quiz_id': quizId,
-          'p_points': points,
-        });
-      } catch (rpcError) {
-        AppLogger.w(
-            '📝 [$_tag] RPC failed (function may not exist): $rpcError');
-      }
+      await _refreshQuizQuestionTotals(quizId);
 
       AppLogger.success('[$_tag] Question added successfully');
       return true;
@@ -330,8 +416,92 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     }
   }
 
+  Future<bool> addQuestionsBulk({
+    required String quizId,
+    required List<Map<String, dynamic>> questions,
+    bool replaceExisting = false,
+  }) async {
+    AppLogger.i(
+        'ðŸ“ [$_tag] addQuestionsBulk: quizId=$quizId, count=${questions.length}, replaceExisting=$replaceExisting');
+    if (questions.isEmpty) return true;
+
+    List<Map<String, dynamic>> previousQuestions = const [];
+
+    try {
+      if (replaceExisting) {
+        final existingRows = await _supabase
+            .from('quiz_questions')
+            .select()
+            .eq('quiz_id', quizId)
+            .order('sort_order');
+        previousQuestions = List<Map<String, dynamic>>.from(existingRows);
+        await _supabase.from('quiz_questions').delete().eq('quiz_id', quizId);
+      }
+
+      final existingQuestions = replaceExisting
+          ? <dynamic>[]
+          : await _supabase
+              .from('quiz_questions')
+              .select('sort_order')
+              .eq('quiz_id', quizId)
+              .order('sort_order', ascending: false)
+              .limit(1);
+
+      final startOrder = existingQuestions.isNotEmpty
+          ? (existingQuestions[0]['sort_order'] as int) + 1
+          : 0;
+
+      const uuid = Uuid();
+      final rows = questions.asMap().entries.map((entry) {
+        final index = entry.key;
+        final question = entry.value;
+        final rawOptions = (question['options'] as List? ?? [])
+            .whereType<Map<String, dynamic>>()
+            .toList();
+        final optionsWithIds = rawOptions.map((opt) {
+          final id = opt['id'];
+          if (id == null || id.toString().isEmpty) {
+            return {...opt, 'id': uuid.v4()};
+          }
+          return opt;
+        }).toList();
+
+        return {
+          'quiz_id': quizId,
+          'question_ar': question['question_ar'] as String? ?? '',
+          'question_en': question['question_en'] as String? ?? '',
+          'image_url': question['image_url'],
+          'question_type': question['question_type'] as String? ?? 'single',
+          'points': question['points'] as int? ?? 1,
+          'sort_order': startOrder + index,
+          'options': optionsWithIds,
+          'correct_answer': question['correct_answer'],
+        };
+      }).toList();
+
+      try {
+        await _supabase.from('quiz_questions').insert(rows);
+        await _refreshQuizQuestionTotals(quizId);
+      } catch (_) {
+        if (replaceExisting && previousQuestions.isNotEmpty) {
+          await _supabase.from('quiz_questions').insert(previousQuestions);
+          await _refreshQuizQuestionTotals(quizId);
+        }
+        rethrow;
+      }
+
+      AppLogger.success('[$_tag] Bulk questions added successfully');
+      return true;
+    } catch (e, s) {
+      AppLogger.e('[$_tag] addQuestionsBulk error', e, s);
+      emit(state.copyWith(errorMessage: e.toString()));
+      return false;
+    }
+  }
+
   /// Update question
   Future<bool> updateQuestion({
+    required String quizId,
     required String questionId,
     String? questionAr,
     String? questionEn,
@@ -370,6 +540,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
             .from('quiz_questions')
             .update(updates)
             .eq('id', questionId);
+        await _refreshQuizQuestionTotals(quizId);
       }
 
       AppLogger.success('[$_tag] Question updated');
@@ -386,21 +557,8 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     AppLogger.i('📝 [$_tag] deleteQuestion: questionId=$questionId');
 
     try {
-      // Get question points before deleting
-      final question = await _supabase
-          .from('quiz_questions')
-          .select('points')
-          .eq('id', questionId)
-          .single();
-      final points = question['points'] as int? ?? 1;
-
       await _supabase.from('quiz_questions').delete().eq('id', questionId);
-
-      // Update quiz total_questions count
-      await _supabase.rpc('decrement_quiz_questions', params: {
-        'p_quiz_id': quizId,
-        'p_points': points,
-      });
+      await _refreshQuizQuestionTotals(quizId);
 
       AppLogger.success('[$_tag] Question deleted');
       return true;

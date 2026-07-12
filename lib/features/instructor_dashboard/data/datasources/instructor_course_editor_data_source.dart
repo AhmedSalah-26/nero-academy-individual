@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/services/app_logger.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../domain/repositories/instructor_repository.dart';
 
 /// Instructor Course Editor Data Source - Course editor methods
@@ -58,11 +59,24 @@ class InstructorCourseEditorDataSource {
           .select('*, lessons(*)')
           .eq('course_id', courseId)
           .order('sort_order');
+      final quizzesResponse = await _client
+          .from('quizzes')
+          .select('id, lesson_id')
+          .eq('course_id', courseId)
+          .not('lesson_id', 'is', null);
+      final quizIdsByLessonId = <String, String>{};
+      for (final quiz in quizzesResponse as List) {
+        final lessonId = quiz['lesson_id'] as String?;
+        final quizId = quiz['id'] as String?;
+        if (lessonId == null || quizId == null) continue;
+        quizIdsByLessonId.putIfAbsent(lessonId, () => quizId);
+      }
 
       final sections = (sectionsResponse as List).map((s) {
         final lessons = (s['lessons'] as List? ?? []).map((l) {
+          final lessonId = l['id'] as String?;
           return LessonDto(
-            id: l['id'] as String?,
+            id: lessonId,
             titleAr: l['title_ar'] as String? ?? '',
             titleEn: l['title_en'] as String? ?? '',
             type: l['type'] as String? ?? 'video',
@@ -70,14 +84,23 @@ class InstructorCourseEditorDataSource {
             durationMinutes: ((l['video_duration'] as int? ?? 0) / 60).round(),
             isFree: l['is_preview'] as bool? ?? false,
             isPublished: l['is_published'] as bool? ?? true,
+            availableFrom: l['available_from'] != null
+                ? DateTime.parse(l['available_from'] as String)
+                : null,
+            availableUntil: l['available_until'] != null
+                ? DateTime.parse(l['available_until'] as String)
+                : null,
             videoUrl: l['video_url'] as String?,
             articleContent: l['article_content_ar'] as String?,
             fileUrl: l['file_url'] as String?,
             fileName: l['file_name'] as String?,
             fileSize: l['file_size'] as int?,
             fileType: l['file_type'] as String?,
+            quizId: lessonId == null ? null : quizIdsByLessonId[lessonId],
           );
-        }).toList();
+        }).toList()
+          // Sort lessons by sort_order (Supabase nested select may not honor order)
+          ..sort((a, b) => a.order.compareTo(b.order));
 
         return SectionDto(
           id: s['id'] as String?,
@@ -87,7 +110,9 @@ class InstructorCourseEditorDataSource {
           isPublished: s['is_published'] as bool? ?? true,
           lessons: lessons,
         );
-      }).toList();
+      }).toList()
+        // Sort sections by sort_order as extra safety guarantee
+        ..sort((a, b) => a.order.compareTo(b.order));
 
       AppLogger.success(
           '[$_tag] getCourseForEdit: ${sections.length} sections');
@@ -115,6 +140,17 @@ class InstructorCourseEditorDataSource {
         flashSaleEnd: courseResponse['flash_sale_end'] != null
             ? DateTime.parse(courseResponse['flash_sale_end'] as String)
             : null,
+        availableFrom: courseResponse['available_from'] != null
+            ? DateTime.parse(courseResponse['available_from'] as String)
+            : null,
+        availableUntil: courseResponse['available_until'] != null
+            ? DateTime.parse(courseResponse['available_until'] as String)
+            : null,
+        pricingOptions:
+            parseCoursePricingOptions(courseResponse['pricing_options']),
+        groupLinks: CourseGroupLinks.fromJson(
+          courseResponse['group_links'] as Map<String, dynamic>?,
+        ),
         sections: sections,
       );
     } catch (e, s) {
@@ -200,6 +236,8 @@ class InstructorCourseEditorDataSource {
             'video_duration': (lesson.durationMinutes * 60),
             'is_preview': lesson.isFree,
             'is_published': lesson.isPublished,
+            'available_from': lesson.availableFrom?.toUtc().toIso8601String(),
+            'available_until': lesson.availableUntil?.toUtc().toIso8601String(),
             'video_url': lesson.videoUrl,
             'article_content_ar': lesson.articleContent,
             'file_url': lesson.fileUrl,
@@ -527,17 +565,10 @@ class InstructorCourseEditorDataSource {
   }) async {
     AppLogger.d('[$_tag] scheduleSectionPublish: sectionId=$sectionId');
     try {
-      final response = await _client.rpc('schedule_section_publish', params: {
-        'p_section_id': sectionId,
-        'p_instructor_id': _userId,
-        'p_publish_at': publishAt?.toIso8601String(),
-        'p_unpublish_at': unpublishAt?.toIso8601String(),
-      });
-
-      final result = response as Map<String, dynamic>;
-      if (result['success'] != true) {
-        throw Exception(result['error'] ?? 'Failed to schedule section');
-      }
+      await _client.from('sections').update({
+        'available_from': publishAt?.toUtc().toIso8601String(),
+        'available_until': unpublishAt?.toUtc().toIso8601String(),
+      }).eq('id', sectionId);
       AppLogger.success('[$_tag] scheduleSectionPublish success');
     } catch (e, s) {
       AppLogger.e('[$_tag] scheduleSectionPublish error', e, s);
@@ -576,17 +607,10 @@ class InstructorCourseEditorDataSource {
   }) async {
     AppLogger.d('[$_tag] scheduleLessonPublish: lessonId=$lessonId');
     try {
-      final response = await _client.rpc('schedule_lesson_publish', params: {
-        'p_lesson_id': lessonId,
-        'p_instructor_id': _userId,
-        'p_publish_at': publishAt?.toIso8601String(),
-        'p_unpublish_at': unpublishAt?.toIso8601String(),
-      });
-
-      final result = response as Map<String, dynamic>;
-      if (result['success'] != true) {
-        throw Exception(result['error'] ?? 'Failed to schedule lesson');
-      }
+      await _client.from('lessons').update({
+        'available_from': publishAt?.toUtc().toIso8601String(),
+        'available_until': unpublishAt?.toUtc().toIso8601String(),
+      }).eq('id', lessonId);
       AppLogger.success('[$_tag] scheduleLessonPublish success');
     } catch (e, s) {
       AppLogger.e('[$_tag] scheduleLessonPublish error', e, s);
@@ -601,8 +625,8 @@ class InstructorCourseEditorDataSource {
     try {
       await _client.from('sections').update({
         'is_published': isPublished,
-        'publish_at': null,
-        'unpublish_at': null,
+        'available_from': null,
+        'available_until': null,
       }).eq('id', sectionId);
       AppLogger.success('[$_tag] setSectionPublished success');
     } catch (e, s) {
@@ -618,8 +642,8 @@ class InstructorCourseEditorDataSource {
     try {
       await _client.from('lessons').update({
         'is_published': isPublished,
-        'publish_at': null,
-        'unpublish_at': null,
+        'available_from': null,
+        'available_until': null,
       }).eq('id', lessonId);
       AppLogger.success('[$_tag] setLessonPublished success');
     } catch (e, s) {

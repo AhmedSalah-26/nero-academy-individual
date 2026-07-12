@@ -491,8 +491,8 @@ class InstructorRepositoryImpl implements InstructorRepository {
       final response = await _client.from('categories').insert({
         'name_ar': dto.nameAr,
         'name_en': dto.nameEn,
-        'description': dto.description,
-        'icon': dto.icon,
+        'description_ar': dto.description,
+        'icon_name': dto.icon,
         'parent_id': dto.parentId,
       }).select().single();
       return CategoryModel.fromJson(response);
@@ -507,8 +507,8 @@ class InstructorRepositoryImpl implements InstructorRepository {
       final data = <String, dynamic>{};
       if (dto.nameAr != null) data['name_ar'] = dto.nameAr;
       if (dto.nameEn != null) data['name_en'] = dto.nameEn;
-      if (dto.description != null) data['description'] = dto.description;
-      if (dto.icon != null) data['icon'] = dto.icon;
+      if (dto.description != null) data['description_ar'] = dto.description;
+      if (dto.icon != null) data['icon_name'] = dto.icon;
       if (dto.parentId != null) data['parent_id'] = dto.parentId;
       if (dto.isActive != null) data['is_active'] = dto.isActive;
       if (dto.sortOrder != null) data['sort_order'] = dto.sortOrder;

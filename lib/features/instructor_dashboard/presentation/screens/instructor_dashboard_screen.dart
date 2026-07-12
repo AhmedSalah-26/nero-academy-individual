@@ -14,8 +14,11 @@ import '../widgets/instructor_reviews/instructor_reviews_content.dart';
 import '../widgets/instructor_coupons/instructor_coupons_content.dart';
 import '../widgets/instructor_quizzes/instructor_quizzes_content.dart';
 import '../widgets/instructor_settings/instructor_settings_content.dart';
+import '../widgets/instructor_settings/teacher_theme_settings_content.dart';
 import '../widgets/instructor_categories/instructor_categories_content.dart';
 import '../widgets/instructor_banners/instructor_banners_content.dart';
+import '../widgets/instructor_reports/instructor_reports_content.dart';
+import 'manual_purchase_requests_screen.dart';
 
 /// Instructor Dashboard Screen
 class InstructorDashboardScreen extends StatefulWidget {
@@ -56,6 +59,11 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
       icon: Icons.assignment_ind_rounded,
     ),
     DashboardNavItem(
+      label: 'Purchase Requests',
+      labelAr: 'طلبات الشراء',
+      icon: Icons.fact_check_rounded,
+    ),
+    DashboardNavItem(
       label: 'Earnings',
       labelAr: 'الأرباح',
       icon: Icons.attach_money_rounded,
@@ -81,6 +89,11 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
       icon: Icons.star_rounded,
     ),
     DashboardNavItem(
+      label: 'Reports',
+      labelAr: 'البلاغات',
+      icon: Icons.flag_rounded,
+    ),
+    DashboardNavItem(
       label: 'Categories',
       labelAr: 'التصنيفات',
       icon: Icons.category_rounded,
@@ -89,6 +102,11 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
       label: 'Banners',
       labelAr: 'البانرات',
       icon: Icons.image_rounded,
+    ),
+    DashboardNavItem(
+      label: 'Theme',
+      labelAr: 'الثيم',
+      icon: Icons.palette_rounded,
     ),
     DashboardNavItem(
       label: 'Settings',
@@ -124,27 +142,36 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
         content = const InstructorEnrollmentsContent();
         break;
       case 5:
-        content = const InstructorEarningsContent();
+        content = const ManualPurchaseRequestsScreen();
         break;
       case 6:
-        content = const InstructorCouponsContent();
+        content = const InstructorEarningsContent();
         break;
       case 7:
-        content = const InstructorQuizzesContent();
+        content = const InstructorCouponsContent();
         break;
       case 8:
-        content = const InstructorQAContent();
+        content = const InstructorQuizzesContent();
         break;
       case 9:
-        content = const InstructorReviewsContent();
+        content = const InstructorQAContent();
         break;
       case 10:
-        content = const InstructorCategoriesContent();
+        content = const InstructorReviewsContent();
         break;
       case 11:
-        content = const InstructorBannersContent();
+        content = const InstructorReportsContent();
         break;
       case 12:
+        content = const InstructorCategoriesContent();
+        break;
+      case 13:
+        content = const InstructorBannersContent();
+        break;
+      case 14:
+        content = const TeacherThemeSettingsContent();
+        break;
+      case 15:
         content = const InstructorSettingsContent();
         break;
       default:

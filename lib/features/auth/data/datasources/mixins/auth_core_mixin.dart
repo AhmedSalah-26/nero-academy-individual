@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
+import '../../../../../core/utils/phone_utils.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../models/user_model.dart';
 
@@ -62,11 +63,24 @@ mixin AuthCoreMixin {
         );
       }
 
+      // Normalize phone number
+      String? normalizedPhone;
+      if (phone != null && phone.isNotEmpty) {
+        final cleaned = PhoneUtils.normalizeWhatsappNumber(phone);
+        if (cleaned == null) {
+          throw const app_exceptions.AuthException(
+            'رقم الهاتف غير صحيح. برجاء كتابة رقم مصري صحيح مثل 01012345678.',
+            code: 'invalid_phone',
+          );
+        }
+        normalizedPhone = '+$cleaned';
+      }
+
       logger.d('  Calling supabase.auth.signUp...');
       final response = await supabase.auth.signUp(
         email: email,
         password: password,
-        data: {'name': name, 'role': role.toJson(), 'phone': phone},
+        data: {'name': name, 'role': role.toJson(), 'phone': normalizedPhone},
         emailRedirectTo: AppConstants.authRedirectUrl,
       );
 
@@ -96,7 +110,7 @@ mixin AuthCoreMixin {
         'email': email,
         'name': name,
         'role': role.toJson(),
-        'phone': phone,
+        'phone': normalizedPhone,
         'is_active': true,
         'created_at': DateTime.now().toIso8601String(),
       };
@@ -190,7 +204,9 @@ mixin AuthCoreMixin {
     return supabase.auth.onAuthStateChange.asyncMap((event) async {
       if (event.session?.user == null) return null;
       try {
-        return await getProfile(event.session!.user.id);
+        final profile = await getOrCreateProfile(event.session!.user);
+        checkUserAccess(profile);
+        return profile;
       } catch (e) {
         return null;
       }

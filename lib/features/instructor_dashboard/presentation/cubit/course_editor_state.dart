@@ -22,6 +22,7 @@ class CourseEditorState extends Equatable {
   final String? previewVideoUrl;
   final String? categoryId;
   final String level;
+  final CourseGroupLinks groupLinks;
 
   // Curriculum
   final List<SectionData> sections;
@@ -34,6 +35,9 @@ class CourseEditorState extends Equatable {
   final bool isFlashSale;
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
+  final List<CoursePricingOption> pricingOptions;
 
   // Settings
   final List<String> requirementsAr;
@@ -65,6 +69,7 @@ class CourseEditorState extends Equatable {
     this.previewVideoUrl,
     this.categoryId,
     this.level = 'beginner',
+    this.groupLinks = const CourseGroupLinks(),
     this.sections = const [],
     this.price = 0,
     this.discountPrice,
@@ -73,6 +78,9 @@ class CourseEditorState extends Equatable {
     this.isFlashSale = false,
     this.flashSaleStart,
     this.flashSaleEnd,
+    this.availableFrom,
+    this.availableUntil,
+    this.pricingOptions = const [],
     this.requirementsAr = const [],
     this.requirementsEn = const [],
     this.objectivesAr = const [],
@@ -84,14 +92,85 @@ class CourseEditorState extends Equatable {
 
   bool get isLoading => status == CourseEditorStatus.loading;
 
+  bool get hasValidAvailabilityWindow =>
+      availableFrom == null ||
+      availableUntil == null ||
+      availableUntil!.isAfter(availableFrom!);
+
   bool get canPublish =>
       titleAr.isNotEmpty &&
       titleEn.isNotEmpty &&
       descriptionAr.isNotEmpty &&
       descriptionEn.isNotEmpty &&
       categoryId != null &&
+      hasValidAvailabilityWindow &&
       sections.isNotEmpty &&
-      sections.every((s) => s.lessons.isNotEmpty);
+      sections.every((s) => s.lessons.isNotEmpty) &&
+      sections
+          .every((s) => s.lessons.every((l) => l.hasValidAvailabilityWindow));
+
+  List<String> publishValidationMessages({required bool isArabic}) {
+    final messages = <String>[];
+
+    if (titleAr.trim().isEmpty) {
+      messages.add('course_editor.validation_title_ar'.tr());
+    }
+    if (titleEn.trim().isEmpty) {
+      messages.add('course_editor.validation_title_en'.tr());
+    }
+    if (descriptionAr.trim().isEmpty) {
+      messages.add('course_editor.validation_description_ar'.tr());
+    }
+    if (descriptionEn.trim().isEmpty) {
+      messages.add('course_editor.validation_description_en'.tr());
+    }
+    if (categoryId == null) {
+      messages.add('course_editor.validation_category'.tr());
+    }
+    if (!hasValidAvailabilityWindow) {
+      messages.add('course_editor.validation_course_availability'.tr());
+    }
+    if (sections.isEmpty) {
+      messages.add('course_editor.validation_section_required'.tr());
+    }
+
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      final sectionName = isArabic
+          ? (section.titleAr.trim().isNotEmpty
+              ? section.titleAr.trim()
+              : 'course_editor.validation_section_fallback'
+                  .tr(namedArgs: {'number': '${i + 1}'}))
+          : (section.titleEn.trim().isNotEmpty
+              ? section.titleEn.trim()
+              : 'course_editor.validation_section_fallback'
+                  .tr(namedArgs: {'number': '${i + 1}'}));
+
+      if (section.lessons.isEmpty) {
+        messages.add('course_editor.validation_section_empty'
+            .tr(namedArgs: {'section': sectionName}));
+      }
+
+      for (var j = 0; j < section.lessons.length; j++) {
+        final lesson = section.lessons[j];
+        if (!lesson.hasValidAvailabilityWindow) {
+          final lessonName = isArabic
+              ? (lesson.titleAr.trim().isNotEmpty
+                  ? lesson.titleAr.trim()
+                  : 'course_editor.validation_lesson_fallback'
+                      .tr(namedArgs: {'number': '${j + 1}'}))
+              : (lesson.titleEn.trim().isNotEmpty
+                  ? lesson.titleEn.trim()
+                  : 'course_editor.validation_lesson_fallback'
+                      .tr(namedArgs: {'number': '${j + 1}'}));
+          messages.add('course_editor.validation_lesson_availability'
+              .tr(namedArgs: {'lesson': lessonName, 'section': sectionName}));
+        }
+      }
+    }
+
+    return messages;
+  }
 
   CourseEditorState copyWith({
     CourseEditorStatus? status,
@@ -109,6 +188,7 @@ class CourseEditorState extends Equatable {
     String? previewVideoUrl,
     String? categoryId,
     String? level,
+    CourseGroupLinks? groupLinks,
     List<SectionData>? sections,
     double? price,
     double? discountPrice,
@@ -121,6 +201,11 @@ class CourseEditorState extends Equatable {
     bool clearFlashSaleStart = false,
     DateTime? flashSaleEnd,
     bool clearFlashSaleEnd = false,
+    DateTime? availableFrom,
+    bool clearAvailableFrom = false,
+    DateTime? availableUntil,
+    bool clearAvailableUntil = false,
+    List<CoursePricingOption>? pricingOptions,
     List<String>? requirementsAr,
     List<String>? requirementsEn,
     List<String>? objectivesAr,
@@ -145,6 +230,7 @@ class CourseEditorState extends Equatable {
       previewVideoUrl: previewVideoUrl ?? this.previewVideoUrl,
       categoryId: categoryId ?? this.categoryId,
       level: level ?? this.level,
+      groupLinks: groupLinks ?? this.groupLinks,
       sections: sections ?? this.sections,
       price: price ?? this.price,
       discountPrice:
@@ -156,6 +242,11 @@ class CourseEditorState extends Equatable {
           clearFlashSaleStart ? null : (flashSaleStart ?? this.flashSaleStart),
       flashSaleEnd:
           clearFlashSaleEnd ? null : (flashSaleEnd ?? this.flashSaleEnd),
+      availableFrom:
+          clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
+      availableUntil:
+          clearAvailableUntil ? null : (availableUntil ?? this.availableUntil),
+      pricingOptions: pricingOptions ?? this.pricingOptions,
       requirementsAr: requirementsAr ?? this.requirementsAr,
       requirementsEn: requirementsEn ?? this.requirementsEn,
       objectivesAr: objectivesAr ?? this.objectivesAr,
@@ -183,6 +274,7 @@ class CourseEditorState extends Equatable {
         previewVideoUrl,
         categoryId,
         level,
+        groupLinks,
         sections,
         price,
         discountPrice,
@@ -192,6 +284,9 @@ class CourseEditorState extends Equatable {
         isFlashSale,
         flashSaleStart,
         flashSaleEnd,
+        availableFrom,
+        availableUntil,
+        pricingOptions,
         requirementsAr,
         requirementsEn,
         objectivesAr,
@@ -253,6 +348,8 @@ class LessonData extends Equatable {
   final int durationMinutes;
   final bool isFree;
   final bool isPublished;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final String? videoUrl;
   final String? articleContent;
   final String? fileUrl;
@@ -270,6 +367,8 @@ class LessonData extends Equatable {
     this.durationMinutes = 0,
     this.isFree = false,
     this.isPublished = true,
+    this.availableFrom,
+    this.availableUntil,
     this.videoUrl,
     this.articleContent,
     this.fileUrl,
@@ -278,6 +377,11 @@ class LessonData extends Equatable {
     this.fileType,
     this.quizId,
   });
+
+  bool get hasValidAvailabilityWindow =>
+      availableFrom == null ||
+      availableUntil == null ||
+      availableUntil!.isAfter(availableFrom!);
 
   LessonData copyWith({
     String? id,
@@ -288,6 +392,10 @@ class LessonData extends Equatable {
     int? durationMinutes,
     bool? isFree,
     bool? isPublished,
+    DateTime? availableFrom,
+    bool clearAvailableFrom = false,
+    DateTime? availableUntil,
+    bool clearAvailableUntil = false,
     String? videoUrl,
     String? articleContent,
     String? fileUrl,
@@ -305,6 +413,10 @@ class LessonData extends Equatable {
       durationMinutes: durationMinutes ?? this.durationMinutes,
       isFree: isFree ?? this.isFree,
       isPublished: isPublished ?? this.isPublished,
+      availableFrom:
+          clearAvailableFrom ? null : (availableFrom ?? this.availableFrom),
+      availableUntil:
+          clearAvailableUntil ? null : (availableUntil ?? this.availableUntil),
       videoUrl: videoUrl ?? this.videoUrl,
       articleContent: articleContent ?? this.articleContent,
       fileUrl: fileUrl ?? this.fileUrl,
@@ -325,6 +437,8 @@ class LessonData extends Equatable {
         durationMinutes,
         isFree,
         isPublished,
+        availableFrom,
+        availableUntil,
         videoUrl,
         articleContent,
         fileUrl,

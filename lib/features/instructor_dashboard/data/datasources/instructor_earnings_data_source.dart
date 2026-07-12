@@ -74,7 +74,8 @@ class InstructorEarningsDataSource {
     try {
       var query = _client
           .from('instructor_earnings')
-          .select('id, instructor_id, course_id, net_amount, gross_amount, platform_fee, status, created_at, courses(title_ar, title_en)')
+          .select(
+              'id, instructor_id, course_id, net_amount, gross_amount, coupon_discount, platform_fee, status, created_at, courses(title_ar, title_en)')
           .eq('instructor_id', _userId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
@@ -102,6 +103,7 @@ class InstructorEarningsDataSource {
           courseName: courseName,
           amount: (e['gross_amount'] as num?)?.toDouble() ?? 0,
           commission: (e['platform_fee'] as num?)?.toDouble() ?? 0,
+          couponDiscount: (e['coupon_discount'] as num?)?.toDouble() ?? 0,
           status: EarningStatus.fromString(e['status'] as String?),
           sourceType: EarningSourceType.courseSale,
           createdAt: DateTime.parse(e['created_at'] as String),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import '../../../../../core/shared_widgets/dashboard/dashboard_widgets.dart';
 import '../../../../../core/shared_widgets/loading_skeleton.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../domain/entities/instructor_entities.dart';
+import '../../../data/models/instructor_course_model.dart';
 import '../../cubit/instructor_courses_cubit.dart';
 import 'instructor_course_list_item.dart';
 
@@ -39,6 +41,47 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       context.read<InstructorCoursesCubit>().loadMoreCourses();
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, InstructorCourseModel course) async {
+    final cubit = context.read<InstructorCoursesCubit>();
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'instructor.delete_course_title'.tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'instructor.delete_course_confirm'.tr(namedArgs: {
+              'title': course.getTitle(isArabic),
+            }),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('common.cancel'.tr()),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('common.delete'.tr()),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await cubit.deleteCourse(course.id);
     }
   }
 
@@ -164,21 +207,38 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
   Widget _buildCoursesList(
       BuildContext context, InstructorCoursesState state, bool isArabic) {
     if (state.isLoading && state.courses.isEmpty) {
-      return _buildLoadingSkeleton();
+      return RefreshIndicator(
+        onRefresh: () => context
+            .read<InstructorCoursesCubit>()
+            .loadCourses(status: state.currentStatus, refresh: true),
+        color: AppColors.primary,
+        child: _buildLoadingSkeleton(),
+      );
     }
 
     if (state.courses.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              isArabic ? 'لا توجد كورسات' : 'No courses found',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+      return RefreshIndicator(
+        onRefresh: () => context
+            .read<InstructorCoursesCubit>()
+            .loadCourses(status: state.currentStatus, refresh: true),
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.6,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  isArabic ? 'لا توجد كورسات' : 'No courses found',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       );
     }
@@ -187,8 +247,10 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
       onRefresh: () => context
           .read<InstructorCoursesCubit>()
           .loadCourses(status: state.currentStatus, refresh: true),
+      color: AppColors.primary,
       child: ListView.builder(
         controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: state.courses.length + (state.isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -225,6 +287,9 @@ class _InstructorCoursesContentState extends State<InstructorCoursesContent> {
               );
             },
             onPreview: () => _openPreviewCourse(course.id),
+            onDelete: course.enrollmentCount == 0
+                ? () => _showDeleteConfirmation(context, course)
+                : null,
           );
         },
       ),

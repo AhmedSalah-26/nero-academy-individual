@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/course_commerce_models.dart';
 import '../../../home/domain/entities/course_entity.dart';
 import 'instructor_entity.dart';
 import 'section_entity.dart';
@@ -44,6 +45,8 @@ class CourseDetailsEntity extends Equatable {
   final DateTime? flashSaleStart;
   final DateTime? flashSaleEnd;
   final String? badge;
+  final List<CoursePricingOption> pricingOptions;
+  final CourseGroupLinks groupLinks;
   final double rating;
   final int ratingCount;
   final int enrolledCount;
@@ -91,6 +94,8 @@ class CourseDetailsEntity extends Equatable {
     this.flashSaleStart,
     this.flashSaleEnd,
     this.badge,
+    this.pricingOptions = const [],
+    this.groupLinks = const CourseGroupLinks(),
     this.rating = 0,
     this.ratingCount = 0,
     this.enrolledCount = 0,
@@ -129,6 +134,9 @@ class CourseDetailsEntity extends Equatable {
   /// Get current effective price
   double get currentPrice {
     if (isFree) return 0;
+    if (pricingOptions.isNotEmpty) {
+      return pricingOptions.first.currentPrice.round().toDouble();
+    }
     // Flash sale makes discount time-limited
     if (isFlashSale) {
       final price =
@@ -136,6 +144,15 @@ class CourseDetailsEntity extends Equatable {
       return price.round().toDouble();
     }
     final price = discountPrice ?? this.price;
+    return price.round().toDouble();
+  }
+
+  /// Get original price (before discount)
+  double get originalPrice {
+    if (isFree) return 0;
+    if (pricingOptions.isNotEmpty) {
+      return pricingOptions.first.price.round().toDouble();
+    }
     return price.round().toDouble();
   }
 
@@ -153,7 +170,12 @@ class CourseDetailsEntity extends Equatable {
 
   /// Get discount percentage
   int? get discountPercentage {
-    if (isFree || price <= 0) return null;
+    if (isFree || currentPrice <= 0) return null;
+    if (pricingOptions.isNotEmpty) {
+      final option = pricingOptions.first;
+      if (option.discountPrice == null || option.discountPrice! >= option.price) return null;
+      return ((option.price - option.discountPrice!) / option.price * 100).round();
+    }
     if (discountPrice == null || discountPrice! >= price) return null;
     // If flash sale, only show discount when active
     if (isFlashSale && !isFlashSaleActive) return null;
@@ -185,6 +207,8 @@ class CourseDetailsEntity extends Equatable {
         flashSaleStart,
         flashSaleEnd,
         badge,
+        pricingOptions,
+        groupLinks,
         rating,
         enrolledCount,
         enrollmentStatus,

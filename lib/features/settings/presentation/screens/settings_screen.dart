@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/animations/animations.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/user_role_service.dart';
 import '../../../../core/shared_widgets/back_button.dart';
 import '../../../../core/shared_widgets/loading_state.dart';
 import '../../../../core/shared_widgets/responsive_dialog.dart';
@@ -27,13 +29,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
-  void _loadSettings() {
+  Future<void> _loadSettings() async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     if (userId != null) {
-      context.read<SettingsCubit>().loadSettings(userId);
+      await context.read<SettingsCubit>().loadSettings(userId);
     } else {
       context.read<SettingsCubit>().loadGuestSettings();
     }
+  }
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    await _loadSettings();
   }
 
   bool get _isGuest => Supabase.instance.client.auth.currentUser == null;
@@ -62,13 +69,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
         leading: const AppBackButton(),
         surfaceTintColor: Colors.transparent,
       ),
-      body: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const AppLoadingState();
-          }
-          return _buildContent(state, isDark);
-        },
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+        child: BlocBuilder<SettingsCubit, SettingsState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: SizedBox(height: 500, child: AppLoadingState()),
+              );
+            }
+            return _buildContent(state, isDark);
+          },
+        ),
       ),
     );
   }
@@ -77,6 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     int sectionIndex = 0;
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,27 +238,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 activeTrackColor: AppColors.primary,
               ),
             ),
-            // Video Autoplay
-            ListTile(
-              leading: const Icon(
-                Icons.play_circle_outline,
-                size: 22,
-                color: AppColors.primary,
-              ),
-              title: Text(
-                'settings.video_autoplay'.tr(),
-                style: TextStyle(
-                  fontSize: 15,
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
-                ),
-              ),
-              trailing: Switch(
-                value: state.videoAutoplay,
-                onChanged: (v) =>
-                    context.read<SettingsCubit>().toggleVideoAutoplay(v),
-                activeTrackColor: AppColors.primary,
-              ),
+            // Learning Profile for students
+            FutureBuilder<String?>(
+              future: UserRoleService.getCurrentUserRole(),
+              builder: (context, snapshot) {
+                final isArabic = context.locale.languageCode == 'ar';
+                if (snapshot.data == 'student') {
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(
+                          Icons.school_outlined,
+                          size: 22,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(
+                          isArabic ? 'تغيير المدرس' : 'Change Teacher',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: isDark
+                                ? AppColors.textMainDark
+                                : AppColors.textMainLight,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: isDark ? AppColors.grey600 : AppColors.grey400,
+                        ),
+                        onTap: () => AppRouter.goToSelectTeacher(context),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.analytics_outlined,
+                          size: 22,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(
+                          isArabic ? 'ملف التعلم' : 'Learning Profile',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: isDark
+                                ? AppColors.textMainDark
+                                : AppColors.textMainLight,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: isDark ? AppColors.grey600 : AppColors.grey400,
+                        ),
+                        onTap: () => AppRouter.goToStudentProfile(context),
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ],
@@ -347,7 +397,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => AppRouter.goToPrivacyPolicy(context),
+                  onPressed: () async {
+                    final Uri url = Uri.parse(
+                        'https://AhmedSalah-26.github.io/shehabtech-privacy/');
+                    if (!await launchUrl(url)) {
+                      debugPrint('Could not launch $url');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,

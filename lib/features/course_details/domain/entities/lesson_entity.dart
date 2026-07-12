@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/availability_window.dart';
 
 /// Lesson Type Enum
 enum LessonType {
@@ -56,6 +57,8 @@ class LessonEntity extends Equatable {
   final bool isMandatory;
   final bool isPublished;
   final int sortOrder;
+  final DateTime? availableFrom;
+  final DateTime? availableUntil;
   final bool isCompleted;
   final int? lastPosition; // video position in seconds
 
@@ -80,6 +83,8 @@ class LessonEntity extends Equatable {
     this.isMandatory = true,
     this.isPublished = true,
     this.sortOrder = 0,
+    this.availableFrom,
+    this.availableUntil,
     this.isCompleted = false,
     this.lastPosition,
   });
@@ -102,6 +107,11 @@ class LessonEntity extends Equatable {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  bool get isCurrentlyAvailable => AvailabilityWindow.isActive(
+        availableFrom: availableFrom,
+        availableUntil: availableUntil,
+      );
+
   @override
   List<Object?> get props => [
         id,
@@ -118,6 +128,8 @@ class LessonEntity extends Equatable {
         isMandatory,
         isPublished,
         sortOrder,
+        availableFrom,
+        availableUntil,
         isCompleted,
       ];
 }

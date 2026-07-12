@@ -1,11 +1,20 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/shared_widgets/app_button.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/phone_utils.dart';
 
-/// Payment Success Screen
+/// Manual order confirmation screen.
 class PaymentSuccessScreen extends StatefulWidget {
+  // No fallback — show instructor number only
+
   final String orderId;
 
   const PaymentSuccessScreen({
@@ -17,52 +26,94 @@ class PaymentSuccessScreen extends StatefulWidget {
   State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
 }
 
-class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Offset> _slideAnimation;
+class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
+  late final Future<String?> _instructorWhatsappFuture =
+      _loadInstructorWhatsappNumber();
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
+  String get shortOrderId => widget.orderId.length <= 8
+      ? widget.orderId.toUpperCase()
+      : widget.orderId.substring(0, 8).toUpperCase();
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
+  Future<String?> _loadInstructorWhatsappNumber() async {
+    try {
+      final supabase = Supabase.instance.client;
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
-      ),
-    );
+      // Paid manual requests do not create enrollments until the instructor
+      // approves them, so resolve the instructor through the saved order item.
+      final requestItem = await Supabase.instance.client
+          .from('manual_purchase_request_items')
+          .select('instructor_id, course_id')
+          .eq('parent_enrollment_id', widget.orderId)
+          .limit(1)
+          .maybeSingle();
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
-      ),
-    );
+      final itemInstructorId = requestItem?['instructor_id'] as String?;
+      final itemPhone = await _loadProfilePhone(itemInstructorId);
+      if (itemPhone != null) {
+        return itemPhone;
+      }
 
-    _controller.forward();
+      // If instructor_id was not readable on the order item, resolve it through
+      // the course attached to the request.
+      final courseId = requestItem?['course_id'] as String?;
+      if (courseId != null) {
+        final course = await supabase
+            .from('courses')
+            .select('instructor_id')
+            .eq('id', courseId)
+            .maybeSingle();
+        final coursePhone =
+            await _loadProfilePhone(course?['instructor_id'] as String?);
+        if (coursePhone != null) {
+          return coursePhone;
+        }
+      }
+
+      // Fallback: If enrollment query failed (e.g. due to RLS on pending status),
+      // get the main instructor/admin's phone number since this is an individual app.
+      final fallbackInstructor = await supabase
+          .from('profiles')
+          .select('phone')
+          .inFilter('role', ['admin', 'instructor'])
+          .not('phone', 'is', null)
+          .limit(1)
+          .maybeSingle();
+
+      final fallbackPhone = fallbackInstructor?['phone'] as String?;
+      return _normalizePhone(fallbackPhone);
+    } catch (e) {
+      debugPrint('[PaymentSuccess] Failed to load instructor phone: $e');
+      return null;
+    }
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Future<String?> _loadProfilePhone(String? profileId) async {
+    if (profileId == null || profileId.isEmpty) return null;
+
+    final instructor = await Supabase.instance.client
+        .from('profiles')
+        .select('phone')
+        .eq('id', profileId)
+        .maybeSingle();
+
+    final rawPhone = instructor?['phone'] as String?;
+    return _normalizePhone(rawPhone);
+  }
+
+  String? _normalizePhone(String? phone) {
+    if (phone == null || phone.trim().isEmpty) return null;
+    final trimmed = phone.trim();
+    final normalized = PhoneUtils.normalizeWhatsappNumber(trimmed);
+    if (normalized != null) return normalized;
+
+    final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return null;
+
+    if (digits.startsWith('00') && digits.length > 2) {
+      return digits.substring(2);
+    }
+
+    return digits;
   }
 
   @override
@@ -73,241 +124,230 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       backgroundColor:
           isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       body: SafeArea(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: child,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Spacer(),
+              Container(
+                width: 112,
+                height: 112,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.success.withValues(alpha: 0.12),
+                  border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.24),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.assignment_turned_in_rounded,
+                  size: 58,
+                  color: AppColors.success,
+                ),
               ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(),
-                // Success illustration
-                ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: _buildSuccessIllustration(isDark),
+              const SizedBox(height: 28),
+              Text(
+                'payment.request_submitted'.tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: isDark ? AppColors.white : AppColors.textMainLight,
                 ),
-                const SizedBox(height: 32),
-                // Title
-                Text(
-                  'payment.success_title'.tr(),
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.white : AppColors.textMainLight,
-                    letterSpacing: -0.5,
-                  ),
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'payment.manual_request_subtitle'.tr(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
                 ),
-                const SizedBox(height: 12),
-                // Subtitle
-                Text(
-                  'payment.success_subtitle'.tr(),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                // Order ID
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+              ),
+              const SizedBox(height: 24),
+              _InfoTile(
+                icon: Icons.confirmation_number_rounded,
+                label: 'payment.operation_id'.tr(),
+                value: shortOrderId,
+                isDark: isDark,
+                onCopy: () => _copy(context, widget.orderId),
+              ),
+              const SizedBox(height: 12),
+              FutureBuilder<String?>(
+                future: _instructorWhatsappFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: LinearProgressIndicator(minHeight: 2),
+                    );
+                  }
+
+                  final instructorNumber = snapshot.data;
+                  if (instructorNumber == null) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        _InfoTile(
+                          icon: Icons.info_outline_rounded,
+                          label: 'payment.instructor_whatsapp'.tr(),
+                          value: context.locale.languageCode == 'ar'
+                              ? 'رقم المدرب غير متاح حالياً'
+                              : 'Instructor phone is not available right now',
+                          isDark: isDark,
+                          onCopy: () {},
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Column(
                     children: [
-                      const Icon(
-                        Icons.receipt_long_rounded,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'payment.order_id'.tr(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.orderId.substring(0, 8).toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                          letterSpacing: 1,
-                        ),
+                      const SizedBox(height: 12),
+                      _InfoTile(
+                        icon: Icons.chat_rounded,
+                        label: 'payment.instructor_whatsapp'.tr(),
+                        value: '+$instructorNumber',
+                        isDark: isDark,
+                        onCopy: () => _copy(context, '+$instructorNumber'),
                       ),
                     ],
+                  );
+                },
+              ),
+              const Spacer(),
+              AppButton(
+                text: 'payment.contact_whatsapp'.tr(),
+                onPressed: () async {
+                  final instructorNumber = await _instructorWhatsappFuture;
+                  if (!context.mounted || instructorNumber == null) return;
+                  await _openWhatsapp(context, instructorNumber);
+                },
+                variant: AppButtonVariant.primary,
+                size: AppButtonSize.large,
+                icon: Icons.chat_rounded,
+                isFullWidth: true,
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => AppRouter.goToHome(context),
+                child: Text(
+                  'payment.back_to_home'.tr(),
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const Spacer(),
-                // Start learning button
-                AppButton(
-                  text: 'payment.start_learning'.tr(),
-                  onPressed: () => _goToMyLearning(context),
-                  variant: AppButtonVariant.primary,
-                  size: AppButtonSize.large,
-                  icon: Icons.play_arrow_rounded,
-                  isFullWidth: true,
-                ),
-                const SizedBox(height: 12),
-                // Back to home
-                TextButton(
-                  onPressed: () => _goToHome(context),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: Text(
-                    'payment.back_to_home'.tr(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSuccessIllustration(bool isDark) {
-    return SizedBox(
-      width: 200,
-      height: 200,
-      child: Stack(
-        alignment: Alignment.center,
+  Future<void> _openWhatsapp(
+    BuildContext context,
+    String instructorNumber,
+  ) async {
+    final text = Uri.encodeComponent(
+      'payment.whatsapp_message'.tr(namedArgs: {'orderId': widget.orderId}),
+    );
+    final uri = Uri.parse('whatsapp://send?phone=$instructorNumber&text=$text');
+    final fallbackUri = Uri.parse(
+        'https://api.whatsapp.com/send?phone=$instructorNumber&text=$text');
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+        return;
+      }
+    } catch (_) {}
+
+    if (!await launchUrl(fallbackUri, mode: LaunchMode.externalApplication) &&
+        context.mounted) {
+      _copy(context, '+$instructorNumber');
+    }
+  }
+
+  void _copy(BuildContext context, String value) {
+    Clipboard.setData(ClipboardData(text: value));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'payment.copied'.tr(),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  const _InfoTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isDark,
+    required this.onCopy,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isDark;
+  final VoidCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
         children: [
-          // Background circles
-          Positioned(
-            top: 10,
-            left: 10,
-            child: _buildCircle(80, AppColors.primary.withValues(alpha: 0.08)),
-          ),
-          Positioned(
-            bottom: 20,
-            right: 10,
-            child: _buildCircle(60, AppColors.primary.withValues(alpha: 0.06)),
-          ),
-          Positioned(
-            top: 40,
-            right: 30,
-            child: _buildCircle(30, AppColors.primary.withValues(alpha: 0.1)),
-          ),
-          // Main icon container
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.15),
-                  AppColors.primary.withValues(alpha: 0.05),
-                ],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
+          Icon(icon, color: AppColors.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  textDirection: ui.TextDirection.ltr,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? AppColors.white : AppColors.textMainLight,
+                  ),
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.check_circle_rounded,
-              size: 56,
-              color: AppColors.primary,
-            ),
           ),
-          // Decorative elements
-          Positioned(
-            top: 30,
-            left: 40,
-            child: _buildDot(8, AppColors.primary.withValues(alpha: 0.4)),
-          ),
-          Positioned(
-            bottom: 40,
-            left: 30,
-            child: _buildDot(6, AppColors.primary.withValues(alpha: 0.3)),
-          ),
-          Positioned(
-            top: 50,
-            right: 20,
-            child: _buildDot(10, AppColors.primary.withValues(alpha: 0.5)),
-          ),
-          Positioned(
-            bottom: 30,
-            right: 40,
-            child: _buildDot(5, AppColors.primary.withValues(alpha: 0.25)),
+          IconButton(
+            onPressed: onCopy,
+            icon: const Icon(Icons.copy_rounded),
+            tooltip: 'common.copy'.tr(),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildCircle(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildDot(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  void _goToMyLearning(BuildContext context) {
-    AppRouter.goToMyLearning(context);
-  }
-
-  void _goToHome(BuildContext context) {
-    AppRouter.goToHome(context);
   }
 }

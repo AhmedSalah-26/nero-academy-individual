@@ -48,7 +48,8 @@ class RatingOverview extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '$totalReviews تقييم',
+                'course_player.review_count'
+                    .tr(args: [totalReviews.toString()]),
                 style: TextStyle(
                   fontSize: 14,
                   color: isDark
@@ -132,8 +133,6 @@ class ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = context.locale.languageCode == 'ar';
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -195,7 +194,7 @@ class ReviewCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              isArabic ? 'أنت' : 'You',
+                              'course_player.you'.tr(),
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.primary,
@@ -216,7 +215,7 @@ class ReviewCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _formatDate(review.createdAt, isArabic),
+                          _formatDate(review.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -230,7 +229,7 @@ class ReviewCard extends StatelessWidget {
                 ),
               ),
               // Report button (only for other users' reviews)
-              if (!isCurrentUser) _buildReportButton(context, isArabic),
+              if (!isCurrentUser) _buildReportButton(context),
             ],
           ),
           if (review.review != null && review.review!.isNotEmpty) ...[
@@ -250,31 +249,29 @@ class ReviewCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date, bool isArabic) {
+  String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return isArabic ? 'اليوم' : 'Today';
+      return 'course_player.today'.tr();
     } else if (difference.inDays == 1) {
-      return isArabic ? 'أمس' : 'Yesterday';
+      return 'course_player.yesterday'.tr();
     } else if (difference.inDays < 7) {
-      return isArabic
-          ? 'منذ ${difference.inDays} أيام'
-          : '${difference.inDays} days ago';
+      return 'course_player.days_ago'.tr(args: [difference.inDays.toString()]);
     } else if (difference.inDays < 30) {
       final weeks = (difference.inDays / 7).floor();
-      return isArabic ? 'منذ $weeks أسابيع' : '$weeks weeks ago';
+      return 'course_player.weeks_ago'.tr(args: [weeks.toString()]);
     } else if (difference.inDays < 365) {
       final months = (difference.inDays / 30).floor();
-      return isArabic ? 'منذ $months أشهر' : '$months months ago';
+      return 'course_player.months_ago'.tr(args: [months.toString()]);
     } else {
       final years = (difference.inDays / 365).floor();
-      return isArabic ? 'منذ $years سنة' : '$years years ago';
+      return 'course_player.years_ago'.tr(args: [years.toString()]);
     }
   }
 
-  Widget _buildReportButton(BuildContext context, bool isArabic) {
+  Widget _buildReportButton(BuildContext context) {
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert,
@@ -291,7 +288,7 @@ class ReviewCard extends StatelessWidget {
               const Icon(Icons.flag_rounded, size: 18, color: AppColors.error),
               const SizedBox(width: 8),
               Text(
-                isArabic ? 'الإبلاغ' : 'Report',
+                'course_player.report'.tr(),
                 style: const TextStyle(color: AppColors.error),
               ),
             ],
@@ -356,7 +353,7 @@ class WriteReviewForm extends StatelessWidget {
             ),
             TextButton(
               onPressed: onCancel,
-              child: const Text('إلغاء'),
+              child: Text('common.cancel'.tr()),
             ),
           ],
         ),

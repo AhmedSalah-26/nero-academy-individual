@@ -92,6 +92,7 @@ class QuizzesRemoteDataSourceImpl implements QuizzesRemoteDataSource {
           .from('quizzes')
           .select('*, quiz_questions(count)')
           .eq('lesson_id', lessonId)
+          .eq('is_published', true)
           .maybeSingle();
 
       if (response == null) return null;
@@ -166,6 +167,11 @@ class QuizzesRemoteDataSourceImpl implements QuizzesRemoteDataSource {
       final userId = supabaseClient.auth.currentUser?.id;
       if (userId == null) {
         throw const ServerException('المستخدم غير مسجل الدخول');
+      }
+
+      final quiz = await getQuiz(quizId: quizId);
+      if (!quiz.isAvailableNow) {
+        throw const ServerException('Quiz is not available now');
       }
 
       final response = await supabaseClient.from('quiz_attempts').insert({
