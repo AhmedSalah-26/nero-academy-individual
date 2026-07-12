@@ -1,12 +1,11 @@
-import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
+import '../../../../../core/services/app_logger.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../models/user_model.dart';
 
 mixin AuthHelpersMixin {
   SupabaseClient get supabase;
-  final logger = Logger(printer: PrettyPrinter(methodCount: 0));
 
   Future<UserModel> getProfile(String userId) async {
     final response =
@@ -15,26 +14,25 @@ mixin AuthHelpersMixin {
   }
 
   Future<UserModel> getOrCreateProfile(User user) async {
-    logger
-        .i('🔍 [DataSource] Getting or creating profile for user: ${user.id}');
-    logger.d('  User phone: ${user.phone}');
-    logger.d('  User email: ${user.email}');
-    logger.d('  User metadata: ${user.userMetadata}');
+    AppLogger.i('🔍 [DataSource] Getting or creating profile for user: ${user.id}');
+    AppLogger.d('  User phone: ${user.phone}');
+    AppLogger.d('  User email: ${user.email}');
+    AppLogger.d('  User metadata: ${user.userMetadata}');
 
     // First: Try getting existing profile
     try {
-      logger.d('  Trying to get existing profile...');
+      AppLogger.d('  Trying to get existing profile...');
       return await getProfile(user.id);
     } on PostgrestException catch (e) {
       // PGRST116 = no rows returned (profile doesn't exist)
       if (e.code != 'PGRST116') {
-        logger.e('❌ [DataSource] Unexpected error getting profile: $e');
+        AppLogger.e('❌ [DataSource] Unexpected error getting profile: $e');
         rethrow;
       }
-      logger.w('  Profile not found (PGRST116), will create new one...');
+      AppLogger.w('  Profile not found (PGRST116), will create new one...');
     } catch (e) {
-      logger.w('  Profile not found, creating new one...');
-      logger.e('  Error getting profile: $e');
+      AppLogger.w('  Profile not found, creating new one...');
+      AppLogger.e('  Error getting profile: $e');
     }
 
     // Second: Create new profile
@@ -48,24 +46,24 @@ mixin AuthHelpersMixin {
     // If no email, use phone as temp email
     final profileEmail = email ?? '${phone?.replaceAll('+', '')}@phone.user';
 
-    logger.i('  Creating profile with:');
-    logger.d('    ID: ${user.id}');
-    logger.d('    Email: $profileEmail');
-    logger.d('    Phone: $phone');
-    logger.d('    Name: $name');
+    AppLogger.i('  Creating profile with:');
+    AppLogger.d('    ID: ${user.id}');
+    AppLogger.d('    Email: $profileEmail');
+    AppLogger.d('    Phone: $phone');
+    AppLogger.d('    Name: $name');
 
     try {
       // Attempt 1: RPC function (bypass RLS)
-      logger.d('  Trying RPC function create_profile_for_phone_auth...');
+      AppLogger.d('  Trying RPC function create_profile_for_phone_auth...');
       await supabase.rpc('create_profile_for_phone_auth', params: {
         'user_id': user.id,
         'user_phone': phone,
         'user_email': profileEmail,
         'user_name': name,
       });
-      logger.i('✅ [DataSource] Profile created via RPC successfully');
+      AppLogger.i('✅ [DataSource] Profile created via RPC successfully');
     } catch (rpcError) {
-      logger.w('  RPC failed: $rpcError, trying direct upsert...');
+      AppLogger.w('  RPC failed: $rpcError, trying direct upsert...');
 
       try {
         // Attempt 2: Direct upsert
@@ -84,16 +82,16 @@ mixin AuthHelpersMixin {
           onConflict: 'id',
           ignoreDuplicates: true,
         );
-        logger.i('✅ [DataSource] Profile upserted successfully');
+        AppLogger.i('✅ [DataSource] Profile upserted successfully');
       } on PostgrestException catch (insertError) {
-        logger.e(
+        AppLogger.e(
             '❌ [DataSource] PostgrestException: ${insertError.message}, code: ${insertError.code}');
 
         // If duplicate key, ignore
         if (insertError.code != '23505') {
           rethrow;
         }
-        logger.w('  Profile already exists (duplicate key), continuing...');
+        AppLogger.w('  Profile already exists (duplicate key), continuing...');
       }
     }
 
@@ -104,7 +102,7 @@ mixin AuthHelpersMixin {
     try {
       return await getProfile(user.id);
     } catch (e) {
-      logger.e('❌ [DataSource] Failed to get profile after creation: $e');
+      AppLogger.e('❌ [DataSource] Failed to get profile after creation: $e');
       // Return temp UserModel
       return UserModel(
         id: user.id,

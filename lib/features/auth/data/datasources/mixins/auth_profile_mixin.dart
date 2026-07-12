@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
@@ -10,7 +9,7 @@ import '../../models/user_model.dart';
 mixin AuthProfileMixin {
   // Dependencies
   SupabaseClient get supabase;
-  Logger get logger;
+  
   Future<UserModel> getProfile(String userId);
   app_exceptions.AuthException handleAuthError(AuthApiException e);
 
@@ -98,3 +97,4 @@ mixin AuthProfileMixin {
     }
   }
 }
+

@@ -173,12 +173,10 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       String instructorId) async {
     try {
       final response = await _client
-          .from('instructor_profiles')
+          .from('teachers')
           .select('display_name, avatar_url')
-          .eq('instructor_id', instructorId)
+          .eq('profile_id', instructorId)
           .maybeSingle();
-
-      // Debug log
 
       return response;
     } catch (e) {

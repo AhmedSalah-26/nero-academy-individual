@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
@@ -116,8 +117,7 @@ class AuthCubit extends Cubit<AuthState> {
     List<String>? expertise,
     Uint8List? avatarBytes,
   }) async {
-    debugPrint(
-        '📝 [AuthCubit] Register called with email: $email, phone: $phone');
+    AppLogger.i('📝 [AuthCubit] Register called — email: $email, phone: $phone');
     emit(const AuthState.loading());
 
     final result = await _registerUseCase(RegisterParams(
@@ -134,24 +134,67 @@ class AuthCubit extends Cubit<AuthState> {
 
     result.fold(
       (failure) {
-        debugPrint('❌ [AuthCubit] Register failed: ${failure.message}');
+        AppLogger.e('[AuthCubit] Register failed: ${failure.message}');
         emit(AuthState.error(failure.message));
       },
       (user) {
-        debugPrint(
-            '✅ [AuthCubit] Register successful: ${user.email}, id: ${user.id}');
+        AppLogger.success('[AuthCubit] Register successful — email: ${user.email}, id: ${user.id}');
 
         final session = Supabase.instance.client.auth.currentSession;
         if (session == null) {
-          debugPrint('📧 [AuthCubit] Session is null, user must confirm email');
+          AppLogger.w('[AuthCubit] Session is null — user must confirm email');
           emit(const AuthState.awaitingEmailVerification());
         } else {
-          debugPrint(
-              '✅ [AuthCubit] Emitting authenticated state after registration');
+          AppLogger.success('[AuthCubit] Emitting authenticated state after registration');
           emit(AuthState.authenticated(user));
         }
       },
     );
+  }
+
+  /// Verify email OTP
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String otp,
+  }) async {
+    AppLogger.i('🔐 [AuthCubit] verifyEmailOtp — email: $email, otp: $otp');
+    emit(const AuthState.loading());
+
+    try {
+      final response = await Supabase.instance.client.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.signup,
+      );
+
+      if (response.user == null) {
+        AppLogger.e('❌ [AuthCubit] Email OTP verification failed: user is null');
+        emit(const AuthState.error('فشل في التحقق من الرمز'));
+        return;
+      }
+
+      AppLogger.success('✅ [AuthCubit] Email OTP verified: ${response.user!.email}');
+      
+      final result = await _getCurrentUserUseCase();
+      result.fold(
+        (failure) {
+          AppLogger.e('❌ [AuthCubit] Failed to fetch profile after email OTP verification: ${failure.message}');
+          emit(AuthState.error(failure.message));
+        },
+        (user) {
+          if (user != null) {
+            AppLogger.success('✅ [AuthCubit] User profile loaded after OTP: ${user.email}');
+            emit(AuthState.authenticated(user));
+          } else {
+            AppLogger.e('❌ [AuthCubit] Profile not found after OTP verification');
+            emit(const AuthState.error('فشل في تحميل بيانات المستخدم'));
+          }
+        },
+      );
+    } catch (e) {
+      AppLogger.e('❌ [AuthCubit] Error during email OTP verification: $e');
+      emit(AuthState.error(e.toString()));
+    }
   }
 
   /// Logout
@@ -229,47 +272,42 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Verify OTP and login
   Future<void> verifyPhoneOtp(String phoneNumber, String otp) async {
-    debugPrint(
-        '🔐 [AuthCubit] verifyPhoneOtp called with phone: $phoneNumber, otp: $otp');
+    AppLogger.i('🔐 [AuthCubit] verifyPhoneOtp — phone: $phoneNumber, otp: $otp');
     emit(const AuthState.loading());
 
     // Development bypass: accept 000000 as valid OTP
     if (otp == '000000') {
-      debugPrint('🔓 [AuthCubit] Using development bypass with OTP 000000');
-
-      // استدعاء الـ use case مع 000000 لتفعيل الـ bypass في الـ data source
-      debugPrint('[AuthCubit] Calling verifyPhoneOtpUseCase with bypass OTP');
+      AppLogger.w('[AuthCubit] 🔓 Dev bypass — OTP 000000 accepted');
+      AppLogger.d('[AuthCubit] Calling verifyPhoneOtpUseCase with bypass OTP');
       final result = await _verifyPhoneOtpUseCase(
         VerifyPhoneOtpParams(phoneNumber: phoneNumber, otp: otp),
       );
 
       result.fold(
         (failure) {
-          debugPrint(
-              '❌ [AuthCubit] OTP verification failed: ${failure.message}');
+          AppLogger.e('[AuthCubit] OTP verification failed: ${failure.message}');
           emit(AuthState.error(failure.message));
         },
         (user) {
-          debugPrint(
-              '✅ [AuthCubit] OTP verified successfully (bypass): ${user.email}');
+          AppLogger.success('[AuthCubit] OTP verified (bypass) — ${user.email}');
           emit(AuthState.authenticated(user));
         },
       );
       return;
     }
 
-    debugPrint('📞 [AuthCubit] Calling Supabase OTP verification');
+    AppLogger.d('[AuthCubit] Calling Supabase OTP verification...');
     final result = await _verifyPhoneOtpUseCase(
       VerifyPhoneOtpParams(phoneNumber: phoneNumber, otp: otp),
     );
 
     result.fold(
       (failure) {
-        debugPrint('❌ [AuthCubit] OTP verification failed: ${failure.message}');
+        AppLogger.e('[AuthCubit] OTP verification failed: ${failure.message}');
         emit(AuthState.error(failure.message));
       },
       (user) {
-        debugPrint('✅ [AuthCubit] OTP verified successfully: ${user.email}');
+        AppLogger.success('[AuthCubit] OTP verified — ${user.email}');
         emit(AuthState.authenticated(user));
       },
     );
@@ -279,9 +317,9 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// إرسال OTP لربط الهاتف بالحساب الحالي
   Future<bool> sendLinkPhoneOtp(String phoneNumber) async {
-    debugPrint('📱 [AuthCubit] sendLinkPhoneOtp called with: $phoneNumber');
+    AppLogger.i('📱 [AuthCubit] sendLinkPhoneOtp — phone: $phoneNumber');
     final currentUser = state.user;
-    debugPrint('👤 [AuthCubit] Current user: ${currentUser?.email ?? "null"}');
+    AppLogger.d('[AuthCubit] Current user: ${currentUser?.email ?? "null"}');
 
     if (isClosed) return false;
     emit(const AuthState.loading());
@@ -292,20 +330,18 @@ class AuthCubit extends Cubit<AuthState> {
       if (isClosed) return false;
       return result.fold(
         (failure) {
-          debugPrint(
-              '❌ [AuthCubit] sendLinkPhoneOtp failed: ${failure.message}');
+          AppLogger.e('[AuthCubit] sendLinkPhoneOtp failed: ${failure.message}');
           emit(AuthState.error(failure.message));
           return false;
         },
         (_) {
-          debugPrint('✅ [AuthCubit] Phone added successfully');
+          AppLogger.success('[AuthCubit] Link OTP sent successfully');
           emit(AuthState.phoneLinkOtpSent(user: currentUser));
           return true;
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('❌ [AuthCubit] Unexpected error in sendLinkPhoneOtp: $e');
-      debugPrint('   Stack trace: $stackTrace');
+      AppLogger.e('[AuthCubit] Unexpected error in sendLinkPhoneOtp', e, stackTrace);
       if (!isClosed) {
         emit(AuthState.error('حدث خطأ غير متوقع: $e'));
       }
@@ -315,23 +351,21 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// تأكيد OTP وربط الهاتف بالحساب
   Future<void> verifyLinkPhoneOtp(String phoneNumber, String otp) async {
-    debugPrint(
-        '🔗 [AuthCubit] verifyLinkPhoneOtp called with phone: $phoneNumber, otp: $otp');
-    debugPrint('👤 [AuthCubit] Current user: ${state.user?.email ?? "null"}');
+    AppLogger.i('🔗 [AuthCubit] verifyLinkPhoneOtp — phone: $phoneNumber, otp: $otp');
+    AppLogger.d('[AuthCubit] Current user: ${state.user?.email ?? "null"}');
 
     // If no user in state, try to get current user first
     var currentUser = state.user;
     if (currentUser == null) {
-      debugPrint('⚠️ [AuthCubit] No user in state, fetching current user...');
+      AppLogger.w('[AuthCubit] No user in state, fetching current user...');
       final currentUserResult = await _getCurrentUserUseCase();
       await currentUserResult.fold(
         (failure) {
-          debugPrint(
-              '❌ [AuthCubit] Failed to get current user: ${failure.message}');
+          AppLogger.e('[AuthCubit] Failed to get current user: ${failure.message}');
         },
         (user) {
           if (user != null) {
-            debugPrint('✅ [AuthCubit] Current user fetched: ${user.email}');
+            AppLogger.success('[AuthCubit] Current user fetched: ${user.email}');
             currentUser = user;
           }
         },
@@ -343,11 +377,8 @@ class AuthCubit extends Cubit<AuthState> {
 
     // Development bypass: accept 000000 as valid OTP
     if (otp == '000000') {
-      debugPrint(
-          '🔓 [AuthCubit] Using development bypass with OTP 000000 for phone linking');
-
-      // استدعاء verifyLinkOtp مع 000000 لتفعيل الـ bypass في الـ data source
-      debugPrint('📞 [AuthCubit] Calling verifyLinkOtp with bypass OTP');
+      AppLogger.w('[AuthCubit] 🔓 Dev bypass — OTP 000000 for phone linking');
+      AppLogger.d('[AuthCubit] Calling verifyLinkOtp with bypass OTP');
       final result = await _verifyPhoneOtpUseCase.verifyLinkOtp(
         phoneNumber: phoneNumber,
         otp: otp,
@@ -356,20 +387,18 @@ class AuthCubit extends Cubit<AuthState> {
       if (isClosed) return;
       result.fold(
         (failure) {
-          debugPrint(
-              '❌ [AuthCubit] Phone link verification failed: ${failure.message}');
+          AppLogger.e('[AuthCubit] Phone link verification failed: ${failure.message}');
           emit(AuthState.error(failure.message));
         },
         (user) {
-          debugPrint(
-              '✅ [AuthCubit] Phone linked successfully (bypass): ${user.email}');
+          AppLogger.success('[AuthCubit] Phone linked (bypass) — ${user.email}');
           emit(AuthState.phoneLinked(user));
         },
       );
       return;
     }
 
-    debugPrint('📞 [AuthCubit] Calling Supabase phone link verification');
+    AppLogger.d('[AuthCubit] Calling Supabase phone link verification...');
     final result = await _verifyPhoneOtpUseCase.verifyLinkOtp(
       phoneNumber: phoneNumber,
       otp: otp,
@@ -378,12 +407,11 @@ class AuthCubit extends Cubit<AuthState> {
     if (isClosed) return;
     result.fold(
       (failure) {
-        debugPrint(
-            '❌ [AuthCubit] Phone link verification failed: ${failure.message}');
+        AppLogger.e('[AuthCubit] Phone link verification failed: ${failure.message}');
         emit(AuthState.error(failure.message));
       },
       (user) {
-        debugPrint('✅ [AuthCubit] Phone linked successfully: ${user.email}');
+        AppLogger.success('[AuthCubit] Phone linked — ${user.email}');
         emit(AuthState.phoneLinked(user));
       },
     );

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart' as google_sign_in;
 
@@ -11,7 +10,7 @@ import '../../models/user_model.dart';
 
 mixin AuthSocialMixin {
   SupabaseClient get supabase;
-  Logger get logger;
+  
   Future<UserModel> getOrCreateProfile(User user);
   void checkUserAccess(UserModel user);
   app_exceptions.AuthException handleAuthError(AuthApiException e);
@@ -130,3 +129,4 @@ mixin AuthSocialMixin {
     );
   }
 }
+

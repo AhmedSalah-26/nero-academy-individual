@@ -87,14 +87,16 @@ class CourseDetailsRemoteDataSourceImpl
           : 0;
       data['total_quizzes'] = quizzesCount;
 
-      // Get instructor_profiles for additional stats
+      // Get instructor data from profiles and teachers
       if (instructorId != null) {
-        final instructorProfile =
-            await supabaseClient.from('instructor_profiles').select('''
-              id, display_name, headline_ar, headline_en, bio_ar, bio_en,
-              avatar_url, cover_image_url, expertise, social_links, website_url,
-              total_students, total_courses, average_rating, is_verified
-            ''').eq('instructor_id', instructorId).limit(1).maybeSingle();
+        final profile = await supabaseClient.from('profiles').select('''
+          id, name, headline_ar, headline_en, bio_ar, bio_en,
+          avatar_url, expertise, social_links, is_verified_instructor
+        ''').eq('id', instructorId).limit(1).maybeSingle();
+
+        final teacher = await supabaseClient.from('teachers').select('''
+          display_name, avatar_url, bio, website_url, cover_image_url
+        ''').eq('profile_id', instructorId).limit(1).maybeSingle();
 
         // احسب عدد الكورسات المنشورة مباشرة من جدول courses
         final coursesCountResult = await supabaseClient
@@ -112,19 +114,33 @@ class CourseDetailsRemoteDataSourceImpl
             .eq('status', 'active');
         final liveTotalStudents = (studentsCountResult as List).length;
 
-        if (instructorProfile != null) {
-          final merged = Map<String, dynamic>.from(instructorProfile);
-          merged['total_courses'] = liveTotalCourses;
-          merged['total_students'] = liveTotalStudents;
+        if (profile != null) {
+          final merged = {
+            'id': profile['id'],
+            'display_name': teacher?['display_name'] ?? profile['name'] ?? 'Instructor',
+            'headline_ar': profile['headline_ar'],
+            'headline_en': profile['headline_en'],
+            'bio_ar': profile['bio_ar'],
+            'bio_en': profile['bio_en'],
+            'avatar_url': teacher?['avatar_url'] ?? profile['avatar_url'],
+            'cover_image_url': teacher?['cover_image_url'],
+            'expertise': profile['expertise'],
+            'social_links': profile['social_links'],
+            'website_url': teacher?['website_url'],
+            'total_courses': liveTotalCourses,
+            'total_students': liveTotalStudents,
+            'average_rating': 0.0,
+            'is_verified': profile['is_verified_instructor'] ?? false,
+          };
           data['instructor_profiles'] = merged;
         } else {
           // Use profiles data as fallback
-          final profile = data['profiles'] as Map<String, dynamic>?;
-          if (profile != null) {
+          final fallbackProfile = data['profiles'] as Map<String, dynamic>?;
+          if (fallbackProfile != null) {
             data['instructor_profiles'] = {
-              'id': profile['id'],
-              'display_name': profile['name'],
-              'avatar_url': profile['avatar_url'],
+              'id': fallbackProfile['id'],
+              'display_name': fallbackProfile['name'],
+              'avatar_url': fallbackProfile['avatar_url'],
               'headline_ar': null,
               'headline_en': null,
               'bio_ar': null,

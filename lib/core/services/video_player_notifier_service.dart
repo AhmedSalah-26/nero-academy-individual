@@ -146,7 +146,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
 
     try {
       await _channel.invokeMethod<void>('show', {
-        'title': _safeText(lessonTitle, fallback: courseTitle ?? 'Dr UneXpected'),
+        'title': _safeText(lessonTitle, fallback: courseTitle ?? 'نسق'),
         'subtitle': _safeText(courseTitle, fallback: ''),
         'continueLabel': 'كمّل الدرس',
         'ongoing': !_isPlayerScreenActive,

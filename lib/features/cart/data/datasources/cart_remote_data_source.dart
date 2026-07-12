@@ -621,19 +621,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             AppLogger.i('🛒 [Checkout] Creating instructor earning record...');
 
             try {
-              // Fetch instructor's revenue_share from instructor_profiles
-              double revenueShare = 70.0; // default
-              final instructorProfile = await supabase
-                  .from('instructor_profiles')
-                  .select('revenue_share')
-                  .eq('instructor_id', instructorId)
-                  .maybeSingle();
-
-              if (instructorProfile != null &&
-                  instructorProfile['revenue_share'] != null) {
-                revenueShare =
-                    (instructorProfile['revenue_share'] as num).toDouble();
-              }
+              // Default revenue share to 70.0%
+              double revenueShare = 70.0;
 
               AppLogger.i(
                   '🛒 [Checkout] Instructor revenue_share: $revenueShare%');

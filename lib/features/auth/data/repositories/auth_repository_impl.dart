@@ -1,6 +1,5 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
-import 'package:logger/logger.dart';
 import '../../../../core/base/base_repository.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
@@ -8,12 +7,12 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
+import '../../../../core/services/app_logger.dart';
 
 /// Auth Repository Implementation
 class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
-  final _logger = Logger(printer: PrettyPrinter(methodCount: 0));
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
@@ -26,14 +25,14 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    _logger.i('🔐 Login attempt for: $email');
+    AppLogger.i('🔐 Login attempt for: $email');
     return safeCall(() async {
       final user = await remoteDataSource.login(
         email: email,
         password: password,
       );
       await localDataSource.cacheUser(user);
-      _logger.i('✅ Login successful for: ${user.email}');
+      AppLogger.i('✅ Login successful for: ${user.email}');
       return user;
     });
   }
@@ -50,15 +49,15 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
     List<String>? expertise,
     Uint8List? avatarBytes,
   }) async {
-    _logger.i('📝 Register attempt:');
-    _logger.d('  Email: $email');
-    _logger.d('  Name: $name');
-    _logger.d('  Role: ${role.name}');
-    _logger.d('  Phone: $phone');
-    _logger.d('  Headline: $headline');
-    _logger.d('  Bio: ${bio != null ? '${bio.length} chars' : 'null'}');
-    _logger.d('  Expertise: $expertise');
-    _logger.d(
+    AppLogger.i('📝 Register attempt:');
+    AppLogger.d('  Email: $email');
+    AppLogger.d('  Name: $name');
+    AppLogger.d('  Role: ${role.name}');
+    AppLogger.d('  Phone: $phone');
+    AppLogger.d('  Headline: $headline');
+    AppLogger.d('  Bio: ${bio != null ? '${bio.length} chars' : 'null'}');
+    AppLogger.d('  Expertise: $expertise');
+    AppLogger.d(
         '  Avatar: ${avatarBytes != null ? '${avatarBytes.length} bytes' : 'null'}');
 
     return safeCall(() async {
@@ -74,7 +73,7 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
         avatarBytes: avatarBytes,
       );
       await localDataSource.cacheUser(user);
-      _logger.i('✅ Registration successful for: ${user.email}');
+      AppLogger.i('✅ Registration successful for: ${user.email}');
       return user;
     });
   }
@@ -197,37 +196,37 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> verifyPhoneOtp(
       String phoneNumber, String otp) async {
-    _logger.i('🔐 [Repository] Verifying phone OTP');
-    _logger.d('  Phone: $phoneNumber');
-    _logger.d('  OTP: $otp');
+    AppLogger.i('🔐 [Repository] Verifying phone OTP');
+    AppLogger.d('  Phone: $phoneNumber');
+    AppLogger.d('  OTP: $otp');
 
     return safeCall(() async {
-      _logger.d('  Calling remote data source...');
+      AppLogger.d('  Calling remote data source...');
       final user = await remoteDataSource.verifyPhoneOtp(phoneNumber, otp);
 
-      _logger.i('✅ [Repository] User verified: ${user.name}');
-      _logger.d('  Caching user...');
+      AppLogger.i('✅ [Repository] User verified: ${user.name}');
+      AppLogger.d('  Caching user...');
       await localDataSource.cacheUser(user);
 
-      _logger.i('✅ [Repository] User cached successfully');
+      AppLogger.i('✅ [Repository] User cached successfully');
       return user;
     });
   }
 
   @override
   Future<Either<Failure, void>> sendLinkPhoneOtp(String phoneNumber) async {
-    _logger.i('📱 [Repository] Sending OTP to link phone: $phoneNumber');
+    AppLogger.i('📱 [Repository] Sending OTP to link phone: $phoneNumber');
     return safeCall(() => remoteDataSource.sendLinkPhoneOtp(phoneNumber));
   }
 
   @override
   Future<Either<Failure, UserEntity>> verifyLinkPhoneOtp(
       String phoneNumber, String otp) async {
-    _logger.i('🔐 [Repository] Verifying OTP to link phone');
+    AppLogger.i('🔐 [Repository] Verifying OTP to link phone');
     return safeCall(() async {
       final user = await remoteDataSource.verifyLinkPhoneOtp(phoneNumber, otp);
       await localDataSource.cacheUser(user);
-      _logger.i('✅ [Repository] Phone linked successfully');
+      AppLogger.i('✅ [Repository] Phone linked successfully');
       return user;
     });
   }
@@ -235,3 +234,4 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   @override
   Stream<UserEntity?> get authStateChanges => remoteDataSource.authStateChanges;
 }
+

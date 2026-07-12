@@ -1,5 +1,5 @@
 {
-  "app_name": "Dr UneXpected",
+  "app_name": "Nasaq",
   "splash_slogan": "Chemistry, the unexpected way",
   "clear_all": "Clear All",
   "common": {
@@ -326,7 +326,7 @@
     "instructor_whatsapp": "Instructor WhatsApp",
     "instructor_whatsapp_unavailable": "Instructor phone is not available right now",
     "contact_whatsapp": "Contact on WhatsApp",
-    "whatsapp_message": "Hello, I want to complete my Dr UneXpected payment. Operation ID: {orderId}",
+    "whatsapp_message": "Hello, I want to complete my Nasaq payment. Operation ID: {orderId}",
     "copied": "Copied"
   },
   "my_learning": {

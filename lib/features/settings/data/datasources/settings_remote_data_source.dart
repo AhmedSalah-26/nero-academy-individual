@@ -70,18 +70,12 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
     final dayStreak = await _getDayStreak(userId);
 
     // Get instructor-specific fields if user is an instructor
-    Map<String, dynamic>? instructorData;
+    Map<String, dynamic>? teacherData;
     if (response['role'] == 'instructor') {
-      instructorData = await client
-          .from('instructor_profiles')
+      teacherData = await client
+          .from('teachers')
           .select()
-          .eq('instructor_id', userId)
-          .maybeSingle();
-
-      instructorData ??= await client
-          .from('instructor_profiles')
-          .select()
-          .eq('id', userId)
+          .eq('profile_id', userId)
           .maybeSingle();
     }
 
@@ -91,16 +85,16 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       'total_watch_time_seconds': totalWatchTimeSeconds,
       'day_streak': dayStreak,
       // Add instructor fields if available
-      if (instructorData != null) ...{
-        'display_name': instructorData['display_name'],
-        'headline_ar': instructorData['headline_ar'],
-        'headline_en': instructorData['headline_en'],
-        'bio_ar': instructorData['bio_ar'],
-        'bio_en': instructorData['bio_en'],
-        'expertise': instructorData['expertise'],
-        'social_links': instructorData['social_links'],
-        'website_url': instructorData['website_url'],
-        'cover_image_url': instructorData['cover_image_url'],
+      if (response['role'] == 'instructor') ...{
+        'display_name': teacherData?['display_name'] ?? response['name'],
+        'headline_ar': response['headline_ar'],
+        'headline_en': response['headline_en'],
+        'bio_ar': response['bio_ar'],
+        'bio_en': response['bio_en'],
+        'expertise': response['expertise'],
+        'social_links': response['social_links'],
+        'website_url': teacherData?['website_url'],
+        'cover_image_url': teacherData?['cover_image_url'] ?? response['avatar_url'],
       },
     };
 
@@ -215,73 +209,55 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
         .eq('id', userId)
         .maybeSingle();
 
-    final instructorProfileByInstructorId = await client
-        .from('instructor_profiles')
-        .select('id, instructor_id, display_name')
-        .eq('instructor_id', userId)
-        .maybeSingle();
-    final instructorProfileById = instructorProfileByInstructorId == null
-        ? await client
-            .from('instructor_profiles')
-            .select('id, instructor_id, display_name')
-            .eq('id', userId)
-            .maybeSingle()
-        : null;
+    final isInstructor = profileMeta?['role'] == 'instructor';
 
-    final existingInstructorProfile =
-        instructorProfileByInstructorId ?? instructorProfileById;
-    final isInstructor = profileMeta?['role'] == 'instructor' ||
-        existingInstructorProfile != null;
-    final existingDisplayName =
-        (existingInstructorProfile?['display_name'] as String?)?.trim();
-    final shouldInitializeDisplayName =
-        isInstructor && (existingDisplayName == null || existingDisplayName.isEmpty);
-
-    // Separate instructor-specific fields
-    final instructorFields = <String, dynamic>{};
+    // Separate profiles table fields and teachers table fields
     final profileFields = <String, dynamic>{};
+    final teacherFields = <String, dynamic>{};
 
-    // Fields that go to instructor_profiles table
-    final instructorOnlyFields = [
+    // Columns that go directly into profiles table (both student and instructor fields)
+    final profileColumns = [
+      'name',
+      'email',
+      'phone',
+      'avatar_url',
+      'interests',
       'headline_ar',
       'headline_en',
       'bio_ar',
       'bio_en',
       'expertise',
       'social_links',
-      'website_url',
-      'cover_image_url',
+      'parent_phone',
     ];
 
-    // Separate the fields
     data.forEach((key, value) {
       if (key == 'display_name') {
         if (isInstructor) {
-          instructorFields[key] = value;
+          teacherFields['display_name'] = value;
         }
         return;
       }
-
-      if (key == 'name') {
-        profileFields[key] = value;
-        if (!data.containsKey('display_name') && shouldInitializeDisplayName) {
-          instructorFields['display_name'] = value;
+      if (key == 'bio') {
+        if (isInstructor) {
+          teacherFields['bio'] = value;
         }
         return;
       }
-
       if (key == 'avatar_url') {
         profileFields[key] = value;
         if (isInstructor) {
-          instructorFields[key] = value;
+          teacherFields['avatar_url'] = value;
         }
         return;
       }
 
-      if (instructorOnlyFields.contains(key)) {
-        instructorFields[key] = value;
-      } else {
+      if (profileColumns.contains(key)) {
         profileFields[key] = value;
+      } else {
+        if (isInstructor) {
+          teacherFields[key] = value;
+        }
       }
     });
 
@@ -290,39 +266,25 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       await client.from('profiles').update(profileFields).eq('id', userId);
     }
 
-    // Update instructor_profiles table if there are instructor fields
-    if (isInstructor) {
-      final mergedInstructorFields = <String, dynamic>{...instructorFields};
-
-      // Keep avatar synced with core profile data for instructors.
-      if (profileFields.containsKey('avatar_url')) {
-        mergedInstructorFields['avatar_url'] = profileFields['avatar_url'];
+    // Update teachers table if instructor
+    if (isInstructor && teacherFields.isNotEmpty) {
+      // Sync teacher display name with profiles.name if not specified
+      if (!teacherFields.containsKey('display_name') && profileFields.containsKey('name')) {
+        teacherFields['display_name'] = profileFields['name'];
+      }
+      // Sync teacher avatar if profiles.avatar_url is updated
+      if (!teacherFields.containsKey('avatar_url') && profileFields.containsKey('avatar_url')) {
+        teacherFields['avatar_url'] = profileFields['avatar_url'];
       }
 
-      if (existingInstructorProfile != null) {
-        if (existingInstructorProfile['instructor_id'] == null) {
-          mergedInstructorFields['instructor_id'] = userId;
-        }
-
-        if (mergedInstructorFields.isNotEmpty) {
-          await client
-              .from('instructor_profiles')
-              .update(mergedInstructorFields)
-              .eq('id', existingInstructorProfile['id']);
-        }
-      } else {
-        await client.from('instructor_profiles').insert({
-          'instructor_id': userId,
-          'display_name': mergedInstructorFields['display_name'] ??
-              profileMeta?['name'] ??
-              'Instructor',
-          'payout_method': 'wallet',
-          ...mergedInstructorFields,
-        });
-      }
+      await client.from('teachers').upsert({
+        'profile_id': userId,
+        'display_name': teacherFields['display_name'] ?? profileMeta?['name'] ?? 'مدرس',
+        ...teacherFields,
+      }, onConflict: 'profile_id');
     }
 
-    // Fetch merged profile (profiles + instructor_profiles)
+    // Fetch and return the updated profile
     return getUserProfile(userId);
   }
 

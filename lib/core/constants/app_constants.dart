@@ -10,8 +10,10 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   // Supabase Configuration
-  static const String supabaseUrl = 'https://ubjhdafxmncfbaldfivd.supabase.co';
+  static const String supabaseUrl = 'https://ogudalsccnraguajiqku.supabase.co';
   static const String supabaseAnonKey =
+      'sb_publishable_brbho9x2lHaslZR4e6Gyfg_BuwRjD49';
+  static const String supabaseJwtAnonKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ndWRhbHNjY25yYWd1YWppcWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTkxOTksImV4cCI6MjA5OTQzNTE5OX0.umuFbHzz_ZR0OauUhJaUaqzu9ByWmEMHJGOkZ4Vxsro';
   static const String googleWebClientId =
       '1083887222364-3jlne3f2n5jqdht1nvbp4i0trev8sgca.apps.googleusercontent.com';

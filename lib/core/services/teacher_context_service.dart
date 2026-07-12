@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'app_logger.dart';
+
 class SelectedTeacher {
   final String id;
   final String name;
@@ -96,10 +98,12 @@ class TeacherContextService {
 
   Future<void> init(SupabaseClient client) async {
     if (_isInitialized) return;
+    AppLogger.i('🏫 [TeacherContextService] Initializing...');
     _client = client;
     _prefs = await SharedPreferences.getInstance();
     _restoreCachedTeacher();
     _isInitialized = true;
+    AppLogger.success('[TeacherContextService] Initialized');
   }
 
   Future<void> ensureInitialized(SupabaseClient client) => init(client);
@@ -107,16 +111,29 @@ class TeacherContextService {
   String? get selectedTeacherId => selectedTeacher.value?.id;
 
   bool hasCachedTeacher() {
-    return _prefs?.getString(_selectedTeacherIdKey) != null;
+    final has = _prefs?.getString(_selectedTeacherIdKey) != null;
+    AppLogger.d('🏫 [TeacherContextService] hasCachedTeacher: $has');
+    return has;
   }
 
   Future<bool> hasSelectedTeacher(String studentId) async {
-    if (selectedTeacher.value != null || hasCachedTeacher()) return true;
+    AppLogger.i(
+        '🏫 [TeacherContextService] Checking selected teacher for student: $studentId');
+
+    if (selectedTeacher.value != null || hasCachedTeacher()) {
+      AppLogger.d(
+          '🏫 [TeacherContextService] Teacher already loaded: ${selectedTeacher.value?.name}');
+      return true;
+    }
 
     final client = _client;
-    if (client == null) return false;
+    if (client == null) {
+      AppLogger.w('[TeacherContextService] Client is null — not initialized');
+      return false;
+    }
 
     try {
+      AppLogger.d('🏫 [TeacherContextService] Fetching teacher from DB...');
       final response = await client
           .from('student_teacher_links')
           .select('teachers(id, display_name, avatar_url, teacher_themes(*))')
@@ -125,33 +142,53 @@ class TeacherContextService {
           .maybeSingle();
 
       final teacher = response?['teachers'] as Map<String, dynamic>?;
-      if (teacher == null) return false;
+      if (teacher == null) {
+        AppLogger.w(
+            '[TeacherContextService] No active teacher linked to student $studentId — using نسق defaults');
+        return false;
+      }
 
-      await _setSelectedTeacher(SelectedTeacher.fromJson(teacher));
+      final selected = SelectedTeacher.fromJson(teacher);
+      AppLogger.success(
+          '[TeacherContextService] Teacher loaded: ${selected.name} (id: ${selected.id}) — hasTheme: ${selected.theme.hasColors}');
+      await _setSelectedTeacher(selected);
       return true;
-    } catch (_) {
+    } catch (e, stack) {
+      AppLogger.e('[TeacherContextService] Error fetching teacher', e, stack);
       return hasCachedTeacher();
     }
   }
 
   Future<List<SelectedTeacher>> getAvailableTeachers() async {
-    final client = _requireClient();
-    final response = await client
-        .from('teachers')
-        .select(
-            'id, display_name, avatar_url, profiles(name, avatar_url), teacher_themes(*)')
-        .eq('is_active', true)
-        .order('display_name', ascending: true);
+    AppLogger.i('🏫 [TeacherContextService] Fetching available teachers...');
+    try {
+      final client = _requireClient();
+      final response = await client
+          .from('teachers')
+          .select(
+              'id, display_name, avatar_url, profiles!teachers_profile_id_fkey(name, avatar_url), teacher_themes(*)')
+          .eq('is_active', true)
+          .order('display_name', ascending: true);
 
-    return (response as List)
-        .map((json) => SelectedTeacher.fromJson(json as Map<String, dynamic>))
-        .toList();
+      final teachers = (response as List)
+          .map((json) => SelectedTeacher.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      AppLogger.success(
+          '[TeacherContextService] Available teachers: ${teachers.length}');
+      return teachers;
+    } catch (e, stack) {
+      AppLogger.e('[TeacherContextService] Error fetching available teachers', e, stack);
+      rethrow;
+    }
   }
 
   Future<void> selectTeacher({
     required String studentId,
     required SelectedTeacher teacher,
   }) async {
+    AppLogger.i(
+        '🏫 [TeacherContextService] Selecting teacher: ${teacher.name} for student: $studentId');
     final client = _requireClient();
 
     await client
@@ -170,17 +207,23 @@ class TeacherContextService {
         .update({'active_teacher_id': teacher.id}).eq('id', studentId);
 
     await _setSelectedTeacher(teacher);
+    AppLogger.success(
+        '[TeacherContextService] Teacher selected: ${teacher.name}');
   }
 
   Future<void> clear() async {
+    AppLogger.i('🏫 [TeacherContextService] Clearing selected teacher');
     selectedTeacher.value = null;
     await _prefs?.remove(_selectedTeacherIdKey);
     await _prefs?.remove(_selectedTeacherNameKey);
+    AppLogger.success(
+        '[TeacherContextService] Teacher cleared — reverting to نسق defaults');
   }
 
   SupabaseClient _requireClient() {
     final client = _client;
     if (client == null) {
+      AppLogger.e('[TeacherContextService] Not initialized — client is null');
       throw StateError('TeacherContextService is not initialized');
     }
     return client;
@@ -188,10 +231,17 @@ class TeacherContextService {
 
   void _restoreCachedTeacher() {
     final id = _prefs?.getString(_selectedTeacherIdKey);
-    if (id == null) return;
+    if (id == null) {
+      AppLogger.d(
+          '🏫 [TeacherContextService] No cached teacher — using نسق defaults');
+      return;
+    }
+    final name = _prefs?.getString(_selectedTeacherNameKey) ?? 'مدرس';
+    AppLogger.i(
+        '🏫 [TeacherContextService] Restored cached teacher: $name (id: $id)');
     selectedTeacher.value = SelectedTeacher(
       id: id,
-      name: _prefs?.getString(_selectedTeacherNameKey) ?? 'مدرس',
+      name: name,
     );
   }
 
@@ -199,5 +249,7 @@ class TeacherContextService {
     selectedTeacher.value = teacher;
     await _prefs?.setString(_selectedTeacherIdKey, teacher.id);
     await _prefs?.setString(_selectedTeacherNameKey, teacher.name);
+    AppLogger.d(
+        '🏫 [TeacherContextService] Teacher persisted to cache: ${teacher.name}');
   }
 }

@@ -43,7 +43,7 @@ class StudentOverviewTab extends StatelessWidget {
     final avgScore = quizAttempts.isEmpty
         ? 0.0
         : quizAttempts
-                .map((a) => (a['score'] as num?)?.toDouble() ?? 0)
+                .map((a) => (a['percentage'] as num?)?.toDouble() ?? (a['score'] as num?)?.toDouble() ?? 0)
                 .reduce((a, b) => a + b) /
             quizAttempts.length;
     final overall =
@@ -466,7 +466,7 @@ class StudentQuizzesTab extends StatelessWidget {
     final total = quizAttempts.length;
     final passed = quizAttempts.where((a) => a['passed'] == true).length;
     final avgScore = quizAttempts
-            .map((a) => (a['score'] as num?)?.toDouble() ?? 0)
+            .map((a) => (a['percentage'] as num?)?.toDouble() ?? (a['score'] as num?)?.toDouble() ?? 0)
             .reduce((a, b) => a + b) /
         total;
 
@@ -554,16 +554,16 @@ class _QuizAttemptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final quiz = attempt['quizzes'] as Map<String, dynamic>? ?? {};
-    final course = quiz['courses'] as Map<String, dynamic>? ?? {};
+    final course = quiz['courses'] as Map<String, dynamic>? ?? const {};
     final title = isArabic
         ? quiz['title_ar'] as String? ?? ''
         : quiz['title_en'] as String? ?? '';
     final courseTitle = isArabic
         ? course['title_ar'] as String? ?? ''
         : course['title_en'] as String? ?? '';
-    final score = (attempt['score'] as num?)?.toDouble() ?? 0;
+    final score = (attempt['percentage'] as num?)?.toDouble() ?? (attempt['score'] as num?)?.toDouble() ?? 0;
     final passed = attempt['passed'] as bool? ?? false;
-    final timeTaken = attempt['time_taken'] as int? ?? 0;
+    final timeTaken = attempt['time_spent'] as int? ?? 0;
     final completedAt = attempt['completed_at'] != null
         ? DateFormat('yyyy/MM/dd HH:mm')
             .format(DateTime.parse(attempt['completed_at'] as String))

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/services/teacher_context_service.dart';
 import '../../../../../core/shared_widgets/glass_search_bar.dart';
 import '../../../../../core/theme/app_colors.dart';
 import 'home_app_bar.dart';
@@ -85,7 +86,7 @@ class _HeroVisual extends StatelessWidget {
           alignment: Alignment.center,
           transform: Matrix4.diagonal3Values(-1, 1, 1),
           child: Image.asset(
-            'assets/COVER_rtl.png',
+            'assets/home_hero_clean.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
@@ -562,16 +563,23 @@ class _HeroCopy extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: w * 0.012),
-                Text(
-                  'Dr UneXpected',
-                  style: TextStyle(
-                    color: isDark
-                        ? AppColors.primaryOnDark
-                        : AppColors.primaryDark,
-                    fontSize: (w * 0.078).clamp(27.0, 39.0),
-                    fontWeight: FontWeight.w900,
-                    height: 1.08,
-                  ),
+                ValueListenableBuilder<SelectedTeacher?>(
+                  valueListenable:
+                      TeacherContextService.instance.selectedTeacher,
+                  builder: (context, teacher, _) {
+                    final name = teacher?.name ?? 'نسق';
+                    return Text(
+                      name,
+                      style: TextStyle(
+                        color: isDark
+                            ? AppColors.primaryOnDark
+                            : AppColors.primaryDark,
+                        fontSize: (w * 0.078).clamp(27.0, 39.0),
+                        fontWeight: FontWeight.w900,
+                        height: 1.08,
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(height: w * 0.018),
                 Container(

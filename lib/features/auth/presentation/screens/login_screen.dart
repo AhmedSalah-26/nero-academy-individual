@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();
   final _headlineCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
+  final _emailOtpCtrl = TextEditingController();
   bool _isLogin = true;
   bool _obscure = true;
   bool _obscureConfirm = true;
@@ -54,6 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _phoneCtrl.dispose();
     _headlineCtrl.dispose();
     _bioCtrl.dispose();
+    _emailOtpCtrl.dispose();
     super.dispose();
   }
 
@@ -289,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
       child: const Text(
-        'Dr UneXpected',
+        'نسق',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'Almarai',
@@ -513,7 +515,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'لقد أرسلنا رابط تفعيل إلى البريد الإلكتروني:',
+                'لقد أرسلنا رمز تفعيل (OTP) إلى البريد الإلكتروني:',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -537,40 +539,65 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'يرجى فتح صندوق الوارد والضغط على الرابط لتأكيد حسابك وتفعيله.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isDark ? AppColors.grey400 : AppColors.grey500,
-                  height: 1.5,
-                ),
+              const SizedBox(height: 24),
+              AuthTextField(
+                controller: _emailOtpCtrl,
+                label: 'رمز التحقق (OTP)',
+                hint: 'أدخل الرمز المكون من 6 أرقام',
+                icon: Icons.security_rounded,
+                keyboardType: TextInputType.number,
+                isDark: isDark,
+                validator: (v) {
+                  if (v == null || v.trim().length != 6) {
+                    return 'الرمز يجب أن يتكون من 6 أرقام';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _showAwaitingVerification = false;
-                      _isLogin = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 24),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: state.isLoading
+                          ? null
+                          : () {
+                              final otp = _emailOtpCtrl.text.trim();
+                              if (otp.length == 6) {
+                                context.read<AuthCubit>().verifyEmailOtp(
+                                      email: email,
+                                      otp: otp,
+                                    );
+                              } else {
+                                ToastUtils.showError('يرجى إدخال رمز التحقق المكون من 6 أرقام');
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: state.isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'تأكيد الرمز وتفعيل الحساب',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'تم، الانتقال لتسجيل الدخول',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               BlocBuilder<AuthCubit, AuthState>(
@@ -587,7 +614,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   .resendVerificationEmail(email);
                               if (success) {
                                 ToastUtils.showSuccess(
-                                    'تم إعادة إرسال البريد الإلكتروني بنجاح!');
+                                    'تم إعادة إرسال رمز التحقق بنجاح!');
                               }
                             },
                       style: OutlinedButton.styleFrom(
@@ -607,7 +634,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             )
                           : const Text(
-                              'إعادة إرسال البريد الإلكتروني',
+                              'إعادة إرسال رمز التحقق (OTP)',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -617,6 +644,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   );
                 },
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _showAwaitingVerification = false;
+                    _isLogin = true;
+                  });
+                },
+                child: const Text(
+                  'الرجوع لتسجيل الدخول',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.grey500,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),

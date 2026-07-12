@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:logger/logger.dart';
+import '../../../../../core/services/app_logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/errors/exceptions.dart' as app_exceptions;
@@ -10,34 +10,34 @@ import '../../models/user_model.dart';
 mixin AuthPhoneMixin {
   // Dependencies
   SupabaseClient get supabase;
-  Logger get logger;
+  
   Future<UserModel> getProfile(String userId);
   void checkUserAccess(UserModel user);
   app_exceptions.AuthException handleAuthError(AuthApiException e);
 
   Future<void> sendPhoneOtp(String phoneNumber) async {
-    logger.i('📱 [DataSource] Sending OTP to: $phoneNumber');
+    AppLogger.i('📱 [DataSource] Sending OTP to: $phoneNumber');
 
     // In development mode, bypass account check
     // We will use 000000 to verify later
-    logger.i('✅ [DataSource] Skipping account check in development mode');
-    logger.i('   Use OTP: 000000 to login');
+    AppLogger.i('✅ [DataSource] Skipping account check in development mode');
+    AppLogger.i('   Use OTP: 000000 to login');
 
     // Currently we don't send real OTP, just success
-    logger.i('✅ [DataSource] OTP ready (bypass mode)');
+    AppLogger.i('✅ [DataSource] OTP ready (bypass mode)');
   }
 
   Future<UserModel> verifyPhoneOtp(String phoneNumber, String otp) async {
-    logger.i('🔐 [DataSource] Verifying OTP for: $phoneNumber');
-    logger.d('  OTP token: $otp');
+    AppLogger.i('🔐 [DataSource] Verifying OTP for: $phoneNumber');
+    AppLogger.d('  OTP token: $otp');
 
     try {
       // ✅ BYPASS MODE: Accept 000000 as valid OTP for development
       if (otp == '000000') {
-        logger.w('⚠️ [DataSource] BYPASS MODE: Using development OTP 000000');
+        AppLogger.w('⚠️ [DataSource] BYPASS MODE: Using development OTP 000000');
 
         // Search for profile related to this number
-        logger.i('📝 [DataSource] Getting profile by phone...');
+        AppLogger.i('📝 [DataSource] Getting profile by phone...');
         final profilesData = await supabase
             .from('profiles')
             .select()
@@ -45,7 +45,7 @@ mixin AuthPhoneMixin {
             .limit(10); // Fetch up to 10 to check
 
         if (profilesData.isEmpty) {
-          logger.e('❌ [DataSource] No profile found with phone: $phoneNumber');
+          AppLogger.e('❌ [DataSource] No profile found with phone: $phoneNumber');
           throw const app_exceptions.AuthException(
             'لا يوجد حساب مرتبط بهذا الرقم.\nيرجى إنشاء حساب جديد أولاً.',
             code: 'phone_not_registered',
@@ -55,27 +55,27 @@ mixin AuthPhoneMixin {
         // If multiple profiles, take first & warn
         final profilesList = profilesData as List;
         if (profilesList.length > 1) {
-          logger.w(
+          AppLogger.w(
               '⚠️ [DataSource] Multiple profiles found with phone: $phoneNumber (${profilesList.length} profiles)');
-          logger.w('   Taking the first profile...');
+          AppLogger.w('   Taking the first profile...');
         }
 
         final profileData = profilesList.first as Map<String, dynamic>;
         final userId = profileData['id'] as String;
         final userEmail = profileData['email'] as String;
 
-        logger.i('🔑 [DataSource] User found: $userEmail (ID: $userId)');
-        logger.i('🔑 [DataSource] Calling add_phone_to_auth_user for: $userId');
+        AppLogger.i('🔑 [DataSource] User found: $userEmail (ID: $userId)');
+        AppLogger.i('🔑 [DataSource] Calling add_phone_to_auth_user for: $userId');
 
         try {
           await supabase.rpc('add_phone_to_auth_user', params: {
             'user_id': userId,
             'phone_number': phoneNumber,
           });
-          logger.i('✅ [DataSource] Phone added to auth.users successfully');
+          AppLogger.i('✅ [DataSource] Phone added to auth.users successfully');
 
           // Attempt login via Supabase OTP
-          logger.i('🔐 [DataSource] Attempting Supabase OTP verification');
+          AppLogger.i('🔐 [DataSource] Attempting Supabase OTP verification');
           try {
             final response = await supabase.auth.verifyOTP(
               type: OtpType.sms,
@@ -84,50 +84,49 @@ mixin AuthPhoneMixin {
             );
 
             if (response.user != null) {
-              logger.i('✅ [DataSource] Supabase OTP verified, user logged in');
+              AppLogger.i('✅ [DataSource] Supabase OTP verified, user logged in');
             } else {
-              logger.w(
+              AppLogger.w(
                   '⚠️ [DataSource] Supabase OTP verification returned null user');
             }
           } catch (otpError) {
-            logger.w(
+            AppLogger.w(
                 '⚠️ [DataSource] Supabase OTP verification failed: $otpError');
-            logger.w('   Continuing with profile data only (no auth session)');
+            AppLogger.w('   Continuing with profile data only (no auth session)');
           }
         } catch (e) {
-          logger.w('⚠️ [DataSource] Failed to add phone to auth.users: $e');
+          AppLogger.w('⚠️ [DataSource] Failed to add phone to auth.users: $e');
           // Continue even if fail
         }
 
         final userModel = UserModel.fromJson(profileData);
-        logger
-            .i('✅ [DataSource] User profile ready (BYPASS): ${userModel.name}');
+        AppLogger.i('✅ [DataSource] User profile ready (BYPASS): ${userModel.name}');
         checkUserAccess(userModel);
         return userModel;
       }
 
       // Normal OTP verification flow
-      logger.d('  Calling supabase.auth.verifyOTP...');
+      AppLogger.d('  Calling supabase.auth.verifyOTP...');
       final response = await supabase.auth.verifyOTP(
         type: OtpType.sms,
         phone: phoneNumber,
         token: otp,
       );
 
-      logger.d('  Response received');
-      logger.d('  User: ${response.user?.id}');
-      logger.d(
+      AppLogger.d('  Response received');
+      AppLogger.d('  User: ${response.user?.id}');
+      AppLogger.d(
           '  Session: ${response.session?.accessToken != null ? "exists" : "null"}');
 
       if (response.user == null) {
-        logger.e('❌ [DataSource] OTP verification failed: user is null');
+        AppLogger.e('❌ [DataSource] OTP verification failed: user is null');
         throw const app_exceptions.AuthException('فشل التحقق من رمز OTP');
       }
 
-      logger.i('✅ [DataSource] OTP verified successfully!');
+      AppLogger.i('✅ [DataSource] OTP verified successfully!');
 
       // Get profile by phone
-      logger.i('📝 [DataSource] Getting profile by phone...');
+      AppLogger.i('📝 [DataSource] Getting profile by phone...');
       final profileData = await supabase
           .from('profiles')
           .select()
@@ -135,7 +134,7 @@ mixin AuthPhoneMixin {
           .maybeSingle();
 
       if (profileData == null) {
-        logger.e('❌ [DataSource] No profile found with phone: $phoneNumber');
+        AppLogger.e('❌ [DataSource] No profile found with phone: $phoneNumber');
         // Sign out
         await supabase.auth.signOut();
         throw const app_exceptions.AuthException(
@@ -145,23 +144,23 @@ mixin AuthPhoneMixin {
       }
 
       final userModel = UserModel.fromJson(profileData);
-      logger.i('✅ [DataSource] User profile ready: ${userModel.name}');
+      AppLogger.i('✅ [DataSource] User profile ready: ${userModel.name}');
       checkUserAccess(userModel);
       return userModel;
     } on AuthApiException catch (e) {
-      logger.e('❌ [DataSource] AuthApiException: ${e.message}');
-      logger.e('   Code: ${e.code}');
-      logger.e('   Status: ${e.statusCode}');
+      AppLogger.e('❌ [DataSource] AuthApiException: ${e.message}');
+      AppLogger.e('   Code: ${e.code}');
+      AppLogger.e('   Status: ${e.statusCode}');
       throw handleAuthError(e);
     } catch (e, stackTrace) {
-      logger.e('❌ [DataSource] Unexpected error: $e');
-      logger.e('   Stack trace: $stackTrace');
+      AppLogger.e('❌ [DataSource] Unexpected error: $e');
+      AppLogger.e('   Stack trace: $stackTrace');
       rethrow;
     }
   }
 
   Future<void> sendLinkPhoneOtp(String phoneNumber) async {
-    logger.i('📱 [DataSource] Adding phone directly (no OTP): $phoneNumber');
+    AppLogger.i('📱 [DataSource] Adding phone directly (no OTP): $phoneNumber');
 
     final currentUser = supabase.auth.currentUser;
     if (currentUser == null) {
@@ -181,7 +180,7 @@ mixin AuthPhoneMixin {
           .maybeSingle();
 
       if (existingProfile != null) {
-        logger.w('❌ [DataSource] Phone already used by another account');
+        AppLogger.w('❌ [DataSource] Phone already used by another account');
         throw const app_exceptions.AuthException(
           'هذا الرقم مرتبط بحساب آخر',
           code: 'phone_already_used',
@@ -189,7 +188,7 @@ mixin AuthPhoneMixin {
       }
     } catch (e) {
       if (e is app_exceptions.AuthException) rethrow;
-      logger.e('❌ [DataSource] Error checking phone: $e');
+      AppLogger.e('❌ [DataSource] Error checking phone: $e');
     }
 
     // Add phone directly to auth.users without OTP
@@ -198,19 +197,19 @@ mixin AuthPhoneMixin {
         'user_id': currentUser.id,
         'phone_number': phoneNumber,
       });
-      logger.i('✅ [DataSource] Phone added directly to auth.users');
-      logger.d('   Result: $result');
+      AppLogger.i('✅ [DataSource] Phone added directly to auth.users');
+      AppLogger.d('   Result: $result');
     } on SocketException catch (e) {
-      logger.e('❌ [DataSource] Network error: $e');
+      AppLogger.e('❌ [DataSource] Network error: $e');
       throw const app_exceptions.AuthException(
         'لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.',
         code: 'network_error',
       );
     } on PostgrestException catch (e) {
-      logger.e('❌ [DataSource] Failed to add phone: ${e.message}');
-      logger.e('   Error code: ${e.code}');
-      logger.e('   Details: ${e.details}');
-      logger.e('   Hint: ${e.hint}');
+      AppLogger.e('❌ [DataSource] Failed to add phone: ${e.message}');
+      AppLogger.e('   Error code: ${e.code}');
+      AppLogger.e('   Details: ${e.details}');
+      AppLogger.e('   Hint: ${e.hint}');
 
       // Check if it's a function not found error
       if (e.code == '42883' ||
@@ -224,14 +223,13 @@ mixin AuthPhoneMixin {
 
       throw app_exceptions.ServerException(e.message, code: e.code);
     } catch (e) {
-      logger.e('❌ [DataSource] Unexpected error: $e');
+      AppLogger.e('❌ [DataSource] Unexpected error: $e');
       rethrow;
     }
   }
 
   Future<UserModel> verifyLinkPhoneOtp(String phoneNumber, String otp) async {
-    logger
-        .i('🔐 [DataSource] Verifying phone link (bypass mode): $phoneNumber');
+    AppLogger.i('🔐 [DataSource] Verifying phone link (bypass mode): $phoneNumber');
 
     final currentUser = supabase.auth.currentUser;
     if (currentUser == null) {
@@ -244,7 +242,7 @@ mixin AuthPhoneMixin {
     try {
       // ✅ BYPASS MODE: Accept 000000 as valid OTP for development
       if (otp == '000000') {
-        logger.w(
+        AppLogger.w(
             '⚠️ [DataSource] BYPASS MODE: Using development OTP 000000 for phone linking');
 
         // Update profile with phone
@@ -254,24 +252,24 @@ mixin AuthPhoneMixin {
         }).eq('id', currentUser.id);
 
         // Call RPC
-        logger.i(
+        AppLogger.i(
             '🔑 [DataSource] Calling add_phone_to_auth_user for: ${currentUser.id}');
         try {
           await supabase.rpc('add_phone_to_auth_user', params: {
             'user_id': currentUser.id,
             'phone_number': phoneNumber,
           });
-          logger.i('✅ [DataSource] Phone added to auth.users successfully');
+          AppLogger.i('✅ [DataSource] Phone added to auth.users successfully');
 
           // Refresh session
-          logger.i('🔄 [DataSource] Refreshing session to update user data');
+          AppLogger.i('🔄 [DataSource] Refreshing session to update user data');
           await supabase.auth.refreshSession();
-          logger.i('✅ [DataSource] Session refreshed successfully');
+          AppLogger.i('✅ [DataSource] Session refreshed successfully');
         } catch (e) {
-          logger.w('⚠️ [DataSource] Failed to add phone to auth.users: $e');
+          AppLogger.w('⚠️ [DataSource] Failed to add phone to auth.users: $e');
         }
 
-        logger.i('✅ [DataSource] Phone linked successfully (BYPASS)!');
+        AppLogger.i('✅ [DataSource] Phone linked successfully (BYPASS)!');
         return await getProfile(currentUser.id);
       }
 
@@ -281,11 +279,12 @@ mixin AuthPhoneMixin {
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', currentUser.id);
 
-      logger.i('✅ [DataSource] Phone linked successfully!');
+      AppLogger.i('✅ [DataSource] Phone linked successfully!');
       return await getProfile(currentUser.id);
     } on PostgrestException catch (e) {
-      logger.e('❌ [DataSource] PostgrestException: ${e.message}');
+      AppLogger.e('❌ [DataSource] PostgrestException: ${e.message}');
       throw app_exceptions.ServerException(e.message, code: e.code);
     }
   }
 }
+

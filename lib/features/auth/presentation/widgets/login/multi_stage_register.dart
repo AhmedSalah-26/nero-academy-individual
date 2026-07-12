@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/services/app_logger.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/utils/toast_utils.dart';
 import '../../../domain/entities/user_entity.dart';
@@ -129,7 +130,6 @@ class _MultiStageRegisterState extends State<MultiStageRegister> {
 
   Future<bool> _validateEmailAvailability() async {
     final email = widget.emailCtrl.text.trim().toLowerCase();
-    final isArabic = context.locale.languageCode == 'ar';
 
     if (_lastCheckedEmail == email && _lastCheckedEmailAvailable != null) {
       if (_lastCheckedEmailAvailable == false) {
@@ -157,13 +157,11 @@ class _MultiStageRegisterState extends State<MultiStageRegister> {
       }
 
       return true;
-    } catch (_) {
-      ToastUtils.showError(
-        isArabic
-            ? 'تعذر التحقق من البريد الإلكتروني الآن، حاول مرة أخرى'
-            : 'Unable to verify email right now. Please try again.',
-      );
-      return false;
+    } catch (e) {
+      // RLS or network error — don't block the user.
+      // Supabase Auth will reject duplicate emails during actual sign-up.
+      AppLogger.w('[Register] Email check failed (RLS/network): $e — allowing user to proceed');
+      return true;
     } finally {
       if (mounted) {
         setState(() => _isCheckingEmail = false);

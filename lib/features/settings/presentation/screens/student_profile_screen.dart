@@ -48,20 +48,57 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
       final userId = client.auth.currentUser?.id;
       if (userId == null) throw Exception('Not logged in');
 
-      final results = await Future.wait([
-        client.from('profiles').select('*').eq('id', userId).single(),
-        client.from('enrollments').select('''
-          id, enrolled_at, last_accessed_at, completed_at,
-          progress_percentage, status,
-          courses!inner(id, title_ar, title_en, thumbnail_url, total_lessons)
-        ''').eq('user_id', userId).order('enrolled_at', ascending: false),
-        client.from('quiz_attempts').select('''
-          id, score, passed, started_at, completed_at, time_taken,
-          quizzes!inner(id, title_ar, title_en, courses(title_ar, title_en))
-        ''').eq('user_id', userId).order('completed_at', ascending: false),
-      ]);
+      // Profile (required - if this fails, show error)
+      final profileRes = await client
+          .from('profiles')
+          .select('id, name, email, avatar_url, created_at, role')
+          .eq('id', userId)
+          .single();
+      final profile = profileRes;
 
-      final enrollments = (results[1] as List).cast<Map<String, dynamic>>();
+      // Enrollments (optional - simplified query without nested courses join)
+      List<Map<String, dynamic>> enrollments = [];
+      try {
+        final enrollmentsRes = await client.from('enrollments').select('''
+          id, enrolled_at, last_accessed_at, completed_at,
+          progress_percentage, status, course_id
+        ''').eq('user_id', userId).order('enrolled_at', ascending: false);
+        enrollments = (enrollmentsRes as List).cast<Map<String, dynamic>>();
+
+        // Try to enrich enrollments with course data separately
+        if (enrollments.isNotEmpty) {
+          final courseIds = enrollments.map((e) => e['course_id']).toList();
+          try {
+            final coursesRes = await client.from('courses').select(
+              'id, title_ar, title_en, thumbnail_url, total_lessons'
+            ).inFilter('id', courseIds);
+            final courseMap = <String, Map<String, dynamic>>{};
+            for (final c in (coursesRes as List)) {
+              courseMap[c['id'] as String] = c as Map<String, dynamic>;
+            }
+            enrollments = enrollments.map((e) {
+              return {...e, 'courses': courseMap[e['course_id'] as String] ?? {}};
+            }).toList();
+          } catch (_) {
+            // Add empty courses to avoid null issues
+            enrollments = enrollments.map((e) => {...e, 'courses': <String, dynamic>{}}).toList();
+          }
+        }
+      } catch (_) {
+        // Enrollments are optional
+      }
+
+      // Quiz attempts (optional)
+      List<Map<String, dynamic>> quizAttempts = [];
+      try {
+        final quizRes = await client.from('quiz_attempts').select('''
+          id, score, percentage, passed, started_at, completed_at, time_spent
+        ''').eq('user_id', userId).order('completed_at', ascending: false);
+        quizAttempts = (quizRes as List).cast<Map<String, dynamic>>();
+      } catch (_) {
+        // Quiz attempts are optional
+      }
+
       int totalL = 0, completedL = 0;
       for (final e in enrollments) {
         final total = ((e['courses'] as Map?)?['total_lessons'] as int?) ?? 0;
@@ -72,9 +109,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
 
       if (mounted) {
         setState(() {
-          _profile = results[0] as Map<String, dynamic>;
+          _profile = profile;
           _enrollments = enrollments;
-          _quizAttempts = (results[2] as List).cast<Map<String, dynamic>>();
+          _quizAttempts = quizAttempts;
           _totalLessons = totalL;
           _completedLessons = completedL;
           _isLoading = false;
