@@ -5,8 +5,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const defaultScripts = [
-  'database_scripts/040_nasaq_app_schema.sql',
-  'database_scripts/041_nasaq_teacher_scoped_purchases.sql',
+  'database_scripts/000_nasaq_full_database.sql',
 ];
 
 function loadDotEnv(path) {
@@ -121,11 +120,14 @@ console.log(`Project: ${projectRef}`);
 console.log(`Scripts: ${scripts.join(', ')}`);
 
 if (!accessToken) {
-  const outputPath = resolve(__dirname, 'database_scripts/nasaq_pending_migration.sql');
-  writeFileSync(outputPath, sql, 'utf-8');
-
   console.log('\nCannot execute DDL without SUPABASE_ACCESS_TOKEN.');
-  console.log(`Wrote combined SQL to: ${outputPath}`);
+  if (scripts.length === defaultScripts.length && scripts.every((script, index) => script === defaultScripts[index])) {
+    console.log(`Use the existing SQL file: ${resolve(__dirname, defaultScripts[0])}`);
+  } else {
+    const outputPath = resolve(__dirname, 'database_scripts/generated_migration.sql');
+    writeFileSync(outputPath, sql, 'utf-8');
+    console.log(`Wrote combined SQL to: ${outputPath}`);
+  }
   console.log(`Open SQL Editor: https://supabase.com/dashboard/project/${projectRef}/sql/new`);
   process.exit(2);
 }
