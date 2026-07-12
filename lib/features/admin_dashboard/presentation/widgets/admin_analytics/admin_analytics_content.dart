@@ -91,80 +91,121 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
 
     return _surface(
       isDark: isDark,
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(6),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 560;
-          return Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: items.map((item) {
-              final selected = item.view == _selectedView;
-              final width = compact
-                  ? (constraints.maxWidth - 8) / 2
-                  : (constraints.maxWidth - 16) / 3;
-              return SizedBox(
-                width: width,
-                child: InkWell(
-                  onTap: () => setState(() => _selectedView = item.view),
-                  borderRadius: BorderRadius.circular(12),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 160),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 13,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.primary
-                          : isDark
-                              ? AppColors.surfaceDark
-                              : AppColors.grey50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: selected
-                            ? AppColors.primary
-                            : isDark
-                                ? AppColors.borderDark
-                                : AppColors.borderLight,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          item.icon,
-                          size: 18,
-                          color: selected
-                              ? AppColors.white
-                              : isDark
-                                  ? AppColors.textMutedDark
-                                  : AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            item.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: selected
-                                  ? AppColors.white
-                                  : isDark
-                                      ? AppColors.textMainDark
-                                      : AppColors.textMainLight,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+          final canFit = constraints.maxWidth >= 430;
+          final buttons = items.map((item) {
+            final selected = item.view == _selectedView;
+            final button = _segmentButton(
+              icon: item.icon,
+              label: item.label,
+              selected: selected,
+              isDark: isDark,
+              onTap: () => setState(() => _selectedView = item.view),
+            );
+
+            if (canFit) {
+              return Expanded(child: button);
+            }
+
+            return SizedBox(width: 154, child: button);
+          }).toList();
+
+          if (canFit) {
+            return Row(
+              children: [
+                for (var i = 0; i < buttons.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  buttons[i],
+                ],
+              ],
+            );
+          }
+
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < buttons.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  buttons[i],
+                ],
+              ],
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _segmentButton({
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary
+              : isDark
+                  ? AppColors.surfaceDark
+                  : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? AppColors.primary
+                : isDark
+                    ? AppColors.borderDark
+                    : AppColors.borderLight,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 19,
+              color: selected
+                  ? AppColors.white
+                  : isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.primary,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: selected
+                      ? AppColors.white
+                      : isDark
+                          ? AppColors.textMainDark
+                          : AppColors.textMainLight,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
