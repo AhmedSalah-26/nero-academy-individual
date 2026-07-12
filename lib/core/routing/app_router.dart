@@ -85,19 +85,15 @@ import '../../features/quizzes/presentation/screens/quiz_question_screen.dart';
 import '../../features/quizzes/presentation/screens/quiz_results_screen.dart';
 
 // Admin Dashboard
-import '../../features/admin_dashboard/data/models/admin_banner_model.dart';
 import '../../features/admin_dashboard/data/models/admin_coupon_model.dart';
 import '../../features/admin_dashboard/data/models/admin_course_model.dart';
 import '../../features/admin_dashboard/data/models/admin_user_model.dart';
 import '../../features/admin_dashboard/data/models/category_model.dart'
     as admin_category;
-import '../../features/admin_dashboard/data/models/level_model.dart';
 import '../../features/admin_dashboard/domain/entities/admin_entities.dart';
 import '../../features/admin_dashboard/presentation/cubit/admin_cubits.dart';
 import '../../features/admin_dashboard/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/admin_dashboard/presentation/screens/ban_user_screen.dart';
-import '../../features/admin_dashboard/presentation/screens/banner_editor_screen.dart'
-    as admin_banner;
 import '../../features/admin_dashboard/presentation/screens/category_editor_screen.dart'
     as admin_category_editor;
 import '../../features/admin_dashboard/presentation/screens/coupon_editor_screen.dart'
@@ -107,7 +103,6 @@ import '../../features/admin_dashboard/presentation/screens/course_details_scree
     as admin_course;
 import '../../features/admin_dashboard/presentation/screens/course_enrollments_screen.dart'
     as admin_course_enrollments;
-import '../../features/admin_dashboard/presentation/screens/level_editor_screen.dart';
 import '../../features/admin_dashboard/presentation/screens/user_details_screen.dart';
 
 // Instructor Dashboard
@@ -704,10 +699,8 @@ class AppRouter {
             BlocProvider(create: (_) => sl<AdminUsersCubit>()),
             BlocProvider(create: (_) => sl<AdminCoursesCubit>()),
             BlocProvider(create: (_) => sl<AdminCategoriesCubit>()),
-            BlocProvider(create: (_) => sl<AdminLevelsCubit>()),
             BlocProvider(create: (_) => sl<AdminEnrollmentsCubit>()),
             BlocProvider(create: (_) => sl<AdminPayoutsCubit>()),
-            BlocProvider(create: (_) => sl<AdminBannersCubit>()),
             BlocProvider(create: (_) => sl<AdminCouponsCubit>()),
             BlocProvider(create: (_) => sl<AdminAnalyticsCubit>()),
             BlocProvider(create: (_) => sl<AdminReviewsCubit>()),
@@ -779,23 +772,6 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: '/admin/level/edit',
-        name: 'level-editor',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          if (extra?['onSave'] == null) {
-            return const Scaffold(
-              body: Center(child: Text('Invalid level data')),
-            );
-          }
-          return LevelEditorScreen(
-            level: extra?['level'] as LevelModel?,
-            onSave: extra!['onSave'] as Function(dynamic),
-          );
-        },
-      ),
-
-      GoRoute(
         path: '/admin/coupon/edit',
         name: 'admin-coupon-editor',
         builder: (context, state) {
@@ -808,23 +784,6 @@ class AppRouter {
           return admin_coupon.CouponEditorScreen(
             coupon: extra?['coupon'] as AdminCouponModel?,
             onSave: extra!['onSave'] as Function(CreateCouponDto),
-          );
-        },
-      ),
-
-      GoRoute(
-        path: '/admin/banner/edit',
-        name: 'admin-banner-editor',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          if (extra?['onSave'] == null) {
-            return const Scaffold(
-              body: Center(child: Text('Invalid banner data')),
-            );
-          }
-          return admin_banner.BannerEditorScreen(
-            banner: extra?['banner'] as AdminBannerModel?,
-            onSave: extra!['onSave'] as Future<void> Function(CreateBannerDto),
           );
         },
       ),
@@ -1582,28 +1541,6 @@ class AppRouter {
   }) {
     context.pushNamed('admin-category-editor', extra: {
       'category': category,
-      'onSave': onSave,
-    });
-  }
-
-  static void goToLevelEditor(
-    BuildContext context, {
-    LevelModel? level,
-    required void Function(dynamic) onSave,
-  }) {
-    context.pushNamed('level-editor', extra: {
-      'level': level,
-      'onSave': onSave,
-    });
-  }
-
-  static void goToAdminBannerEditor(
-    BuildContext context, {
-    AdminBannerModel? banner,
-    required Future<void> Function(CreateBannerDto) onSave,
-  }) {
-    context.pushNamed('admin-banner-editor', extra: {
-      'banner': banner,
       'onSave': onSave,
     });
   }

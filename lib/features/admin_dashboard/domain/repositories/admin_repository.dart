@@ -1,7 +1,5 @@
 import '../entities/admin_entities.dart';
-import '../entities/level_entity.dart';
 import '../../data/models/admin_models.dart';
-import '../../data/models/level_model.dart';
 
 /// Admin Repository Interface
 abstract class AdminRepository {
@@ -40,12 +38,6 @@ abstract class AdminRepository {
   Future<CategoryModel> updateCategory(String id, CategoryUpdateDto dto);
   Future<bool> toggleCategoryStatus(String id);
 
-  // Levels
-  Future<List<LevelModel>> getLevels({bool? isActive});
-  Future<LevelModel> createLevel(LevelCreateDto dto);
-  Future<LevelModel> updateLevel(String id, LevelUpdateDto dto);
-  Future<bool> toggleLevelStatus(String id);
-
   // Enrollments
   Future<List<AdminEnrollmentModel>> getEnrollments({
     EnrollmentStatus? status,
@@ -64,13 +56,6 @@ abstract class AdminRepository {
   Future<bool> approvePayout(String payoutId);
   Future<bool> completePayout(String payoutId, String transactionId);
   Future<bool> rejectPayout(String payoutId, String reason);
-
-  // Banners
-  Future<List<BannerModel>> getBanners({BannerType? type, bool? isActive});
-  Future<BannerModel> createBanner(BannerCreateDto dto);
-  Future<BannerModel> updateBanner(String id, BannerUpdateDto dto);
-  Future<bool> deleteBanner(String id);
-  Future<bool> toggleBannerStatus(String id);
 
   // Global Coupons
   Future<List<CouponModel>> getGlobalCoupons(
@@ -274,81 +259,6 @@ class CategoryUpdateDto {
     this.isActive,
     this.sortOrder,
   });
-}
-
-/// Banner Create DTO
-class BannerCreateDto {
-  final String imageUrl;
-  final String? titleAr;
-  final String? titleEn;
-  final String? linkUrl;
-  final BannerType type;
-  final int sortOrder;
-  final DateTime? startDate;
-  final DateTime? endDate;
-
-  const BannerCreateDto({
-    required this.imageUrl,
-    this.titleAr,
-    this.titleEn,
-    this.linkUrl,
-    required this.type,
-    this.sortOrder = 0,
-    this.startDate,
-    this.endDate,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'image_url': imageUrl,
-        'title_ar': titleAr,
-        'title_en': titleEn,
-        'link_url': linkUrl,
-        'type': type.name,
-        'sort_order': sortOrder,
-        'start_date': startDate?.toUtc().toIso8601String(),
-        'end_date': endDate?.toUtc().toIso8601String(),
-      };
-}
-
-/// Banner Update DTO
-class BannerUpdateDto {
-  final String? imageUrl;
-  final String? titleAr;
-  final String? titleEn;
-  final String? linkUrl;
-  final BannerType? type;
-  final int? sortOrder;
-  final bool? isActive;
-  final DateTime? startDate;
-  final DateTime? endDate;
-
-  const BannerUpdateDto({
-    this.imageUrl,
-    this.titleAr,
-    this.titleEn,
-    this.linkUrl,
-    this.type,
-    this.sortOrder,
-    this.isActive,
-    this.startDate,
-    this.endDate,
-  });
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    if (imageUrl != null) map['image_url'] = imageUrl;
-    if (titleAr != null) map['title_ar'] = titleAr;
-    if (titleEn != null) map['title_en'] = titleEn;
-    if (linkUrl != null) map['link_url'] = linkUrl;
-    if (type != null) map['type'] = type!.name;
-    if (sortOrder != null) map['sort_order'] = sortOrder;
-    if (isActive != null) map['is_active'] = isActive;
-    if (startDate != null) {
-      map['start_date'] = startDate!.toUtc().toIso8601String();
-    }
-    if (endDate != null) map['end_date'] = endDate!.toUtc().toIso8601String();
-    return map;
-  }
 }
 
 /// Coupon Create DTO

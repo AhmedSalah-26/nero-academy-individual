@@ -19,7 +19,6 @@ export 'presentation/screens/user_details_screen.dart';
 export 'presentation/screens/ban_user_screen.dart';
 export 'presentation/screens/category_editor_screen.dart';
 export 'presentation/screens/coupon_editor_screen.dart';
-export 'presentation/screens/banner_editor_screen.dart';
 export 'presentation/screens/course_details_screen.dart';
 export 'presentation/screens/course_enrollments_screen.dart';
 export 'presentation/screens/coupon_usage_screen.dart';

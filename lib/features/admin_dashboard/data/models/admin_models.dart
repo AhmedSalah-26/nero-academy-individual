@@ -10,5 +10,4 @@ export 'payout_model.dart';
 export 'course_report_model.dart';
 export 'review_report_model.dart';
 export 'chart_data_point_model.dart';
-export 'banner_model.dart';
 export 'coupon_model.dart';

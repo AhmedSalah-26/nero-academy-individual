@@ -1,29 +1,22 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/admin_entities.dart';
-import '../../domain/entities/level_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
-import '../datasources/admin_banners_data_source.dart';
 import '../datasources/admin_coupons_data_source.dart';
 import '../datasources/admin_courses_data_source.dart';
 import '../datasources/admin_forum_data_source.dart';
-import '../datasources/admin_levels_data_source.dart';
 import '../datasources/admin_payouts_data_source.dart';
 import '../datasources/admin_qa_data_source.dart';
 import '../datasources/admin_reviews_data_source.dart';
 import '../datasources/admin_stats_data_source.dart';
 import '../datasources/admin_users_data_source.dart';
 import '../models/admin_models.dart';
-import '../models/admin_banner_model.dart';
 import '../models/admin_coupon_model.dart';
-import '../models/level_model.dart';
 
 /// Admin Repository Implementation
 class AdminRepositoryImpl implements AdminRepository {
   final AdminStatsDataSource _statsDataSource;
   final AdminUsersDataSource _usersDataSource;
   final AdminCoursesDataSource _coursesDataSource;
-  final AdminLevelsDataSource _levelsDataSource;
-  final AdminBannersDataSource _bannersDataSource;
   final AdminCouponsDataSource _couponsDataSource;
   final AdminReviewsDataSource _reviewsDataSource;
   final AdminQADataSource _qaDataSource;
@@ -33,8 +26,6 @@ class AdminRepositoryImpl implements AdminRepository {
     required AdminStatsDataSource statsDataSource,
     required AdminUsersDataSource usersDataSource,
     required AdminCoursesDataSource coursesDataSource,
-    required AdminLevelsDataSource levelsDataSource,
-    required AdminBannersDataSource bannersDataSource,
     required AdminCouponsDataSource couponsDataSource,
     required AdminPayoutsDataSource payoutsDataSource,
     required AdminReviewsDataSource reviewsDataSource,
@@ -43,8 +34,6 @@ class AdminRepositoryImpl implements AdminRepository {
   })  : _statsDataSource = statsDataSource,
         _usersDataSource = usersDataSource,
         _coursesDataSource = coursesDataSource,
-        _levelsDataSource = levelsDataSource,
-        _bannersDataSource = bannersDataSource,
         _couponsDataSource = couponsDataSource,
         _reviewsDataSource = reviewsDataSource,
         _qaDataSource = qaDataSource,
@@ -158,28 +147,6 @@ class AdminRepositoryImpl implements AdminRepository {
     return true;
   }
 
-  // Levels
-  @override
-  Future<List<LevelModel>> getLevels({bool? isActive}) async {
-    return await _levelsDataSource.getLevels(isActive: isActive);
-  }
-
-  @override
-  Future<LevelModel> createLevel(LevelCreateDto dto) async {
-    return await _levelsDataSource.createLevel(dto);
-  }
-
-  @override
-  Future<LevelModel> updateLevel(String id, LevelUpdateDto dto) async {
-    return await _levelsDataSource.updateLevel(id, dto);
-  }
-
-  @override
-  Future<bool> toggleLevelStatus(String id) async {
-    await _levelsDataSource.toggleLevelStatus(id);
-    return true;
-  }
-
   @override
   Future<List<AdminEnrollmentModel>> getEnrollments({
     EnrollmentStatus? status,
@@ -264,90 +231,6 @@ class AdminRepositoryImpl implements AdminRepository {
         .from('course_reviews')
         .update({'is_hidden': true}).eq('id', reviewId);
     return true;
-  }
-
-  @override
-  Future<List<BannerModel>> getBanners(
-      {BannerType? type, bool? isActive}) async {
-    final banners = await _bannersDataSource.getAllBanners();
-    return banners
-        .map((b) => BannerModel(
-              id: b.id,
-              titleAr: b.titleAr,
-              titleEn: b.titleEn,
-              imageUrl: b.imageUrl,
-              type: BannerType.home,
-              isActive: b.isActive,
-              sortOrder: b.sortOrder,
-              startDate: b.startDate,
-              endDate: b.endDate,
-              createdAt: b.createdAt,
-            ))
-        .toList();
-  }
-
-  @override
-  Future<BannerModel> createBanner(BannerCreateDto dto) async {
-    final banner = await _bannersDataSource.createBanner(CreateBannerDto(
-      titleAr: dto.titleAr ?? '',
-      titleEn: dto.titleEn,
-      imageUrl: dto.imageUrl,
-      linkType: dto.type.name,
-      sortOrder: dto.sortOrder,
-      startDate: dto.startDate,
-      endDate: dto.endDate,
-    ));
-    return BannerModel(
-      id: banner.id,
-      titleAr: banner.titleAr,
-      titleEn: banner.titleEn,
-      imageUrl: banner.imageUrl,
-      type: dto.type,
-      isActive: banner.isActive,
-      sortOrder: banner.sortOrder,
-      startDate: banner.startDate,
-      endDate: banner.endDate,
-      createdAt: banner.createdAt,
-    );
-  }
-
-  @override
-  Future<BannerModel> updateBanner(String id, BannerUpdateDto dto) async {
-    final banner = await _bannersDataSource.updateBanner(
-        id,
-        CreateBannerDto(
-          titleAr: dto.titleAr ?? '',
-          titleEn: dto.titleEn,
-          imageUrl: dto.imageUrl ?? '',
-          linkType: dto.type?.name ?? 'home',
-          sortOrder: dto.sortOrder ?? 0,
-          startDate: dto.startDate,
-          endDate: dto.endDate,
-        ));
-    return BannerModel(
-      id: banner.id,
-      titleAr: banner.titleAr,
-      titleEn: banner.titleEn,
-      imageUrl: banner.imageUrl,
-      type: dto.type ?? BannerType.home,
-      isActive: banner.isActive,
-      sortOrder: banner.sortOrder,
-      startDate: banner.startDate,
-      endDate: banner.endDate,
-      createdAt: banner.createdAt,
-    );
-  }
-
-  @override
-  Future<bool> deleteBanner(String id) async {
-    return await _bannersDataSource.deleteBanner(id);
-  }
-
-  @override
-  Future<bool> toggleBannerStatus(String id) async {
-    final banners = await _bannersDataSource.getAllBanners();
-    final banner = banners.firstWhere((b) => b.id == id);
-    return await _bannersDataSource.toggleBannerStatus(id, banner.isActive);
   }
 
   @override
