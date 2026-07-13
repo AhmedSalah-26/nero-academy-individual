@@ -36,18 +36,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _loadWishlist();
   }
 
-  Future<void> _loadWishlist() async {
+  Future<void> _loadWishlist({bool force = false}) async {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     AppLogger.i('❤️ [WishlistScreen] Loading wishlist for user: $userId');
 
     if (userId != null) {
-      await context.read<WishlistCubit>().loadWishlist(userId);
+      await context.read<WishlistCubit>().loadWishlist(userId, force: force);
     }
   }
 
   Future<void> _onRefresh() async {
     HapticFeedback.mediumImpact();
-    await _loadWishlist();
+    await _loadWishlist(force: true);
   }
 
   @override

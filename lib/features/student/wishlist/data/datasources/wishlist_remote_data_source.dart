@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/errors/exceptions.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
@@ -25,47 +27,86 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
   Future<List<WishlistItemModel>> getWishlist(String userId) async {
     AppLogger.i('❤️ [WishlistRemote] Getting wishlist for user: $userId');
     try {
-      // Get wishlist items with course details
       final teacherId = TeacherContextService.instance.selectedTeacherId;
-      var query = supabase.from('wishlist').select('''
-            *,
-            courses!inner (
-              id, teacher_id, title_ar, title_en, thumbnail_url, price, discount_price,
-              is_flash_sale, flash_sale_start, flash_sale_end,
-              currency, is_free, rating, rating_count,
-              profiles:instructor_id (name, avatar_url)
-            )
-          ''').eq('user_id', userId);
-      if (teacherId != null) {
-        query = query.eq('courses.teacher_id', teacherId);
+
+      final wishlistResponse = await supabase
+          .from('wishlist')
+          .select('id, user_id, course_id, created_at')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .timeout(const Duration(seconds: 8));
+
+      final wishlistRows = (wishlistResponse as List)
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+
+      if (wishlistRows.isEmpty) {
+        AppLogger.success('[WishlistRemote] Loaded 0 items');
+        return const [];
       }
-      final wishlistResponse =
-          await query.order('created_at', ascending: false);
 
-      // Check enrollment for each course
+      final courseIds = wishlistRows
+          .map((item) => item['course_id'] as String?)
+          .whereType<String>()
+          .toSet()
+          .toList();
+
+      if (courseIds.isEmpty) {
+        AppLogger.success('[WishlistRemote] Loaded 0 valid items');
+        return const [];
+      }
+
+      var coursesQuery = supabase.from('courses').select('''
+            id, teacher_id, title_ar, title_en, thumbnail_url, price, discount_price,
+            is_flash_sale, flash_sale_start, flash_sale_end,
+            currency, is_free, rating, rating_count
+          ''').inFilter('id', courseIds);
+      if (teacherId != null) {
+        coursesQuery = coursesQuery.eq('teacher_id', teacherId);
+      }
+      final coursesResponse =
+          await coursesQuery.timeout(const Duration(seconds: 8));
+      final coursesById = {
+        for (final course in (coursesResponse as List).whereType<Map>())
+          course['id'] as String: Map<String, dynamic>.from(course),
+      };
+
+      if (coursesById.isEmpty) {
+        AppLogger.success('[WishlistRemote] Loaded 0 items for teacher');
+        return const [];
+      }
+
+      final enrollmentResponse = await supabase
+          .from('enrollments')
+          .select('id, course_id')
+          .eq('user_id', userId)
+          .inFilter('course_id', coursesById.keys.toList())
+          .timeout(const Duration(seconds: 8));
+      final enrolledCourseIds = (enrollmentResponse as List)
+          .whereType<Map>()
+          .map((item) => item['course_id'] as String?)
+          .whereType<String>()
+          .toSet();
+
       final List<Map<String, dynamic>> result = [];
-      for (final item in wishlistResponse as List) {
-        final courseId = item['course_id'];
-        final enrollment = await supabase
-            .from('enrollments')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('course_id', courseId)
-            .maybeSingle();
+      for (final item in wishlistRows) {
+        final courseId = item['course_id'] as String?;
+        final course = courseId == null ? null : coursesById[courseId];
+        if (course == null) continue;
 
-        // Add enrollment info to the item
         final itemWithEnrollment = Map<String, dynamic>.from(item);
-        if (itemWithEnrollment['courses'] != null) {
-          itemWithEnrollment['courses'] =
-              Map<String, dynamic>.from(itemWithEnrollment['courses']);
-          itemWithEnrollment['courses']['enrollments'] =
-              enrollment != null ? [enrollment] : [];
-        }
+        itemWithEnrollment['courses'] = Map<String, dynamic>.from(course)
+          ..['enrollments'] =
+              enrolledCourseIds.contains(courseId) ? const [{}] : const [];
         result.add(itemWithEnrollment);
       }
 
       AppLogger.success('[WishlistRemote] Loaded ${result.length} items');
       return result.map((e) => WishlistItemModel.fromJson(e)).toList();
+    } on TimeoutException {
+      AppLogger.e('[WishlistRemote] Wishlist query timed out');
+      throw const ServerException('Wishlist loading timed out');
     } on PostgrestException catch (e) {
       AppLogger.e('[WishlistRemote] Error getting wishlist: ${e.message}');
       throw ServerException(e.message, code: e.code);

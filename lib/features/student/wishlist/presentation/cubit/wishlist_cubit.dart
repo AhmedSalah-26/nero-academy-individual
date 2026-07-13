@@ -29,6 +29,8 @@ class WishlistCubit extends Cubit<WishlistState> {
   }) : super(const WishlistState());
 
   String? _currentUserId;
+  Future<void>? _activeLoad;
+  String? _activeLoadUserId;
 
   /// Get current user ID
   String? get currentUserId => _currentUserId;
@@ -47,12 +49,36 @@ class WishlistCubit extends Cubit<WishlistState> {
   }
 
   /// Load wishlist
-  Future<void> loadWishlist(String userId) async {
+  Future<void> loadWishlist(String userId, {bool force = false}) async {
     AppLogger.i('❤️ [WishlistCubit] Loading wishlist for user: $userId');
-    _currentUserId = userId;
 
+    if (!force && _currentUserId == userId && state.isSuccess) {
+      AppLogger.i('[WishlistCubit] Wishlist already loaded for user: $userId');
+      return;
+    }
+
+    if (_activeLoad != null && _activeLoadUserId == userId) {
+      AppLogger.i('[WishlistCubit] Wishlist load already in progress');
+      return _activeLoad;
+    }
+
+    _currentUserId = userId;
+    _activeLoadUserId = userId;
+    _activeLoad = _loadWishlistInternal(userId);
+
+    try {
+      await _activeLoad;
+    } finally {
+      if (_activeLoadUserId == userId) {
+        _activeLoad = null;
+        _activeLoadUserId = null;
+      }
+    }
+  }
+
+  Future<void> _loadWishlistInternal(String userId) async {
     // Show loading state
-    _safeEmit(state.copyWith(status: StateStatus.loading));
+    _safeEmit(state.copyWith(status: StateStatus.loading, clearFailure: true));
 
     try {
       final result = await getWishlistUseCase(GetWishlistParams(userId: userId))
@@ -81,8 +107,10 @@ class WishlistCubit extends Cubit<WishlistState> {
     } on TimeoutException {
       AppLogger.e('[WishlistCubit] Wishlist load timed out');
       _safeEmit(state.copyWith(
-        status: StateStatus.error,
-        failure: const NetworkFailure('Wishlist loading timed out'),
+        status: StateStatus.success,
+        items: state.items,
+        wishlistCourseIds: state.wishlistCourseIds,
+        clearFailure: true,
       ));
     } catch (e, stack) {
       AppLogger.e('[WishlistCubit] Unexpected wishlist load error', e, stack);
@@ -96,7 +124,7 @@ class WishlistCubit extends Cubit<WishlistState> {
   /// Refresh wishlist
   Future<void> refreshWishlist() async {
     if (_currentUserId != null) {
-      await loadWishlist(_currentUserId!);
+      await loadWishlist(_currentUserId!, force: true);
     }
   }
 
