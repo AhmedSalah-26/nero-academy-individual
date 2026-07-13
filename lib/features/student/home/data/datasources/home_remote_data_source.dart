@@ -25,13 +25,13 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   static const _courseSelect = '''
     id, title_ar, title_en, subtitle_ar, subtitle_en, thumbnail_url, preview_video_url,
-    teacher_id, instructor_id, category_id, level, language, price, discount_price, currency,
+    teacher_id, category_id, level, language, price, discount_price, currency,
     is_free, is_flash_sale, flash_sale_start, flash_sale_end,
     badge, pricing_options,
     rating, rating_count, enrolled_count, total_duration, total_lessons,
     is_featured, is_published, published_at, created_at,
     available_from, available_until,
-    profiles:instructor_id(name, avatar_url)
+    teachers!courses_teacher_id_fkey(id, profile_id, display_name, avatar_url)
   ''';
 
   List<CourseModel> _mapAvailableCourses(List<dynamic> response, {int? limit}) {

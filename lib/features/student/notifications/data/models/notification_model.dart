@@ -1,3 +1,4 @@
+import 'package:lms_platform/core/utils/text_encoding_utils.dart';
 import 'package:lms_platform/features/student/notifications/domain/entities/notification_entity.dart';
 
 /// Notification Model - Maps to database table
@@ -32,10 +33,10 @@ class NotificationModel extends NotificationEntity {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       type: NotificationType.fromString(json['type'] as String? ?? 'system'),
-      titleAr: json['title_ar'] as String,
-      titleEn: json['title_en'] as String?,
-      bodyAr: json['body_ar'] as String?,
-      bodyEn: json['body_en'] as String?,
+      titleAr: TextEncodingUtils.clean(json['title_ar'] as String?),
+      titleEn: TextEncodingUtils.clean(json['title_en'] as String?),
+      bodyAr: TextEncodingUtils.clean(json['body_ar'] as String?),
+      bodyEn: TextEncodingUtils.clean(json['body_en'] as String?),
       imageUrl: dataMap?['image_url'] as String?,
       iconName: dataMap?['icon_name'] as String?,
       actionType: dataMap?['action_type'] as String?,

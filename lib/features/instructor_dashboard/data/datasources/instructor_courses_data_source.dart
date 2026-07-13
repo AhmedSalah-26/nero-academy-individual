@@ -12,6 +12,15 @@ class InstructorCoursesDataSource {
 
   String get _userId => _client.auth.currentUser!.id;
 
+  Future<String?> _resolveTeacherId() async {
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    return teacher?['id'] as String?;
+  }
+
   /// Get my courses
   Future<List<InstructorCourseModel>> getMyCourses({
     InstructorCourseStatus? status,
@@ -20,12 +29,15 @@ class InstructorCoursesDataSource {
   }) async {
     AppLogger.d('[$_tag] getMyCourses: status=$status, page=$page');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
       var query = _client.from('courses').select('''
         id, title_ar, title_en, thumbnail_url, price, discount_price,
         is_published, is_suspended, suspension_reason, created_at, published_at,
         rating, rating_count, enrolled_count,
         lesson_count, section_count, total_revenue
-      ''').eq('instructor_id', _userId);
+      ''').eq('teacher_id', teacherId);
 
       if (status != null && status != InstructorCourseStatus.all) {
         switch (status) {
@@ -60,14 +72,17 @@ class InstructorCoursesDataSource {
   Future<bool> publishCourse(String courseId) async {
     AppLogger.d('[$_tag] publishCourse: $courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
       await _client
           .from('courses')
           .update({
             'is_published': true,
             'published_at': DateTime.now().toIso8601String(),
+            'teacher_id': teacherId,
           })
           .eq('id', courseId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', teacherId);
       AppLogger.success('[$_tag] publishCourse success');
       return true;
     } catch (e, s) {
@@ -80,11 +95,13 @@ class InstructorCoursesDataSource {
   Future<bool> unpublishCourse(String courseId) async {
     AppLogger.d('[$_tag] unpublishCourse: $courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
       await _client
           .from('courses')
           .update({'is_published': false})
           .eq('id', courseId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', teacherId);
       AppLogger.success('[$_tag] unpublishCourse success');
       return true;
     } catch (e, s) {
@@ -97,11 +114,13 @@ class InstructorCoursesDataSource {
   Future<bool> deleteCourse(String courseId) async {
     AppLogger.d('[$_tag] deleteCourse: $courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
       await _client
           .from('courses')
           .delete()
           .eq('id', courseId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', teacherId);
       AppLogger.success('[$_tag] deleteCourse success');
       return true;
     } catch (e, s) {

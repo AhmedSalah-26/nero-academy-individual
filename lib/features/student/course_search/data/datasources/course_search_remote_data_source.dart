@@ -59,7 +59,7 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
         teacher_id,
         category_id,
         categories(name_ar, name_en),
-        profiles!courses_instructor_id_fkey(name, avatar_url)
+        teachers!courses_teacher_id_fkey(display_name, avatar_url)
       ''');
 
       // Apply filters using dynamic query building
@@ -138,11 +138,11 @@ class CourseSearchRemoteDataSourceImpl implements CourseSearchRemoteDataSource {
                 (flashSaleEnd == null || !now.isAfter(flashSaleEnd));
 
             // Flatten nested data
-            if (courseJson['profiles'] != null) {
+            if (courseJson['teachers'] != null) {
               courseJson['instructor_name'] =
-                  courseJson['profiles']['name'] ?? '';
+                  courseJson['teachers']['display_name'] ?? '';
               courseJson['instructor_avatar'] =
-                  courseJson['profiles']['avatar_url'];
+                  courseJson['teachers']['avatar_url'];
             }
             if (courseJson['categories'] != null) {
               courseJson['category_name'] =

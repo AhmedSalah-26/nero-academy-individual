@@ -40,8 +40,7 @@ class CourseModel extends CourseEntity {
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
-    // Handle nested instructor profile
-    final instructor = json['profiles'] as Map<String, dynamic>?;
+    final teacher = json['teachers'] as Map<String, dynamic>?;
 
     return CourseModel(
       id: json['id'] as String,
@@ -51,9 +50,9 @@ class CourseModel extends CourseEntity {
       subtitleEn: json['subtitle_en'] as String?,
       thumbnailUrl: json['thumbnail_url'] as String?,
       previewVideoUrl: json['preview_video_url'] as String?,
-      instructorId: json['instructor_id'] as String,
-      instructorName: instructor?['name'] as String?,
-      instructorAvatarUrl: instructor?['avatar_url'] as String?,
+      instructorId: (json['teacher_id'] ?? json['instructor_id']) as String,
+      instructorName: teacher?['display_name'] as String?,
+      instructorAvatarUrl: teacher?['avatar_url'] as String?,
       categoryId: json['category_id'] as String?,
       level: CourseLevel.fromString(json['level'] as String?),
       language: json['language'] as String? ?? 'ar',
@@ -99,7 +98,7 @@ class CourseModel extends CourseEntity {
       'subtitle_en': subtitleEn,
       'thumbnail_url': thumbnailUrl,
       'preview_video_url': previewVideoUrl,
-      'instructor_id': instructorId,
+      'teacher_id': instructorId,
       'category_id': categoryId,
       'level': level.toJson(),
       'language': language,

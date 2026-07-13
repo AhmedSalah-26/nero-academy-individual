@@ -13,6 +13,15 @@ class InstructorCourseEditorDataSource {
 
   String get _userId => _client.auth.currentUser!.id;
 
+  Future<String?> _resolveTeacherId() async {
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    return teacher?['id'] as String?;
+  }
+
   /// Get categories for course editor
   Future<List<CategoryOption>> getCategories() async {
     AppLogger.d('[$_tag] getCategories');
@@ -42,11 +51,14 @@ class InstructorCourseEditorDataSource {
   Future<CourseDetails?> getCourseForEdit(String courseId) async {
     AppLogger.d('[$_tag] getCourseForEdit: $courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return null;
+
       final courseResponse = await _client
           .from('courses')
           .select()
           .eq('id', courseId)
-          .eq('instructor_id', _userId)
+          .eq('teacher_id', teacherId)
           .maybeSingle();
 
       if (courseResponse == null) {
@@ -164,10 +176,13 @@ class InstructorCourseEditorDataSource {
     AppLogger.d('[$_tag] createCourse: ${dto.titleAr}');
     try {
       final data = dto.toJson();
-      data['instructor_id'] = _userId;
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) {
+        throw Exception('Teacher profile is missing for the current user');
+      }
+      data['teacher_id'] = teacherId;
 
-      final response =
-          await _client.from('courses').insert(data).select().single();
+      final response = await _insertCourse(data);
       AppLogger.success('[$_tag] createCourse success: ${response['id']}');
       return response['id'] as String;
     } catch (e, s) {
@@ -176,16 +191,35 @@ class InstructorCourseEditorDataSource {
     }
   }
 
+  Future<Map<String, dynamic>> _insertCourse(Map<String, dynamic> data) async {
+    try {
+      return await _client.from('courses').insert(data).select().single();
+    } on PostgrestException catch (e) {
+      final requiresLegacyInstructorId =
+          e.code == '23502' && e.message.contains('instructor_id');
+      if (!requiresLegacyInstructorId) rethrow;
+
+      final legacyData = Map<String, dynamic>.from(data)
+        ..['instructor_id'] = _userId;
+      return await _client.from('courses').insert(legacyData).select().single();
+    }
+  }
+
   /// Update course
   Future<bool> updateCourse(String courseId, CourseUpdateDto dto) async {
     AppLogger.d('[$_tag] updateCourse: $courseId');
     try {
       final data = dto.toJson();
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) {
+        throw Exception('Teacher profile is missing for the current user');
+      }
+      data['teacher_id'] = teacherId;
       await _client
           .from('courses')
           .update(data)
           .eq('id', courseId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', teacherId);
       AppLogger.success('[$_tag] updateCourse success');
       return true;
     } catch (e, s) {

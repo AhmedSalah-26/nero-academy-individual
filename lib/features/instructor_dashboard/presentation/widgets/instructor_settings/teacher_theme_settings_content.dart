@@ -378,9 +378,6 @@ class _TeacherThemeSettingsContentState
   Color get _currentCardColor =>
       _previewMode == _ThemeModePreview.dark ? _darkCardColor : _lightCardColor;
 
-  TextEditingController get _currentCoverController =>
-      _coverControllerFor(_previewMode);
-
   TextEditingController get _currentLogoController =>
       _logoControllerFor(_previewMode);
 
@@ -393,11 +390,6 @@ class _TeacherThemeSettingsContentState
       mode == _ThemeModePreview.dark
           ? _darkLogoUrlController
           : _lightLogoUrlController;
-
-  Uint8List? get _currentCoverPreviewBytes =>
-      _previewMode == _ThemeModePreview.dark
-          ? _darkCoverPreviewBytes
-          : _lightCoverPreviewBytes;
 
   void _setCurrentPrimaryColor(Color color) {
     if (_previewMode == _ThemeModePreview.dark) {
@@ -730,19 +722,6 @@ class _TeacherThemeSettingsContentState
       padding: const EdgeInsets.all(16),
       children: [
         _HeaderCard(isDark: isDark),
-        const SizedBox(height: 14),
-        _ThemePreview(
-          primary: _currentPrimaryColor,
-          secondary: _currentSecondaryColor,
-          background: _currentBackgroundColor,
-          button: _currentButtonColor,
-          card: _currentCardColor,
-          logoUrl: _currentLogoController.text,
-          coverUrl: _currentCoverController.text,
-          logoBytes: _logoPreviewBytes,
-          coverBytes: _currentCoverPreviewBytes,
-          isDarkPreview: _previewMode == _ThemeModePreview.dark,
-        ),
         const SizedBox(height: 14),
         _ModeSelector(
           value: _previewMode,
@@ -1716,161 +1695,6 @@ class _ImagePreview extends StatelessWidget {
 
   Widget _placeholder() {
     return Icon(icon, color: AppColors.primary, size: 28);
-  }
-}
-
-class _ThemePreview extends StatelessWidget {
-  final Color primary;
-  final Color secondary;
-  final Color background;
-  final Color button;
-  final Color card;
-  final String logoUrl;
-  final String coverUrl;
-  final Uint8List? logoBytes;
-  final Uint8List? coverBytes;
-  final bool isDarkPreview;
-
-  const _ThemePreview({
-    required this.primary,
-    required this.secondary,
-    required this.background,
-    required this.button,
-    required this.card,
-    required this.logoUrl,
-    required this.coverUrl,
-    required this.logoBytes,
-    required this.coverBytes,
-    required this.isDarkPreview,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textColor = isDarkPreview ? AppColors.white : AppColors.textMainLight;
-    return Container(
-      height: 184,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primary.withValues(alpha: 0.35)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (coverBytes != null)
-            Image.memory(coverBytes!, fit: BoxFit.cover)
-          else if (coverUrl.trim().isNotEmpty)
-            Image.network(
-              coverUrl.trim(),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-          Container(color: background.withValues(alpha: 0.68)),
-          Positioned(
-            right: 18,
-            left: 18,
-            bottom: 18,
-            child: Row(
-              children: [
-                _LogoPreview(
-                  color: primary,
-                  url: logoUrl,
-                  bytes: logoBytes,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'تجربة الطالب',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(height: 8, width: 150, color: primary),
-                      const SizedBox(height: 7),
-                      Container(height: 8, width: 108, color: secondary),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          Container(
-                            width: 86,
-                            height: 34,
-                            decoration: BoxDecoration(
-                              color: button,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Container(
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: card,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: primary.withValues(alpha: 0.25),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LogoPreview extends StatelessWidget {
-  final Color color;
-  final String url;
-  final Uint8List? bytes;
-
-  const _LogoPreview({
-    required this.color,
-    required this.url,
-    required this.bytes,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child;
-    if (bytes != null) {
-      child = Image.memory(bytes!, fit: BoxFit.cover);
-    } else if (url.trim().isNotEmpty) {
-      child = Image.network(
-        url.trim(),
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Icon(Icons.school_rounded, color: color),
-      );
-    } else {
-      child = Icon(Icons.school_rounded, color: color);
-    }
-
-    return Container(
-      width: 62,
-      height: 62,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.55), width: 2),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: child,
-    );
   }
 }
 
