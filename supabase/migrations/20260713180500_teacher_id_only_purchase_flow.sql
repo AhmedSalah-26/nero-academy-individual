@@ -399,6 +399,19 @@ alter table public.manual_purchase_request_items
 alter table public.courses
   drop column if exists instructor_id;
 
+drop trigger if exists trigger_auto_instructor_earning on public.enrollments;
+drop policy if exists enrollments_select_instructor on public.enrollments;
+
+create policy enrollments_select_teacher
+on public.enrollments
+for select
+to authenticated
+using (
+  user_id = auth.uid()
+  or public.current_profile_role() = 'admin'
+  or teacher_id = public.current_teacher_id()
+);
+
 alter table public.enrollments
   drop column if exists instructor_id;
 
