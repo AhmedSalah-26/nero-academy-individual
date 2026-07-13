@@ -288,7 +288,7 @@ class _TeacherThemeSettingsContentState
         'cover_image_url': coverUrl ?? darkCoverUrl ?? lightCoverUrl,
       }).eq('id', teacherId);
 
-      _syncSelectedTeacherTheme(teacherId, logoUrl);
+      await _syncSelectedTeacherTheme(teacherId, logoUrl);
 
       if (!mounted) return;
       AnimatedSnackbar.showSuccess(
@@ -306,12 +306,13 @@ class _TeacherThemeSettingsContentState
     }
   }
 
-  void _syncSelectedTeacherTheme(String teacherId, String? logoUrl) {
+  Future<void> _syncSelectedTeacherTheme(
+      String teacherId, String? logoUrl) async {
     final selectedTeacher =
         TeacherContextService.instance.selectedTeacher.value;
     if (selectedTeacher == null || selectedTeacher.id != teacherId) return;
 
-    TeacherContextService.instance.selectedTeacher.value = SelectedTeacher(
+    await TeacherContextService.instance.updateSelectedTeacher(SelectedTeacher(
       id: selectedTeacher.id,
       name: selectedTeacher.name,
       avatarUrl: logoUrl ?? selectedTeacher.avatarUrl,
@@ -336,7 +337,7 @@ class _TeacherThemeSettingsContentState
         darkCoverUrl: _emptyToNull(_darkCoverUrlController.text),
         welcomeText: _emptyToNull(_welcomeController.text),
       ),
-    );
+    ));
   }
 
   Color get _currentPrimaryColor => _previewMode == _ThemeModePreview.dark

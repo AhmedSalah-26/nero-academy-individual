@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,6 +32,15 @@ class SelectedTeacher {
           (profile?['avatar_url'] as String?),
       theme: TeacherThemeConfig.fromJson(theme ?? json),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'display_name': name,
+      'avatar_url': avatarUrl,
+      ...theme.toJson(),
+    };
   }
 
   static Map<String, dynamic>? _firstMap(dynamic value) {
@@ -112,6 +123,30 @@ class TeacherThemeConfig {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'primary_color': _colorToHex(primaryColor),
+      'secondary_color': _colorToHex(secondaryColor),
+      'background_color': _colorToHex(backgroundColor),
+      'light_primary_color': _colorToHex(lightPrimaryColor),
+      'light_secondary_color': _colorToHex(lightSecondaryColor),
+      'light_background_color': _colorToHex(lightBackgroundColor),
+      'light_button_color': _colorToHex(lightButtonColor),
+      'light_card_color': _colorToHex(lightCardColor),
+      'dark_primary_color': _colorToHex(darkPrimaryColor),
+      'dark_secondary_color': _colorToHex(darkSecondaryColor),
+      'dark_background_color': _colorToHex(darkBackgroundColor),
+      'dark_button_color': _colorToHex(darkButtonColor),
+      'dark_card_color': _colorToHex(darkCardColor),
+      'logo_url': logoUrl,
+      'light_logo_url': lightLogoUrl,
+      'dark_logo_url': darkLogoUrl,
+      'light_cover_url': lightCoverUrl,
+      'dark_cover_url': darkCoverUrl,
+      'welcome_text': welcomeText,
+    };
+  }
+
   bool get hasColors =>
       primaryColor != null ||
       secondaryColor != null ||
@@ -162,6 +197,12 @@ class TeacherThemeConfig {
     );
     return colorValue == null ? null : Color(colorValue);
   }
+
+  static String? _colorToHex(Color? color) {
+    if (color == null) return null;
+    final value = color.toARGB32().toRadixString(16).padLeft(8, '0');
+    return '#${value.substring(2).toUpperCase()}';
+  }
 }
 
 class TeacherContextService {
@@ -171,6 +212,7 @@ class TeacherContextService {
 
   static const _selectedTeacherIdKey = 'nasaq_selected_teacher_id';
   static const _selectedTeacherNameKey = 'nasaq_selected_teacher_name';
+  static const _selectedTeacherJsonKey = 'nasaq_selected_teacher_json';
 
   final ValueNotifier<SelectedTeacher?> selectedTeacher = ValueNotifier(null);
 
@@ -293,6 +335,7 @@ class TeacherContextService {
     selectedTeacher.value = null;
     await _prefs?.remove(_selectedTeacherIdKey);
     await _prefs?.remove(_selectedTeacherNameKey);
+    await _prefs?.remove(_selectedTeacherJsonKey);
     AppLogger.success(
         '[TeacherContextService] Teacher cleared — reverting to نسق defaults');
   }
@@ -307,6 +350,26 @@ class TeacherContextService {
   }
 
   void _restoreCachedTeacher() {
+    final cachedJson = _prefs?.getString(_selectedTeacherJsonKey);
+    if (cachedJson != null) {
+      try {
+        final decoded = jsonDecode(cachedJson);
+        if (decoded is Map<String, dynamic>) {
+          final teacher = SelectedTeacher.fromJson(decoded);
+          AppLogger.i(
+              '🏫 [TeacherContextService] Restored cached teacher theme: ${teacher.name} (id: ${teacher.id})');
+          selectedTeacher.value = teacher;
+          return;
+        }
+      } catch (e, stack) {
+        AppLogger.e(
+          '[TeacherContextService] Failed to restore cached teacher theme',
+          e,
+          stack,
+        );
+      }
+    }
+
     final id = _prefs?.getString(_selectedTeacherIdKey);
     if (id == null) {
       AppLogger.d(
@@ -322,10 +385,18 @@ class TeacherContextService {
     );
   }
 
+  Future<void> updateSelectedTeacher(SelectedTeacher teacher) async {
+    await _setSelectedTeacher(teacher);
+  }
+
   Future<void> _setSelectedTeacher(SelectedTeacher teacher) async {
     selectedTeacher.value = teacher;
     await _prefs?.setString(_selectedTeacherIdKey, teacher.id);
     await _prefs?.setString(_selectedTeacherNameKey, teacher.name);
+    await _prefs?.setString(
+      _selectedTeacherJsonKey,
+      jsonEncode(teacher.toJson()),
+    );
     AppLogger.d(
         '🏫 [TeacherContextService] Teacher persisted to cache: ${teacher.name}');
   }
