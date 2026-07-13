@@ -14,13 +14,20 @@ class InstructorDashboardCubit extends Cubit<InstructorDashboardState> {
   InstructorDashboardCubit(this._repository)
       : super(InstructorDashboardState());
 
+  void _safeEmit(InstructorDashboardState newState) {
+    if (!isClosed) {
+      emit(newState);
+    }
+  }
+
   /// Load all dashboard data
   Future<void> loadAll() async {
     AppLogger.d('[$_tag] loadAll: Starting to load dashboard data');
-    emit(state.copyWith(status: InstructorDashboardStatus.loading));
+    _safeEmit(state.copyWith(status: InstructorDashboardStatus.loading));
     try {
       AppLogger.d('[$_tag] loadAll: Fetching dashboard stats...');
       final stats = await _repository.getDashboardStats();
+      if (isClosed) return;
       AppLogger.d(
           '[$_tag] loadAll: Stats received - totalEarnings: ${stats.totalEarnings}, availableBalance: ${stats.availableBalance}, pendingBalance: ${stats.pendingBalance}');
 
@@ -28,6 +35,7 @@ class InstructorDashboardCubit extends Cubit<InstructorDashboardState> {
           '[$_tag] loadAll: Fetching revenue chart (${state.startDate} - ${state.endDate})...');
       final revenueChart =
           await _repository.getRevenueChart(state.startDate, state.endDate);
+      if (isClosed) return;
       AppLogger.d(
           '[$_tag] loadAll: Revenue chart received - ${revenueChart.length} data points');
       if (revenueChart.isNotEmpty) {
@@ -41,19 +49,21 @@ class InstructorDashboardCubit extends Cubit<InstructorDashboardState> {
       AppLogger.d('[$_tag] loadAll: Fetching enrollments chart...');
       final enrollmentsChart =
           await _repository.getEnrollmentsChart(state.startDate, state.endDate);
+      if (isClosed) return;
       AppLogger.d(
           '[$_tag] loadAll: Enrollments chart received - ${enrollmentsChart.length} data points');
 
       AppLogger.success('[$_tag] loadAll: Dashboard data loaded successfully');
-      emit(state.copyWith(
+      _safeEmit(state.copyWith(
         status: InstructorDashboardStatus.success,
         stats: stats,
         revenueChart: revenueChart,
         enrollmentsChart: enrollmentsChart,
       ));
     } catch (e, s) {
+      if (isClosed) return;
       AppLogger.e('[$_tag] loadAll: Error loading dashboard data', e, s);
-      emit(state.copyWith(
+      _safeEmit(state.copyWith(
         status: InstructorDashboardStatus.error,
         errorMessage: e.toString(),
       ));
@@ -63,7 +73,7 @@ class InstructorDashboardCubit extends Cubit<InstructorDashboardState> {
   /// Set date range and reload charts
   Future<void> setDateRange(DateTime start, DateTime end) async {
     AppLogger.d('[$_tag] setDateRange: $start - $end');
-    emit(state.copyWith(
+    _safeEmit(state.copyWith(
       startDate: start,
       endDate: end,
       status: InstructorDashboardStatus.loading,
@@ -71,17 +81,20 @@ class InstructorDashboardCubit extends Cubit<InstructorDashboardState> {
 
     try {
       final revenueChart = await _repository.getRevenueChart(start, end);
+      if (isClosed) return;
       final enrollmentsChart =
           await _repository.getEnrollmentsChart(start, end);
+      if (isClosed) return;
 
-      emit(state.copyWith(
+      _safeEmit(state.copyWith(
         status: InstructorDashboardStatus.success,
         revenueChart: revenueChart,
         enrollmentsChart: enrollmentsChart,
       ));
     } catch (e, s) {
+      if (isClosed) return;
       AppLogger.e('[$_tag] setDateRange: Error loading chart data', e, s);
-      emit(state.copyWith(
+      _safeEmit(state.copyWith(
         status: InstructorDashboardStatus.error,
         errorMessage: e.toString(),
       ));
