@@ -66,8 +66,7 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       available_from,
       available_until,
       teacher_id,
-      instructor_id,
-      profiles!courses_instructor_id_fkey (id, name, avatar_url)
+      teachers!courses_teacher_id_fkey (id, profile_id, display_name, avatar_url)
     )
   ''';
 
@@ -169,13 +168,12 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
   }
 
   /// Get instructor profile data
-  Future<Map<String, dynamic>?> _getInstructorProfile(
-      String instructorId) async {
+  Future<Map<String, dynamic>?> _getInstructorProfile(String teacherId) async {
     try {
       final response = await _client
           .from('teachers')
           .select('display_name, avatar_url')
-          .eq('profile_id', instructorId)
+          .eq('id', teacherId)
           .maybeSingle();
 
       return response;

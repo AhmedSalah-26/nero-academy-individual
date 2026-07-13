@@ -38,8 +38,8 @@ class CourseDetailsRemoteDataSourceImpl
       // (e.g., instructor previewing draft/suspended course).
       final query = supabaseClient.from('courses').select('''
         *,
-        profiles!courses_instructor_id_fkey(
-          id, name, avatar_url
+        teachers!courses_teacher_id_fkey(
+          id, profile_id, display_name, avatar_url, bio, website_url, cover_image_url
         ),
         sections(
           id, course_id, title_ar, title_en, sort_order, is_published,
@@ -61,9 +61,10 @@ class CourseDetailsRemoteDataSourceImpl
       }
 
       final isPublished = data['is_published'] == true;
-      final instructorId = data['instructor_id'] as String?;
       final teacherId = data['teacher_id'] as String?;
-      final isOwnerInstructor = userId != null && instructorId == userId;
+      final teacher = data['teachers'] as Map<String, dynamic>?;
+      final teacherProfileId = teacher?['profile_id'] as String?;
+      final isOwnerInstructor = userId != null && teacherProfileId == userId;
       final selectedTeacherId =
           TeacherContextService.instance.selectedTeacherId;
 
@@ -87,76 +88,45 @@ class CourseDetailsRemoteDataSourceImpl
           : 0;
       data['total_quizzes'] = quizzesCount;
 
-      // Get instructor data from profiles and teachers
-      if (instructorId != null) {
+      // Get teacher data from teachers and profiles.
+      if (teacherId != null && teacherProfileId != null) {
         final profile = await supabaseClient.from('profiles').select('''
           id, name, headline_ar, headline_en, bio_ar, bio_en,
           avatar_url, expertise, social_links, is_verified_instructor
-        ''').eq('id', instructorId).limit(1).maybeSingle();
+        ''').eq('id', teacherProfileId).limit(1).maybeSingle();
 
-        final teacher = await supabaseClient.from('teachers').select('''
-          display_name, avatar_url, bio, website_url, cover_image_url
-        ''').eq('profile_id', instructorId).limit(1).maybeSingle();
-
-        // احسب عدد الكورسات المنشورة مباشرة من جدول courses
         final coursesCountResult = await supabaseClient
             .from('courses')
             .select('id')
-            .eq('instructor_id', instructorId)
+            .eq('teacher_id', teacherId)
             .eq('is_published', true);
         final liveTotalCourses = (coursesCountResult as List).length;
 
-        // احسب عدد الطلاب المسجلين مباشرة من جدول enrollments
         final studentsCountResult = await supabaseClient
             .from('enrollments')
             .select('user_id')
-            .eq('instructor_id', instructorId)
+            .eq('teacher_id', teacherId)
             .eq('status', 'active');
         final liveTotalStudents = (studentsCountResult as List).length;
 
-        if (profile != null) {
-          final merged = {
-            'id': profile['id'],
-            'display_name':
-                teacher?['display_name'] ?? profile['name'] ?? 'Instructor',
-            'headline_ar': profile['headline_ar'],
-            'headline_en': profile['headline_en'],
-            'bio_ar': profile['bio_ar'],
-            'bio_en': profile['bio_en'],
-            'avatar_url': teacher?['avatar_url'] ?? profile['avatar_url'],
-            'cover_image_url': teacher?['cover_image_url'],
-            'expertise': profile['expertise'],
-            'social_links': profile['social_links'],
-            'website_url': teacher?['website_url'],
-            'total_courses': liveTotalCourses,
-            'total_students': liveTotalStudents,
-            'average_rating': 0.0,
-            'is_verified': profile['is_verified_instructor'] ?? false,
-          };
-          data['instructor_profiles'] = merged;
-        } else {
-          // Use profiles data as fallback
-          final fallbackProfile = data['profiles'] as Map<String, dynamic>?;
-          if (fallbackProfile != null) {
-            data['instructor_profiles'] = {
-              'id': fallbackProfile['id'],
-              'display_name': fallbackProfile['name'],
-              'avatar_url': fallbackProfile['avatar_url'],
-              'headline_ar': null,
-              'headline_en': null,
-              'bio_ar': null,
-              'bio_en': null,
-              'cover_image_url': null,
-              'expertise': const <String>[],
-              'social_links': const <String, dynamic>{},
-              'website_url': null,
-              'total_students': liveTotalStudents,
-              'total_courses': liveTotalCourses,
-              'average_rating': 0.0,
-              'is_verified': false,
-            };
-          }
-        }
+        data['instructor_profiles'] = {
+          'id': teacherProfileId,
+          'display_name':
+              teacher?['display_name'] ?? profile?['name'] ?? 'Instructor',
+          'headline_ar': profile?['headline_ar'],
+          'headline_en': profile?['headline_en'],
+          'bio_ar': profile?['bio_ar'],
+          'bio_en': profile?['bio_en'],
+          'avatar_url': teacher?['avatar_url'] ?? profile?['avatar_url'],
+          'cover_image_url': teacher?['cover_image_url'],
+          'expertise': profile?['expertise'] ?? const <String>[],
+          'social_links': profile?['social_links'] ?? const <String, dynamic>{},
+          'website_url': teacher?['website_url'],
+          'total_courses': liveTotalCourses,
+          'total_students': liveTotalStudents,
+          'average_rating': 0.0,
+          'is_verified': profile?['is_verified_instructor'] ?? false,
+        };
       }
 
       // Check wishlist and cart status if user is logged in
@@ -621,7 +591,7 @@ class CourseDetailsRemoteDataSourceImpl
     try {
       final courseData = await supabaseClient
           .from('courses')
-          .select('instructor_id, price, discount_price, is_free')
+          .select('teacher_id, price, discount_price, is_free')
           .eq('id', courseId)
           .single();
 
@@ -642,6 +612,7 @@ class CourseDetailsRemoteDataSourceImpl
             'subtotal': 0,
             'discount': 0,
             'coupon_discount': 0,
+            'teacher_id': courseData['teacher_id'],
             'payment_method': 'free',
             'payment_status': 'paid',
             'paid_at': DateTime.now().toIso8601String(),
@@ -654,7 +625,7 @@ class CourseDetailsRemoteDataSourceImpl
       await supabaseClient.from('enrollments').insert({
         'user_id': userId,
         'course_id': courseId,
-        'instructor_id': courseData['instructor_id'],
+        'teacher_id': courseData['teacher_id'],
         'parent_enrollment_id': parentEnrollmentId,
         'status': 'active',
         'progress_percentage': 0,

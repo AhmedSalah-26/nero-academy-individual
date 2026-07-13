@@ -25,13 +25,16 @@ class CartItemModel extends CartItemEntity {
     // Parse course data if nested
     final course = json['courses'] as Map<String, dynamic>?;
 
-    // Handle instructor - can be from profiles (new) or instructor_profiles (old)
+    // Handle teacher - can be from teachers (new), profiles, or instructor_profiles (old)
     String? instructorName;
+    final teacher = course?['teachers'] as Map<String, dynamic>?;
     final profiles = course?['profiles'] as Map<String, dynamic>?;
     final instructorProfiles =
         course?['instructor_profiles'] as Map<String, dynamic>?;
 
-    if (profiles != null) {
+    if (teacher != null) {
+      instructorName = teacher['display_name'] as String?;
+    } else if (profiles != null) {
       instructorName = profiles['name'] as String?;
     } else if (instructorProfiles != null) {
       instructorName = instructorProfiles['display_name'] as String?;

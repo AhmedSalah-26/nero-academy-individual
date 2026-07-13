@@ -36,14 +36,12 @@ class EnrollmentModel extends EnrollmentEntity {
     String? instructorName;
     String? instructorAvatar;
 
-    // Get instructor_id from course (this is the actual instructor user id)
-    instructorId = course?['instructor_id'] as String?;
+    instructorId = course?['teacher_id'] as String?;
 
-    // Get instructor name and avatar from profiles
-    final profiles = course?['profiles'] as Map<String, dynamic>?;
-    if (profiles != null) {
-      instructorName = profiles['name'] as String?;
-      instructorAvatar = profiles['avatar_url'] as String?;
+    final teacher = course?['teachers'] as Map<String, dynamic>?;
+    if (teacher != null) {
+      instructorName = teacher['display_name'] as String?;
+      instructorAvatar = teacher['avatar_url'] as String?;
     }
 
     // Parse status

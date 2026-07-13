@@ -71,7 +71,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               id, title_ar, title_en, thumbnail_url, price, discount_price,
               is_flash_sale, flash_sale_start, flash_sale_end,
               currency, is_free, rating, rating_count,
-              profiles:instructor_id (name, avatar_url)
+              teachers!courses_teacher_id_fkey (display_name, avatar_url)
             )
           ''').eq('user_id', userId).order('created_at', ascending: false);
 
@@ -178,7 +178,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               id, title_ar, title_en, thumbnail_url, price, discount_price,
               is_flash_sale, flash_sale_start, flash_sale_end,
               currency, is_free, rating, rating_count,
-              profiles:instructor_id (name, avatar_url)
+              teachers!courses_teacher_id_fkey (display_name, avatar_url)
             )
           ''').single();
 
@@ -424,20 +424,11 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final courseData = await supabase
             .from('courses')
             .select(
-                'teacher_id, instructor_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
+                'teacher_id, price, discount_price, is_free, is_flash_sale, flash_sale_start, flash_sale_end, pricing_options')
             .eq('id', courseId)
             .single();
 
-        var teacherId = courseData['teacher_id'] as String?;
-        final instructorId = courseData['instructor_id'] as String?;
-        if (teacherId == null && instructorId != null) {
-          final teacher = await supabase
-              .from('teachers')
-              .select('id')
-              .eq('profile_id', instructorId)
-              .maybeSingle();
-          teacherId = teacher?['id'] as String?;
-        }
+        final teacherId = courseData['teacher_id'] as String?;
         if (teacherId == null) {
           throw const ValidationException(
               'Course is not assigned to an active teacher.');
@@ -498,7 +489,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           'effectivePrice': roundedPrice,
           'originalPrice': price, // Always pass the original course price
           'teacherId': teacherId,
-          'instructorId': instructorId,
           'pricingOption': item['pricing_option'],
         });
       }
@@ -560,7 +550,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         final priceAtAdd = processed['effectivePrice'] as double;
         final originalPrice = processed['originalPrice'] as double;
         final teacherId = processed['teacherId'] as String;
-        final instructorId = processed['instructorId'] as String?;
         final pricingOption = processed['pricingOption'];
         final itemCouponDiscount = processed['couponDiscount'] as double;
 
@@ -573,7 +562,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'user_id': userId,
             'course_id': courseId,
             'teacher_id': teacherId,
-            'instructor_id': instructorId,
             'price': priceAtAdd,
             'original_price': originalPrice,
             'discount': itemCouponDiscount,
@@ -598,7 +586,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               .insert({
                 'user_id': userId,
                 'course_id': courseId,
-                'instructor_id': instructorId,
+                'teacher_id': teacherId,
                 'parent_enrollment_id': parentEnrollmentId,
                 'status': 'active',
                 'progress_percentage': 0,
@@ -617,7 +605,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               '🛒 [Checkout] Enrollment created with ID: $enrollmentId');
 
           // Create instructor earning record (if paid course and has instructor)
-          if (priceAtAdd > 0 && instructorId != null) {
+          if (priceAtAdd > 0) {
             AppLogger.i('🛒 [Checkout] Creating instructor earning record...');
 
             try {
@@ -655,9 +643,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
                   '🛒 [Checkout] Failed to create instructor earning: $earningError');
               // Don't throw - enrollment was successful, just log the error
             }
-          } else {
-            AppLogger.w(
-                '🛒 [Checkout] Skipping earnings: effectivePrice=$priceAtAdd, instructorId=$instructorId');
           }
         } else {
           final existingStatus = existing['status'] as String?;
@@ -714,7 +699,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             id, title_ar, title_en, thumbnail_url, price, discount_price,
             is_flash_sale, flash_sale_start, flash_sale_end,
             currency, is_free, rating, rating_count,
-            profiles:instructor_id (name, avatar_url)
+            teachers!courses_teacher_id_fkey (display_name, avatar_url)
           ''')
           .eq('is_published', true)
           .order('enrolled_count', ascending: false)

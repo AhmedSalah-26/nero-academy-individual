@@ -182,26 +182,13 @@ class InstructorCourseEditorDataSource {
       }
       data['teacher_id'] = teacherId;
 
-      final response = await _insertCourse(data);
+      final response =
+          await _client.from('courses').insert(data).select().single();
       AppLogger.success('[$_tag] createCourse success: ${response['id']}');
       return response['id'] as String;
     } catch (e, s) {
       AppLogger.e('[$_tag] createCourse error', e, s);
       rethrow;
-    }
-  }
-
-  Future<Map<String, dynamic>> _insertCourse(Map<String, dynamic> data) async {
-    try {
-      return await _client.from('courses').insert(data).select().single();
-    } on PostgrestException catch (e) {
-      final requiresLegacyInstructorId =
-          e.code == '23502' && e.message.contains('instructor_id');
-      if (!requiresLegacyInstructorId) rethrow;
-
-      final legacyData = Map<String, dynamic>.from(data)
-        ..['instructor_id'] = _userId;
-      return await _client.from('courses').insert(legacyData).select().single();
     }
   }
 

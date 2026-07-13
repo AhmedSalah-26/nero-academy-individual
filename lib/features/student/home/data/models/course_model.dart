@@ -50,7 +50,7 @@ class CourseModel extends CourseEntity {
       subtitleEn: json['subtitle_en'] as String?,
       thumbnailUrl: json['thumbnail_url'] as String?,
       previewVideoUrl: json['preview_video_url'] as String?,
-      instructorId: (json['teacher_id'] ?? json['instructor_id']) as String,
+      instructorId: json['teacher_id'] as String,
       instructorName: teacher?['display_name'] as String?,
       instructorAvatarUrl: teacher?['avatar_url'] as String?,
       categoryId: json['category_id'] as String?,

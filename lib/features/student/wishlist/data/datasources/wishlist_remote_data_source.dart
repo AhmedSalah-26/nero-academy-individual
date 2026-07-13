@@ -130,7 +130,7 @@ class WishlistRemoteDataSourceImpl implements WishlistRemoteDataSource {
               id, title_ar, title_en, thumbnail_url, price, discount_price,
               is_flash_sale, flash_sale_start, flash_sale_end,
               currency, is_free, rating, rating_count,
-              profiles:instructor_id (name, avatar_url)
+              teachers!courses_teacher_id_fkey (display_name, avatar_url)
             )
           ''').single();
 

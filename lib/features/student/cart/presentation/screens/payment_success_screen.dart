@@ -38,36 +38,26 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     try {
       final supabase = Supabase.instance.client;
 
-      // Paid manual requests do not create enrollments until the instructor
-      // approves them, so resolve the instructor through the saved order item.
-      final requestItem = await Supabase.instance.client
+      final order = await supabase
+          .from('parent_enrollments')
+          .select('teacher_id')
+          .eq('id', widget.orderId)
+          .maybeSingle();
+
+      final teacherPhone =
+          await _loadTeacherProfilePhone(order?['teacher_id'] as String?);
+      if (teacherPhone != null) return teacherPhone;
+
+      final requestItem = await supabase
           .from('manual_purchase_request_items')
-          .select('instructor_id, course_id')
+          .select('teacher_id')
           .eq('parent_enrollment_id', widget.orderId)
           .limit(1)
           .maybeSingle();
 
-      final itemInstructorId = requestItem?['instructor_id'] as String?;
-      final itemPhone = await _loadProfilePhone(itemInstructorId);
-      if (itemPhone != null) {
-        return itemPhone;
-      }
-
-      // If instructor_id was not readable on the order item, resolve it through
-      // the course attached to the request.
-      final courseId = requestItem?['course_id'] as String?;
-      if (courseId != null) {
-        final course = await supabase
-            .from('courses')
-            .select('instructor_id')
-            .eq('id', courseId)
-            .maybeSingle();
-        final coursePhone =
-            await _loadProfilePhone(course?['instructor_id'] as String?);
-        if (coursePhone != null) {
-          return coursePhone;
-        }
-      }
+      final itemPhone =
+          await _loadTeacherProfilePhone(requestItem?['teacher_id'] as String?);
+      if (itemPhone != null) return itemPhone;
 
       // Fallback: If enrollment query failed (e.g. due to RLS on pending status),
       // get the main instructor/admin's phone number since this is an individual app.
@@ -85,6 +75,18 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
       debugPrint('[PaymentSuccess] Failed to load instructor phone: $e');
       return null;
     }
+  }
+
+  Future<String?> _loadTeacherProfilePhone(String? teacherId) async {
+    if (teacherId == null || teacherId.isEmpty) return null;
+
+    final teacher = await Supabase.instance.client
+        .from('teachers')
+        .select('profile_id')
+        .eq('id', teacherId)
+        .maybeSingle();
+
+    return _loadProfilePhone(teacher?['profile_id'] as String?);
   }
 
   Future<String?> _loadProfilePhone(String? profileId) async {

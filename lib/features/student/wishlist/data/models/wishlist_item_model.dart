@@ -23,11 +23,11 @@ class WishlistItemModel extends WishlistItemEntity {
   factory WishlistItemModel.fromJson(Map<String, dynamic> json) {
     final course = json['courses'] as Map<String, dynamic>?;
 
-    // Handle instructor name from profiles
+    // Handle teacher name from teachers
     String? instructorName;
-    final profiles = course?['profiles'] as Map<String, dynamic>?;
-    if (profiles != null) {
-      instructorName = profiles['name'] as String?;
+    final teacher = course?['teachers'] as Map<String, dynamic>?;
+    if (teacher != null) {
+      instructorName = teacher['display_name'] as String?;
     } else {
       instructorName = json['instructor_name'] as String?;
     }
