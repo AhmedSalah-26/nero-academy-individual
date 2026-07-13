@@ -439,6 +439,266 @@ class _TeacherThemeSettingsContentState
     }
   }
 
+  void _applyPreset(_TeacherThemePreset preset) {
+    setState(() {
+      _lightPrimaryColor = preset.lightPrimary;
+      _lightSecondaryColor = preset.lightSecondary;
+      _lightBackgroundColor = preset.lightBackground;
+      _lightButtonColor = preset.lightButton;
+      _lightCardColor = preset.lightCard;
+      _darkPrimaryColor = preset.darkPrimary;
+      _darkSecondaryColor = preset.darkSecondary;
+      _darkBackgroundColor = preset.darkBackground;
+      _darkButtonColor = preset.darkButton;
+      _darkCardColor = preset.darkCard;
+    });
+  }
+
+  bool _isPresetSelected(_TeacherThemePreset preset) {
+    return _sameColor(_lightPrimaryColor, preset.lightPrimary) &&
+        _sameColor(_lightSecondaryColor, preset.lightSecondary) &&
+        _sameColor(_lightBackgroundColor, preset.lightBackground) &&
+        _sameColor(_lightButtonColor, preset.lightButton) &&
+        _sameColor(_lightCardColor, preset.lightCard) &&
+        _sameColor(_darkPrimaryColor, preset.darkPrimary) &&
+        _sameColor(_darkSecondaryColor, preset.darkSecondary) &&
+        _sameColor(_darkBackgroundColor, preset.darkBackground) &&
+        _sameColor(_darkButtonColor, preset.darkButton) &&
+        _sameColor(_darkCardColor, preset.darkCard);
+  }
+
+  Future<void> _openCustomizeSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void updateState(VoidCallback update) {
+              setState(update);
+              setSheetState(() {});
+            }
+
+            return SafeArea(
+              child: FractionallySizedBox(
+                heightFactor: 0.9,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    24 + MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'تخصيص الثيم',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 14),
+                      _ModeSelector(
+                        value: _previewMode,
+                        onChanged: (value) {
+                          updateState(() => _previewMode = value);
+                        },
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildCustomizationSections(
+                        isDark: isDark,
+                        updateState: updateState,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomizationSections({
+    required bool isDark,
+    required void Function(VoidCallback update) updateState,
+  }) {
+    return Column(
+      children: [
+        _SectionCard(
+          title: 'الألوان',
+          subtitle: 'عدّل ألوان الوضع المختار من الأعلى',
+          isDark: isDark,
+          child: Column(
+            children: [
+              _ColorSelectorTile(
+                title: 'اللون الأساسي',
+                color: _currentPrimaryColor,
+                onTap: () => _openColorSheet(
+                  title: 'اللون الأساسي',
+                  selected: _currentPrimaryColor,
+                  onSelected: (color) =>
+                      updateState(() => _setCurrentPrimaryColor(color)),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'اللون الثانوي',
+                color: _currentSecondaryColor,
+                onTap: () => _openColorSheet(
+                  title: 'اللون الثانوي',
+                  selected: _currentSecondaryColor,
+                  onSelected: (color) =>
+                      updateState(() => _setCurrentSecondaryColor(color)),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'لون الخلفية',
+                color: _currentBackgroundColor,
+                onTap: () => _openColorSheet(
+                  title: 'لون الخلفية',
+                  selected: _currentBackgroundColor,
+                  onSelected: (color) =>
+                      updateState(() => _setCurrentBackgroundColor(color)),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'لون الأزرار',
+                color: _currentButtonColor,
+                onTap: () => _openColorSheet(
+                  title: 'لون الأزرار',
+                  selected: _currentButtonColor,
+                  onSelected: (color) =>
+                      updateState(() => _setCurrentButtonColor(color)),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'خلفية الكروت',
+                color: _currentCardColor,
+                onTap: () => _openColorSheet(
+                  title: 'خلفية الكروت',
+                  selected: _currentCardColor,
+                  onSelected: (color) =>
+                      updateState(() => _setCurrentCardColor(color)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'الصور',
+          subtitle: 'ارفع شعار المدرس وصورة كفر منفصلة لكل وضع',
+          isDark: isDark,
+          child: Column(
+            children: [
+              _ImageUploadTile(
+                title: 'الشعار',
+                subtitle: 'يظهر مع بيانات المدرس',
+                url: _currentLogoController.text,
+                bytes: _logoPreviewBytes,
+                isUploading: _isUploadingLogo,
+                icon: Icons.badge_rounded,
+                onUpload: () async {
+                  await _pickAndUploadImage(_ThemeImageTarget.logo);
+                  updateState(() {});
+                },
+                onClear: () {
+                  updateState(() {
+                    _currentLogoController.clear();
+                    _logoUrlController.clear();
+                    _logoPreviewBytes = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              _ImageUploadTile(
+                title: 'صورة الكفر - لايت مود',
+                subtitle: 'تظهر للطالب عند استخدام الوضع الفاتح',
+                url: _lightCoverUrlController.text,
+                bytes: _lightCoverPreviewBytes,
+                isUploading: _isUploadingLightCover,
+                icon: Icons.wallpaper_rounded,
+                wide: true,
+                onUpload: () async {
+                  await _pickAndUploadImage(
+                    _ThemeImageTarget.cover,
+                    mode: _ThemeModePreview.light,
+                  );
+                  updateState(() {});
+                },
+                onClear: () {
+                  updateState(() {
+                    _lightCoverUrlController.clear();
+                    _coverUrlController.clear();
+                    _lightCoverPreviewBytes = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              _ImageUploadTile(
+                title: 'صورة الكفر - دارك مود',
+                subtitle: 'تظهر للطالب عند استخدام الوضع الداكن',
+                url: _darkCoverUrlController.text,
+                bytes: _darkCoverPreviewBytes,
+                isUploading: _isUploadingDarkCover,
+                icon: Icons.wallpaper_rounded,
+                wide: true,
+                onUpload: () async {
+                  await _pickAndUploadImage(
+                    _ThemeImageTarget.cover,
+                    mode: _ThemeModePreview.dark,
+                  );
+                  updateState(() {});
+                },
+                onClear: () {
+                  updateState(() {
+                    _darkCoverUrlController.clear();
+                    _coverUrlController.clear();
+                    _darkCoverPreviewBytes = null;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'نص الترحيب',
+          subtitle: 'اختياري',
+          isDark: isDark,
+          child: TextField(
+            controller: _welcomeController,
+            minLines: 3,
+            maxLines: 5,
+            decoration: InputDecoration(
+              hintText: 'مثال: ابدأ رحلتك التعليمية بثقة',
+              filled: true,
+              fillColor: isDark ? AppColors.surfaceDark : AppColors.grey50,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -494,158 +754,21 @@ class _TeacherThemeSettingsContentState
           isDark: isDark,
         ),
         const SizedBox(height: 14),
-        _SectionCard(
-          title: 'الألوان',
-          subtitle: 'اختر ألوان الهوية من قوائم جاهزة',
+        _PresetThemeSection(
+          presets: _themePresets,
           isDark: isDark,
-          child: Column(
-            children: [
-              _ColorSelectorTile(
-                title: 'اللون الأساسي',
-                color: _currentPrimaryColor,
-                onTap: () => _openColorSheet(
-                  title: 'اللون الأساسي',
-                  selected: _currentPrimaryColor,
-                  onSelected: (color) =>
-                      setState(() => _setCurrentPrimaryColor(color)),
-                ),
-              ),
-              _ColorSelectorTile(
-                title: 'اللون الثانوي',
-                color: _currentSecondaryColor,
-                onTap: () => _openColorSheet(
-                  title: 'اللون الثانوي',
-                  selected: _currentSecondaryColor,
-                  onSelected: (color) =>
-                      setState(() => _setCurrentSecondaryColor(color)),
-                ),
-              ),
-              _ColorSelectorTile(
-                title: 'لون الخلفية',
-                color: _currentBackgroundColor,
-                onTap: () => _openColorSheet(
-                  title: 'لون الخلفية',
-                  selected: _currentBackgroundColor,
-                  onSelected: (color) =>
-                      setState(() => _setCurrentBackgroundColor(color)),
-                ),
-              ),
-              _ColorSelectorTile(
-                title: 'لون الأزرار',
-                color: _currentButtonColor,
-                onTap: () => _openColorSheet(
-                  title: 'لون الأزرار',
-                  selected: _currentButtonColor,
-                  onSelected: (color) =>
-                      setState(() => _setCurrentButtonColor(color)),
-                ),
-              ),
-              _ColorSelectorTile(
-                title: 'خلفية الكروت',
-                color: _currentCardColor,
-                onTap: () => _openColorSheet(
-                  title: 'خلفية الكروت',
-                  selected: _currentCardColor,
-                  onSelected: (color) =>
-                      setState(() => _setCurrentCardColor(color)),
-                ),
-              ),
-            ],
-          ),
+          isSelected: _isPresetSelected,
+          onSelected: _applyPreset,
         ),
         const SizedBox(height: 14),
-        _SectionCard(
-          title: 'الصور',
-          subtitle: 'ارفع شعار المدرس وصورة الكفر من الجهاز',
-          isDark: isDark,
-          child: Column(
-            children: [
-              _ImageUploadTile(
-                title: 'الشعار',
-                subtitle: 'يظهر مع بيانات المدرس',
-                url: _currentLogoController.text,
-                bytes: _logoPreviewBytes,
-                isUploading: _isUploadingLogo,
-                icon: Icons.badge_rounded,
-                onUpload: () => _pickAndUploadImage(_ThemeImageTarget.logo),
-                onClear: () {
-                  setState(() {
-                    _currentLogoController.clear();
-                    _logoUrlController.clear();
-                    _logoPreviewBytes = null;
-                  });
-                },
-              ),
-              const SizedBox(height: 12),
-              _ImageUploadTile(
-                title: 'صورة الكفر - لايت مود',
-                subtitle: 'تظهر للطالب عند استخدام الوضع الفاتح',
-                url: _lightCoverUrlController.text,
-                bytes: _lightCoverPreviewBytes,
-                isUploading: _isUploadingLightCover,
-                icon: Icons.wallpaper_rounded,
-                wide: true,
-                onUpload: () => _pickAndUploadImage(
-                  _ThemeImageTarget.cover,
-                  mode: _ThemeModePreview.light,
-                ),
-                onClear: () {
-                  setState(() {
-                    _lightCoverUrlController.clear();
-                    _coverUrlController.clear();
-                    _lightCoverPreviewBytes = null;
-                  });
-                },
-              ),
-              const SizedBox(height: 12),
-              _ImageUploadTile(
-                title: 'صورة الكفر - دارك مود',
-                subtitle: 'تظهر للطالب عند استخدام الوضع الداكن',
-                url: _darkCoverUrlController.text,
-                bytes: _darkCoverPreviewBytes,
-                isUploading: _isUploadingDarkCover,
-                icon: Icons.wallpaper_rounded,
-                wide: true,
-                onUpload: () => _pickAndUploadImage(
-                  _ThemeImageTarget.cover,
-                  mode: _ThemeModePreview.dark,
-                ),
-                onClear: () {
-                  setState(() {
-                    _darkCoverUrlController.clear();
-                    _coverUrlController.clear();
-                    _darkCoverPreviewBytes = null;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        _SectionCard(
-          title: 'نص الترحيب',
-          subtitle: 'اختياري',
-          isDark: isDark,
-          child: TextField(
-            controller: _welcomeController,
-            minLines: 3,
-            maxLines: 5,
-            decoration: InputDecoration(
-              hintText: 'مثال: ابدأ رحلتك التعليمية بثقة',
-              filled: true,
-              fillColor: isDark ? AppColors.surfaceDark : AppColors.grey50,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                ),
-              ),
+        SizedBox(
+          height: 54,
+          child: OutlinedButton.icon(
+            onPressed: _openCustomizeSheet,
+            icon: const Icon(Icons.tune_rounded),
+            label: const Text(
+              'تخصيص الثيم',
+              style: TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ),
@@ -821,6 +944,8 @@ class _TeacherThemeSettingsContentState
     return '#${value.substring(2).toUpperCase()}';
   }
 
+  static bool _sameColor(Color a, Color b) => a.toARGB32() == b.toARGB32();
+
   static final List<Color> _colorPresets = [
     const Color(0xFF20E5DC),
     const Color(0xFF117CFF),
@@ -833,6 +958,362 @@ class _TeacherThemeSettingsContentState
     const Color(0xFFF4F9FA),
     const Color(0xFFFFFFFF),
   ];
+
+  static const List<_TeacherThemePreset> _themePresets = [
+    _TeacherThemePreset(
+      name: 'نسق نيونو',
+      tagline: 'هوية تقنية مضيئة',
+      icon: Icons.auto_awesome_rounded,
+      lightPrimary: Color(0xFF00BEB8),
+      lightSecondary: Color(0xFF117CFF),
+      lightBackground: Color(0xFFF4FBFC),
+      lightButton: Color(0xFF00BEB8),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFF20E5DC),
+      darkSecondary: Color(0xFF117CFF),
+      darkBackground: Color(0xFF01060B),
+      darkButton: Color(0xFF20E5DC),
+      darkCard: Color(0xFF071720),
+    ),
+    _TeacherThemePreset(
+      name: 'ملكي',
+      tagline: 'أزرق فاخر وذهبي',
+      icon: Icons.workspace_premium_rounded,
+      lightPrimary: Color(0xFF1D4ED8),
+      lightSecondary: Color(0xFFD97706),
+      lightBackground: Color(0xFFF7FAFF),
+      lightButton: Color(0xFF1D4ED8),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFF60A5FA),
+      darkSecondary: Color(0xFFFBBF24),
+      darkBackground: Color(0xFF07111F),
+      darkButton: Color(0xFF2563EB),
+      darkCard: Color(0xFF0D1B2E),
+    ),
+    _TeacherThemePreset(
+      name: 'زمرد',
+      tagline: 'هادئ ومنظم',
+      icon: Icons.eco_rounded,
+      lightPrimary: Color(0xFF059669),
+      lightSecondary: Color(0xFF0EA5E9),
+      lightBackground: Color(0xFFF2FBF7),
+      lightButton: Color(0xFF059669),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFF34D399),
+      darkSecondary: Color(0xFF38BDF8),
+      darkBackground: Color(0xFF03110D),
+      darkButton: Color(0xFF10B981),
+      darkCard: Color(0xFF08251C),
+    ),
+    _TeacherThemePreset(
+      name: 'ياقوت',
+      tagline: 'قوي وواضح',
+      icon: Icons.local_fire_department_rounded,
+      lightPrimary: Color(0xFFDC2626),
+      lightSecondary: Color(0xFFF97316),
+      lightBackground: Color(0xFFFFF7F5),
+      lightButton: Color(0xFFDC2626),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFFFB7185),
+      darkSecondary: Color(0xFFF97316),
+      darkBackground: Color(0xFF160608),
+      darkButton: Color(0xFFE11D48),
+      darkCard: Color(0xFF2A1013),
+    ),
+    _TeacherThemePreset(
+      name: 'بنفسج',
+      tagline: 'إبداعي وناعم',
+      icon: Icons.blur_on_rounded,
+      lightPrimary: Color(0xFF7C3AED),
+      lightSecondary: Color(0xFFEC4899),
+      lightBackground: Color(0xFFFBF7FF),
+      lightButton: Color(0xFF7C3AED),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFFA78BFA),
+      darkSecondary: Color(0xFFF472B6),
+      darkBackground: Color(0xFF10081F),
+      darkButton: Color(0xFF8B5CF6),
+      darkCard: Color(0xFF1E1233),
+    ),
+    _TeacherThemePreset(
+      name: 'فضي',
+      tagline: 'بسيط واحترافي',
+      icon: Icons.diamond_rounded,
+      lightPrimary: Color(0xFF475569),
+      lightSecondary: Color(0xFF06B6D4),
+      lightBackground: Color(0xFFF7FAFC),
+      lightButton: Color(0xFF334155),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFFCBD5E1),
+      darkSecondary: Color(0xFF22D3EE),
+      darkBackground: Color(0xFF0A0F16),
+      darkButton: Color(0xFF0891B2),
+      darkCard: Color(0xFF111827),
+    ),
+    _TeacherThemePreset(
+      name: 'شمس',
+      tagline: 'مشرق وحيوي',
+      icon: Icons.wb_sunny_rounded,
+      lightPrimary: Color(0xFFF59E0B),
+      lightSecondary: Color(0xFF14B8A6),
+      lightBackground: Color(0xFFFFFBEB),
+      lightButton: Color(0xFFF59E0B),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFFFBBF24),
+      darkSecondary: Color(0xFF2DD4BF),
+      darkBackground: Color(0xFF141006),
+      darkButton: Color(0xFFD97706),
+      darkCard: Color(0xFF261D0A),
+    ),
+    _TeacherThemePreset(
+      name: 'محترف',
+      tagline: 'داشبورد نظيف',
+      icon: Icons.analytics_rounded,
+      lightPrimary: Color(0xFF0F766E),
+      lightSecondary: Color(0xFF2563EB),
+      lightBackground: Color(0xFFF6F8FB),
+      lightButton: Color(0xFF0F766E),
+      lightCard: Color(0xFFFFFFFF),
+      darkPrimary: Color(0xFF2DD4BF),
+      darkSecondary: Color(0xFF60A5FA),
+      darkBackground: Color(0xFF060B12),
+      darkButton: Color(0xFF14B8A6),
+      darkCard: Color(0xFF0F172A),
+    ),
+  ];
+}
+
+class _TeacherThemePreset {
+  final String name;
+  final String tagline;
+  final IconData icon;
+  final Color lightPrimary;
+  final Color lightSecondary;
+  final Color lightBackground;
+  final Color lightButton;
+  final Color lightCard;
+  final Color darkPrimary;
+  final Color darkSecondary;
+  final Color darkBackground;
+  final Color darkButton;
+  final Color darkCard;
+
+  const _TeacherThemePreset({
+    required this.name,
+    required this.tagline,
+    required this.icon,
+    required this.lightPrimary,
+    required this.lightSecondary,
+    required this.lightBackground,
+    required this.lightButton,
+    required this.lightCard,
+    required this.darkPrimary,
+    required this.darkSecondary,
+    required this.darkBackground,
+    required this.darkButton,
+    required this.darkCard,
+  });
+}
+
+class _PresetThemeSection extends StatelessWidget {
+  final List<_TeacherThemePreset> presets;
+  final bool isDark;
+  final bool Function(_TeacherThemePreset preset) isSelected;
+  final ValueChanged<_TeacherThemePreset> onSelected;
+
+  const _PresetThemeSection({
+    required this.presets,
+    required this.isDark,
+    required this.isSelected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      title: 'ثيمات جاهزة',
+      subtitle: 'اختار ثيم فاخر وخصصه بعدين لو محتاج',
+      isDark: isDark,
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: presets.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.86,
+        ),
+        itemBuilder: (context, index) {
+          final preset = presets[index];
+          return _PresetThemeCard(
+            preset: preset,
+            selected: isSelected(preset),
+            darkPreview: isDark,
+            onTap: () => onSelected(preset),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _PresetThemeCard extends StatelessWidget {
+  final _TeacherThemePreset preset;
+  final bool selected;
+  final bool darkPreview;
+  final VoidCallback onTap;
+
+  const _PresetThemeCard({
+    required this.preset,
+    required this.selected,
+    required this.darkPreview,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = darkPreview ? preset.darkPrimary : preset.lightPrimary;
+    final secondary =
+        darkPreview ? preset.darkSecondary : preset.lightSecondary;
+    final background =
+        darkPreview ? preset.darkBackground : preset.lightBackground;
+    final card = darkPreview ? preset.darkCard : preset.lightCard;
+    final textColor = darkPreview ? AppColors.white : AppColors.textMainLight;
+    final mutedColor = textColor.withValues(alpha: 0.68);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected ? primary : primary.withValues(alpha: 0.22),
+            width: selected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: selected ? 0.18 : 0.08),
+              blurRadius: selected ? 18 : 10,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(preset.icon, color: primary),
+                ),
+                const Spacer(),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 150),
+                  child: selected
+                      ? Container(
+                          key: const ValueKey('selected'),
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            color: AppColors.white,
+                            size: 18,
+                          ),
+                        )
+                      : Icon(
+                          Icons.radio_button_unchecked_rounded,
+                          key: const ValueKey('idle'),
+                          color: primary.withValues(alpha: 0.45),
+                        ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: card,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: primary.withValues(alpha: 0.16)),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 6,
+                          width: 54,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        Container(
+                          height: 6,
+                          width: 36,
+                          decoration: BoxDecoration(
+                            color: secondary,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    margin: const EdgeInsetsDirectional.only(end: 6),
+                    decoration: BoxDecoration(
+                      color: primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              preset.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.w900,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              preset.tagline,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: mutedColor, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _HeaderCard extends StatelessWidget {
