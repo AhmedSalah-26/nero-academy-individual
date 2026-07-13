@@ -75,8 +75,7 @@ class _PaymentsHistoryViewState extends State<_PaymentsHistoryView>
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor =
-        isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -177,7 +176,7 @@ class _OrdersStatusTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           bottom: BorderSide(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -188,10 +187,10 @@ class _OrdersStatusTabBar extends StatelessWidget {
         controller: controller,
         isScrollable: true,
         tabAlignment: TabAlignment.start,
-        labelColor: isDark ? AppColors.primaryOnDark : AppColors.primary,
+        labelColor: Theme.of(context).colorScheme.tertiary,
         unselectedLabelColor:
             isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-        indicatorColor: isDark ? AppColors.primaryOnDark : AppColors.primary,
+        indicatorColor: Theme.of(context).colorScheme.tertiary,
         indicatorWeight: 2.6,
         dividerColor: Colors.transparent,
         labelPadding: const EdgeInsets.symmetric(horizontal: 18),
@@ -228,15 +227,15 @@ class _OrdersTabPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final actionColor = Theme.of(context).colorScheme.tertiary;
 
     return RefreshIndicator(
       onRefresh: () async {
         HapticFeedback.mediumImpact();
         await context.read<PaymentsHistoryCubit>().loadPayments(_userId);
       },
-      color: AppColors.primary,
-      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      color: actionColor,
+      backgroundColor: Theme.of(context).cardColor,
       child: payments.isEmpty
           ? const _OrdersEmptyTabState()
           : ListView.builder(
@@ -257,6 +256,7 @@ class _OrdersEmptyTabState extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -265,7 +265,7 @@ class _OrdersEmptyTabState extends StatelessWidget {
         Icon(
           Icons.receipt_long_outlined,
           size: 46,
-          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+          color: primary,
         ),
         const SizedBox(height: 14),
         Text(
@@ -340,6 +340,7 @@ class _OrdersEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRtl = context.locale.languageCode == 'ar';
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return SafeArea(
       child: Center(
@@ -356,19 +357,15 @@ class _OrdersEmptyState extends StatelessWidget {
                   height: 96,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:
-                        (isDark ? AppColors.primaryOnDark : AppColors.primary)
-                            .withValues(alpha: isDark ? 0.18 : 0.12),
+                    color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
                     border: Border.all(
-                      color:
-                          (isDark ? AppColors.primaryOnDark : AppColors.primary)
-                              .withValues(alpha: isDark ? 0.32 : 0.18),
+                      color: primary.withValues(alpha: isDark ? 0.32 : 0.18),
                     ),
                   ),
                   child: Icon(
                     Icons.receipt_long_rounded,
                     size: 44,
-                    color: isDark ? AppColors.primaryOnDark : AppColors.primary,
+                    color: primary,
                   ),
                 ),
                 const SizedBox(height: 22),

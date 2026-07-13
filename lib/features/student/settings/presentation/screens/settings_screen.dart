@@ -314,6 +314,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         // Help Center - expandable card
         ExpandableCard(
+          backgroundColor: Theme.of(context).cardColor,
           header: Row(
             children: [
               Icon(Icons.help_outline, size: 22, color: buttonColor),
@@ -370,6 +371,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 8),
         // Privacy Policy - expandable card
         ExpandableCard(
+          backgroundColor: Theme.of(context).cardColor,
           header: Row(
             children: [
               Icon(Icons.shield_outlined, size: 22, color: buttonColor),
@@ -432,6 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 8),
         // Terms of Service - expandable card
         ExpandableCard(
+          backgroundColor: Theme.of(context).cardColor,
           header: Row(
             children: [
               Icon(Icons.description_outlined, size: 22, color: buttonColor),

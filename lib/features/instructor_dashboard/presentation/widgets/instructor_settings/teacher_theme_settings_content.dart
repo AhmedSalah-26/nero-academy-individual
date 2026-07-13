@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:lms_platform/core/animations/animations.dart';
+import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/core/services/teacher_context_service.dart';
 import 'package:lms_platform/core/theme/app_colors.dart';
 
@@ -177,6 +178,8 @@ class _TeacherThemeSettingsContentState
   Future<void> _pickAndUploadImage(_ThemeImageTarget target) async {
     final teacherId = _teacherId;
     if (teacherId == null) return;
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
 
     final image = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -203,7 +206,7 @@ class _TeacherThemeSettingsContentState
       final fileName = target == _ThemeImageTarget.cover
           ? '${modePrefix}_theme_cover.jpg'
           : '${modePrefix}_theme_logo.jpg';
-      final path = 'teacher_themes/$teacherId/$fileName';
+      final path = '$userId/teacher_themes/$teacherId/$fileName';
 
       await _client.storage.from('avatars').uploadBinary(
             path,
@@ -227,7 +230,8 @@ class _TeacherThemeSettingsContentState
           _logoUrlController.text = cacheBusted;
         }
       });
-    } catch (_) {
+    } catch (e, stack) {
+      AppLogger.e('[TeacherTheme] Failed to upload theme image', e, stack);
       if (!mounted) return;
       AnimatedSnackbar.showError(
         context: context,
