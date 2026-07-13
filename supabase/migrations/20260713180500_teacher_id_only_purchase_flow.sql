@@ -393,6 +393,49 @@ with check (
   or public.current_profile_role() = 'admin'
 );
 
+drop table if exists public.instructor_earnings cascade;
+
+do $$
+declare
+  policy_row record;
+begin
+  for policy_row in
+    select schemaname, tablename, policyname
+    from pg_policies
+    where schemaname = 'public'
+      and (
+        coalesce(qual, '') ilike '%instructor_id%'
+        or coalesce(with_check, '') ilike '%instructor_id%'
+      )
+  loop
+    execute format(
+      'drop policy if exists %I on %I.%I',
+      policy_row.policyname,
+      policy_row.schemaname,
+      policy_row.tablename
+    );
+  end loop;
+end $$;
+
+do $$
+declare
+  trigger_row record;
+begin
+  for trigger_row in
+    select event_object_schema, event_object_table, trigger_name
+    from information_schema.triggers
+    where event_object_schema = 'public'
+      and action_statement ilike '%instructor_id%'
+  loop
+    execute format(
+      'drop trigger if exists %I on %I.%I',
+      trigger_row.trigger_name,
+      trigger_row.event_object_schema,
+      trigger_row.event_object_table
+    );
+  end loop;
+end $$;
+
 alter table public.manual_purchase_request_items
   drop column if exists instructor_id;
 
@@ -414,5 +457,23 @@ using (
 
 alter table public.enrollments
   drop column if exists instructor_id;
+
+do $$
+declare
+  column_row record;
+begin
+  for column_row in
+    select table_schema, table_name
+    from information_schema.columns
+    where table_schema = 'public'
+      and column_name = 'instructor_id'
+  loop
+    execute format(
+      'alter table %I.%I drop column if exists instructor_id cascade',
+      column_row.table_schema,
+      column_row.table_name
+    );
+  end loop;
+end $$;
 
 commit;
