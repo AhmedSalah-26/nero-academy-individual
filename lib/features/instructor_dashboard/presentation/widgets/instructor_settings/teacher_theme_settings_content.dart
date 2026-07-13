@@ -36,11 +36,13 @@ class _TeacherThemeSettingsContentState
 
   bool _isLoading = true;
   bool _isSaving = false;
-  bool _isUploadingCover = false;
+  bool _isUploadingLightCover = false;
+  bool _isUploadingDarkCover = false;
   bool _isUploadingLogo = false;
   String? _teacherId;
   String? _error;
-  Uint8List? _coverPreviewBytes;
+  Uint8List? _lightCoverPreviewBytes;
+  Uint8List? _darkCoverPreviewBytes;
   Uint8List? _logoPreviewBytes;
 
   Color _lightPrimaryColor = _parseColor(_defaultPrimary);
@@ -175,11 +177,15 @@ class _TeacherThemeSettingsContentState
     }
   }
 
-  Future<void> _pickAndUploadImage(_ThemeImageTarget target) async {
+  Future<void> _pickAndUploadImage(
+    _ThemeImageTarget target, {
+    _ThemeModePreview? mode,
+  }) async {
     final teacherId = _teacherId;
     if (teacherId == null) return;
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return;
+    final uploadMode = mode ?? _previewMode;
 
     final image = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -192,8 +198,13 @@ class _TeacherThemeSettingsContentState
     final bytes = await image.readAsBytes();
     setState(() {
       if (target == _ThemeImageTarget.cover) {
-        _isUploadingCover = true;
-        _coverPreviewBytes = bytes;
+        if (uploadMode == _ThemeModePreview.dark) {
+          _isUploadingDarkCover = true;
+          _darkCoverPreviewBytes = bytes;
+        } else {
+          _isUploadingLightCover = true;
+          _lightCoverPreviewBytes = bytes;
+        }
       } else {
         _isUploadingLogo = true;
         _logoPreviewBytes = bytes;
@@ -202,7 +213,7 @@ class _TeacherThemeSettingsContentState
 
     try {
       final modePrefix =
-          _previewMode == _ThemeModePreview.dark ? 'dark' : 'light';
+          uploadMode == _ThemeModePreview.dark ? 'dark' : 'light';
       final fileName = target == _ThemeImageTarget.cover
           ? '${modePrefix}_theme_cover.jpg'
           : '${modePrefix}_theme_logo.jpg';
@@ -223,10 +234,10 @@ class _TeacherThemeSettingsContentState
 
       setState(() {
         if (target == _ThemeImageTarget.cover) {
-          _currentCoverController.text = cacheBusted;
+          _coverControllerFor(uploadMode).text = cacheBusted;
           _coverUrlController.text = cacheBusted;
         } else {
-          _currentLogoController.text = cacheBusted;
+          _logoControllerFor(uploadMode).text = cacheBusted;
           _logoUrlController.text = cacheBusted;
         }
       });
@@ -241,7 +252,11 @@ class _TeacherThemeSettingsContentState
       if (mounted) {
         setState(() {
           if (target == _ThemeImageTarget.cover) {
-            _isUploadingCover = false;
+            if (uploadMode == _ThemeModePreview.dark) {
+              _isUploadingDarkCover = false;
+            } else {
+              _isUploadingLightCover = false;
+            }
           } else {
             _isUploadingLogo = false;
           }
@@ -278,7 +293,7 @@ class _TeacherThemeSettingsContentState
         'dark_background_color': _colorToHex(_darkBackgroundColor),
         'dark_button_color': _colorToHex(_darkButtonColor),
         'dark_card_color': _colorToHex(_darkCardColor),
-        'logo_url': coverUrl,
+        'logo_url': logoUrl,
         'light_cover_url': lightCoverUrl,
         'dark_cover_url': darkCoverUrl,
         'light_logo_url': lightLogoUrl,
@@ -364,14 +379,25 @@ class _TeacherThemeSettingsContentState
       _previewMode == _ThemeModePreview.dark ? _darkCardColor : _lightCardColor;
 
   TextEditingController get _currentCoverController =>
-      _previewMode == _ThemeModePreview.dark
+      _coverControllerFor(_previewMode);
+
+  TextEditingController get _currentLogoController =>
+      _logoControllerFor(_previewMode);
+
+  TextEditingController _coverControllerFor(_ThemeModePreview mode) =>
+      mode == _ThemeModePreview.dark
           ? _darkCoverUrlController
           : _lightCoverUrlController;
 
-  TextEditingController get _currentLogoController =>
-      _previewMode == _ThemeModePreview.dark
+  TextEditingController _logoControllerFor(_ThemeModePreview mode) =>
+      mode == _ThemeModePreview.dark
           ? _darkLogoUrlController
           : _lightLogoUrlController;
+
+  Uint8List? get _currentCoverPreviewBytes =>
+      _previewMode == _ThemeModePreview.dark
+          ? _darkCoverPreviewBytes
+          : _lightCoverPreviewBytes;
 
   void _setCurrentPrimaryColor(Color color) {
     if (_previewMode == _ThemeModePreview.dark) {
@@ -454,7 +480,7 @@ class _TeacherThemeSettingsContentState
           logoUrl: _currentLogoController.text,
           coverUrl: _currentCoverController.text,
           logoBytes: _logoPreviewBytes,
-          coverBytes: _coverPreviewBytes,
+          coverBytes: _currentCoverPreviewBytes,
           isDarkPreview: _previewMode == _ThemeModePreview.dark,
         ),
         const SizedBox(height: 14),
@@ -552,19 +578,43 @@ class _TeacherThemeSettingsContentState
               ),
               const SizedBox(height: 12),
               _ImageUploadTile(
-                title: 'صورة الكفر',
-                subtitle: 'تظهر في الصفحة الرئيسية للطالب',
-                url: _currentCoverController.text,
-                bytes: _coverPreviewBytes,
-                isUploading: _isUploadingCover,
+                title: 'صورة الكفر - لايت مود',
+                subtitle: 'تظهر للطالب عند استخدام الوضع الفاتح',
+                url: _lightCoverUrlController.text,
+                bytes: _lightCoverPreviewBytes,
+                isUploading: _isUploadingLightCover,
                 icon: Icons.wallpaper_rounded,
                 wide: true,
-                onUpload: () => _pickAndUploadImage(_ThemeImageTarget.cover),
+                onUpload: () => _pickAndUploadImage(
+                  _ThemeImageTarget.cover,
+                  mode: _ThemeModePreview.light,
+                ),
                 onClear: () {
                   setState(() {
-                    _currentCoverController.clear();
+                    _lightCoverUrlController.clear();
                     _coverUrlController.clear();
-                    _coverPreviewBytes = null;
+                    _lightCoverPreviewBytes = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              _ImageUploadTile(
+                title: 'صورة الكفر - دارك مود',
+                subtitle: 'تظهر للطالب عند استخدام الوضع الداكن',
+                url: _darkCoverUrlController.text,
+                bytes: _darkCoverPreviewBytes,
+                isUploading: _isUploadingDarkCover,
+                icon: Icons.wallpaper_rounded,
+                wide: true,
+                onUpload: () => _pickAndUploadImage(
+                  _ThemeImageTarget.cover,
+                  mode: _ThemeModePreview.dark,
+                ),
+                onClear: () {
+                  setState(() {
+                    _darkCoverUrlController.clear();
+                    _coverUrlController.clear();
+                    _darkCoverPreviewBytes = null;
                   });
                 },
               ),
@@ -603,7 +653,10 @@ class _TeacherThemeSettingsContentState
         SizedBox(
           height: 56,
           child: ElevatedButton.icon(
-            onPressed: _isSaving || _isUploadingCover || _isUploadingLogo
+            onPressed: _isSaving ||
+                    _isUploadingLightCover ||
+                    _isUploadingDarkCover ||
+                    _isUploadingLogo
                 ? null
                 : _saveTheme,
             icon: _isSaving
