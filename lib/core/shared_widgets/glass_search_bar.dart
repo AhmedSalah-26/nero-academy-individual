@@ -49,7 +49,7 @@ class GlassSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     final fieldTextStyle = textStyle ??
         TextStyle(
           fontSize: 15,

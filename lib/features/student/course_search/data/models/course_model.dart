@@ -1,4 +1,5 @@
 import 'package:lms_platform/features/student/course_search/domain/entities/course_entity.dart';
+import 'package:lms_platform/core/utils/text_encoding_utils.dart';
 
 /// Course Model - Data Model with JSON serialization
 class CourseModel extends CourseEntity {
@@ -24,8 +25,10 @@ class CourseModel extends CourseEntity {
   factory CourseModel.fromJson(Map<String, dynamic> json) {
     return CourseModel(
       id: json['id']?.toString() ?? '',
-      title: json['title'] ?? '',
-      instructorName: json['instructor_name'] ?? json['instructorName'] ?? '',
+      title: TextEncodingUtils.clean(json['title'] as String?),
+      instructorName: TextEncodingUtils.clean(
+          json['instructor_name'] as String? ??
+              json['instructorName'] as String?),
       instructorAvatar: json['instructor_avatar'] ?? json['instructorAvatar'],
       thumbnailUrl: json['thumbnail_url'] ?? json['thumbnailUrl'] ?? '',
       rating: (json['rating'] ?? 0).toDouble(),
@@ -38,7 +41,8 @@ class CourseModel extends CourseEntity {
               : null,
       badge: json['badge'],
       categoryId: json['category_id'] ?? json['categoryId'],
-      categoryName: json['category_name'] ?? json['categoryName'],
+      categoryName: TextEncodingUtils.clean(
+          json['category_name'] as String? ?? json['categoryName'] as String?),
       durationMinutes: json['duration_minutes'] ?? json['durationMinutes'],
       lectureCount: json['lecture_count'] ?? json['lectureCount'],
       level: json['level'],

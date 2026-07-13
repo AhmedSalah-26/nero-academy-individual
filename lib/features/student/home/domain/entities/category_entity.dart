@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:lms_platform/core/utils/text_encoding_utils.dart';
 
 /// Category Entity - Pure Dart Object
 class CategoryEntity extends Equatable {
@@ -28,11 +29,11 @@ class CategoryEntity extends Equatable {
     this.isActive = true,
   });
 
-  String getName(String locale) =>
-      locale == 'ar' ? (nameAr ?? nameEn ?? '') : (nameEn ?? nameAr ?? '');
-  String getDescription(String locale) => locale == 'ar'
+  String getName(String locale) => TextEncodingUtils.clean(
+      locale == 'ar' ? (nameAr ?? nameEn ?? '') : (nameEn ?? nameAr ?? ''));
+  String getDescription(String locale) => TextEncodingUtils.clean(locale == 'ar'
       ? (descriptionAr ?? descriptionEn ?? '')
-      : (descriptionEn ?? descriptionAr ?? '');
+      : (descriptionEn ?? descriptionAr ?? ''));
 
   bool get isParentCategory => parentId == null;
 

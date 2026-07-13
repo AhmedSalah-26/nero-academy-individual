@@ -31,7 +31,7 @@ class GlassIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     final actionColor = Theme.of(context).colorScheme.tertiary;
     final numberBadgeScale = compactBadge ? 0.78 : 1.0;
     const borderWidth = 1.5;

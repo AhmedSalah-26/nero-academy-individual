@@ -26,7 +26,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -68,7 +68,7 @@ class ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -171,7 +171,7 @@ class CourseThumbnailPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     return Container(
       width: size,
       height: size,
@@ -179,7 +179,7 @@ class CourseThumbnailPlaceholder extends StatelessWidget {
         color: primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(Icons.school_outlined, color: primary, size: 28),
+      child: const Icon(Icons.school_outlined, color: primary, size: 28),
     );
   }
 }
@@ -245,7 +245,7 @@ class StudentProfileSliverHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    const primary = AppColors.primary;
     return SliverAppBar(
       expandedHeight: 118,
       toolbarHeight: 58,

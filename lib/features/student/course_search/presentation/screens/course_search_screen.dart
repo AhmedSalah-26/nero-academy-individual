@@ -64,6 +64,7 @@ class _CourseSearchScreenState extends State<CourseSearchScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         children: [
           // Header with search bar
@@ -169,7 +170,7 @@ class _CourseSearchScreenState extends State<CourseSearchScreen> {
               runSpacing: 8,
               children: state.categories.map((category) {
                 return _buildSearchChip(
-                  category.name,
+                  category.displayName,
                   Icons.category_outlined,
                   isDark,
                   theme,

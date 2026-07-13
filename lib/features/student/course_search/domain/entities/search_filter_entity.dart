@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:lms_platform/core/utils/text_encoding_utils.dart';
 
 /// Sort Options for Course Search
 enum CourseSortOption {
@@ -124,6 +125,8 @@ class CategoryEntity extends Equatable {
     this.iconName,
     this.courseCount = 0,
   });
+
+  String get displayName => TextEncodingUtils.clean(name);
 
   @override
   List<Object?> get props => [id, name, iconName, courseCount];
