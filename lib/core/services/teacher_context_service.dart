@@ -185,7 +185,7 @@ class TeacherThemeConfig {
       isDarkMode ? darkLogoUrl ?? logoUrl : lightLogoUrl ?? logoUrl;
 
   String? coverFor(bool isDarkMode) =>
-      isDarkMode ? darkCoverUrl ?? logoUrl : lightCoverUrl ?? logoUrl;
+      isDarkMode ? darkCoverUrl : lightCoverUrl;
 
   static Color? _parseColor(String? value) {
     if (value == null || value.trim().isEmpty) return null;

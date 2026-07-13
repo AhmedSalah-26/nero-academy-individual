@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:lms_platform/core/theme/app_colors.dart';
 import 'package:lms_platform/core/services/teacher_context_service.dart';
 
 class SelectTeacherScreen extends StatefulWidget {
@@ -52,9 +53,18 @@ class _SelectTeacherScreenState extends State<SelectTeacherScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('اختيار المدرس')),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text('اختيار المدرس'),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: theme.colorScheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+      ),
       body: FutureBuilder<List<SelectedTeacher>>(
         future: _teachersFuture,
         builder: (context, snapshot) {
@@ -84,59 +94,185 @@ class _SelectTeacherScreenState extends State<SelectTeacherScreen> {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: teachers.length + (_errorMessage == null ? 1 : 2),
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Text(
-                  'اختر المدرس الذي تريد متابعة كورساته. يمكنك تغيير المدرس النشط لاحقا من حسابك.',
-                  style: theme.textTheme.bodyMedium,
-                );
-              }
-
-              if (_errorMessage != null && index == 1) {
-                return Text(
-                  _errorMessage!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w700,
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'اختر المدرس الذي تريد متابعة كورساته. يمكنك تغيير المدرس النشط لاحقا من حسابك.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                      color: isDark
+                          ? AppColors.textMutedDark
+                          : AppColors.textMutedLight,
+                    ),
                   ),
-                );
-              }
-
-              final teacherIndex = index - (_errorMessage == null ? 1 : 2);
-              final teacher = teachers[teacherIndex];
-              final isSaving = _savingTeacherId == teacher.id;
-
-              return Card(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: teacher.avatarUrl == null
-                        ? null
-                        : NetworkImage(teacher.avatarUrl!),
-                    child: teacher.avatarUrl == null
-                        ? const Icon(Icons.person_rounded)
-                        : null,
-                  ),
-                  title: Text(teacher.name),
-                  subtitle: teacher.theme.welcomeText == null
-                      ? null
-                      : Text(teacher.theme.welcomeText!),
-                  trailing: isSaving
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.chevron_right_rounded),
-                  onTap: isSaving ? null : () => _selectTeacher(teacher),
                 ),
-              );
-            },
+              ),
+              if (_errorMessage != null)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                sliver: SliverGrid.builder(
+                  itemCount: teachers.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 14,
+                    childAspectRatio: 0.86,
+                  ),
+                  itemBuilder: (context, index) {
+                    final teacher = teachers[index];
+                    final isSaving = _savingTeacherId == teacher.id;
+
+                    return _TeacherChoiceCard(
+                      teacher: teacher,
+                      isSaving: isSaving,
+                      isDark: isDark,
+                      onTap: isSaving ? null : () => _selectTeacher(teacher),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _TeacherChoiceCard extends StatelessWidget {
+  final SelectedTeacher teacher;
+  final bool isSaving;
+  final bool isDark;
+  final VoidCallback? onTap;
+
+  const _TeacherChoiceCard({
+    required this.teacher,
+    required this.isSaving,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = teacher.theme.primaryFor(isDark) ??
+        Theme.of(context).colorScheme.primary;
+    final cardColor = teacher.theme.cardFor(isDark) ??
+        (isDark ? AppColors.cardDark : AppColors.white);
+    final logoUrl = teacher.theme.logoFor(isDark) ?? teacher.avatarUrl;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: primary.withValues(alpha: 0.24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primary.withValues(alpha: isDark ? 0.14 : 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: double.infinity,
+                  color: primary.withValues(alpha: 0.12),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (logoUrl != null && logoUrl.trim().isNotEmpty)
+                        Image.network(
+                          logoUrl.trim(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _TeacherPlaceholder(color: primary),
+                        )
+                      else
+                        _TeacherPlaceholder(color: primary),
+                      if (isSaving)
+                        Container(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              teacher.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TeacherPlaceholder extends StatelessWidget {
+  final Color color;
+
+  const _TeacherPlaceholder({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.16),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.person_rounded,
+          color: color,
+          size: 34,
+        ),
       ),
     );
   }
