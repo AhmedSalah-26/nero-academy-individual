@@ -9,7 +9,7 @@ class EnrollmentModel extends EnrollmentEntity {
     super.titleAr,
     super.titleEn,
     super.thumbnailUrl,
-    super.instructorId,
+    super.teacherId,
     super.instructorName,
     super.instructorAvatar,
     super.progressPercentage,
@@ -32,11 +32,11 @@ class EnrollmentModel extends EnrollmentEntity {
     final course = json['courses'] as Map<String, dynamic>?;
 
     // Handle instructor name, id and avatar
-    String? instructorId;
+    String? teacherId;
     String? instructorName;
     String? instructorAvatar;
 
-    instructorId = course?['teacher_id'] as String?;
+    teacherId = course?['teacher_id'] as String?;
 
     final teacher = course?['teachers'] as Map<String, dynamic>?;
     if (teacher != null) {
@@ -67,7 +67,7 @@ class EnrollmentModel extends EnrollmentEntity {
       titleAr: course?['title_ar'] as String?,
       titleEn: course?['title_en'] as String?,
       thumbnailUrl: course?['thumbnail_url'] as String?,
-      instructorId: instructorId,
+      teacherId: teacherId,
       instructorName: instructorName,
       instructorAvatar: instructorAvatar,
       progressPercentage: progress,
@@ -126,7 +126,7 @@ class EnrollmentModel extends EnrollmentEntity {
       titleAr: titleAr,
       titleEn: titleEn,
       thumbnailUrl: thumbnailUrl,
-      instructorId: instructorId,
+      teacherId: teacherId,
       instructorName: instructorName ?? this.instructorName,
       instructorAvatar: instructorAvatar ?? this.instructorAvatar,
       progressPercentage: progressPercentage,

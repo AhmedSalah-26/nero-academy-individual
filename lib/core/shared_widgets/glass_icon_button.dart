@@ -30,19 +30,17 @@ class GlassIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    const primary = AppColors.primary;
-    final actionColor = Theme.of(context).colorScheme.tertiary;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final actionColor = theme.colorScheme.tertiary;
     final numberBadgeScale = compactBadge ? 0.78 : 1.0;
     const borderWidth = 1.5;
     final radius = BorderRadius.circular(borderRadius);
     final innerRadius = BorderRadius.circular(borderRadius - borderWidth);
     final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.15)
-        : primary.withValues(alpha: 0.28);
-    final fillColor = isDark
-        ? AppColors.surfaceDark.withValues(alpha: 0.86)
-        : Colors.white.withValues(alpha: 0.74);
+        ? actionColor.withValues(alpha: 0.28)
+        : actionColor.withValues(alpha: 0.32);
+    final fillColor = theme.cardColor.withValues(alpha: isDark ? 0.84 : 0.78);
 
     return Stack(
       clipBehavior: Clip.none,
@@ -68,8 +66,7 @@ class GlassIconButton extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: iconSize,
-                    color: iconColor ??
-                        (isDark ? AppColors.textMainDark : primary),
+                    color: iconColor ?? actionColor,
                   ),
                 ),
               ),

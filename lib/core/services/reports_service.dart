@@ -145,7 +145,7 @@ class ReportsRemoteDataSource {
       final courseReports = await _client
           .from('course_reports')
           .select(
-              '*, course:courses!inner(title_ar, title_en, instructor_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
+              '*, course:courses!inner(title_ar, title_en, teacher_id), reporter:profiles!course_reports_user_id_fkey(name, avatar_url)')
           .order('created_at', ascending: false);
 
       final reviewReports = await _client

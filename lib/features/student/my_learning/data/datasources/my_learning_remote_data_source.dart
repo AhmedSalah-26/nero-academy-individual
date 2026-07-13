@@ -105,9 +105,9 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       // Enrich with instructor data
       final enrichedEnrollments = <EnrollmentModel>[];
       for (final enrollment in enrollments) {
-        if (enrollment.instructorId != null) {
+        if (enrollment.teacherId != null) {
           final instructorData =
-              await _getInstructorProfile(enrollment.instructorId!);
+              await _getInstructorProfile(enrollment.teacherId!);
           if (instructorData != null) {
             enrichedEnrollments.add(enrollment.copyWithInstructor(
               instructorName: instructorData['display_name'] as String?,
@@ -149,9 +149,9 @@ class MyLearningRemoteDataSourceImpl implements MyLearningRemoteDataSource {
       // Get instructor full data from instructor_profiles
       final enrollment = EnrollmentModel.fromJson(response);
 
-      if (enrollment.instructorId != null) {
+      if (enrollment.teacherId != null) {
         final instructorData =
-            await _getInstructorProfile(enrollment.instructorId!);
+            await _getInstructorProfile(enrollment.teacherId!);
         if (instructorData != null) {
           final enriched = enrollment.copyWithInstructor(
             instructorName: instructorData['display_name'] as String?,

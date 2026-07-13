@@ -192,7 +192,7 @@ class ForumsListCubit extends Cubit<ForumsListState> {
       final coursesResponse = await _supabase
           .from('courses')
           .select('id, title_ar, title_en')
-          .eq('instructor_id', userId)
+          .eq('teacher_id', userId)
           .order('created_at', ascending: false);
 
       final courses = coursesResponse as List;

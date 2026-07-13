@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class  LocaleKeys {
+abstract class LocaleKeys {
   static const app_name = 'app_name';
   static const splash_slogan = 'splash_slogan';
   static const clear_all = 'clear_all';
@@ -65,8 +65,10 @@ abstract class  LocaleKeys {
   static const error_state_server_message = 'error_state.server_message';
   static const error_state_not_found_title = 'error_state.not_found_title';
   static const error_state_not_found_message = 'error_state.not_found_message';
-  static const error_state_unauthorized_title = 'error_state.unauthorized_title';
-  static const error_state_unauthorized_message = 'error_state.unauthorized_message';
+  static const error_state_unauthorized_title =
+      'error_state.unauthorized_title';
+  static const error_state_unauthorized_message =
+      'error_state.unauthorized_message';
   static const error_state_generic_title = 'error_state.generic_title';
   static const error_state_generic_message = 'error_state.generic_message';
   static const error_state = 'error_state';
@@ -96,7 +98,8 @@ abstract class  LocaleKeys {
   static const auth_name_required = 'auth.name_required';
   static const auth_phone_placeholder = 'auth.phone_placeholder';
   static const auth_password_placeholder = 'auth.password_placeholder';
-  static const auth_create_password_placeholder = 'auth.create_password_placeholder';
+  static const auth_create_password_placeholder =
+      'auth.create_password_placeholder';
   static const auth_password_hint = 'auth.password_hint';
   static const auth_create_account = 'auth.create_account';
   static const auth_or_login_with = 'auth.or_login_with';
@@ -121,21 +124,26 @@ abstract class  LocaleKeys {
   static const auth_expertise_placeholder = 'auth.expertise_placeholder';
   static const auth_expertise_hint = 'auth.expertise_hint';
   static const auth_student_email = 'auth.student_email';
-  static const auth_student_email_placeholder = 'auth.student_email_placeholder';
+  static const auth_student_email_placeholder =
+      'auth.student_email_placeholder';
   static const auth_link_student = 'auth.link_student';
   static const auth_link_student_hint = 'auth.link_student_hint';
   static const auth_instructor_fields_title = 'auth.instructor_fields_title';
   static const auth_parent_fields_title = 'auth.parent_fields_title';
   static const auth_optional = 'auth.optional';
-  static const auth_errors_invalid_credentials = 'auth.errors.invalid_credentials';
-  static const auth_errors_email_already_in_use = 'auth.errors.email_already_in_use';
+  static const auth_errors_invalid_credentials =
+      'auth.errors.invalid_credentials';
+  static const auth_errors_email_already_in_use =
+      'auth.errors.email_already_in_use';
   static const auth_errors_weak_password = 'auth.errors.weak_password';
   static const auth_errors_user_not_found = 'auth.errors.user_not_found';
-  static const auth_errors_email_not_confirmed = 'auth.errors.email_not_confirmed';
+  static const auth_errors_email_not_confirmed =
+      'auth.errors.email_not_confirmed';
   static const auth_errors_session_expired = 'auth.errors.session_expired';
   static const auth_errors_user_banned = 'auth.errors.user_banned';
   static const auth_errors_user_inactive = 'auth.errors.user_inactive';
-  static const auth_errors_email_not_registered = 'auth.errors.email_not_registered';
+  static const auth_errors_email_not_registered =
+      'auth.errors.email_not_registered';
   static const auth_errors = 'auth.errors';
   static const auth_login_required = 'auth.login_required';
   static const auth_login_with_phone = 'auth.login_with_phone';
@@ -167,8 +175,10 @@ abstract class  LocaleKeys {
   static const auth_governorate = 'auth.governorate';
   static const auth_city = 'auth.city';
   static const auth_select = 'auth.select';
-  static const auth_confirm_password_placeholder = 'auth.confirm_password_placeholder';
-  static const auth_confirm_password_required = 'auth.confirm_password_required';
+  static const auth_confirm_password_placeholder =
+      'auth.confirm_password_placeholder';
+  static const auth_confirm_password_required =
+      'auth.confirm_password_required';
   static const auth_passwords_dont_match = 'auth.passwords_dont_match';
   static const auth_complete_profile = 'auth.complete_profile';
   static const auth_signup_step1_subtitle = 'auth.signup_step1_subtitle';
@@ -186,10 +196,13 @@ abstract class  LocaleKeys {
   static const auth_photo_subtitle = 'auth.photo_subtitle';
   static const auth_instructor_info = 'auth.instructor_info';
   static const auth_instructor_subtitle = 'auth.instructor_subtitle';
-  static const auth_reset_password_done_title = 'auth.reset_password_done_title';
-  static const auth_reset_password_done_subtitle = 'auth.reset_password_done_subtitle';
+  static const auth_reset_password_done_title =
+      'auth.reset_password_done_title';
+  static const auth_reset_password_done_subtitle =
+      'auth.reset_password_done_subtitle';
   static const auth_reset_password_new_title = 'auth.reset_password_new_title';
-  static const auth_reset_password_new_subtitle = 'auth.reset_password_new_subtitle';
+  static const auth_reset_password_new_subtitle =
+      'auth.reset_password_new_subtitle';
   static const auth_new_password = 'auth.new_password';
   static const auth_change_password = 'auth.change_password';
   static const auth_reset_link_invalid = 'auth.reset_link_invalid';
@@ -201,7 +214,8 @@ abstract class  LocaleKeys {
   static const auth_otp_code = 'auth.otp_code';
   static const auth_otp_code_hint = 'auth.otp_code_hint';
   static const auth_otp_required = 'auth.otp_required';
-  static const auth_verify_and_change_password = 'auth.verify_and_change_password';
+  static const auth_verify_and_change_password =
+      'auth.verify_and_change_password';
   static const auth_reset_success = 'auth.reset_success';
   static const auth_resend_code = 'auth.resend_code';
   static const auth_send_reset_code = 'auth.send_reset_code';
@@ -317,11 +331,13 @@ abstract class  LocaleKeys {
   static const payment_back_to_home = 'payment.back_to_home';
   static const payment_pending_confirmation = 'payment.pending_confirmation';
   static const payment_request_submitted = 'payment.request_submitted';
-  static const payment_manual_request_subtitle = 'payment.manual_request_subtitle';
+  static const payment_manual_request_subtitle =
+      'payment.manual_request_subtitle';
   static const payment_operation_id = 'payment.operation_id';
   static const payment_admin_whatsapp = 'payment.admin_whatsapp';
   static const payment_instructor_whatsapp = 'payment.instructor_whatsapp';
-  static const payment_instructor_whatsapp_unavailable = 'payment.instructor_whatsapp_unavailable';
+  static const payment_instructor_whatsapp_unavailable =
+      'payment.instructor_whatsapp_unavailable';
   static const payment_contact_whatsapp = 'payment.contact_whatsapp';
   static const payment_whatsapp_message = 'payment.whatsapp_message';
   static const payment_copied = 'payment.copied';
@@ -385,7 +401,8 @@ abstract class  LocaleKeys {
   static const interests_suggest_topic = 'interests.suggest_topic';
   static const interests_continue_btn = 'interests.continue_btn';
   static const interests_selected = 'interests.selected';
-  static const interests_suggest_dialog_title = 'interests.suggest_dialog_title';
+  static const interests_suggest_dialog_title =
+      'interests.suggest_dialog_title';
   static const interests_suggest_dialog_hint = 'interests.suggest_dialog_hint';
   static const interests_suggest_success = 'interests.suggest_success';
   static const interests = 'interests';
@@ -432,13 +449,17 @@ abstract class  LocaleKeys {
   static const settings_edit_profile = 'settings.edit_profile';
   static const settings_verify_phone = 'settings.verify_phone';
   static const settings_phone_verified = 'settings.phone_verified';
-  static const settings_phone_already_verified = 'settings.phone_already_verified';
+  static const settings_phone_already_verified =
+      'settings.phone_already_verified';
   static const settings_phone_not_verified = 'settings.phone_not_verified';
   static const settings_help_center = 'settings.help_center';
-  static const settings_help_center_description = 'settings.help_center_description';
+  static const settings_help_center_description =
+      'settings.help_center_description';
   static const settings_terms_of_service = 'settings.terms_of_service';
-  static const settings_terms_of_service_description = 'settings.terms_of_service_description';
-  static const settings_privacy_policy_description = 'settings.privacy_policy_description';
+  static const settings_terms_of_service_description =
+      'settings.terms_of_service_description';
+  static const settings_privacy_policy_description =
+      'settings.privacy_policy_description';
   static const settings_delete_account = 'settings.delete_account';
   static const settings_delete_warning = 'settings.delete_warning';
   static const settings_danger_zone = 'settings.danger_zone';
@@ -453,12 +474,14 @@ abstract class  LocaleKeys {
   static const notifications = 'notifications';
   static const help_support_title = 'help_support.title';
   static const help_support_how_can_we_help = 'help_support.how_can_we_help';
-  static const help_support_search_placeholder = 'help_support.search_placeholder';
+  static const help_support_search_placeholder =
+      'help_support.search_placeholder';
   static const help_support_common_topics = 'help_support.common_topics';
   static const help_support_top_questions = 'help_support.top_questions';
   static const help_support_view_all_faqs = 'help_support.view_all_faqs';
   static const help_support_still_need_help = 'help_support.still_need_help';
-  static const help_support_support_available = 'help_support.support_available';
+  static const help_support_support_available =
+      'help_support.support_available';
   static const help_support_live_chat = 'help_support.live_chat';
   static const help_support_email_us = 'help_support.email_us';
   static const help_support_account = 'help_support.account';
@@ -545,17 +568,22 @@ abstract class  LocaleKeys {
   static const course_details_instructor = 'course_details.instructor';
   static const course_details_rating = 'course_details.rating';
   static const course_details_show_more = 'course_details.show_more';
-  static const course_details_student_reviews = 'course_details.student_reviews';
+  static const course_details_student_reviews =
+      'course_details.student_reviews';
   static const course_details_free = 'course_details.free';
   static const course_details_off = 'course_details.off';
   static const course_details_enroll_now = 'course_details.enroll_now';
   static const course_details_go_to_cart = 'course_details.go_to_cart';
   static const course_details_start_learning = 'course_details.start_learning';
-  static const course_details_continue_learning = 'course_details.continue_learning';
+  static const course_details_continue_learning =
+      'course_details.continue_learning';
   static const course_details_not_found = 'course_details.not_found';
-  static const course_details_preview_not_available = 'course_details.preview_not_available';
-  static const course_details_invalid_preview_link = 'course_details.invalid_preview_link';
-  static const course_details_cannot_open_preview = 'course_details.cannot_open_preview';
+  static const course_details_preview_not_available =
+      'course_details.preview_not_available';
+  static const course_details_invalid_preview_link =
+      'course_details.invalid_preview_link';
+  static const course_details_cannot_open_preview =
+      'course_details.cannot_open_preview';
   static const course_details_courses = 'course_details.courses';
   static const course_details_get_for_free = 'course_details.get_for_free';
   static const course_details = 'course_details';
@@ -582,7 +610,8 @@ abstract class  LocaleKeys {
   static const instructor_reviews = 'instructor.reviews';
   static const instructor_no_reviews = 'instructor.no_reviews';
   static const instructor_search_instructors = 'instructor.search_instructors';
-  static const instructor_filter_by_expertise = 'instructor.filter_by_expertise';
+  static const instructor_filter_by_expertise =
+      'instructor.filter_by_expertise';
   static const instructor_min_students = 'instructor.min_students';
   static const instructor_min_courses = 'instructor.min_courses';
   static const instructor_most_students = 'instructor.most_students';
@@ -621,27 +650,38 @@ abstract class  LocaleKeys {
   static const course_player_no_notes_desc = 'course_player.no_notes_desc';
   static const course_player_at = 'course_player.at';
   static const course_player_no_bookmarks = 'course_player.no_bookmarks';
-  static const course_player_no_bookmarks_desc = 'course_player.no_bookmarks_desc';
+  static const course_player_no_bookmarks_desc =
+      'course_player.no_bookmarks_desc';
   static const course_player_go_to_lesson = 'course_player.go_to_lesson';
   static const course_player_no_questions = 'course_player.no_questions';
-  static const course_player_no_questions_desc = 'course_player.no_questions_desc';
+  static const course_player_no_questions_desc =
+      'course_player.no_questions_desc';
   static const course_player_ask_question = 'course_player.ask_question';
   static const course_player_answered = 'course_player.answered';
   static const course_player_answers = 'course_player.answers';
   static const course_player_no_answers_yet = 'course_player.no_answers_yet';
   static const course_player_instructor = 'course_player.instructor';
-  static const course_player_cannot_upvote_own_answer = 'course_player.cannot_upvote_own_answer';
-  static const course_player_question_title_hint = 'course_player.question_title_hint';
-  static const course_player_question_content_hint = 'course_player.question_content_hint';
+  static const course_player_cannot_upvote_own_answer =
+      'course_player.cannot_upvote_own_answer';
+  static const course_player_question_title_hint =
+      'course_player.question_title_hint';
+  static const course_player_question_content_hint =
+      'course_player.question_content_hint';
   static const course_player_mark_complete = 'course_player.mark_complete';
   static const course_player_complete_course = 'course_player.complete_course';
-  static const course_player_course_completed_title = 'course_player.course_completed_title';
-  static const course_player_course_completed_message = 'course_player.course_completed_message';
-  static const course_player_certificate_earned = 'course_player.certificate_earned';
-  static const course_player_view_certificate = 'course_player.view_certificate';
-  static const course_player_back_to_learning = 'course_player.back_to_learning';
+  static const course_player_course_completed_title =
+      'course_player.course_completed_title';
+  static const course_player_course_completed_message =
+      'course_player.course_completed_message';
+  static const course_player_certificate_earned =
+      'course_player.certificate_earned';
+  static const course_player_view_certificate =
+      'course_player.view_certificate';
+  static const course_player_back_to_learning =
+      'course_player.back_to_learning';
   static const course_player_no_attachments = 'course_player.no_attachments';
-  static const course_player_no_announcements = 'course_player.no_announcements';
+  static const course_player_no_announcements =
+      'course_player.no_announcements';
   static const course_player_note_hint = 'course_player.note_hint';
   static const course_player_quizzes = 'course_player.quizzes';
   static const course_player_no_quizzes = 'course_player.no_quizzes';
@@ -656,7 +696,8 @@ abstract class  LocaleKeys {
   static const course_player_your_rating = 'course_player.your_rating';
   static const course_player_write_review = 'course_player.write_review';
   static const course_player_submit_rating = 'course_player.submit_rating';
-  static const course_player_rating_submitted = 'course_player.rating_submitted';
+  static const course_player_rating_submitted =
+      'course_player.rating_submitted';
   static const course_player_update_rating = 'course_player.update_rating';
   static const course_player_no_rating = 'course_player.no_rating';
   static const course_player_rate_now = 'course_player.rate_now';
@@ -666,10 +707,13 @@ abstract class  LocaleKeys {
   static const course_player_forward_10 = 'course_player.forward_10';
   static const course_player_playback_speed = 'course_player.playback_speed';
   static const course_player_fullscreen = 'course_player.fullscreen';
-  static const course_player_video_unavailable = 'course_player.video_unavailable';
-  static const course_player_video_unavailable_desc = 'course_player.video_unavailable_desc';
+  static const course_player_video_unavailable =
+      'course_player.video_unavailable';
+  static const course_player_video_unavailable_desc =
+      'course_player.video_unavailable_desc';
   static const course_player_select_rating = 'course_player.select_rating';
-  static const course_player_rating_submit_error = 'course_player.rating_submit_error';
+  static const course_player_rating_submit_error =
+      'course_player.rating_submit_error';
   static const course_player_review_count = 'course_player.review_count';
   static const course_player_you = 'course_player.you';
   static const course_player_today = 'course_player.today';
@@ -726,7 +770,8 @@ abstract class  LocaleKeys {
   static const empty_my_learning_message = 'empty.my_learning_message';
   static const empty_instructors_title = 'empty.instructors_title';
   static const empty_instructors_message = 'empty.instructors_message';
-  static const empty_no_instructors_match_filters = 'empty.no_instructors_match_filters';
+  static const empty_no_instructors_match_filters =
+      'empty.no_instructors_match_filters';
   static const empty_reviews_title = 'empty.reviews_title';
   static const empty_reviews_message = 'empty.reviews_message';
   static const empty_qa_title = 'empty.qa_title';
@@ -781,7 +826,8 @@ abstract class  LocaleKeys {
   static const qa_ago_days = 'qa.ago_days';
   static const qa = 'qa';
   static const dashboard_admin_dashboard = 'dashboard.admin_dashboard';
-  static const dashboard_instructor_dashboard = 'dashboard.instructor_dashboard';
+  static const dashboard_instructor_dashboard =
+      'dashboard.instructor_dashboard';
   static const dashboard_admin_title = 'dashboard.admin.title';
   static const dashboard_admin_home = 'dashboard.admin.home';
   static const dashboard_admin_users = 'dashboard.admin.users';
@@ -789,19 +835,26 @@ abstract class  LocaleKeys {
   static const dashboard_admin_categories = 'dashboard.admin.categories';
   static const dashboard_admin_enrollments = 'dashboard.admin.enrollments';
   static const dashboard_admin_banners = 'dashboard.admin.banners';
-  static const dashboard_admin_global_coupons = 'dashboard.admin.global_coupons';
-  static const dashboard_admin_instructor_coupons = 'dashboard.admin.instructor_coupons';
+  static const dashboard_admin_global_coupons =
+      'dashboard.admin.global_coupons';
+  static const dashboard_admin_instructor_coupons =
+      'dashboard.admin.instructor_coupons';
   static const dashboard_admin_payouts = 'dashboard.admin.payouts';
-  static const dashboard_admin_course_reports = 'dashboard.admin.course_reports';
-  static const dashboard_admin_review_reports = 'dashboard.admin.review_reports';
+  static const dashboard_admin_course_reports =
+      'dashboard.admin.course_reports';
+  static const dashboard_admin_review_reports =
+      'dashboard.admin.review_reports';
   static const dashboard_admin_analytics = 'dashboard.admin.analytics';
   static const dashboard_admin_settings = 'dashboard.admin.settings';
   static const dashboard_admin_total_users = 'dashboard.admin.total_users';
   static const dashboard_admin_total_courses = 'dashboard.admin.total_courses';
   static const dashboard_admin_total_revenue = 'dashboard.admin.total_revenue';
-  static const dashboard_admin_total_enrollments = 'dashboard.admin.total_enrollments';
-  static const dashboard_admin_active_students = 'dashboard.admin.active_students';
-  static const dashboard_admin_pending_payouts = 'dashboard.admin.pending_payouts';
+  static const dashboard_admin_total_enrollments =
+      'dashboard.admin.total_enrollments';
+  static const dashboard_admin_active_students =
+      'dashboard.admin.active_students';
+  static const dashboard_admin_pending_payouts =
+      'dashboard.admin.pending_payouts';
   static const dashboard_admin_students = 'dashboard.admin.students';
   static const dashboard_admin_instructors = 'dashboard.admin.instructors';
   static const dashboard_admin_admins = 'dashboard.admin.admins';
@@ -818,53 +871,85 @@ abstract class  LocaleKeys {
   static const dashboard_admin_refunded = 'dashboard.admin.refunded';
   static const dashboard_admin_ban_user = 'dashboard.admin.ban_user';
   static const dashboard_admin_unban_user = 'dashboard.admin.unban_user';
-  static const dashboard_admin_suspend_course = 'dashboard.admin.suspend_course';
-  static const dashboard_admin_activate_course = 'dashboard.admin.activate_course';
+  static const dashboard_admin_suspend_course =
+      'dashboard.admin.suspend_course';
+  static const dashboard_admin_activate_course =
+      'dashboard.admin.activate_course';
   static const dashboard_admin_delete_course = 'dashboard.admin.delete_course';
   static const dashboard_admin_top_courses = 'dashboard.admin.top_courses';
-  static const dashboard_admin_top_instructors = 'dashboard.admin.top_instructors';
+  static const dashboard_admin_top_instructors =
+      'dashboard.admin.top_instructors';
   static const dashboard_admin_revenue_chart = 'dashboard.admin.revenue_chart';
-  static const dashboard_admin_enrollments_chart = 'dashboard.admin.enrollments_chart';
+  static const dashboard_admin_enrollments_chart =
+      'dashboard.admin.enrollments_chart';
   static const dashboard_admin = 'dashboard.admin';
   static const dashboard_instructor_title = 'dashboard.instructor.title';
   static const dashboard_instructor_home = 'dashboard.instructor.home';
   static const dashboard_instructor_courses = 'dashboard.instructor.courses';
   static const dashboard_instructor_students = 'dashboard.instructor.students';
-  static const dashboard_instructor_enrollments = 'dashboard.instructor.enrollments';
+  static const dashboard_instructor_enrollments =
+      'dashboard.instructor.enrollments';
   static const dashboard_instructor_earnings = 'dashboard.instructor.earnings';
   static const dashboard_instructor_coupons = 'dashboard.instructor.coupons';
   static const dashboard_instructor_qa = 'dashboard.instructor.qa';
   static const dashboard_instructor_reviews = 'dashboard.instructor.reviews';
   static const dashboard_instructor_quizzes = 'dashboard.instructor.quizzes';
   static const dashboard_instructor_settings = 'dashboard.instructor.settings';
-  static const dashboard_instructor_total_students = 'dashboard.instructor.total_students';
-  static const dashboard_instructor_total_courses = 'dashboard.instructor.total_courses';
-  static const dashboard_instructor_total_revenue = 'dashboard.instructor.total_revenue';
-  static const dashboard_instructor_total_enrollments = 'dashboard.instructor.total_enrollments';
-  static const dashboard_instructor_average_rating = 'dashboard.instructor.average_rating';
-  static const dashboard_instructor_pending_questions = 'dashboard.instructor.pending_questions';
-  static const dashboard_instructor_create_course = 'dashboard.instructor.create_course';
-  static const dashboard_instructor_edit_course = 'dashboard.instructor.edit_course';
-  static const dashboard_instructor_publish_course = 'dashboard.instructor.publish_course';
-  static const dashboard_instructor_unpublish_course = 'dashboard.instructor.unpublish_course';
-  static const dashboard_instructor_course_editor = 'dashboard.instructor.course_editor';
-  static const dashboard_instructor_basic_info = 'dashboard.instructor.basic_info';
-  static const dashboard_instructor_curriculum = 'dashboard.instructor.curriculum';
+  static const dashboard_instructor_total_students =
+      'dashboard.instructor.total_students';
+  static const dashboard_instructor_total_courses =
+      'dashboard.instructor.total_courses';
+  static const dashboard_instructor_total_revenue =
+      'dashboard.instructor.total_revenue';
+  static const dashboard_instructor_total_enrollments =
+      'dashboard.instructor.total_enrollments';
+  static const dashboard_instructor_average_rating =
+      'dashboard.instructor.average_rating';
+  static const dashboard_instructor_pending_questions =
+      'dashboard.instructor.pending_questions';
+  static const dashboard_instructor_create_course =
+      'dashboard.instructor.create_course';
+  static const dashboard_instructor_edit_course =
+      'dashboard.instructor.edit_course';
+  static const dashboard_instructor_publish_course =
+      'dashboard.instructor.publish_course';
+  static const dashboard_instructor_unpublish_course =
+      'dashboard.instructor.unpublish_course';
+  static const dashboard_instructor_course_editor =
+      'dashboard.instructor.course_editor';
+  static const dashboard_instructor_basic_info =
+      'dashboard.instructor.basic_info';
+  static const dashboard_instructor_curriculum =
+      'dashboard.instructor.curriculum';
   static const dashboard_instructor_pricing = 'dashboard.instructor.pricing';
-  static const dashboard_instructor_available_balance = 'dashboard.instructor.available_balance';
-  static const dashboard_instructor_pending_balance = 'dashboard.instructor.pending_balance';
-  static const dashboard_instructor_total_earnings = 'dashboard.instructor.total_earnings';
-  static const dashboard_instructor_request_payout = 'dashboard.instructor.request_payout';
-  static const dashboard_instructor_payout_history = 'dashboard.instructor.payout_history';
-  static const dashboard_instructor_create_coupon = 'dashboard.instructor.create_coupon';
-  static const dashboard_instructor_edit_coupon = 'dashboard.instructor.edit_coupon';
-  static const dashboard_instructor_answer_question = 'dashboard.instructor.answer_question';
-  static const dashboard_instructor_create_quiz = 'dashboard.instructor.create_quiz';
-  static const dashboard_instructor_edit_quiz = 'dashboard.instructor.edit_quiz';
-  static const dashboard_instructor_quiz_attempts = 'dashboard.instructor.quiz_attempts';
-  static const dashboard_instructor_preview_quiz = 'dashboard.instructor.preview_quiz';
-  static const dashboard_instructor_delete_course_title = 'dashboard.instructor.delete_course_title';
-  static const dashboard_instructor_delete_course_confirm = 'dashboard.instructor.delete_course_confirm';
+  static const dashboard_instructor_available_balance =
+      'dashboard.instructor.available_balance';
+  static const dashboard_instructor_pending_balance =
+      'dashboard.instructor.pending_balance';
+  static const dashboard_instructor_total_earnings =
+      'dashboard.instructor.total_earnings';
+  static const dashboard_instructor_request_payout =
+      'dashboard.instructor.request_payout';
+  static const dashboard_instructor_payout_history =
+      'dashboard.instructor.payout_history';
+  static const dashboard_instructor_create_coupon =
+      'dashboard.instructor.create_coupon';
+  static const dashboard_instructor_edit_coupon =
+      'dashboard.instructor.edit_coupon';
+  static const dashboard_instructor_answer_question =
+      'dashboard.instructor.answer_question';
+  static const dashboard_instructor_create_quiz =
+      'dashboard.instructor.create_quiz';
+  static const dashboard_instructor_edit_quiz =
+      'dashboard.instructor.edit_quiz';
+  static const dashboard_instructor_quiz_attempts =
+      'dashboard.instructor.quiz_attempts';
+  static const dashboard_instructor_preview_quiz =
+      'dashboard.instructor.preview_quiz';
+  static const dashboard_instructor_delete_course_title =
+      'dashboard.instructor.delete_course_title';
+  static const dashboard_instructor_delete_course_confirm =
+      'dashboard.instructor.delete_course_confirm';
   static const dashboard_instructor = 'dashboard.instructor';
   static const dashboard_common_search = 'dashboard.common.search';
   static const dashboard_common_filter = 'dashboard.common.filter';
@@ -879,8 +964,10 @@ abstract class  LocaleKeys {
   static const dashboard_common_loading = 'dashboard.common.loading';
   static const dashboard_common_error = 'dashboard.common.error';
   static const dashboard_common_success = 'dashboard.common.success';
-  static const dashboard_common_confirm_delete = 'dashboard.common.confirm_delete';
-  static const dashboard_common_confirm_action = 'dashboard.common.confirm_action';
+  static const dashboard_common_confirm_delete =
+      'dashboard.common.confirm_delete';
+  static const dashboard_common_confirm_action =
+      'dashboard.common.confirm_action';
   static const dashboard_common = 'dashboard.common';
   static const dashboard = 'dashboard';
   static const portfolio_title = 'portfolio.title';
@@ -892,11 +979,14 @@ abstract class  LocaleKeys {
   static const portfolio_unlocked = 'portfolio.unlocked';
   static const portfolio_in_progress = 'portfolio.in_progress';
   static const portfolio_empty_certificates = 'portfolio.empty_certificates';
-  static const portfolio_empty_certificates_subtitle = 'portfolio.empty_certificates_subtitle';
+  static const portfolio_empty_certificates_subtitle =
+      'portfolio.empty_certificates_subtitle';
   static const portfolio_empty_courses = 'portfolio.empty_courses';
-  static const portfolio_empty_courses_subtitle = 'portfolio.empty_courses_subtitle';
+  static const portfolio_empty_courses_subtitle =
+      'portfolio.empty_courses_subtitle';
   static const portfolio_empty_achievements = 'portfolio.empty_achievements';
-  static const portfolio_empty_achievements_subtitle = 'portfolio.empty_achievements_subtitle';
+  static const portfolio_empty_achievements_subtitle =
+      'portfolio.empty_achievements_subtitle';
   static const portfolio_share_portfolio = 'portfolio.share_portfolio';
   static const portfolio_view_certificate = 'portfolio.view_certificate';
   static const portfolio = 'portfolio';
@@ -930,71 +1020,118 @@ abstract class  LocaleKeys {
   static const reports_status_resolved = 'reports.status.resolved';
   static const reports_status_rejected = 'reports.status.rejected';
   static const reports_status = 'reports.status';
-  static const reports_admin_responses_reviewed_title = 'reports.admin_responses.reviewed_title';
-  static const reports_admin_responses_reviewed_body = 'reports.admin_responses.reviewed_body';
-  static const reports_admin_responses_resolved_title = 'reports.admin_responses.resolved_title';
-  static const reports_admin_responses_resolved_body = 'reports.admin_responses.resolved_body';
-  static const reports_admin_responses_rejected_title = 'reports.admin_responses.rejected_title';
-  static const reports_admin_responses_rejected_body = 'reports.admin_responses.rejected_body';
-  static const reports_admin_responses_content_removed = 'reports.admin_responses.content_removed';
-  static const reports_admin_responses_warning_issued = 'reports.admin_responses.warning_issued';
-  static const reports_admin_responses_no_violation = 'reports.admin_responses.no_violation';
-  static const reports_admin_responses_duplicate_report = 'reports.admin_responses.duplicate_report';
+  static const reports_admin_responses_reviewed_title =
+      'reports.admin_responses.reviewed_title';
+  static const reports_admin_responses_reviewed_body =
+      'reports.admin_responses.reviewed_body';
+  static const reports_admin_responses_resolved_title =
+      'reports.admin_responses.resolved_title';
+  static const reports_admin_responses_resolved_body =
+      'reports.admin_responses.resolved_body';
+  static const reports_admin_responses_rejected_title =
+      'reports.admin_responses.rejected_title';
+  static const reports_admin_responses_rejected_body =
+      'reports.admin_responses.rejected_body';
+  static const reports_admin_responses_content_removed =
+      'reports.admin_responses.content_removed';
+  static const reports_admin_responses_warning_issued =
+      'reports.admin_responses.warning_issued';
+  static const reports_admin_responses_no_violation =
+      'reports.admin_responses.no_violation';
+  static const reports_admin_responses_duplicate_report =
+      'reports.admin_responses.duplicate_report';
   static const reports_admin_responses = 'reports.admin_responses';
   static const reports = 'reports';
   static const course_editor_next_settings = 'course_editor.next_settings';
   static const course_editor_publish_course = 'course_editor.publish_course';
   static const course_editor_publish = 'course_editor.publish';
   static const course_editor_save_draft = 'course_editor.save_draft';
-  static const course_editor_publish_missing_title = 'course_editor.publish_missing_title';
-  static const course_editor_publish_missing_message = 'course_editor.publish_missing_message';
-  static const course_editor_publish_confirm_title = 'course_editor.publish_confirm_title';
-  static const course_editor_publish_confirm_message = 'course_editor.publish_confirm_message';
+  static const course_editor_publish_missing_title =
+      'course_editor.publish_missing_title';
+  static const course_editor_publish_missing_message =
+      'course_editor.publish_missing_message';
+  static const course_editor_publish_confirm_title =
+      'course_editor.publish_confirm_title';
+  static const course_editor_publish_confirm_message =
+      'course_editor.publish_confirm_message';
   static const course_editor_publish_success = 'course_editor.publish_success';
   static const course_editor_publish_failed = 'course_editor.publish_failed';
-  static const course_editor_published_available = 'course_editor.published_available';
+  static const course_editor_published_available =
+      'course_editor.published_available';
   static const course_editor_publishing = 'course_editor.publishing';
-  static const course_editor_validation_title_ar = 'course_editor.validation_title_ar';
-  static const course_editor_validation_title_en = 'course_editor.validation_title_en';
-  static const course_editor_validation_description_ar = 'course_editor.validation_description_ar';
-  static const course_editor_validation_description_en = 'course_editor.validation_description_en';
-  static const course_editor_validation_category = 'course_editor.validation_category';
-  static const course_editor_validation_course_availability = 'course_editor.validation_course_availability';
-  static const course_editor_validation_section_required = 'course_editor.validation_section_required';
-  static const course_editor_validation_section_fallback = 'course_editor.validation_section_fallback';
-  static const course_editor_validation_lesson_fallback = 'course_editor.validation_lesson_fallback';
-  static const course_editor_validation_section_empty = 'course_editor.validation_section_empty';
-  static const course_editor_validation_lesson_availability = 'course_editor.validation_lesson_availability';
+  static const course_editor_validation_title_ar =
+      'course_editor.validation_title_ar';
+  static const course_editor_validation_title_en =
+      'course_editor.validation_title_en';
+  static const course_editor_validation_description_ar =
+      'course_editor.validation_description_ar';
+  static const course_editor_validation_description_en =
+      'course_editor.validation_description_en';
+  static const course_editor_validation_category =
+      'course_editor.validation_category';
+  static const course_editor_validation_course_availability =
+      'course_editor.validation_course_availability';
+  static const course_editor_validation_section_required =
+      'course_editor.validation_section_required';
+  static const course_editor_validation_section_fallback =
+      'course_editor.validation_section_fallback';
+  static const course_editor_validation_lesson_fallback =
+      'course_editor.validation_lesson_fallback';
+  static const course_editor_validation_section_empty =
+      'course_editor.validation_section_empty';
+  static const course_editor_validation_lesson_availability =
+      'course_editor.validation_lesson_availability';
   static const course_editor_ai_import_title = 'course_editor.ai_import_title';
-  static const course_editor_ai_import_tab_prompt = 'course_editor.ai_import_tab_prompt';
-  static const course_editor_ai_import_tab_paste = 'course_editor.ai_import_tab_paste';
-  static const course_editor_ai_import_how_title = 'course_editor.ai_import_how_title';
+  static const course_editor_ai_import_tab_prompt =
+      'course_editor.ai_import_tab_prompt';
+  static const course_editor_ai_import_tab_paste =
+      'course_editor.ai_import_tab_paste';
+  static const course_editor_ai_import_how_title =
+      'course_editor.ai_import_how_title';
   static const course_editor_ai_import_step1 = 'course_editor.ai_import_step1';
   static const course_editor_ai_import_step2 = 'course_editor.ai_import_step2';
   static const course_editor_ai_import_step3 = 'course_editor.ai_import_step3';
   static const course_editor_ai_import_step4 = 'course_editor.ai_import_step4';
   static const course_editor_ai_import_step5 = 'course_editor.ai_import_step5';
-  static const course_editor_ai_import_copy_prompt = 'course_editor.ai_import_copy_prompt';
-  static const course_editor_ai_import_copied = 'course_editor.ai_import_copied';
+  static const course_editor_ai_import_copy_prompt =
+      'course_editor.ai_import_copy_prompt';
+  static const course_editor_ai_import_copied =
+      'course_editor.ai_import_copied';
   static const course_editor_ai_import_hint = 'course_editor.ai_import_hint';
-  static const course_editor_ai_import_paste_label = 'course_editor.ai_import_paste_label';
-  static const course_editor_ai_import_paste_hint = 'course_editor.ai_import_paste_hint';
-  static const course_editor_ai_import_preview_btn = 'course_editor.ai_import_preview_btn';
+  static const course_editor_ai_import_paste_label =
+      'course_editor.ai_import_paste_label';
+  static const course_editor_ai_import_paste_hint =
+      'course_editor.ai_import_paste_hint';
+  static const course_editor_ai_import_preview_btn =
+      'course_editor.ai_import_preview_btn';
   static const course_editor_ai_import_ready = 'course_editor.ai_import_ready';
-  static const course_editor_ai_import_add_btn = 'course_editor.ai_import_add_btn';
-  static const course_editor_ai_import_adding = 'course_editor.ai_import_adding';
-  static const course_editor_ai_import_success = 'course_editor.ai_import_success';
-  static const course_editor_ai_import_err_empty = 'course_editor.ai_import_err_empty';
-  static const course_editor_ai_import_err_not_array = 'course_editor.ai_import_err_not_array';
-  static const course_editor_ai_import_err_no_questions = 'course_editor.ai_import_err_no_questions';
-  static const course_editor_ai_import_err_invalid = 'course_editor.ai_import_err_invalid';
-  static const course_editor_ai_import_fab_label = 'course_editor.ai_import_fab_label';
-  static const course_editor_ai_import_fab_subtitle = 'course_editor.ai_import_fab_subtitle';
-  static const course_editor_ai_import_type_single = 'course_editor.ai_import_type_single';
-  static const course_editor_ai_import_type_multiple = 'course_editor.ai_import_type_multiple';
-  static const course_editor_ai_import_type_tf = 'course_editor.ai_import_type_tf';
-  static const course_editor_ai_import_type_text = 'course_editor.ai_import_type_text';
-  static const course_editor_ai_import_points = 'course_editor.ai_import_points';
+  static const course_editor_ai_import_add_btn =
+      'course_editor.ai_import_add_btn';
+  static const course_editor_ai_import_adding =
+      'course_editor.ai_import_adding';
+  static const course_editor_ai_import_success =
+      'course_editor.ai_import_success';
+  static const course_editor_ai_import_err_empty =
+      'course_editor.ai_import_err_empty';
+  static const course_editor_ai_import_err_not_array =
+      'course_editor.ai_import_err_not_array';
+  static const course_editor_ai_import_err_no_questions =
+      'course_editor.ai_import_err_no_questions';
+  static const course_editor_ai_import_err_invalid =
+      'course_editor.ai_import_err_invalid';
+  static const course_editor_ai_import_fab_label =
+      'course_editor.ai_import_fab_label';
+  static const course_editor_ai_import_fab_subtitle =
+      'course_editor.ai_import_fab_subtitle';
+  static const course_editor_ai_import_type_single =
+      'course_editor.ai_import_type_single';
+  static const course_editor_ai_import_type_multiple =
+      'course_editor.ai_import_type_multiple';
+  static const course_editor_ai_import_type_tf =
+      'course_editor.ai_import_type_tf';
+  static const course_editor_ai_import_type_text =
+      'course_editor.ai_import_type_text';
+  static const course_editor_ai_import_points =
+      'course_editor.ai_import_points';
   static const course_editor = 'course_editor';
-
 }

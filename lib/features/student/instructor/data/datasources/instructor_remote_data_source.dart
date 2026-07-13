@@ -41,7 +41,7 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     final coursesResponse = await client
         .from('courses')
         .select('id, rating, rating_count')
-        .eq('instructor_id', visitorId);
+        .eq('teacher_id', visitorId);
 
     final courses = coursesResponse as List;
     int totalStudents = 0;
@@ -125,7 +125,7 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     final response = await client
         .from('courses')
         .select()
-        .eq('instructor_id', visitorId)
+        .eq('teacher_id', visitorId)
         .eq('is_published', true)
         .order('created_at', ascending: false);
 

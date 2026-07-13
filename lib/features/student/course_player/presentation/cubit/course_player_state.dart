@@ -14,7 +14,7 @@ class CoursePlayerState extends Equatable {
   final String? courseId;
   final String? enrollmentId;
   final String? courseTitle;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
   final List<SectionEntity> sections;
@@ -35,7 +35,7 @@ class CoursePlayerState extends Equatable {
     this.courseId,
     this.enrollmentId,
     this.courseTitle,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
     this.sections = const [],
@@ -148,7 +148,7 @@ class CoursePlayerState extends Equatable {
     String? courseId,
     String? enrollmentId,
     String? courseTitle,
-    String? instructorId,
+    String? teacherId,
     String? instructorName,
     String? instructorAvatar,
     List<SectionEntity>? sections,
@@ -170,7 +170,7 @@ class CoursePlayerState extends Equatable {
       courseId: courseId ?? this.courseId,
       enrollmentId: enrollmentId ?? this.enrollmentId,
       courseTitle: courseTitle ?? this.courseTitle,
-      instructorId: instructorId ?? this.instructorId,
+      teacherId: teacherId ?? this.teacherId,
       instructorName: instructorName ?? this.instructorName,
       instructorAvatar: instructorAvatar ?? this.instructorAvatar,
       sections: sections ?? this.sections,
@@ -194,7 +194,7 @@ class CoursePlayerState extends Equatable {
         courseId,
         enrollmentId,
         courseTitle,
-        instructorId,
+        teacherId,
         instructorName,
         instructorAvatar,
         sections,

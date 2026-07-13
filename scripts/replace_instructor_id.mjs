@@ -20,7 +20,8 @@ const replacements = [
 function shouldSkip(path) {
   return path.includes(`${join('build')}`) ||
     path.includes(`${join('.dart_tool')}`) ||
-    path.includes(`${join('.git')}`);
+    path.includes(`${join('.git')}`) ||
+    path.endsWith(join('scripts', 'replace_instructor_id.mjs'));
 }
 
 function extensionOf(path) {

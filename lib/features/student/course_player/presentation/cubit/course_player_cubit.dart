@@ -56,7 +56,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
     required String enrollmentId,
     required String courseTitle,
     String? initialLessonId,
-    String? instructorId,
+    String? teacherId,
     String? instructorName,
     String? instructorAvatar,
   }) async {
@@ -66,7 +66,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
       courseId: courseId,
       enrollmentId: enrollmentId,
       courseTitle: courseTitle,
-      instructorId: instructorId,
+      teacherId: teacherId,
       instructorName: instructorName,
       instructorAvatar: instructorAvatar,
     ));
@@ -292,7 +292,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
         lastWatched: DateTime.now(),
         lastPosition: progress?.lastPosition,
         thumbnailUrl: null, // Lesson doesn't have thumbnail
-        instructorId: state.instructorId,
+        teacherId: state.teacherId,
         instructorName: state.instructorName,
         instructorAvatar: state.instructorAvatar,
       );

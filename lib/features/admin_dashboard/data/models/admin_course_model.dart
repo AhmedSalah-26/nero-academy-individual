@@ -4,7 +4,7 @@ class AdminCourseModel {
   final String titleAr;
   final String? titleEn;
   final String? thumbnailUrl;
-  final String instructorId;
+  final String teacherId;
   final String instructorName;
   final String? categoryName;
   final double price;
@@ -24,7 +24,7 @@ class AdminCourseModel {
     required this.titleAr,
     this.titleEn,
     this.thumbnailUrl,
-    required this.instructorId,
+    required this.teacherId,
     required this.instructorName,
     this.categoryName,
     required this.price,
@@ -46,7 +46,7 @@ class AdminCourseModel {
       titleAr: json['title_ar'] as String? ?? '',
       titleEn: json['title_en'] as String?,
       thumbnailUrl: json['thumbnail_url'] as String?,
-      instructorId: json['instructor_id'] as String,
+      teacherId: json['teacher_id'] as String,
       instructorName: json['instructor_name'] as String? ??
           json['instructor']?['name'] as String? ??
           'Unknown',
@@ -72,7 +72,7 @@ class AdminCourseModel {
       'title_ar': titleAr,
       'title_en': titleEn,
       'thumbnail_url': thumbnailUrl,
-      'instructor_id': instructorId,
+      'teacher_id': teacherId,
       'instructor_name': instructorName,
       'category_name': categoryName,
       'price': price,

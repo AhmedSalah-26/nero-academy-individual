@@ -36,7 +36,7 @@ class InstructorStatsDataSource {
       final coursesResponse = await _client
           .from('courses')
           .select('id, is_published')
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', _userId);
       final courses = coursesResponse as List;
       final totalCourses = courses.length;
       final publishedCourses =
@@ -44,8 +44,8 @@ class InstructorStatsDataSource {
 
       final enrollmentsResponse = await _client
           .from('enrollments')
-          .select('id, user_id, course:courses!inner(instructor_id)')
-          .eq('course.instructor_id', _userId);
+          .select('id, user_id, course:courses!inner(teacher_id)')
+          .eq('course.teacher_id', _userId);
       final enrollments = enrollmentsResponse as List;
       final totalEnrollments = enrollments.length;
       final uniqueStudents =
@@ -53,8 +53,8 @@ class InstructorStatsDataSource {
 
       final reviewsResponse = await _client
           .from('course_reviews')
-          .select('rating, course:courses!inner(instructor_id)')
-          .eq('course.instructor_id', _userId);
+          .select('rating, course:courses!inner(teacher_id)')
+          .eq('course.teacher_id', _userId);
       final reviews = reviewsResponse as List;
       final totalReviews = reviews.length;
       final avgRating = reviews.isEmpty
@@ -153,8 +153,8 @@ class InstructorStatsDataSource {
     try {
       final response = await _client
           .from('enrollments')
-          .select('enrolled_at, course:courses!inner(instructor_id)')
-          .eq('course.instructor_id', _userId)
+          .select('enrolled_at, course:courses!inner(teacher_id)')
+          .eq('course.teacher_id', _userId)
           .gte('enrolled_at', start.toIso8601String())
           .lte('enrolled_at', end.toIso8601String());
 

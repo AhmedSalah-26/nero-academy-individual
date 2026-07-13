@@ -495,7 +495,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       final finalTotal =
           (total - couponDiscountTotal).clamp(0, double.infinity);
-      final isFreeOrder = finalTotal == 0;
+      final isFreeOrder = false;
       final teacherIds =
           processedItems.map((item) => item['teacherId'] as String).toSet();
       if (teacherIds.length != 1) {
@@ -503,6 +503,23 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'Cart must contain courses from one teacher only.');
       }
       final orderTeacherId = teacherIds.first;
+
+      final pendingTeacherOrder = await supabase
+          .from('parent_enrollments')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('teacher_id', orderTeacherId)
+          .eq('payment_method', 'manual')
+          .eq('payment_status', 'pending_manual_payment')
+          .limit(1);
+
+      if ((pendingTeacherOrder as List).isNotEmpty) {
+        AppLogger.w(
+            'ðŸ›’ [Checkout] User already has a pending manual request for teacher: $orderTeacherId');
+        throw const ValidationException(
+            'You already have a pending purchase request for this teacher. '
+            'Please wait for review before submitting another request.');
+      }
 
       AppLogger.i(
           '🛒 [Checkout] Total amount: $total, couponDiscount: $couponDiscountTotal, finalTotal: $finalTotal');
@@ -519,9 +536,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
             'coupon_code': couponCode,
             'coupon_discount': couponDiscountTotal,
             'teacher_id': orderTeacherId,
-            'payment_method': isFreeOrder ? 'free' : 'manual',
-            'payment_status': isFreeOrder ? 'paid' : 'pending_manual_payment',
-            'paid_at': isFreeOrder ? DateTime.now().toIso8601String() : null,
+            'payment_method': 'manual',
+            'payment_status': 'pending_manual_payment',
+            'paid_at': null,
           })
           .select('id')
           .single();

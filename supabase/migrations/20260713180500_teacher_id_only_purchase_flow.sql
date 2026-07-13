@@ -3,11 +3,22 @@ begin;
 alter table public.courses
   add column if not exists teacher_id uuid references public.teachers(id) on delete set null;
 
-update public.courses c
-set teacher_id = t.id
-from public.teachers t
-where c.teacher_id is null
-  and c.instructor_id = t.profile_id;
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'courses'
+      and column_name = 'instructor_id'
+  ) then
+    update public.courses c
+    set teacher_id = t.id
+    from public.teachers t
+    where c.teacher_id is null
+      and c.instructor_id = t.profile_id;
+  end if;
+end $$;
 
 alter table public.enrollments
   add column if not exists teacher_id uuid references public.teachers(id) on delete set null;
@@ -444,6 +455,7 @@ alter table public.courses
 
 drop trigger if exists trigger_auto_instructor_earning on public.enrollments;
 drop policy if exists enrollments_select_instructor on public.enrollments;
+drop policy if exists enrollments_select_teacher on public.enrollments;
 
 create policy enrollments_select_teacher
 on public.enrollments

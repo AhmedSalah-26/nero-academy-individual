@@ -22,7 +22,7 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    final primary = Theme.of(context).colorScheme.tertiary;
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth * 0.04;
     final verticalPadding = screenWidth * 0.018;
@@ -153,7 +153,7 @@ class _QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     final buttonSize = (screenWidth * 0.095).clamp(36.0, 44.0);
     final iconSize = (screenWidth * 0.052).clamp(20.0, 24.0);
 
@@ -167,7 +167,7 @@ class _QuickAction extends StatelessWidget {
             width: buttonSize,
             height: buttonSize,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardDark : AppColors.white,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
                 color: primary.withValues(alpha: 0.26),
@@ -197,7 +197,7 @@ class _QuickAction extends StatelessWidget {
                   color: AppColors.error,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isDark ? AppColors.cardDark : AppColors.white,
+                    color: theme.cardColor,
                     width: 1.5,
                   ),
                 ),
@@ -217,7 +217,7 @@ class _QuickAction extends StatelessWidget {
                   color: AppColors.error,
                   borderRadius: BorderRadius.circular(9),
                   border: Border.all(
-                    color: isDark ? AppColors.cardDark : AppColors.white,
+                    color: theme.cardColor,
                     width: 1,
                   ),
                 ),

@@ -24,7 +24,7 @@ class QuizQuestionScreen extends StatefulWidget {
   final String? courseTitle;
   final String? courseId;
   final String? lessonId;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
 
@@ -35,7 +35,7 @@ class QuizQuestionScreen extends StatefulWidget {
     this.courseTitle,
     this.courseId,
     this.lessonId,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
   });
@@ -300,8 +300,8 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
     if (widget.lessonId != null && widget.lessonId!.trim().isNotEmpty) {
       params['lesson'] = widget.lessonId!;
     }
-    if (widget.instructorId != null && widget.instructorId!.trim().isNotEmpty) {
-      params['instructorId'] = widget.instructorId!;
+    if (widget.teacherId != null && widget.teacherId!.trim().isNotEmpty) {
+      params['teacherId'] = widget.teacherId!;
     }
     if (widget.instructorName != null &&
         widget.instructorName!.trim().isNotEmpty) {

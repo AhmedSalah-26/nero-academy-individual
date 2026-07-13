@@ -20,7 +20,7 @@ class QuizResultsScreen extends StatelessWidget {
   final String? courseTitle;
   final String? courseId;
   final String? lessonId;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
 
@@ -31,7 +31,7 @@ class QuizResultsScreen extends StatelessWidget {
     this.courseTitle,
     this.courseId,
     this.lessonId,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
   });
@@ -290,8 +290,8 @@ class QuizResultsScreen extends StatelessWidget {
     if (lessonId != null && lessonId!.trim().isNotEmpty) {
       params['lesson'] = lessonId!;
     }
-    if (instructorId != null && instructorId!.trim().isNotEmpty) {
-      params['instructorId'] = instructorId!;
+    if (teacherId != null && teacherId!.trim().isNotEmpty) {
+      params['teacherId'] = teacherId!;
     }
     if (instructorName != null && instructorName!.trim().isNotEmpty) {
       params['instructor'] = instructorName!;
@@ -313,8 +313,8 @@ class QuizResultsScreen extends StatelessWidget {
     if (lessonId != null && lessonId!.trim().isNotEmpty) {
       params['lesson'] = lessonId!;
     }
-    if (instructorId != null && instructorId!.trim().isNotEmpty) {
-      params['instructorId'] = instructorId!;
+    if (teacherId != null && teacherId!.trim().isNotEmpty) {
+      params['teacherId'] = teacherId!;
     }
     if (instructorName != null && instructorName!.trim().isNotEmpty) {
       params['instructor'] = instructorName!;

@@ -79,7 +79,7 @@ update public.courses c
 set teacher_id = t.id
 from public.teachers t
 where c.teacher_id is null
-  and c.instructor_id = t.profile_id;
+  and c.teacher_id = t.profile_id;
 
 create table if not exists public.student_teacher_links (
   id uuid primary key default gen_random_uuid(),
@@ -247,7 +247,7 @@ begin
     and (
       parent_enrollment_id = request_row.parent_enrollment_id
       or (
-        instructor_id = request_teacher_profile_id
+        teacher_id = request_teacher_profile_id
         and (
           request_row.course_id is null
           or course_id = request_row.course_id

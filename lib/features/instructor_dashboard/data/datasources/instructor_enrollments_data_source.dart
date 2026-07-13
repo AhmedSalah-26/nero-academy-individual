@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
@@ -26,8 +26,8 @@ class InstructorEnrollmentsDataSource {
     try {
       var query = _client
           .from('enrollments')
-          .select('''*, course:courses!inner(title_ar, instructor_id), 
-            user:profiles!enrollments_user_id_fkey(name, avatar_url)''').eq('course.instructor_id', _userId);
+          .select('''*, course:courses!inner(title_ar, teacher_id),
+            user:profiles!enrollments_user_id_fkey(name, avatar_url)''').eq('course.teacher_id', _userId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (status != null && status != InstructorEnrollmentStatus.all) {
@@ -65,9 +65,9 @@ class InstructorEnrollmentsDataSource {
     try {
       final enrollment = await _client
           .from('enrollments')
-          .select('access_expires_at, course:courses!inner(instructor_id)')
+          .select('access_expires_at, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.instructor_id', _userId)
+          .eq('course.teacher_id', _userId)
           .single();
 
       DateTime newExpiry;
@@ -98,9 +98,9 @@ class InstructorEnrollmentsDataSource {
     try {
       final enrollment = await _client
           .from('enrollments')
-          .select('user_id, course_id, course:courses!inner(instructor_id)')
+          .select('user_id, course_id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.instructor_id', _userId)
+          .eq('course.teacher_id', _userId)
           .single();
 
       final odId = enrollment['user_id'] as String;
@@ -137,9 +137,9 @@ class InstructorEnrollmentsDataSource {
     try {
       await _client
           .from('enrollments')
-          .select('id, course:courses!inner(instructor_id)')
+          .select('id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.instructor_id', _userId)
+          .eq('course.teacher_id', _userId)
           .single();
 
       final updateData = <String, dynamic>{
@@ -172,9 +172,9 @@ class InstructorEnrollmentsDataSource {
       // Verify instructor owns this enrollment
       await _client
           .from('enrollments')
-          .select('id, course:courses!inner(instructor_id)')
+          .select('id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.instructor_id', _userId)
+          .eq('course.teacher_id', _userId)
           .single();
 
       await _client.from('enrollments').update({
@@ -201,13 +201,13 @@ class InstructorEnrollmentsDataSource {
           .from('courses')
           .select('id')
           .eq('id', courseId)
-          .eq('instructor_id', _userId)
+          .eq('teacher_id', _userId)
           .single();
 
       await _client.from('enrollments').insert({
         'user_id': studentId,
         'course_id': courseId,
-        'instructor_id': _userId,
+        'teacher_id': _userId,
         'price': 0,
         'discount': 0,
         'status': 'active',
@@ -231,9 +231,9 @@ class InstructorEnrollmentsDataSource {
     try {
       final enrollment = await _client
           .from('enrollments')
-          .select('course_id, user_id, course:courses!inner(instructor_id)')
+          .select('course_id, user_id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.instructor_id', _userId)
+          .eq('course.teacher_id', _userId)
           .single();
 
       final courseId = enrollment['course_id'] as String;
@@ -272,14 +272,14 @@ class InstructorEnrollmentsDataSource {
       final allCourses = await _client
           .from('courses')
           .select('id, title_ar, title_en, thumbnail_url')
-          .eq('instructor_id', _userId)
+          .eq('teacher_id', _userId)
           .eq('is_published', true);
 
       final enrolledResponse = await _client
           .from('enrollments')
-          .select('course_id, course:courses!inner(instructor_id)')
+          .select('course_id, course:courses!inner(teacher_id)')
           .eq('user_id', studentId)
-          .eq('course.instructor_id', _userId);
+          .eq('course.teacher_id', _userId);
 
       final enrolledCourseIds = (enrolledResponse as List)
           .map((e) => e['course_id'] as String)

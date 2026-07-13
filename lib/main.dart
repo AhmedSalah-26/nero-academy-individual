@@ -129,24 +129,83 @@ class MyApp extends StatelessWidget {
         teacherTheme.primaryFor(isDarkMode) ?? baseTheme.colorScheme.primary;
     final secondary = teacherTheme.secondaryFor(isDarkMode) ??
         baseTheme.colorScheme.secondary;
-    final background = teacherTheme.backgroundFor(isDarkMode) ??
-        baseTheme.scaffoldBackgroundColor;
+    final requestedBackground = teacherTheme.backgroundFor(isDarkMode);
+    final background = _safeScaffoldBackground(
+      requestedBackground,
+      baseTheme.scaffoldBackgroundColor,
+      isDarkMode: isDarkMode,
+    );
     final button = teacherTheme.buttonFor(isDarkMode) ?? primary;
-    final card = teacherTheme.cardFor(isDarkMode) ?? baseTheme.cardColor;
+    final requestedCard = teacherTheme.cardFor(isDarkMode);
+    final card = _safeCardColor(
+      requestedCard,
+      baseTheme.cardColor,
+      isDarkMode: isDarkMode,
+    );
+    final onBackground = _readableTextColor(background);
+    final onCard = _readableTextColor(card);
+    final outline = Color.alphaBlend(
+      primary.withValues(alpha: isDarkMode ? 0.35 : 0.22),
+      card,
+    );
 
     return baseTheme.copyWith(
       primaryColor: primary,
       scaffoldBackgroundColor: background,
       cardColor: card,
+      dividerColor: outline,
+      appBarTheme: baseTheme.appBarTheme.copyWith(
+        backgroundColor: background,
+        foregroundColor: onBackground,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: onBackground),
+        actionsIconTheme: IconThemeData(color: onBackground),
+        titleTextStyle: baseTheme.appBarTheme.titleTextStyle?.copyWith(
+          color: onBackground,
+        ),
+      ),
+      cardTheme: baseTheme.cardTheme.copyWith(
+        color: card,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: outline),
+        ),
+      ),
       colorScheme: baseTheme.colorScheme.copyWith(
         primary: primary,
+        onPrimary: _readableTextColor(primary),
         secondary: secondary,
-        surface: background,
+        onSecondary: _readableTextColor(secondary),
+        surface: card,
+        onSurface: onCard,
+        outline: outline,
         tertiary: button,
+        onTertiary: _readableTextColor(button),
+      ),
+      inputDecorationTheme: baseTheme.inputDecorationTheme.copyWith(
+        fillColor: card,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: button, width: 1.4),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: outline),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: outline),
+        ),
+      ),
+      navigationBarTheme: baseTheme.navigationBarTheme.copyWith(
+        backgroundColor: card,
+        indicatorColor: button.withValues(alpha: isDarkMode ? 0.24 : 0.14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: baseTheme.elevatedButtonTheme.style?.copyWith(
           backgroundColor: WidgetStatePropertyAll(button),
+          foregroundColor: WidgetStatePropertyAll(_readableTextColor(button)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -161,6 +220,43 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _readableTextColor(Color background) {
+    return background.computeLuminance() > 0.48
+        ? AppColors.textMainLight
+        : AppColors.textMainDark;
+  }
+
+  Color _safeScaffoldBackground(
+    Color? requested,
+    Color fallback, {
+    required bool isDarkMode,
+  }) {
+    if (requested == null) return fallback;
+    final hsl = HSLColor.fromColor(requested);
+    final isTintedLight = !isDarkMode && hsl.lightness > 0.88;
+    final isHeavyLight = !isDarkMode && hsl.lightness <= 0.88;
+    final isTintedDark = isDarkMode && hsl.saturation > 0.46;
+
+    if (isHeavyLight || isTintedDark) return fallback;
+    if (isTintedLight && hsl.saturation > 0.22) return fallback;
+    return requested;
+  }
+
+  Color _safeCardColor(
+    Color? requested,
+    Color fallback, {
+    required bool isDarkMode,
+  }) {
+    if (requested == null) return fallback;
+    final hsl = HSLColor.fromColor(requested);
+    final badLightCard =
+        !isDarkMode && (hsl.lightness < 0.94 || hsl.saturation > 0.18);
+    final badDarkCard =
+        isDarkMode && (hsl.lightness > 0.22 || hsl.saturation > 0.52);
+
+    return badLightCard || badDarkCard ? fallback : requested;
   }
 }
 

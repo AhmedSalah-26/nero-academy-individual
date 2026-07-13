@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:lms_platform/core/theme/app_colors.dart';
 import 'package:lms_platform/features/student/course_details/domain/entities/course_details_entity.dart';
 
 /// Course Hero Section - Video thumbnail with play button and parallax effect
@@ -53,13 +52,15 @@ class CourseHeroSection extends StatelessWidget {
           // Thumbnail
           _buildThumbnail(isDark),
           // Overlay
-          _buildOverlay(isDark, hasPreview),
+          _buildOverlay(context, isDark, hasPreview),
         ],
       ),
     );
   }
 
-  Widget _buildOverlay(bool isDark, bool hasPreview) {
+  Widget _buildOverlay(BuildContext context, bool isDark, bool hasPreview) {
+    final accent = Theme.of(context).colorScheme.tertiary;
+
     return GestureDetector(
       onTap: hasPreview ? onPlayPreview : null,
       child: Stack(
@@ -87,11 +88,11 @@ class CourseHeroSection extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: accent,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
+                      color: accent.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -128,12 +129,22 @@ class CourseHeroSection extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: course.thumbnailUrl!,
         fit: BoxFit.cover,
-        placeholder: (_, __) => Container(
-          color: isDark ? AppColors.surfaceDark : AppColors.grey200,
-          child: const Center(
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
+        placeholder: (context, _) {
+          final theme = Theme.of(context);
+          final accent = theme.colorScheme.tertiary;
+          return Container(
+            color: Color.alphaBlend(
+              accent.withValues(alpha: isDark ? 0.08 : 0.025),
+              theme.cardColor,
+            ),
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: accent,
+              ),
+            ),
+          );
+        },
         errorWidget: (_, __, ___) => _buildPlaceholder(isDark),
       );
     }
@@ -141,15 +152,24 @@ class CourseHeroSection extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(bool isDark) {
-    return Container(
-      color: isDark ? AppColors.surfaceDark : AppColors.grey200,
-      child: const Center(
-        child: Icon(
-          Icons.play_circle_outline_rounded,
-          size: 64,
-          color: AppColors.grey400,
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final accent = theme.colorScheme.tertiary;
+        return Container(
+          color: Color.alphaBlend(
+            accent.withValues(alpha: isDark ? 0.08 : 0.025),
+            theme.cardColor,
+          ),
+          child: Center(
+            child: Icon(
+              Icons.play_circle_outline_rounded,
+              size: 64,
+              color: accent.withValues(alpha: 0.68),
+            ),
+          ),
+        );
+      },
     );
   }
 }

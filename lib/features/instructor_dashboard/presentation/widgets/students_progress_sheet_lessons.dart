@@ -73,15 +73,11 @@ class _StudentLessonsProgressDialogState
       final client = Supabase.instance.client;
 
       // 1. Fetch enrollments for this student (only courses by this instructor)
-      final instructorId = client.auth.currentUser?.id;
-      final enrollmentsRes = await client
-          .from('enrollments')
-          .select('''
+      final teacherId = client.auth.currentUser?.id;
+      final enrollmentsRes = await client.from('enrollments').select('''
         course_id,
-        courses!inner(id, title_ar, title_en, instructor_id)
-      ''')
-          .eq('user_id', widget.studentId)
-          .eq('courses.instructor_id', instructorId!);
+        courses!inner(id, title_ar, title_en, teacher_id)
+      ''').eq('user_id', widget.studentId).eq('courses.teacher_id', teacherId!);
 
       final enrollmentsList =
           (enrollmentsRes as List).cast<Map<String, dynamic>>();

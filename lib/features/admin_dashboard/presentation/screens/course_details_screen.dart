@@ -59,7 +59,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         titleAr: _currentCourse.titleAr,
         titleEn: _currentCourse.titleEn,
         thumbnailUrl: _currentCourse.thumbnailUrl,
-        instructorId: _currentCourse.instructorId,
+        teacherId: _currentCourse.teacherId,
         instructorName: _currentCourse.instructorName,
         categoryName: _currentCourse.categoryName,
         price: _currentCourse.price,

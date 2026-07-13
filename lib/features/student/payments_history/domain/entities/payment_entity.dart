@@ -37,8 +37,11 @@ class PaymentEntity extends Equatable {
   bool get isFailed => paymentStatus == 'failed';
   bool get isRefunded => paymentStatus == 'refunded';
   bool get isCancelled => paymentStatus == 'cancelled';
+  bool get isManualRequest =>
+      paymentStatus == 'pending_manual_payment' || paymentMethod == 'manual';
   bool get isFree =>
-      total <= 0 || paymentMethod == 'free' || courses.every((c) => c.isFree);
+      !isManualRequest &&
+      (total <= 0 || paymentMethod == 'free' || courses.every((c) => c.isFree));
 
   String get statusAr {
     switch (paymentStatus) {
@@ -75,6 +78,7 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodAr {
+    if (isManualRequest) return 'دفع يدوي';
     if (isFree) return 'مجاني';
 
     switch (paymentMethod) {
@@ -94,6 +98,7 @@ class PaymentEntity extends Equatable {
   }
 
   String get methodEn {
+    if (isManualRequest) return 'Manual Payment';
     if (isFree) return 'Free';
 
     switch (paymentMethod) {

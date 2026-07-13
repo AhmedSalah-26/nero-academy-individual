@@ -561,7 +561,7 @@ class InstructorCourseEditorDataSource {
     try {
       final response = await _client.rpc('toggle_section_published', params: {
         'p_section_id': sectionId,
-        'p_instructor_id': _userId,
+        'p_teacher_id': _userId,
       });
 
       final result = response as Map<String, dynamic>;
@@ -603,7 +603,7 @@ class InstructorCourseEditorDataSource {
     try {
       final response = await _client.rpc('toggle_lesson_published', params: {
         'p_lesson_id': lessonId,
-        'p_instructor_id': _userId,
+        'p_teacher_id': _userId,
       });
 
       final result = response as Map<String, dynamic>;

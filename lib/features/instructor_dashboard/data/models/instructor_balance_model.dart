@@ -1,6 +1,6 @@
 /// Wallet Summary Model — mirrors user balance fields
 class WalletSummaryModel {
-  final String instructorId;
+  final String teacherId;
   final double availableBalance;
   final double pendingBalance;
   final double totalEarnings;
@@ -8,7 +8,7 @@ class WalletSummaryModel {
   final DateTime updatedAt;
 
   const WalletSummaryModel({
-    required this.instructorId,
+    required this.teacherId,
     required this.availableBalance,
     required this.pendingBalance,
     required this.totalEarnings,
@@ -18,7 +18,7 @@ class WalletSummaryModel {
 
   factory WalletSummaryModel.fromJson(Map<String, dynamic> json) {
     return WalletSummaryModel(
-      instructorId: json['instructor_id'] as String,
+      teacherId: json['teacher_id'] as String,
       availableBalance: (json['available_balance'] as num?)?.toDouble() ?? 0,
       pendingBalance: (json['pending_balance'] as num?)?.toDouble() ?? 0,
       totalEarnings: (json['total_earnings'] as num?)?.toDouble() ?? 0,
@@ -30,7 +30,7 @@ class WalletSummaryModel {
 
   /// Empty balance (fallback when no row exists yet)
   static final empty = WalletSummaryModel(
-    instructorId: '',
+    teacherId: '',
     availableBalance: 0,
     pendingBalance: 0,
     totalEarnings: 0,

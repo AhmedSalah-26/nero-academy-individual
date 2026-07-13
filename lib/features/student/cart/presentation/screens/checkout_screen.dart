@@ -38,11 +38,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = theme.colorScheme.tertiary;
+    final onAccent = theme.colorScheme.onTertiary;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocConsumer<CheckoutCubit, CheckoutState>(
         listener: (context, state) {
           if (!mounted) return;
@@ -68,10 +70,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             slivers: [
               SliverAppBar(
                 pinned: true,
-                backgroundColor: isDark
-                    ? AppColors.backgroundDark
-                    : AppColors.backgroundLight,
+                backgroundColor: theme.scaffoldBackgroundColor,
                 surfaceTintColor: Colors.transparent,
+                foregroundColor: theme.appBarTheme.foregroundColor,
                 elevation: 0,
                 leading: const AppBackButton(),
                 title: Text(
@@ -114,7 +115,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               12 + MediaQuery.of(context).padding.bottom,
             ),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardDark : AppColors.white,
+              color: theme.cardColor,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.06),
@@ -133,29 +134,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         context.read<CheckoutCubit>().processCheckout();
                       },
                 icon: state.isProcessing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: onAccent,
                         ),
                       )
-                    : const Icon(Icons.send_rounded),
+                    : Icon(Icons.send_rounded, color: onAccent),
                 label: Text(
                   context.locale.languageCode == 'ar'
                       ? 'تقديم الطلب - ${cart.currency} ${cart.total.toStringAsFixed(0)}'
                       : 'Submit request - ${cart.currency} ${cart.total.toStringAsFixed(0)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
+                    color: onAccent,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor:
-                      AppColors.primary.withValues(alpha: 0.5),
+                  backgroundColor: accent,
+                  foregroundColor: onAccent,
+                  disabledBackgroundColor: accent.withValues(alpha: 0.5),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -180,15 +181,15 @@ class _OrderSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = context.locale.languageCode;
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.tertiary;
 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
+        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,12 +199,12 @@ class _OrderSummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.shopping_bag_rounded,
-                  color: AppColors.primary,
+                  color: accent,
                   size: 20,
                 ),
               ),
@@ -222,10 +223,10 @@ class _OrderSummaryCard extends StatelessWidget {
               ),
               Text(
                 '${cart.currency} ${cart.total.toStringAsFixed(0)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
+                  color: accent,
                 ),
               ),
             ],
@@ -282,18 +283,20 @@ class _ManualPaymentInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.locale.languageCode == 'ar';
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.tertiary;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: isDark ? 0.12 : 0.08),
+        color: accent.withValues(alpha: isDark ? 0.12 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.22)),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_rounded, color: AppColors.info),
+          Icon(Icons.info_rounded, color: accent),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

@@ -18,7 +18,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
   String? courseTitle;
   String? lessonId;
   String? lessonTitle;
-  String? instructorId;
+  String? teacherId;
   String? instructorName;
   String? instructorAvatar;
 
@@ -43,7 +43,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     required String courseTitle,
     required String lessonId,
     required String lessonTitle,
-    String? instructorId,
+    String? teacherId,
     String? instructorName,
     String? instructorAvatar,
   }) {
@@ -62,7 +62,7 @@ class VideoPlayerNotifierService extends ChangeNotifier {
     this.courseTitle = courseTitle;
     this.lessonId = lessonId;
     this.lessonTitle = lessonTitle;
-    this.instructorId = instructorId;
+    this.teacherId = teacherId;
     this.instructorName = instructorName;
     this.instructorAvatar = instructorAvatar;
 

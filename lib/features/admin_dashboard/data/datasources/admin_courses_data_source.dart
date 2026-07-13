@@ -20,7 +20,7 @@ class AdminCoursesDataSource {
     AppLogger.d('[$_tag] getCourses: status=$status, search=$search');
     try {
       var query = _client.from('courses').select(
-          '*, instructor:profiles!instructor_id(name), category:categories(name_ar)');
+          '*, instructor:profiles!teacher_id(name), category:categories(name_ar)');
 
       if (status != null && status != CourseStatus.all) {
         switch (status) {

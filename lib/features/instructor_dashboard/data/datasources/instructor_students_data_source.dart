@@ -29,8 +29,8 @@ class InstructorStudentsDataSource {
               interests, is_active, is_banned, banned_until, ban_reason,
               created_at, updated_at
             ),
-            course:courses!inner(id, title_ar, title_en, instructor_id)
-          ''').eq('course.instructor_id', _userId);
+            course:courses!inner(id, title_ar, title_en, teacher_id)
+          ''').eq('course.teacher_id', _userId);
 
       if (courseId != null) {
         query = query.eq('course_id', courseId);
@@ -121,13 +121,11 @@ class InstructorStudentsDataSource {
   Future<List<StudentEnrollmentDetail>> getStudentEnrollments(
       String studentId) async {
     AppLogger.d(
-        '[$_tag] getStudentEnrollments: studentId=$studentId, instructorId=$_userId');
+        '[$_tag] getStudentEnrollments: studentId=$studentId, teacherId=$_userId');
     try {
       // First, get all courses owned by this instructor
-      final instructorCourses = await _client
-          .from('courses')
-          .select('id')
-          .eq('instructor_id', _userId);
+      final instructorCourses =
+          await _client.from('courses').select('id').eq('teacher_id', _userId);
 
       final courseIds =
           (instructorCourses as List).map((c) => c['id'] as String).toList();
@@ -145,7 +143,7 @@ class InstructorStudentsDataSource {
           .select('''
             id, course_id, progress_percentage, completed_lessons, status,
             enrolled_at, last_accessed_at, completed_at,
-            course:courses(title_ar, title_en, thumbnail_url, instructor_id, total_lessons)
+            course:courses(title_ar, title_en, thumbnail_url, teacher_id, total_lessons)
           ''')
           .eq('user_id', studentId)
           .inFilter('course_id', courseIds)
@@ -164,13 +162,11 @@ class InstructorStudentsDataSource {
   Future<List<StudentCourseProgress>> getStudentProgress(
       String studentId) async {
     AppLogger.d(
-        '[$_tag] getStudentProgress: studentId=$studentId, instructorId=$_userId');
+        '[$_tag] getStudentProgress: studentId=$studentId, teacherId=$_userId');
     try {
       // First, get all courses owned by this instructor
-      final instructorCourses = await _client
-          .from('courses')
-          .select('id')
-          .eq('instructor_id', _userId);
+      final instructorCourses =
+          await _client.from('courses').select('id').eq('teacher_id', _userId);
 
       final courseIds =
           (instructorCourses as List).map((c) => c['id'] as String).toList();
@@ -182,7 +178,7 @@ class InstructorStudentsDataSource {
 
       final enrollments = await _client.from('enrollments').select('''
             course_id, progress_percentage,
-            course:courses(title_ar, title_en, instructor_id)
+            course:courses(title_ar, title_en, teacher_id)
           ''').eq('user_id', studentId).inFilter('course_id', courseIds);
 
       final List<StudentCourseProgress> progressList = [];
@@ -240,7 +236,7 @@ class InstructorStudentsDataSource {
         'title_en': subject,
         'body_ar': message,
         'body_en': message,
-        'data': {'from_instructor_id': _userId, 'type': 'direct_message'},
+        'data': {'from_teacher_id': _userId, 'type': 'direct_message'},
       });
       AppLogger.success('[$_tag] sendMessageToStudent success');
       return true;

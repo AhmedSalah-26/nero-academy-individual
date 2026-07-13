@@ -143,7 +143,7 @@ CREATE INDEX idx_levels_order ON levels(display_order);
 -- 1.4 COURSES TABLE (Main courses table)
 CREATE TABLE courses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  instructor_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   level_id UUID REFERENCES levels(id) ON DELETE SET NULL,
   -- Basic Info
@@ -200,7 +200,7 @@ CREATE TABLE courses (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_courses_instructor ON courses(instructor_id);
+CREATE INDEX idx_courses_instructor ON courses(teacher_id);
 CREATE INDEX idx_courses_category ON courses(category_id);
 CREATE INDEX idx_courses_level_id ON courses(level_id);
 CREATE INDEX idx_courses_published ON courses(is_published) WHERE is_published = TRUE;
@@ -336,7 +336,7 @@ CREATE TABLE enrollments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  instructor_id UUID REFERENCES profiles(id),
+  teacher_id UUID REFERENCES profiles(id),
   parent_enrollment_id UUID REFERENCES parent_enrollments(id) ON DELETE SET NULL,
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
   pricing_option JSONB,
@@ -580,7 +580,7 @@ CREATE INDEX idx_quiz_attempts_user ON quiz_attempts(user_id);
 CREATE TABLE announcements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  instructor_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title_ar TEXT NOT NULL,
   title_en TEXT,
   content_ar TEXT NOT NULL,
@@ -627,7 +627,7 @@ CREATE TABLE coupons (
   start_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   end_date TIMESTAMPTZ,
   scope VARCHAR(20) DEFAULT 'all' CHECK (scope IN ('all', 'categories', 'courses')),
-  instructor_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  teacher_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   is_active BOOLEAN DEFAULT TRUE,
   is_suspended BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -1086,7 +1086,7 @@ BEGIN
   FOR v_course IN 
     SELECT 
       c.id as course_id,
-      c.instructor_id,
+      c.teacher_id,
       CASE 
         WHEN c.is_flash_sale AND c.flash_sale_end > NOW() THEN COALESCE(c.flash_sale_price, c.discount_price, c.price)
         ELSE COALESCE(c.discount_price, c.price)
@@ -1096,11 +1096,11 @@ BEGIN
     WHERE ci.user_id = p_user_id
   LOOP
     INSERT INTO enrollments (
-      user_id, course_id, instructor_id, parent_enrollment_id,
+      user_id, course_id, teacher_id, parent_enrollment_id,
       price, status, enrolled_at
     )
     VALUES (
-      p_user_id, v_course.course_id, v_course.instructor_id, v_parent_enrollment_id,
+      p_user_id, v_course.course_id, v_course.teacher_id, v_parent_enrollment_id,
       v_course.final_price,
       CASE WHEN v_course.final_price = 0 OR (v_total_subtotal - COALESCE(p_coupon_discount, 0) = 0) THEN 'active' ELSE 'pending' END,
       NOW()
@@ -1228,7 +1228,7 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Course does not offer certificates');
   END IF;
   
-  SELECT name INTO v_instructor FROM profiles WHERE id = v_course.instructor_id;
+  SELECT name INTO v_instructor FROM profiles WHERE id = v_course.teacher_id;
   SELECT name INTO v_user FROM profiles WHERE id = v_user_id;
   
   v_certificate_number := 'CERT-' || UPPER(SUBSTRING(gen_random_uuid()::TEXT, 1, 8));
@@ -1353,7 +1353,7 @@ CREATE OR REPLACE FUNCTION get_or_create_course_conversation(p_course_id UUID, p
 RETURNS UUID AS $$
 DECLARE
     v_conversation_id UUID;
-    v_instructor_id UUID;
+    v_teacher_id UUID;
 BEGIN
     SELECT id INTO v_conversation_id
     FROM conversations
@@ -1361,17 +1361,17 @@ BEGIN
     LIMIT 1;
 
     IF v_conversation_id IS NULL THEN
-        SELECT instructor_id INTO v_instructor_id
+        SELECT teacher_id INTO v_teacher_id
         FROM courses WHERE id = p_course_id;
 
         INSERT INTO conversations (type, course_id, title, created_by)
-        SELECT 'multi', p_course_id, COALESCE(c.title_ar, c.title_en, 'Course Forum'), COALESCE(v_instructor_id, p_user_id)
+        SELECT 'multi', p_course_id, COALESCE(c.title_ar, c.title_en, 'Course Forum'), COALESCE(v_teacher_id, p_user_id)
         FROM courses c WHERE c.id = p_course_id
         RETURNING id INTO v_conversation_id;
 
-        IF v_instructor_id IS NOT NULL THEN
+        IF v_teacher_id IS NOT NULL THEN
             INSERT INTO conversation_participants (conversation_id, user_id, role)
-            VALUES (v_conversation_id, v_instructor_id, 'admin')
+            VALUES (v_conversation_id, v_teacher_id, 'admin')
             ON CONFLICT (conversation_id, user_id) DO NOTHING;
         END IF;
     END IF;
@@ -1479,7 +1479,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION get_instructor_dashboard_stats()
 RETURNS JSON AS $$
 DECLARE
-    v_instructor_id UUID := auth.uid();
+    v_teacher_id UUID := auth.uid();
     v_stats JSON;
     v_total_courses INT;
     v_published_courses INT;
@@ -1496,7 +1496,7 @@ BEGIN
     -- Get course counts
     SELECT COUNT(*), COUNT(CASE WHEN is_published THEN 1 END)
     INTO v_total_courses, v_published_courses
-    FROM courses WHERE instructor_id = v_instructor_id;
+    FROM courses WHERE teacher_id = v_teacher_id;
     
     -- Get student/enrollment counts
     SELECT 
@@ -1506,7 +1506,7 @@ BEGIN
     INTO v_total_students, v_total_enrollments, v_monthly_enrollments
     FROM enrollments e 
     JOIN courses c ON c.id = e.course_id 
-    WHERE c.instructor_id = v_instructor_id;
+    WHERE c.teacher_id = v_teacher_id;
     
     -- Get earnings directly from enrollments (price paid)
     SELECT 
@@ -1514,7 +1514,7 @@ BEGIN
     INTO v_total_earnings
     FROM enrollments e
     JOIN courses c ON c.id = e.course_id
-    WHERE c.instructor_id = v_instructor_id AND e.status IN ('active', 'completed');
+    WHERE c.teacher_id = v_teacher_id AND e.status IN ('active', 'completed');
     
     -- Available balance is equal to total earnings in single instructor setup
     v_available_balance := v_total_earnings;
@@ -1525,21 +1525,21 @@ BEGIN
     INTO v_pending_balance
     FROM enrollments e
     JOIN courses c ON c.id = e.course_id
-    WHERE c.instructor_id = v_instructor_id AND e.status = 'pending';
+    WHERE c.teacher_id = v_teacher_id AND e.status = 'pending';
     
     -- Get ratings
     SELECT COALESCE(AVG(cr.rating), 0), COUNT(*)
     INTO v_average_rating, v_total_reviews
     FROM course_reviews cr 
     JOIN courses c ON c.id = cr.course_id 
-    WHERE c.instructor_id = v_instructor_id;
+    WHERE c.teacher_id = v_teacher_id;
     
     -- Get unanswered questions
     SELECT COUNT(*)
     INTO v_unanswered_questions
     FROM qa_questions q 
     JOIN courses c ON c.id = q.course_id 
-    WHERE c.instructor_id = v_instructor_id AND q.is_answered = false;
+    WHERE c.teacher_id = v_teacher_id AND q.is_answered = false;
     
     -- Build result JSON
     v_stats := json_build_object(
@@ -1570,7 +1570,7 @@ RETURNS TABLE (
     value DECIMAL(10,2)
 ) AS $$
 DECLARE
-    v_instructor_id UUID := auth.uid();
+    v_teacher_id UUID := auth.uid();
 BEGIN
     RETURN QUERY
     SELECT 
@@ -1583,7 +1583,7 @@ BEGIN
     ) as dates(date)
     LEFT JOIN enrollments e ON 
         DATE_TRUNC('day', e.enrolled_at) = dates.date
-        AND e.instructor_id = v_instructor_id
+        AND e.teacher_id = v_teacher_id
         AND e.status IN ('active', 'completed')
     GROUP BY dates.date
     ORDER BY dates.date;
@@ -1600,7 +1600,7 @@ RETURNS TABLE (
     value DECIMAL(10,2)
 ) AS $$
 DECLARE
-    v_instructor_id UUID := auth.uid();
+    v_teacher_id UUID := auth.uid();
 BEGIN
     RETURN QUERY
     SELECT 
@@ -1613,7 +1613,7 @@ BEGIN
     ) as dates(date)
     LEFT JOIN enrollments e ON 
         DATE_TRUNC('day', e.enrolled_at) = dates.date
-        AND e.instructor_id = v_instructor_id
+        AND e.teacher_id = v_teacher_id
     GROUP BY dates.date
     ORDER BY dates.date;
 END;
@@ -1686,19 +1686,19 @@ CREATE POLICY "Instructor can manage levels" ON levels FOR ALL USING (is_admin()
 
 -- 15.4 courses Policies
 CREATE POLICY "Anyone can view published courses" ON courses FOR SELECT USING (is_published = true AND is_active = true);
-CREATE POLICY "Instructor can do everything on courses" ON courses FOR ALL USING (instructor_id = auth.uid() OR is_admin());
+CREATE POLICY "Instructor can do everything on courses" ON courses FOR ALL USING (teacher_id = auth.uid() OR is_admin());
 
 -- 15.5 sections Policies
 CREATE POLICY "Anyone can view sections of published courses" ON sections FOR SELECT 
   USING (EXISTS (SELECT 1 FROM courses WHERE id = sections.course_id AND is_published = true) OR is_admin() OR is_enrolled(sections.course_id));
 CREATE POLICY "Instructor can manage sections" ON sections FOR ALL 
-  USING (EXISTS (SELECT 1 FROM courses WHERE id = sections.course_id AND (instructor_id = auth.uid() OR is_admin())));
+  USING (EXISTS (SELECT 1 FROM courses WHERE id = sections.course_id AND (teacher_id = auth.uid() OR is_admin())));
 
 -- 15.6 lessons Policies
 CREATE POLICY "View lessons if enrolled or preview" ON lessons FOR SELECT 
   USING (is_preview = true OR is_enrolled(lessons.course_id) OR is_admin());
 CREATE POLICY "Instructor can manage lessons" ON lessons FOR ALL 
-  USING (EXISTS (SELECT 1 FROM courses WHERE id = lessons.course_id AND (instructor_id = auth.uid() OR is_admin())));
+  USING (EXISTS (SELECT 1 FROM courses WHERE id = lessons.course_id AND (teacher_id = auth.uid() OR is_admin())));
 
 -- 15.7 lesson_attachments Policies
 CREATE POLICY "View attachments if enrolled" ON lesson_attachments FOR SELECT 
@@ -1875,7 +1875,7 @@ ALTER TABLE IF EXISTS quiz_questions ADD COLUMN IF NOT EXISTS image_url TEXT;
 -- A. Instructor Earnings Table
 CREATE TABLE IF NOT EXISTS instructor_earnings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  instructor_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  teacher_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   -- Amounts
@@ -1890,7 +1890,7 @@ CREATE TABLE IF NOT EXISTS instructor_earnings (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_earnings_instructor ON instructor_earnings(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_earnings_instructor ON instructor_earnings(teacher_id);
 CREATE INDEX IF NOT EXISTS idx_earnings_course ON instructor_earnings(course_id);
 CREATE INDEX IF NOT EXISTS idx_earnings_status ON instructor_earnings(status);
 
@@ -2128,7 +2128,7 @@ CREATE POLICY "Instructors can manage their course attachments" ON course_attach
 FOR ALL
 USING (
   course_id IN (
-    SELECT id FROM courses WHERE instructor_id = auth.uid()
+    SELECT id FROM courses WHERE teacher_id = auth.uid()
   )
 );
 
@@ -2410,7 +2410,7 @@ END;
 $$;
 
 -- 4. get_instructor_courses (Optional, if missing, but usually this is needed to list groups)
-CREATE OR REPLACE FUNCTION public.get_instructor_courses(p_instructor_id UUID)
+CREATE OR REPLACE FUNCTION public.get_instructor_courses(p_teacher_id UUID)
 RETURNS TABLE (
     course_id UUID,
     title_ar TEXT,
@@ -2431,7 +2431,7 @@ BEGIN
             WHERE conv.course_id = c.id AND conv.type = 'course_forum'
         ) AS has_group
     FROM courses c
-    WHERE c.instructor_id = p_instructor_id
+    WHERE c.teacher_id = p_teacher_id
     ORDER BY c.created_at DESC;
 END;
 $$;
@@ -2594,7 +2594,7 @@ AS $$
       AND p.role = 'instructor'
       AND p.is_active = TRUE
       AND p.is_banned = FALSE
-      AND (c.instructor_id = auth.uid() OR public.is_admin())
+      AND (c.teacher_id = auth.uid() OR public.is_admin())
   );
 $$;
 
@@ -2727,7 +2727,7 @@ DROP POLICY IF EXISTS "Instructors can view own earnings" ON public.instructor_e
 CREATE POLICY "Instructors can view own earnings"
 ON public.instructor_earnings
 FOR SELECT
-USING (instructor_id = auth.uid() OR public.is_admin());
+USING (teacher_id = auth.uid() OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admins can manage earnings" ON public.instructor_earnings;
 CREATE POLICY "Admins can manage earnings"
@@ -2845,7 +2845,7 @@ BEGIN
   FOR v_course IN
     SELECT
       c.id AS course_id,
-      c.instructor_id,
+      c.teacher_id,
       CASE
         WHEN c.is_flash_sale AND c.flash_sale_end > NOW() THEN COALESCE(c.flash_sale_price, c.discount_price, c.price)
         ELSE COALESCE(c.discount_price, c.price)
@@ -2855,13 +2855,13 @@ BEGIN
     WHERE ci.user_id = v_user_id
   LOOP
     INSERT INTO public.enrollments (
-      user_id, course_id, instructor_id, parent_enrollment_id,
+      user_id, course_id, teacher_id, parent_enrollment_id,
       price, discount, status, enrolled_at
     )
     VALUES (
       v_user_id,
       v_course.course_id,
-      v_course.instructor_id,
+      v_course.teacher_id,
       v_parent_enrollment_id,
       v_course.final_price,
       CASE
@@ -2975,7 +2975,7 @@ AS $$
 DECLARE
   v_user_id UUID := auth.uid();
   v_conversation_id UUID;
-  v_instructor_id UUID;
+  v_teacher_id UUID;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
@@ -2993,20 +2993,20 @@ BEGIN
   LIMIT 1;
 
   IF v_conversation_id IS NULL THEN
-    SELECT instructor_id
-    INTO v_instructor_id
+    SELECT teacher_id
+    INTO v_teacher_id
     FROM public.courses
     WHERE id = p_course_id;
 
     INSERT INTO public.conversations (type, course_id, title, created_by)
-    SELECT 'multi', p_course_id, COALESCE(c.title_ar, c.title_en, 'Course Forum'), COALESCE(v_instructor_id, v_user_id)
+    SELECT 'multi', p_course_id, COALESCE(c.title_ar, c.title_en, 'Course Forum'), COALESCE(v_teacher_id, v_user_id)
     FROM public.courses c
     WHERE c.id = p_course_id
     RETURNING id INTO v_conversation_id;
 
-    IF v_instructor_id IS NOT NULL THEN
+    IF v_teacher_id IS NOT NULL THEN
       INSERT INTO public.conversation_participants (conversation_id, user_id, role)
-      VALUES (v_conversation_id, v_instructor_id, 'admin')
+      VALUES (v_conversation_id, v_teacher_id, 'admin')
       ON CONFLICT (conversation_id, user_id) DO NOTHING;
     END IF;
   END IF;
@@ -3562,7 +3562,7 @@ BEGIN
   FOR v_course IN
     SELECT
       c.id AS course_id,
-      c.instructor_id,
+      c.teacher_id,
       CASE
         WHEN c.is_flash_sale AND c.flash_sale_end > NOW() THEN COALESCE(c.flash_sale_price, c.discount_price, c.price)
         ELSE COALESCE(c.discount_price, c.price)
@@ -3572,13 +3572,13 @@ BEGIN
     WHERE ci.user_id = v_user_id
   LOOP
     INSERT INTO public.enrollments (
-      user_id, course_id, instructor_id, parent_enrollment_id,
+      user_id, course_id, teacher_id, parent_enrollment_id,
       price, discount, status, enrolled_at
     )
     VALUES (
       v_user_id,
       v_course.course_id,
-      v_course.instructor_id,
+      v_course.teacher_id,
       v_parent_enrollment_id,
       v_course.final_price,
       CASE
@@ -3590,7 +3590,7 @@ BEGIN
     )
     ON CONFLICT (user_id, course_id)
     DO UPDATE SET
-      instructor_id = EXCLUDED.instructor_id,
+      teacher_id = EXCLUDED.teacher_id,
       parent_enrollment_id = EXCLUDED.parent_enrollment_id,
       price = EXCLUDED.price,
       discount = EXCLUDED.discount,
@@ -4579,7 +4579,7 @@ USING (
     SELECT 1
     FROM courses c
     WHERE c.id = sections.course_id
-      AND c.instructor_id = auth.uid()
+      AND c.teacher_id = auth.uid()
   )
 );
 
@@ -4741,7 +4741,7 @@ BEGIN
       created_at
     )
     SELECT
-      c.instructor_id,
+      c.teacher_id,
       'ØªÙ… Ù†Ø´Ø± Ø§Ù„Ø¯Ø±Ø³ Ø¨Ù†Ø¬Ø§Ø­ âœ…',
       'Lesson Published Successfully âœ…',
       'ØªÙ… Ù†Ø´Ø± Ø§Ù„Ø¯Ø±Ø³: ' || v_lesson_title_ar || ' ÙÙŠ ÙƒÙˆØ±Ø³: ' || COALESCE(v_course_title_ar, ''),
@@ -4788,7 +4788,7 @@ SELECT '019 - Auto-notification triggers for courses and lessons created success
 CREATE OR REPLACE FUNCTION trigger_create_instructor_earning()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_instructor_id UUID;
+  v_teacher_id UUID;
   v_price         DECIMAL(10,2);
   v_gross         DECIMAL(10,2);
   v_platform_fee  DECIMAL(10,2);
@@ -4800,17 +4800,17 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Get instructor_id and price from enrollment
-  v_instructor_id := NEW.instructor_id;
+  -- Get teacher_id and price from enrollment
+  v_teacher_id := NEW.teacher_id;
   v_price         := COALESCE(NEW.price, 0);
 
-  -- If instructor_id not set on enrollment row, get it from courses table
-  IF v_instructor_id IS NULL THEN
-    SELECT instructor_id INTO v_instructor_id
+  -- If teacher_id not set on enrollment row, get it from courses table
+  IF v_teacher_id IS NULL THEN
+    SELECT teacher_id INTO v_teacher_id
     FROM courses WHERE id = NEW.course_id;
   END IF;
 
-  IF v_instructor_id IS NULL THEN
+  IF v_teacher_id IS NULL THEN
     RETURN NEW; -- no instructor found, skip
   END IF;
 
@@ -4828,7 +4828,7 @@ BEGIN
     SELECT 1 FROM instructor_earnings WHERE enrollment_id = NEW.id
   ) THEN
     INSERT INTO instructor_earnings (
-      instructor_id,
+      teacher_id,
       enrollment_id,
       course_id,
       gross_amount,
@@ -4839,7 +4839,7 @@ BEGIN
       available_at,
       created_at
     ) VALUES (
-      v_instructor_id,
+      v_teacher_id,
       NEW.id,
       NEW.course_id,
       v_gross,
@@ -4884,7 +4884,7 @@ SELECT '020 - Instructor earnings trigger created successfully!' AS status;
 -- ============================================================
 
 -- Helper function that recalculates the instructor rating from scratch
-CREATE OR REPLACE FUNCTION update_instructor_average_rating(p_instructor_id UUID)
+CREATE OR REPLACE FUNCTION update_instructor_average_rating(p_teacher_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -4899,7 +4899,7 @@ BEGIN
   INTO v_avg, v_count
   FROM course_reviews cr
   JOIN courses c ON c.id = cr.course_id
-  WHERE c.instructor_id = p_instructor_id;
+  WHERE c.teacher_id = p_teacher_id;
 
   -- Upsert into instructor_profiles
   UPDATE instructor_profiles
@@ -4907,7 +4907,7 @@ BEGIN
     average_rating = v_avg,
     total_reviews  = v_count,
     updated_at     = NOW()
-  WHERE instructor_id = p_instructor_id;
+  WHERE teacher_id = p_teacher_id;
 
   -- If no row existed for this instructor, do nothing silently
   -- (the row should exist; if not, it will be fixed on next profile create)
@@ -4921,19 +4921,19 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_instructor_id UUID;
+  v_teacher_id UUID;
 BEGIN
-  -- Determine the instructor_id from whichever row we have
+  -- Determine the teacher_id from whichever row we have
   IF TG_OP = 'DELETE' THEN
-    SELECT c.instructor_id INTO v_instructor_id
+    SELECT c.teacher_id INTO v_teacher_id
     FROM courses c WHERE c.id = OLD.course_id;
   ELSE
-    SELECT c.instructor_id INTO v_instructor_id
+    SELECT c.teacher_id INTO v_teacher_id
     FROM courses c WHERE c.id = NEW.course_id;
   END IF;
 
-  IF v_instructor_id IS NOT NULL THEN
-    PERFORM update_instructor_average_rating(v_instructor_id);
+  IF v_teacher_id IS NOT NULL THEN
+    PERFORM update_instructor_average_rating(v_teacher_id);
   END IF;
 
   RETURN NULL; -- AFTER trigger; return value is ignored
@@ -4956,11 +4956,11 @@ DECLARE
   rec RECORD;
 BEGIN
   FOR rec IN
-    SELECT DISTINCT c.instructor_id
+    SELECT DISTINCT c.teacher_id
     FROM courses c
     JOIN course_reviews cr ON cr.course_id = c.id
   LOOP
-    PERFORM update_instructor_average_rating(rec.instructor_id);
+    PERFORM update_instructor_average_rating(rec.teacher_id);
   END LOOP;
 END;
 $$;
@@ -5114,7 +5114,7 @@ CREATE TABLE IF NOT EXISTS manual_purchase_request_items (
   parent_enrollment_id UUID NOT NULL REFERENCES parent_enrollments(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  instructor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  teacher_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
   original_price DECIMAL(10,2) DEFAULT 0,
   discount DECIMAL(10,2) DEFAULT 0,
@@ -5131,7 +5131,7 @@ CREATE INDEX IF NOT EXISTS idx_manual_purchase_items_user_course
 ON manual_purchase_request_items(user_id, course_id);
 
 CREATE INDEX IF NOT EXISTS idx_manual_purchase_items_instructor
-ON manual_purchase_request_items(instructor_id);
+ON manual_purchase_request_items(teacher_id);
 
 ALTER TABLE manual_purchase_request_items ENABLE ROW LEVEL SECURITY;
 
@@ -5205,7 +5205,7 @@ INSERT INTO manual_purchase_request_items (
   parent_enrollment_id,
   user_id,
   course_id,
-  instructor_id,
+  teacher_id,
   price,
   original_price,
   discount,
@@ -5217,7 +5217,7 @@ SELECT DISTINCT ON (e.parent_enrollment_id, e.course_id)
   e.parent_enrollment_id,
   e.user_id,
   e.course_id,
-  e.instructor_id,
+  e.teacher_id,
   e.price,
   e.price,
   COALESCE(e.discount, 0),
@@ -5233,7 +5233,7 @@ ORDER BY e.parent_enrollment_id, e.course_id, e.created_at DESC
 ON CONFLICT (parent_enrollment_id, course_id) DO UPDATE
 SET
   user_id = EXCLUDED.user_id,
-  instructor_id = EXCLUDED.instructor_id,
+  teacher_id = EXCLUDED.teacher_id,
   price = EXCLUDED.price,
   original_price = EXCLUDED.original_price,
   discount = EXCLUDED.discount,
@@ -5304,7 +5304,7 @@ BEGIN
     INSERT INTO enrollments (
       user_id,
       course_id,
-      instructor_id,
+      teacher_id,
       parent_enrollment_id,
       price,
       pricing_option,
@@ -5320,7 +5320,7 @@ BEGIN
     VALUES (
       v_item.user_id,
       v_item.course_id,
-      v_item.instructor_id,
+      v_item.teacher_id,
       p_parent_enrollment_id,
       v_item.price,
       v_item.pricing_option,
@@ -5335,7 +5335,7 @@ BEGIN
     )
     ON CONFLICT (user_id, course_id)
     DO UPDATE SET
-      instructor_id = EXCLUDED.instructor_id,
+      teacher_id = EXCLUDED.teacher_id,
       parent_enrollment_id = EXCLUDED.parent_enrollment_id,
       price = EXCLUDED.price,
       pricing_option = EXCLUDED.pricing_option,
@@ -5429,7 +5429,7 @@ USING (
     SELECT 1
     FROM coupons c
     WHERE c.id = coupon_usages.coupon_id
-      AND c.instructor_id = auth.uid()
+      AND c.teacher_id = auth.uid()
   )
   OR is_admin()
 );
@@ -5673,7 +5673,7 @@ BEGIN
   FOR v_course IN
     SELECT
       c.id AS course_id,
-      c.instructor_id,
+      c.teacher_id,
       public.course_effective_price(
         c.price,
         c.discount_price,
@@ -5688,11 +5688,11 @@ BEGIN
     WHERE ci.user_id = p_user_id
   LOOP
     INSERT INTO enrollments (
-      user_id, course_id, instructor_id, parent_enrollment_id,
+      user_id, course_id, teacher_id, parent_enrollment_id,
       price, status, enrolled_at
     )
     VALUES (
-      p_user_id, v_course.course_id, v_course.instructor_id, v_parent_enrollment_id,
+      p_user_id, v_course.course_id, v_course.teacher_id, v_parent_enrollment_id,
       v_course.final_price,
       CASE WHEN v_course.final_price = 0 OR GREATEST(v_total_subtotal - COALESCE(p_coupon_discount, 0), 0) = 0 THEN 'active' ELSE 'pending' END,
       NOW()
@@ -5750,7 +5750,7 @@ ADD COLUMN IF NOT EXISTS coupon_discount DECIMAL(10,2) NOT NULL DEFAULT 0;
 CREATE OR REPLACE FUNCTION trigger_create_instructor_earning()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_instructor_id UUID;
+  v_teacher_id UUID;
   v_gross DECIMAL(10,2);
   v_coupon_discount DECIMAL(10,2);
   v_platform_fee DECIMAL(10,2);
@@ -5761,20 +5761,20 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  v_instructor_id := NEW.instructor_id;
+  v_teacher_id := NEW.teacher_id;
   v_gross := GREATEST(COALESCE(NEW.price, 0), 0);
   v_coupon_discount := LEAST(
     GREATEST(COALESCE(NEW.discount, 0), 0),
     v_gross
   );
 
-  IF v_instructor_id IS NULL THEN
-    SELECT instructor_id INTO v_instructor_id
+  IF v_teacher_id IS NULL THEN
+    SELECT teacher_id INTO v_teacher_id
     FROM courses
     WHERE id = NEW.course_id;
   END IF;
 
-  IF v_instructor_id IS NULL OR v_gross <= 0 THEN
+  IF v_teacher_id IS NULL OR v_gross <= 0 THEN
     RETURN NEW;
   END IF;
 
@@ -5782,7 +5782,7 @@ BEGIN
   v_net := GREATEST(v_gross - v_coupon_discount - v_platform_fee, 0);
 
   INSERT INTO instructor_earnings (
-    instructor_id,
+    teacher_id,
     enrollment_id,
     course_id,
     gross_amount,
@@ -5795,7 +5795,7 @@ BEGIN
     created_at
   )
   VALUES (
-    v_instructor_id,
+    v_teacher_id,
     NEW.id,
     NEW.course_id,
     v_gross,
@@ -5809,7 +5809,7 @@ BEGIN
   )
   ON CONFLICT (enrollment_id)
   DO UPDATE SET
-    instructor_id = EXCLUDED.instructor_id,
+    teacher_id = EXCLUDED.teacher_id,
     course_id = EXCLUDED.course_id,
     gross_amount = EXCLUDED.gross_amount,
     coupon_discount = EXCLUDED.coupon_discount,
@@ -5828,7 +5828,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS trigger_auto_instructor_earning ON enrollments;
 CREATE TRIGGER trigger_auto_instructor_earning
-AFTER INSERT OR UPDATE OF status, price, discount, instructor_id, course_id
+AFTER INSERT OR UPDATE OF status, price, discount, teacher_id, course_id
 ON enrollments
 FOR EACH ROW
 EXECUTE FUNCTION trigger_create_instructor_earning();
@@ -5874,7 +5874,7 @@ WHERE e.id = ie.enrollment_id
 
 -- Create any missing earning rows for active paid enrollments.
 INSERT INTO instructor_earnings (
-  instructor_id,
+  teacher_id,
   enrollment_id,
   course_id,
   gross_amount,
@@ -5887,7 +5887,7 @@ INSERT INTO instructor_earnings (
   created_at
 )
 SELECT
-  COALESCE(e.instructor_id, c.instructor_id),
+  COALESCE(e.teacher_id, c.teacher_id),
   e.id,
   e.course_id,
   GREATEST(COALESCE(e.price, 0), 0),
@@ -5912,7 +5912,7 @@ FROM enrollments e
 JOIN courses c ON c.id = e.course_id
 WHERE e.status IN ('active', 'completed')
   AND GREATEST(COALESCE(e.price, 0), 0) > 0
-  AND COALESCE(e.instructor_id, c.instructor_id) IS NOT NULL
+  AND COALESCE(e.teacher_id, c.teacher_id) IS NOT NULL
 ON CONFLICT (enrollment_id)
 DO NOTHING;
 
@@ -5948,7 +5948,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 CREATE OR REPLACE FUNCTION get_instructor_dashboard_stats()
 RETURNS JSON AS $$
 DECLARE
-    v_instructor_id UUID := auth.uid();
+    v_teacher_id UUID := auth.uid();
     v_stats JSON;
     v_total_courses INT;
     v_published_courses INT;
@@ -5965,7 +5965,7 @@ BEGIN
     SELECT COUNT(*), COUNT(CASE WHEN is_published THEN 1 END)
     INTO v_total_courses, v_published_courses
     FROM courses
-    WHERE instructor_id = v_instructor_id;
+    WHERE teacher_id = v_teacher_id;
 
     SELECT
         COUNT(DISTINCT e.user_id),
@@ -5974,7 +5974,7 @@ BEGIN
     INTO v_total_students, v_total_enrollments, v_monthly_enrollments
     FROM enrollments e
     JOIN courses c ON c.id = e.course_id
-    WHERE c.instructor_id = v_instructor_id
+    WHERE c.teacher_id = v_teacher_id
       AND e.status IN ('active', 'completed');
 
     SELECT
@@ -5983,19 +5983,19 @@ BEGIN
       COALESCE(SUM(CASE WHEN status = 'pending' THEN net_amount ELSE 0 END), 0)
     INTO v_total_earnings, v_available_balance, v_pending_balance
     FROM instructor_earnings
-    WHERE instructor_id = v_instructor_id;
+    WHERE teacher_id = v_teacher_id;
 
     SELECT COALESCE(AVG(cr.rating), 0), COUNT(*)
     INTO v_average_rating, v_total_reviews
     FROM course_reviews cr
     JOIN courses c ON c.id = cr.course_id
-    WHERE c.instructor_id = v_instructor_id;
+    WHERE c.teacher_id = v_teacher_id;
 
     SELECT COUNT(*)
     INTO v_unanswered_questions
     FROM qa_questions q
     JOIN courses c ON c.id = q.course_id
-    WHERE c.instructor_id = v_instructor_id
+    WHERE c.teacher_id = v_teacher_id
       AND q.is_answered = false;
 
     v_stats := json_build_object(
@@ -6025,7 +6025,7 @@ RETURNS TABLE (
     value DECIMAL(10,2)
 ) AS $$
 DECLARE
-    v_instructor_id UUID := auth.uid();
+    v_teacher_id UUID := auth.uid();
 BEGIN
     RETURN QUERY
     SELECT
@@ -6038,7 +6038,7 @@ BEGIN
     ) AS dates(date)
     LEFT JOIN instructor_earnings ie ON
         DATE_TRUNC('day', ie.created_at) = dates.date
-        AND ie.instructor_id = v_instructor_id
+        AND ie.teacher_id = v_teacher_id
         AND ie.status IN ('available', 'paid', 'pending')
     GROUP BY dates.date
     ORDER BY dates.date;
@@ -6103,7 +6103,7 @@ WHERE cp.conversation_id = c.id
   AND NOT EXISTS (
     SELECT 1 FROM public.courses cr
     WHERE cr.id = c.course_id
-      AND cr.instructor_id = cp.user_id
+      AND cr.teacher_id = cp.user_id
   );
 
 -- Step 2: Replace get_user_conversations with a version that
@@ -6158,14 +6158,14 @@ BEGIN
         c.id,
         p_user_id,
         CASE
-            WHEN cr.instructor_id = p_user_id THEN 'admin'
+            WHEN cr.teacher_id = p_user_id THEN 'admin'
             ELSE 'member'
         END
     FROM public.conversations c
     JOIN public.courses cr ON cr.id = c.course_id
     WHERE c.type = 'multi'
       AND (
-          cr.instructor_id = p_user_id
+          cr.teacher_id = p_user_id
           OR EXISTS (
               SELECT 1
               FROM public.enrollments e
@@ -6197,7 +6197,7 @@ BEGIN
       AND NOT EXISTS (
           SELECT 1 FROM public.courses cr2
           WHERE cr2.id = c2.course_id
-            AND cr2.instructor_id = p_user_id
+            AND cr2.teacher_id = p_user_id
       );
 
     RETURN QUERY
@@ -6307,14 +6307,14 @@ CREATE POLICY "Instructors can manage coupon courses" ON coupon_courses FOR ALL
     EXISTS (
       SELECT 1 FROM coupons
       WHERE coupons.id = coupon_courses.coupon_id 
-        AND coupons.instructor_id = auth.uid()
+        AND coupons.teacher_id = auth.uid()
     )
   )
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM coupons
       WHERE coupons.id = coupon_courses.coupon_id 
-        AND coupons.instructor_id = auth.uid()
+        AND coupons.teacher_id = auth.uid()
     )
   );
 
@@ -6335,23 +6335,23 @@ CREATE POLICY "Anyone can view active coupons" ON coupons FOR SELECT USING (is_a
 -- Instructors can view coupons they created
 DROP POLICY IF EXISTS "Instructors can view own coupons" ON coupons;
 CREATE POLICY "Instructors can view own coupons" ON coupons FOR SELECT 
-  USING (instructor_id = auth.uid() OR is_admin());
+  USING (teacher_id = auth.uid() OR is_admin());
 
 -- Instructors can insert/create their own coupons
 DROP POLICY IF EXISTS "Instructors can insert own coupons" ON coupons;
 CREATE POLICY "Instructors can insert own coupons" ON coupons FOR INSERT 
-  WITH CHECK (instructor_id = auth.uid() OR is_admin());
+  WITH CHECK (teacher_id = auth.uid() OR is_admin());
 
 -- Instructors can update their own coupons
 DROP POLICY IF EXISTS "Instructors can update own coupons" ON coupons;
 CREATE POLICY "Instructors can update own coupons" ON coupons FOR UPDATE 
-  USING (instructor_id = auth.uid() OR is_admin())
-  WITH CHECK (instructor_id = auth.uid() OR is_admin());
+  USING (teacher_id = auth.uid() OR is_admin())
+  WITH CHECK (teacher_id = auth.uid() OR is_admin());
 
 -- Instructors can delete their own coupons
 DROP POLICY IF EXISTS "Instructors can delete own coupons" ON coupons;
 CREATE POLICY "Instructors can delete own coupons" ON coupons FOR DELETE 
-  USING (instructor_id = auth.uid() OR is_admin());
+  USING (teacher_id = auth.uid() OR is_admin());
 
 -- Admins can manage all coupons
 DROP POLICY IF EXISTS "Admins can manage all coupons" ON coupons;
@@ -6435,7 +6435,7 @@ USING (
   EXISTS (
     SELECT 1 FROM courses
     WHERE courses.id = enrollments.course_id
-      AND courses.instructor_id = auth.uid()
+      AND courses.teacher_id = auth.uid()
   )
 );
 
@@ -6451,7 +6451,7 @@ USING (
   EXISTS (
     SELECT 1 FROM courses
     WHERE courses.id = lesson_progress.course_id
-      AND courses.instructor_id = auth.uid()
+      AND courses.teacher_id = auth.uid()
   )
 );
 
@@ -6522,7 +6522,7 @@ USING (
     SELECT 1 FROM course_reviews cr
     JOIN courses c ON c.id = cr.course_id
     WHERE cr.id = review_reports.review_id
-      AND c.instructor_id = auth.uid()
+      AND c.teacher_id = auth.uid()
   )
 );
 
@@ -6576,7 +6576,7 @@ USING (
   EXISTS (
     SELECT 1 FROM courses
     WHERE courses.id = course_reports.course_id
-      AND courses.instructor_id = auth.uid()
+      AND courses.teacher_id = auth.uid()
   )
 );
 
@@ -6893,7 +6893,7 @@ update public.courses c
 set teacher_id = t.id
 from public.teachers t
 where c.teacher_id is null
-  and c.instructor_id = t.profile_id;
+  and c.teacher_id = t.profile_id;
 
 create table if not exists public.student_teacher_links (
   id uuid primary key default gen_random_uuid(),
@@ -7061,7 +7061,7 @@ begin
     and (
       parent_enrollment_id = request_row.parent_enrollment_id
       or (
-        instructor_id = request_teacher_profile_id
+        teacher_id = request_teacher_profile_id
         and (
           request_row.course_id is null
           or course_id = request_row.course_id
@@ -7220,7 +7220,7 @@ alter table public.manual_purchase_request_items
 update public.parent_enrollments pe
 set teacher_id = t.id
 from public.manual_purchase_request_items item
-join public.teachers t on t.profile_id = item.instructor_id
+join public.teachers t on t.profile_id = item.teacher_id
 where pe.id = item.parent_enrollment_id
   and pe.teacher_id is null;
 
@@ -7228,7 +7228,7 @@ update public.manual_purchase_request_items item
 set teacher_id = t.id
 from public.teachers t
 where item.teacher_id is null
-  and item.instructor_id = t.profile_id;
+  and item.teacher_id = t.profile_id;
 
 create index if not exists idx_parent_enrollments_teacher_manual
 on public.parent_enrollments(teacher_id, payment_status, created_at desc)
@@ -7339,7 +7339,7 @@ begin
     insert into public.enrollments (
       user_id,
       course_id,
-      instructor_id,
+      teacher_id,
       parent_enrollment_id,
       price,
       pricing_option,
@@ -7355,7 +7355,7 @@ begin
     values (
       v_item.user_id,
       v_item.course_id,
-      v_item.instructor_id,
+      v_item.teacher_id,
       p_parent_enrollment_id,
       v_item.price,
       v_item.pricing_option,
@@ -7370,7 +7370,7 @@ begin
     )
     on conflict (user_id, course_id)
     do update set
-      instructor_id = excluded.instructor_id,
+      teacher_id = excluded.teacher_id,
       parent_enrollment_id = excluded.parent_enrollment_id,
       price = excluded.price,
       pricing_option = excluded.pricing_option,

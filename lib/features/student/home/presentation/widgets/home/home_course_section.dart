@@ -34,6 +34,7 @@ class HomeCourseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = Theme.of(context).colorScheme.tertiary;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -70,7 +71,7 @@ class HomeCourseSection extends StatelessWidget {
                     child: Text(
                       'home.see_all'.tr(),
                       style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.primary,
+                        color: accent,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),

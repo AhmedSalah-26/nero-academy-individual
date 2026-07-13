@@ -58,7 +58,7 @@ class _CourseSelectionDialogState extends State<CourseSelectionDialog> {
       final response = await supabase
           .from('courses')
           .select('id, title_ar, title_en, thumbnail_url, is_published')
-          .eq('instructor_id', userId)
+          .eq('teacher_id', userId)
           .order('created_at', ascending: false);
 
       if (mounted) {

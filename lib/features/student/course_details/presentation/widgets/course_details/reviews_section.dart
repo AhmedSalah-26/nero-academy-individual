@@ -25,16 +25,16 @@ class ReviewsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = theme.colorScheme.tertiary;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
+        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,8 +57,8 @@ class ReviewsSection extends StatelessWidget {
                   onPressed: onSeeAll,
                   child: Text(
                     'course_details.see_all'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: accent,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -68,7 +68,7 @@ class ReviewsSection extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Rating Overview (Amazon style)
-          _buildRatingOverview(isDark),
+          _buildRatingOverview(context, isDark),
 
           if (reviews.isNotEmpty) ...[
             const SizedBox(height: 24),
@@ -88,7 +88,9 @@ class ReviewsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingOverview(bool isDark) {
+  Widget _buildRatingOverview(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -102,8 +104,7 @@ class ReviewsSection extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
-                  color:
-                      isDark ? AppColors.textMainDark : AppColors.textMainLight,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -154,8 +155,8 @@ class ReviewsSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: percentage,
-                          backgroundColor:
-                              isDark ? AppColors.grey700 : AppColors.grey200,
+                          backgroundColor: theme.colorScheme.outline
+                              .withValues(alpha: isDark ? 0.45 : 0.35),
                           valueColor: const AlwaysStoppedAnimation<Color>(
                               AppColors.rating),
                           minHeight: 8,
@@ -184,14 +185,15 @@ class ReviewsSection extends StatelessWidget {
 
   Widget _buildReviewCard(
       BuildContext context, ReviewEntity review, bool isDark) {
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.tertiary;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
+        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,7 +203,7 @@ class ReviewsSection extends StatelessWidget {
               // User Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                backgroundColor: accent.withValues(alpha: 0.1),
                 backgroundImage: review.userAvatarUrl != null &&
                         review.userAvatarUrl!.isNotEmpty
                     ? NetworkImage(review.userAvatarUrl!)
@@ -210,8 +212,8 @@ class ReviewsSection extends StatelessWidget {
                         review.userAvatarUrl!.isEmpty
                     ? Text(
                         (review.userName ?? 'U')[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: accent,
                           fontWeight: FontWeight.bold,
                         ),
                       )

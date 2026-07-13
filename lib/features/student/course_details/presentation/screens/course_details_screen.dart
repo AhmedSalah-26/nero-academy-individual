@@ -82,7 +82,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final locale = context.locale.languageCode;
 
     return PopScope(
@@ -92,8 +93,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         context.go('/home');
       },
       child: Scaffold(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: BlocBuilder<CourseDetailsCubit, CourseDetailsState>(
           builder: (context, state) {
             if (state.isLoading) {
@@ -188,7 +188,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   if (course.instructor != null) ...[
                     const SizedBox(height: 16),
                     Divider(
-                      color: isDark ? AppColors.borderDark : AppColors.grey200,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                     SlideFadeIn.fromBottom(
                       delay: Duration(milliseconds: 100 * sectionIndex++),
@@ -203,7 +203,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   ],
                   const SizedBox(height: 16),
                   Divider(
-                    color: isDark ? AppColors.borderDark : AppColors.grey200,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                   // Reviews Section with animation
                   SlideFadeIn.fromBottom(
@@ -244,11 +244,15 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   }
 
   Widget _buildAppBar(CourseDetailsEntity course, String locale, bool isDark) {
+    final theme = Theme.of(context);
+    final onBackground = theme.appBarTheme.foregroundColor ??
+        (isDark ? AppColors.textMainDark : AppColors.textMainLight);
+
     return SliverAppBar(
       pinned: true,
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: theme.scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
+      foregroundColor: onBackground,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () => context.go('/home'),
@@ -261,7 +265,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+            color: onBackground,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -288,7 +292,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       isInWishlist
                           ? Icons.favorite_rounded
                           : Icons.favorite_border_rounded,
-                      color: AppColors.primary,
+                      color: theme.colorScheme.tertiary,
                     ),
                     onPressed: state.isWishlistLoading
                         ? null
@@ -337,6 +341,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   Widget _buildCartButton(bool isDark) {
     // Use singleton CartCubit from service locator
     final cartCubit = sl<CartCubit>();
+    final accent = Theme.of(context).colorScheme.tertiary;
     return BlocBuilder<CartCubit, CartState>(
       bloc: cartCubit,
       builder: (context, cartState) {
@@ -353,8 +358,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 top: 4,
                 child: Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
+                  decoration: BoxDecoration(
+                    color: accent,
                     shape: BoxShape.circle,
                   ),
                   constraints: const BoxConstraints(
@@ -470,8 +475,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     _openPreviewPlayerScreen(normalizedUrl, course);
   }
 
-  void _navigateToInstructor(String instructorId) {
-    AppRouter.goToInstructor(context, instructorId);
+  void _navigateToInstructor(String teacherId) {
+    AppRouter.goToInstructor(context, teacherId);
   }
 
   void _navigateToReviews(String courseId) {
@@ -496,7 +501,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         courseId: courseId,
         enrollmentId: course.enrollmentId!,
         courseTitle: course.getTitle(locale),
-        instructorId: course.instructor?.id,
+        teacherId: course.instructor?.id,
         instructorName: course.instructor?.displayName,
         instructorAvatar: course.instructor?.avatarUrl,
       );
@@ -630,11 +635,12 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
     final locale = context.locale.languageCode;
     final isArabic = locale == 'ar';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      backgroundColor: theme.cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -651,9 +657,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.textMainDark
-                        : AppColors.textMainLight,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -673,9 +677,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
-                          color: isDark
-                              ? AppColors.borderDark
-                              : AppColors.borderLight,
+                          color: theme.colorScheme.outline,
                         ),
                       ),
                       title: Text(option.label),
@@ -736,9 +738,9 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                           ] else
                             Text(
                               '${course.currency} ${option.price.toStringAsFixed(0)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
+                                color: theme.colorScheme.tertiary,
                               ),
                             ),
                         ],

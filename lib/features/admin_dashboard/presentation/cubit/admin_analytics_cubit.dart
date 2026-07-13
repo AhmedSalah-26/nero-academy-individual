@@ -37,8 +37,8 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
   }
 
   /// Select an instructor and load their date-filtered analytics.
-  Future<void> selectInstructor(String instructorId) async {
-    emit(state.copyWith(selectedInstructorId: instructorId));
+  Future<void> selectInstructor(String teacherId) async {
+    emit(state.copyWith(selectedTeacherId: teacherId));
     await _loadSelectedInstructorData();
   }
 
@@ -83,21 +83,21 @@ class AdminAnalyticsCubit extends Cubit<AdminAnalyticsState> {
       return;
     }
 
-    final currentId = state.selectedInstructorId;
+    final currentId = state.selectedTeacherId;
     final hasCurrent = currentId != null &&
         state.topInstructors.any((instructor) => instructor.id == currentId);
     final selectedId = hasCurrent ? currentId : state.topInstructors.first.id;
-    emit(state.copyWith(selectedInstructorId: selectedId));
+    emit(state.copyWith(selectedTeacherId: selectedId));
     await _loadSelectedInstructorData();
   }
 
   Future<void> _loadSelectedInstructorData() async {
-    final instructorId = state.selectedInstructorId;
-    if (instructorId == null) return;
+    final teacherId = state.selectedTeacherId;
+    if (teacherId == null) return;
 
     try {
       final data = await _repository.getInstructorEnrollmentsChart(
-        instructorId,
+        teacherId,
         state.startDate,
         state.endDate,
       );

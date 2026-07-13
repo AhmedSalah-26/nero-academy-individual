@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
@@ -23,8 +23,8 @@ class InstructorReviewsDataSource {
     try {
       var query = _client
           .from('course_reviews')
-          .select('''*, course:courses!inner(title_ar, instructor_id), 
-            user:profiles(name, avatar_url)''').eq('course.instructor_id', _userId);
+          .select('''*, course:courses!inner(title_ar, teacher_id),
+            user:profiles(name, avatar_url)''').eq('course.teacher_id', _userId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (minRating != null) query = query.gte('rating', minRating);

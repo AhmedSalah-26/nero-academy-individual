@@ -36,7 +36,7 @@ abstract class AdminRepository {
   Future<List<TopCourseModel>> getTopCourses({int limit = 10});
   Future<List<TopInstructorModel>> getTopInstructors({int limit = 10});
   Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
-    String instructorId,
+    String teacherId,
     DateTime start,
     DateTime end,
   );

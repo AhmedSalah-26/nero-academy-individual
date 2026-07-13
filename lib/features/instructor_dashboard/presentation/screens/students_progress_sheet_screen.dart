@@ -62,8 +62,8 @@ class _StudentsProgressSheetScreenState
       var query = client.from('enrollments').select('''
         id, enrolled_at, last_accessed_at, completed_at, progress_percentage, status, user_id,
         profiles!enrollments_user_id_fkey(id, name, email, phone, avatar_url, created_at, is_active),
-        courses!inner(id, title_ar, title_en, total_lessons, instructor_id)
-      ''').eq('courses.instructor_id', currentUserId);
+        courses!inner(id, title_ar, title_en, total_lessons, teacher_id)
+      ''').eq('courses.teacher_id', currentUserId);
 
       if (widget.courseId != null) {
         query = query.eq('course_id', widget.courseId!);
@@ -81,8 +81,8 @@ class _StudentsProgressSheetScreenState
         final quizData = await client
             .from('quiz_attempts')
             .select(
-                'user_id, score, passed, quizzes!inner(courses!inner(instructor_id))')
-            .eq('quizzes.courses.instructor_id', currentUserId)
+                'user_id, score, passed, quizzes!inner(courses!inner(teacher_id))')
+            .eq('quizzes.courses.teacher_id', currentUserId)
             .inFilter('user_id', studentIds.toList());
         for (final q in quizData as List) {
           final uid = q['user_id'] as String? ?? '';

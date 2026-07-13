@@ -48,8 +48,9 @@ class GlassSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    const primary = AppColors.primary;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = theme.colorScheme.tertiary;
     final fieldTextStyle = textStyle ??
         TextStyle(
           fontSize: 15,
@@ -64,11 +65,9 @@ class GlassSearchBar extends StatelessWidget {
     final radius = BorderRadius.circular(borderRadius);
     final innerRadius = BorderRadius.circular(borderRadius - borderWidth);
     final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.15)
-        : primary.withValues(alpha: 0.32);
-    final fillColor = isDark
-        ? AppColors.surfaceDark.withValues(alpha: 0.92)
-        : Colors.white.withValues(alpha: 0.82);
+        ? accent.withValues(alpha: 0.25)
+        : accent.withValues(alpha: 0.30);
+    final fillColor = theme.cardColor.withValues(alpha: isDark ? 0.90 : 0.84);
 
     return Container(
       height: height,
@@ -97,18 +96,18 @@ class GlassSearchBar extends StatelessWidget {
               textInputAction: TextInputAction.search,
               textDirection: textDirection,
               textAlignVertical: TextAlignVertical.center,
-              cursorColor: isDark ? AppColors.grey400 : primary,
+              cursorColor: accent,
               style: fieldTextStyle,
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: fieldHintStyle,
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: isDark ? AppColors.grey400 : primary,
+                  color: accent,
                   size: iconSize,
                 ),
                 suffixIcon: _buildSuffix(isDark),
-                suffixIconColor: isDark ? AppColors.grey400 : primary,
+                suffixIconColor: accent,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,

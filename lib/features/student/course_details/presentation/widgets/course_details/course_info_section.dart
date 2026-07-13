@@ -24,7 +24,7 @@ class CourseInfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Badges row
-          _buildBadges(isDark),
+          _buildBadges(context, isDark),
           const SizedBox(height: 12),
           // Title
           Text(
@@ -56,8 +56,9 @@ class CourseInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildBadges(bool isDark) {
+  Widget _buildBadges(BuildContext context, bool isDark) {
     final customBadge = (course.badge ?? '').trim();
+    final fallbackAccent = Theme.of(context).colorScheme.tertiary;
 
     return Wrap(
       spacing: 8,
@@ -66,7 +67,7 @@ class CourseInfoSection extends StatelessWidget {
         if (customBadge.isNotEmpty)
           _buildBadge(
             customBadge,
-            AppColors.primary,
+            fallbackAccent,
             Colors.white,
           ),
         if (customBadge.isEmpty && course.isFlashSaleActive)
@@ -85,8 +86,8 @@ class CourseInfoSection extends StatelessWidget {
         // Level badge
         _buildBadge(
           course.level.getDisplayName(locale),
-          AppColors.success.withValues(alpha: 0.1),
-          AppColors.success,
+          fallbackAccent.withValues(alpha: isDark ? 0.22 : 0.12),
+          fallbackAccent,
         ),
       ],
     );

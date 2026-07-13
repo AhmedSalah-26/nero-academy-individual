@@ -112,12 +112,12 @@ class AdminRepositoryImpl implements AdminRepository {
 
   @override
   Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
-    String instructorId,
+    String teacherId,
     DateTime start,
     DateTime end,
   ) {
     return _statsDataSource.getInstructorEnrollmentsChart(
-      instructorId,
+      teacherId,
       start,
       end,
     );

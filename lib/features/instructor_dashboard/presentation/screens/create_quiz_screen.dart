@@ -79,7 +79,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
       final response = await supabase
           .from('courses')
           .select('id, title_ar, title_en')
-          .eq('instructor_id', userId)
+          .eq('teacher_id', userId)
           .order('created_at', ascending: false);
 
       AppLogger.d(

@@ -41,10 +41,8 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
       AppLogger.d('[$_tag] Loading quizzes for instructor: $userId');
 
       // Get instructor's courses first
-      final coursesResponse = await _supabase
-          .from('courses')
-          .select('id')
-          .eq('instructor_id', userId);
+      final coursesResponse =
+          await _supabase.from('courses').select('id').eq('teacher_id', userId);
 
       final courseIds =
           (coursesResponse as List).map((c) => c['id'] as String).toList();
@@ -66,7 +64,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
           .from('quizzes')
           .select('''
             *,
-            course:courses!inner(id, title_ar, title_en, instructor_id)
+            course:courses!inner(id, title_ar, title_en, teacher_id)
           ''')
           .inFilter('course_id', courseIds)
           .order('created_at', ascending: false)

@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 
 /// Instructor Announcements Data Source
-/// Uses the 'announcements' table (DB column: instructor_id, not user_id)
+/// Uses the 'announcements' table (DB column: teacher_id, not user_id)
 class InstructorAnnouncementsDataSource {
   final SupabaseClient _client;
   static const _tag = 'InstructorAnnouncementsDS';
@@ -22,17 +22,17 @@ class InstructorAnnouncementsDataSource {
       final response = await _client
           .from('announcements')
           .select(
-              '*, instructor:profiles!announcements_instructor_id_fkey(name, avatar_url)')
+              '*, instructor:profiles!announcements_teacher_id_fkey(name, avatar_url)')
           .eq('course_id', courseId)
           .order('created_at', ascending: false)
           .range((page - 1) * limit, page * limit - 1);
 
       AppLogger.success(
           '[$_tag] getAnnouncements: ${(response as List).length} items');
-      // Normalize: add 'user_id' alias for instructor_id for UI compatibility
+      // Normalize: add 'user_id' alias for teacher_id for UI compatibility
       return (response as List).map((item) {
         final map = Map<String, dynamic>.from(item as Map);
-        map['user_id'] = map['instructor_id'];
+        map['user_id'] = map['teacher_id'];
         return map;
       }).toList();
     } catch (e, s) {
@@ -48,7 +48,7 @@ class InstructorAnnouncementsDataSource {
       final response = await _client
           .from('courses')
           .select('id, title_ar, title_en')
-          .eq('instructor_id', _userId)
+          .eq('teacher_id', _userId)
           .eq('is_published', true)
           .order('title_ar');
 
@@ -73,7 +73,7 @@ class InstructorAnnouncementsDataSource {
     try {
       await _client.from('announcements').insert({
         'course_id': courseId,
-        'instructor_id': _userId, // DB column is instructor_id
+        'teacher_id': _userId, // DB column is teacher_id
         'title_ar': titleAr,
         'title_en': titleEn,
         'content_ar': contentAr,
@@ -93,17 +93,17 @@ class InstructorAnnouncementsDataSource {
       String announcementId, Map<String, dynamic> data) async {
     AppLogger.d('[$_tag] updateAnnouncement: $announcementId');
     try {
-      // Remove user_id if passed (DB uses instructor_id)
+      // Remove user_id if passed (DB uses teacher_id)
       final dbData = Map<String, dynamic>.from(data);
       if (dbData.containsKey('user_id')) {
-        dbData['instructor_id'] = dbData.remove('user_id');
+        dbData['teacher_id'] = dbData.remove('user_id');
       }
       dbData['updated_at'] = DateTime.now().toIso8601String();
       await _client
           .from('announcements')
           .update(dbData)
           .eq('id', announcementId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', _userId);
       AppLogger.success('[$_tag] updateAnnouncement success');
       return true;
     } catch (e, s) {
@@ -120,7 +120,7 @@ class InstructorAnnouncementsDataSource {
           .from('announcements')
           .delete()
           .eq('id', announcementId)
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', _userId);
       AppLogger.success('[$_tag] deleteAnnouncement success');
       return true;
     } catch (e, s) {

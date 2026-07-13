@@ -71,7 +71,7 @@ class _DirectVideoPlayerWidgetState extends State<DirectVideoPlayerWidget> {
           courseTitle: cubitState.courseTitle ?? '',
           lessonId: cubitState.currentLesson?.id ?? '',
           lessonTitle: cubitState.currentLesson?.titleAr ?? '',
-          instructorId: cubitState.instructorId,
+          teacherId: cubitState.teacherId,
           instructorName: cubitState.instructorName,
           instructorAvatar: cubitState.instructorAvatar,
         );

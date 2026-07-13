@@ -367,19 +367,19 @@ class AppRouter {
 
       // Instructor Profile
       GoRoute(
-        path: '/instructor/profile/:instructorId',
+        path: '/instructor/profile/:teacherId',
         name: 'instructor-profile',
         builder: (context, state) {
-          final instructorId = state.pathParameters['instructorId']!;
+          final teacherId = state.pathParameters['teacherId']!;
           final returnCourseId = state.uri.queryParameters['returnCourseId'];
           final fallbackLocation =
               returnCourseId == null ? '/home' : '/course/$returnCourseId';
           return BlocProvider(
             create: (_) => InstructorCubit(
               remoteDataSource: InstructorRemoteDataSourceImpl(sl()),
-            )..loadInstructor(instructorId),
+            )..loadInstructor(teacherId),
             child: InstructorProfileScreen(
-              instructorId: instructorId,
+              teacherId: teacherId,
               fallbackLocation: fallbackLocation,
             ),
           );
@@ -479,7 +479,7 @@ class AppRouter {
           final enrollmentId = state.uri.queryParameters['enrollment'] ?? '';
           final courseTitle = state.uri.queryParameters['title'] ?? '';
           final lessonId = state.uri.queryParameters['lesson'];
-          final instructorId = state.uri.queryParameters['instructorId'];
+          final teacherId = state.uri.queryParameters['teacherId'];
           final instructorName = state.uri.queryParameters['instructor'];
           final instructorAvatar = state.uri.queryParameters['avatar'];
 
@@ -496,7 +496,7 @@ class AppRouter {
                 enrollmentId: enrollmentId,
                 courseTitle: courseTitle,
                 initialLessonId: lessonId,
-                instructorId: instructorId,
+                teacherId: teacherId,
                 instructorName: instructorName,
                 instructorAvatar: instructorAvatar,
               ),
@@ -586,7 +586,7 @@ class AppRouter {
           final courseTitle = state.uri.queryParameters['title'];
           final courseId = state.uri.queryParameters['courseId'];
           final lessonId = state.uri.queryParameters['lesson'];
-          final instructorId = state.uri.queryParameters['instructorId'];
+          final teacherId = state.uri.queryParameters['teacherId'];
           final instructorName = state.uri.queryParameters['instructor'];
           final instructorAvatar = state.uri.queryParameters['avatar'];
           return BlocProvider(
@@ -598,7 +598,7 @@ class AppRouter {
               courseTitle: courseTitle,
               courseId: courseId,
               lessonId: lessonId,
-              instructorId: instructorId,
+              teacherId: teacherId,
               instructorName: instructorName,
               instructorAvatar: instructorAvatar,
             ),
@@ -616,7 +616,7 @@ class AppRouter {
           final courseTitle = state.uri.queryParameters['title'];
           final courseId = state.uri.queryParameters['courseId'];
           final lessonId = state.uri.queryParameters['lesson'];
-          final instructorId = state.uri.queryParameters['instructorId'];
+          final teacherId = state.uri.queryParameters['teacherId'];
           final instructorName = state.uri.queryParameters['instructor'];
           final instructorAvatar = state.uri.queryParameters['avatar'];
           return BlocProvider(
@@ -627,7 +627,7 @@ class AppRouter {
               courseTitle: courseTitle,
               courseId: courseId,
               lessonId: lessonId,
-              instructorId: instructorId,
+              teacherId: teacherId,
               instructorName: instructorName,
               instructorAvatar: instructorAvatar,
             ),
@@ -646,7 +646,7 @@ class AppRouter {
           final courseTitle = state.uri.queryParameters['title'];
           final courseId = state.uri.queryParameters['courseId'];
           final lessonId = state.uri.queryParameters['lesson'];
-          final instructorId = state.uri.queryParameters['instructorId'];
+          final teacherId = state.uri.queryParameters['teacherId'];
           final instructorName = state.uri.queryParameters['instructor'];
           final instructorAvatar = state.uri.queryParameters['avatar'];
           return BlocProvider(
@@ -662,7 +662,7 @@ class AppRouter {
               courseTitle: courseTitle,
               courseId: courseId,
               lessonId: lessonId,
-              instructorId: instructorId,
+              teacherId: teacherId,
               instructorName: instructorName,
               instructorAvatar: instructorAvatar,
             ),
@@ -1213,7 +1213,7 @@ class AppRouter {
       }
 
       // Instructor workspace access control. Public instructor profiles live
-      // under /instructor/profile/:instructorId and remain publicly reachable.
+      // under /instructor/profile/:teacherId and remain publicly reachable.
       final isInstructorWorkspace =
           path == '/instructor' || path.startsWith('/instructor/');
       final isPublicInstructorProfile = path.startsWith('/instructor/profile/');
@@ -1280,7 +1280,7 @@ class AppRouter {
     required String enrollmentId,
     required String courseTitle,
     String? lessonId,
-    String? instructorId,
+    String? teacherId,
     String? instructorName,
     String? instructorAvatar,
   }) {
@@ -1289,7 +1289,7 @@ class AppRouter {
       'title': courseTitle,
     };
     if (lessonId != null) queryParams['lesson'] = lessonId;
-    if (instructorId != null) queryParams['instructorId'] = instructorId;
+    if (teacherId != null) queryParams['teacherId'] = teacherId;
     if (instructorName != null) queryParams['instructor'] = instructorName;
     if (instructorAvatar != null) queryParams['avatar'] = instructorAvatar;
 
@@ -1724,9 +1724,9 @@ class AppRouter {
     });
   }
 
-  static void goToInstructor(BuildContext context, String instructorId) {
+  static void goToInstructor(BuildContext context, String teacherId) {
     context.pushNamed('instructor-profile',
-        pathParameters: {'instructorId': instructorId});
+        pathParameters: {'teacherId': teacherId});
   }
 
   static void pop(BuildContext context) {

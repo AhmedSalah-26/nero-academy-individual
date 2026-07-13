@@ -12,7 +12,7 @@ class LessonHistoryItem {
   final DateTime lastWatched;
   final int? lastPosition;
   final String? thumbnailUrl;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
 
@@ -25,7 +25,7 @@ class LessonHistoryItem {
     required this.lastWatched,
     this.lastPosition,
     this.thumbnailUrl,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
   });
@@ -39,7 +39,7 @@ class LessonHistoryItem {
         'lastWatched': lastWatched.toIso8601String(),
         'lastPosition': lastPosition,
         'thumbnailUrl': thumbnailUrl,
-        'instructorId': instructorId,
+        'teacherId': teacherId,
         'instructorName': instructorName,
         'instructorAvatar': instructorAvatar,
       };
@@ -54,7 +54,7 @@ class LessonHistoryItem {
         lastWatched: DateTime.parse(json['lastWatched'] as String),
         lastPosition: json['lastPosition'] as int?,
         thumbnailUrl: json['thumbnailUrl'] as String?,
-        instructorId: json['instructorId'] as String?,
+        teacherId: json['teacherId'] as String?,
         instructorName: json['instructorName'] as String?,
         instructorAvatar: json['instructorAvatar'] as String?,
       );

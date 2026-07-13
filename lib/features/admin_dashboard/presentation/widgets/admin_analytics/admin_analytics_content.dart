@@ -511,7 +511,7 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
 
   TopInstructorModel? _selectedInstructor(AdminAnalyticsState state) {
     if (state.topInstructors.isEmpty) return null;
-    final selectedId = state.selectedInstructorId;
+    final selectedId = state.selectedTeacherId;
     return state.topInstructors.firstWhere(
       (instructor) => instructor.id == selectedId,
       orElse: () => state.topInstructors.first,
@@ -582,7 +582,7 @@ class _AdminAnalyticsContentState extends State<AdminAnalyticsContent> {
                         return _instructorTile(
                           context,
                           instructor,
-                          instructor.id == state.selectedInstructorId,
+                          instructor.id == state.selectedTeacherId,
                           isArabic,
                           isDark,
                         );

@@ -11,7 +11,7 @@ class CourseEntity extends Equatable {
   final String? subtitleEn;
   final String? thumbnailUrl;
   final String? previewVideoUrl;
-  final String instructorId;
+  final String teacherId;
   final String? instructorName;
   final String? instructorAvatarUrl;
   final String? categoryId;
@@ -46,7 +46,7 @@ class CourseEntity extends Equatable {
     this.subtitleEn,
     this.thumbnailUrl,
     this.previewVideoUrl,
-    required this.instructorId,
+    required this.teacherId,
     this.instructorName,
     this.instructorAvatarUrl,
     this.categoryId,
@@ -143,7 +143,7 @@ class CourseEntity extends Equatable {
         subtitleEn,
         thumbnailUrl,
         previewVideoUrl,
-        instructorId,
+        teacherId,
         instructorName,
         instructorAvatarUrl,
         categoryId,

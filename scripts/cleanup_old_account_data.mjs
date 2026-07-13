@@ -159,11 +159,11 @@ const deleteProfileRefs = [
   ['course_reports', 'user_id'],
   ['review_reports', 'user_id'],
   ['enrollments', 'user_id'],
-  ['enrollments', 'instructor_id'],
-  ['instructor_earnings', 'instructor_id'],
-  ['announcements', 'instructor_id'],
-  ['coupons', 'instructor_id'],
-  ['courses', 'instructor_id'],
+  ['enrollments', 'teacher_id'],
+  ['instructor_earnings', 'teacher_id'],
+  ['announcements', 'teacher_id'],
+  ['coupons', 'teacher_id'],
+  ['courses', 'teacher_id'],
   ['teachers', 'profile_id'],
 ];
 
@@ -180,7 +180,7 @@ const nullableProfileRefs = [
   ['course_reports', 'admin_id'],
   ['review_reports', 'admin_id'],
   ['payment_requests', 'reviewed_by'],
-  ['manual_purchase_request_items', 'instructor_id'],
+  ['manual_purchase_request_items', 'teacher_id'],
 ];
 
 let deleted = 0;

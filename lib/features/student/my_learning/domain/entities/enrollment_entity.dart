@@ -12,7 +12,7 @@ class EnrollmentEntity extends Equatable {
   final String? titleAr;
   final String? titleEn;
   final String? thumbnailUrl;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
   final double progressPercentage;
@@ -37,7 +37,7 @@ class EnrollmentEntity extends Equatable {
     this.titleAr,
     this.titleEn,
     this.thumbnailUrl,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
     this.progressPercentage = 0,

@@ -26,42 +26,41 @@ class BottomPriceBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = theme.colorScheme.tertiary;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomPadding),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
+        color: theme.cardColor,
         border: Border(
           top: BorderSide(
-            color: isDark ? AppColors.borderDark : AppColors.grey200,
+            color: theme.colorScheme.outline,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.15),
+            color: accent.withValues(alpha: isDark ? 0.18 : 0.12),
             blurRadius: 16,
             offset: const Offset(0, -4),
-          ),
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.1 : 0.08),
-            blurRadius: 24,
-            spreadRadius: 2,
           ),
         ],
       ),
       child: Row(
         children: [
-          Expanded(child: _buildPriceSection(isDark)),
+          Expanded(child: _buildPriceSection(context, isDark)),
           const SizedBox(width: 16),
-          _buildCTAButton(isDark),
+          _buildCTAButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildPriceSection(bool isDark) {
+  Widget _buildPriceSection(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+
     if (course.isFree) {
       return Text(
         'course_details.free'.tr(),
@@ -88,7 +87,7 @@ class BottomPriceBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.white : AppColors.textMainLight,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),
@@ -130,10 +129,12 @@ class BottomPriceBar extends StatelessWidget {
     );
   }
 
-  Widget _buildCTAButton(bool isDark) {
+  Widget _buildCTAButton(BuildContext context) {
+    final theme = Theme.of(context);
     String buttonText;
     VoidCallback? onPressed;
-    Color buttonColor = AppColors.primary;
+    Color buttonColor = theme.colorScheme.tertiary;
+    Color foregroundColor = theme.colorScheme.onTertiary;
 
     if (course.isEnrolled) {
       buttonText = course.progressPercentage > 0
@@ -141,6 +142,7 @@ class BottomPriceBar extends StatelessWidget {
           : 'course_details.start_learning'.tr();
       onPressed = onStartLearning;
       buttonColor = AppColors.success;
+      foregroundColor = AppColors.white;
     } else if (course.isFree || course.currentPrice == 0) {
       buttonText = 'course_details.get_for_free'.tr();
       onPressed = onEnroll;
@@ -161,7 +163,7 @@ class BottomPriceBar extends StatelessWidget {
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
-            foregroundColor: Colors.white,
+            foregroundColor: foregroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -169,19 +171,20 @@ class BottomPriceBar extends StatelessWidget {
             shadowColor: buttonColor.withValues(alpha: 0.3),
           ),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
                   ),
                 )
               : Text(
                   buttonText,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
+                    color: foregroundColor,
                   ),
                 ),
         ),

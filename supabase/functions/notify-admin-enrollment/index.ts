@@ -11,17 +11,17 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 type EnrollmentItem = {
   course_id: string
-  instructor_id?: string | null
+  teacher_id?: string | null
   courses?:
     | {
         title_ar?: string | null
         title_en?: string | null
-        instructor_id?: string | null
+        teacher_id?: string | null
       }
     | Array<{
         title_ar?: string | null
         title_en?: string | null
-        instructor_id?: string | null
+        teacher_id?: string | null
       }>
     | null
 }
@@ -63,11 +63,11 @@ serve(async (req) => {
         .select(
           `
           course_id,
-          instructor_id,
+          teacher_id,
           courses:course_id (
             title_ar,
             title_en,
-            instructor_id
+            teacher_id
           )
         `,
         )
@@ -90,15 +90,15 @@ serve(async (req) => {
     const getCourse = (item: EnrollmentItem) =>
       Array.isArray(item.courses) ? item.courses[0] : item.courses
 
-    const instructorIds = [
+    const teacherIds = [
       ...new Set(
         (enrollmentItems ?? [])
-          .map((item) => item.instructor_id ?? getCourse(item)?.instructor_id)
+          .map((item) => item.teacher_id ?? getCourse(item)?.teacher_id)
           .filter((id): id is string => typeof id === 'string' && id.length > 0),
       ),
     ]
 
-    if (instructorIds.length === 0) {
+    if (teacherIds.length === 0) {
       return new Response(
         JSON.stringify({ success: true, notified: 0, reason: 'No instructor found' }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
@@ -136,8 +136,8 @@ serve(async (req) => {
     const { error: notificationInsertError } = await supabaseAdmin
       .from('notifications')
       .insert(
-        instructorIds.map((instructorId) => ({
-          user_id: instructorId,
+        teacherIds.map((teacherId) => ({
+          user_id: teacherId,
           type: 'system',
           title_ar: notificationTitle.ar,
           title_en: notificationTitle.en,
@@ -169,7 +169,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             app_id: ONESIGNAL_APP_ID,
-            include_external_user_ids: instructorIds,
+            include_external_user_ids: teacherIds,
             channel_for_external_user_ids: 'push',
             headings: notificationTitle,
             contents: notificationBody,
@@ -192,7 +192,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         notified,
-        instructor_ids: instructorIds,
+        teacher_ids: teacherIds,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
     )

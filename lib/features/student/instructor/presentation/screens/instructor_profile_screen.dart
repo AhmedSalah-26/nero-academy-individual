@@ -17,12 +17,12 @@ import 'package:lms_platform/features/student/instructor/presentation/widgets/in
 
 /// Instructor Profile Screen - Instagram-like bio page
 class InstructorProfileScreen extends StatefulWidget {
-  final String instructorId;
+  final String teacherId;
   final String fallbackLocation;
 
   const InstructorProfileScreen({
     super.key,
-    required this.instructorId,
+    required this.teacherId,
     this.fallbackLocation = '/home',
   });
 
@@ -40,7 +40,7 @@ class _InstructorProfileScreenState extends State<InstructorProfileScreen> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
-    context.read<InstructorCubit>().loadInstructor(widget.instructorId);
+    context.read<InstructorCubit>().loadInstructor(widget.teacherId);
   }
 
   @override

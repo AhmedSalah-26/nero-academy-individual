@@ -12,7 +12,7 @@ alter table public.manual_purchase_request_items
 update public.parent_enrollments pe
 set teacher_id = t.id
 from public.manual_purchase_request_items item
-join public.teachers t on t.profile_id = item.instructor_id
+join public.teachers t on t.profile_id = item.teacher_id
 where pe.id = item.parent_enrollment_id
   and pe.teacher_id is null;
 
@@ -20,7 +20,7 @@ update public.manual_purchase_request_items item
 set teacher_id = t.id
 from public.teachers t
 where item.teacher_id is null
-  and item.instructor_id = t.profile_id;
+  and item.teacher_id = t.profile_id;
 
 create index if not exists idx_parent_enrollments_teacher_manual
 on public.parent_enrollments(teacher_id, payment_status, created_at desc)
@@ -131,7 +131,7 @@ begin
     insert into public.enrollments (
       user_id,
       course_id,
-      instructor_id,
+      teacher_id,
       parent_enrollment_id,
       price,
       pricing_option,
@@ -147,7 +147,7 @@ begin
     values (
       v_item.user_id,
       v_item.course_id,
-      v_item.instructor_id,
+      v_item.teacher_id,
       p_parent_enrollment_id,
       v_item.price,
       v_item.pricing_option,
@@ -162,7 +162,7 @@ begin
     )
     on conflict (user_id, course_id)
     do update set
-      instructor_id = excluded.instructor_id,
+      teacher_id = excluded.teacher_id,
       parent_enrollment_id = excluded.parent_enrollment_id,
       price = excluded.price,
       pricing_option = excluded.pricing_option,

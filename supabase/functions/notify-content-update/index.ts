@@ -126,13 +126,13 @@ async function handleNewLesson(record: Record<string, unknown>) {
   // Get course title
   const { data: course } = await supabaseAdmin
     .from('courses')
-    .select('title_ar, title_en, instructor_id')
+    .select('title_ar, title_en, teacher_id')
     .eq('id', courseId)
     .single()
 
   const courseTitleAr = course?.title_ar ?? ''
   const courseTitleEn = course?.title_en ?? courseTitleAr
-  const instructorId = course?.instructor_id as string | undefined
+  const teacherId = course?.teacher_id as string | undefined
 
   // Get all active enrolled students for this course
   const { data: enrollments } = await supabaseAdmin
@@ -164,7 +164,7 @@ async function handleNewLesson(record: Record<string, unknown>) {
   }
 
   // Push confirmation to instructor
-  if (instructorId) {
+  if (teacherId) {
     const instructorHeadings = {
       ar: '✅ تم نشر الدرس بنجاح',
       en: '✅ Lesson Published Successfully',
@@ -174,7 +174,7 @@ async function handleNewLesson(record: Record<string, unknown>) {
       en: `Published: ${lessonTitleEn} in course: ${courseTitleEn}`,
     }
     await sendPushToUsers(
-      [instructorId],
+      [teacherId],
       instructorHeadings,
       instructorContents,
       { ...data, type: 'lesson_published' }

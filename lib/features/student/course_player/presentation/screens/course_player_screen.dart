@@ -38,7 +38,7 @@ class CoursePlayerScreen extends StatefulWidget {
   final String enrollmentId;
   final String courseTitle;
   final String? initialLessonId;
-  final String? instructorId;
+  final String? teacherId;
   final String? instructorName;
   final String? instructorAvatar;
 
@@ -48,7 +48,7 @@ class CoursePlayerScreen extends StatefulWidget {
     required this.enrollmentId,
     required this.courseTitle,
     this.initialLessonId,
-    this.instructorId,
+    this.teacherId,
     this.instructorName,
     this.instructorAvatar,
   });
@@ -186,7 +186,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
           enrollmentId: widget.enrollmentId,
           courseTitle: widget.courseTitle,
           initialLessonId: widget.initialLessonId,
-          instructorId: widget.instructorId,
+          teacherId: widget.teacherId,
           instructorName: widget.instructorName,
           instructorAvatar: widget.instructorAvatar,
         );
@@ -202,7 +202,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         courseTitle: widget.courseTitle,
         initialLessonId:
             cubit.state.currentLesson?.id ?? widget.initialLessonId,
-        instructorId: widget.instructorId,
+        teacherId: widget.teacherId,
         instructorName: widget.instructorName,
         instructorAvatar: widget.instructorAvatar,
       );
@@ -457,20 +457,20 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
             HapticFeedback.lightImpact();
             builderContext.read<CoursePlayerCubit>().toggleBookmark();
           },
-          onInstructorTap: state.instructorId != null
+          onInstructorTap: state.teacherId != null
               ? () {
                   HapticFeedback.lightImpact();
                   AppLogger.i(
-                      '👨‍🏫 [CoursePlayer] Navigating to instructor: ${state.instructorId}');
+                      '👨‍🏫 [CoursePlayer] Navigating to instructor: ${state.teacherId}');
                   builderContext.goNamed(
                     'instructor-profile',
-                    pathParameters: {'instructorId': state.instructorId!},
+                    pathParameters: {'teacherId': state.teacherId!},
                     queryParameters: {'returnCourseId': widget.courseId},
                   );
                 }
               : () {
                   AppLogger.w(
-                      '👨‍🏫 [CoursePlayer] instructorId is null, cannot navigate');
+                      '👨‍🏫 [CoursePlayer] teacherId is null, cannot navigate');
                 },
         );
       },
@@ -648,8 +648,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
     if (quizLessonId != null && quizLessonId.trim().isNotEmpty) {
       params['lesson'] = quizLessonId;
     }
-    if (state.instructorId != null && state.instructorId!.trim().isNotEmpty) {
-      params['instructorId'] = state.instructorId!;
+    if (state.teacherId != null && state.teacherId!.trim().isNotEmpty) {
+      params['teacherId'] = state.teacherId!;
     }
     if (state.instructorName != null &&
         state.instructorName!.trim().isNotEmpty) {

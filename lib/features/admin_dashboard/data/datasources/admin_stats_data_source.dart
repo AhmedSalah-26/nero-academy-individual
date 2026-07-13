@@ -147,18 +147,18 @@ class AdminStatsDataSource {
 
   /// Get instructor enrollments chart data for date range
   Future<List<ChartDataPointModel>> getInstructorEnrollmentsChart(
-    String instructorId,
+    String teacherId,
     DateTime start,
     DateTime end,
   ) async {
     AppLogger.d(
-      '[$_tag] getInstructorEnrollmentsChart: $instructorId, $start to $end',
+      '[$_tag] getInstructorEnrollmentsChart: $teacherId, $start to $end',
     );
     try {
       final response = await _client
           .from('enrollments')
-          .select('enrolled_at, course:courses!inner(instructor_id)')
-          .eq('course.instructor_id', instructorId)
+          .select('enrolled_at, course:courses!inner(teacher_id)')
+          .eq('course.teacher_id', teacherId)
           .gte('enrolled_at', start.toIso8601String())
           .lte('enrolled_at', end.toIso8601String())
           .order('enrolled_at');
@@ -198,7 +198,7 @@ class AdminStatsDataSource {
     try {
       final response = await _client.from('courses').select('''
             id, title_ar, title_en, thumbnail_url,
-            profiles!courses_instructor_id_fkey(name),
+            profiles!courses_teacher_id_fkey(name),
             enrollments(id, price)
           ''').limit(limit);
 
@@ -239,7 +239,7 @@ class AdminStatsDataSource {
     try {
       final response = await _client.from('profiles').select('''
             id, name, avatar_url,
-            courses!courses_instructor_id_fkey(
+            courses!courses_teacher_id_fkey(
               id,
               enrollments(id, price)
             )

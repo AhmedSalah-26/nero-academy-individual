@@ -133,8 +133,8 @@ ALTER TABLE public.announcements ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Instructor manages own announcements" ON public.announcements;
 CREATE POLICY "Instructor manages own announcements"
   ON public.announcements FOR ALL
-  USING (instructor_id = auth.uid())
-  WITH CHECK (instructor_id = auth.uid());
+  USING (teacher_id = auth.uid())
+  WITH CHECK (teacher_id = auth.uid());
 
 DROP POLICY IF EXISTS "Enrolled students can view announcements" ON public.announcements;
 CREATE POLICY "Enrolled students can view announcements"

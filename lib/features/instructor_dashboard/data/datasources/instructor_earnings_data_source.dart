@@ -25,7 +25,7 @@ class InstructorEarningsDataSource {
       final response = await _client
           .from('instructor_earnings')
           .select('net_amount, status')
-          .eq('instructor_id', _userId);
+          .eq('teacher_id', _userId);
 
       final rows = response as List;
       double totalEarnings = 0;
@@ -43,7 +43,7 @@ class InstructorEarningsDataSource {
           '[$_tag] getWalletSummary: totalEarnings=$totalEarnings, available=$available');
 
       return WalletSummaryModel(
-        instructorId: _userId,
+        teacherId: _userId,
         availableBalance: available,
         pendingBalance: 0,
         totalEarnings: totalEarnings,
@@ -75,8 +75,8 @@ class InstructorEarningsDataSource {
       var query = _client
           .from('instructor_earnings')
           .select(
-              'id, instructor_id, course_id, net_amount, gross_amount, coupon_discount, platform_fee, status, created_at, courses(title_ar, title_en)')
-          .eq('instructor_id', _userId);
+              'id, teacher_id, course_id, net_amount, gross_amount, coupon_discount, platform_fee, status, created_at, courses(title_ar, title_en)')
+          .eq('teacher_id', _userId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (status != null) query = query.eq('status', status);
@@ -98,7 +98,7 @@ class InstructorEarningsDataSource {
             '';
         return EarningsTransactionModel(
           id: e['id'] as String,
-          userId: e['instructor_id'] as String,
+          userId: e['teacher_id'] as String,
           courseId: e['course_id'] as String?,
           courseName: courseName,
           amount: (e['gross_amount'] as num?)?.toDouble() ?? 0,

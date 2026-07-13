@@ -45,7 +45,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
       final response = await _supabase
           .from('coupons')
           .select('*, coupon_courses(course_id)')
-          .eq('instructor_id', userId)
+          .eq('teacher_id', userId)
           .order('created_at', ascending: false)
           .range(
             (_currentPage - 1) * _pageSize,
@@ -122,7 +122,7 @@ class InstructorCouponsCubit extends Cubit<InstructorCouponsState> {
       }
 
       final insertData = {
-        'instructor_id': userId,
+        'teacher_id': userId,
         'code': code.toUpperCase(),
         'name_ar': nameAr,
         'name_en': nameEn,

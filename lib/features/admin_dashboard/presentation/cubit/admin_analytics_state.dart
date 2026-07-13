@@ -12,7 +12,7 @@ class AdminAnalyticsState extends Equatable {
   final List<ChartDataPointModel> instructorEnrollmentsData;
   final List<TopCourseModel> topCourses;
   final List<TopInstructorModel> topInstructors;
-  final String? selectedInstructorId;
+  final String? selectedTeacherId;
   final DateTime startDate;
   final DateTime endDate;
   final double totalRevenue;
@@ -28,7 +28,7 @@ class AdminAnalyticsState extends Equatable {
     this.instructorEnrollmentsData = const [],
     this.topCourses = const [],
     this.topInstructors = const [],
-    this.selectedInstructorId,
+    this.selectedTeacherId,
     DateTime? startDate,
     DateTime? endDate,
     this.totalRevenue = 0,
@@ -49,7 +49,7 @@ class AdminAnalyticsState extends Equatable {
     List<ChartDataPointModel>? instructorEnrollmentsData,
     List<TopCourseModel>? topCourses,
     List<TopInstructorModel>? topInstructors,
-    String? selectedInstructorId,
+    String? selectedTeacherId,
     DateTime? startDate,
     DateTime? endDate,
     double? totalRevenue,
@@ -66,7 +66,7 @@ class AdminAnalyticsState extends Equatable {
           instructorEnrollmentsData ?? this.instructorEnrollmentsData,
       topCourses: topCourses ?? this.topCourses,
       topInstructors: topInstructors ?? this.topInstructors,
-      selectedInstructorId: selectedInstructorId ?? this.selectedInstructorId,
+      selectedTeacherId: selectedTeacherId ?? this.selectedTeacherId,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       totalRevenue: totalRevenue ?? this.totalRevenue,
@@ -86,7 +86,7 @@ class AdminAnalyticsState extends Equatable {
         instructorEnrollmentsData,
         topCourses,
         topInstructors,
-        selectedInstructorId,
+        selectedTeacherId,
         startDate,
         endDate,
         totalRevenue,

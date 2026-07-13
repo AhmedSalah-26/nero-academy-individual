@@ -58,8 +58,8 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
                       'enrollment': service.enrollmentId ?? '',
                       'title': service.courseTitle ?? '',
                       if (service.lessonId != null) 'lesson': service.lessonId!,
-                      if (service.instructorId != null)
-                        'instructorId': service.instructorId!,
+                      if (service.teacherId != null)
+                        'teacherId': service.teacherId!,
                       if (service.instructorName != null)
                         'instructor': service.instructorName!,
                       if (service.instructorAvatar != null)

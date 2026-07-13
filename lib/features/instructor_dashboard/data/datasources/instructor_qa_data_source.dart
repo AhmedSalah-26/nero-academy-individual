@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
@@ -22,15 +22,15 @@ class InstructorQADataSource {
     AppLogger.d('[$_tag] getQuestions: status=$status, courseId=$courseId');
     try {
       var query = _client.from('qa_questions').select('''
-            *, 
-            course:courses!inner(title_ar, instructor_id), 
-            lesson:lessons(title_ar), 
+            *,
+            course:courses!inner(title_ar, teacher_id),
+            lesson:lessons(title_ar),
             user:profiles(name, avatar_url),
             qa_answers(
               *,
               user:profiles(name, avatar_url)
             )
-          ''').eq('course.instructor_id', _userId);
+          ''').eq('course.teacher_id', _userId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (status != null && status != QAStatus.all) {

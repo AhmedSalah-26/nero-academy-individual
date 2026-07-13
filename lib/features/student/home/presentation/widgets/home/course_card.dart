@@ -30,10 +30,16 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = width ?? screenWidth * 0.44;
     final borderWidth = isDark ? 1.5 : 1.0;
+    final accent = theme.colorScheme.tertiary;
+    final borderColor = Color.alphaBlend(
+      accent.withValues(alpha: isDark ? 0.34 : 0.16),
+      theme.cardColor,
+    );
     const radius = 8.0;
 
     return GestureDetector(
@@ -42,14 +48,9 @@ class CourseCard extends StatelessWidget {
         width: cardWidth,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: isDark
-                ? AppColors.primary.withValues(alpha: 0.7)
-                : AppColors.primary.withValues(alpha: 0.25),
-            width: borderWidth,
-          ),
+          border: Border.all(color: borderColor, width: borderWidth),
         ),
         child: Padding(
           padding: EdgeInsets.all(borderWidth),
@@ -58,7 +59,7 @@ class CourseCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildThumbnail(isDark),
+                _buildThumbnail(context, isDark),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8, 7, 8, 8),
@@ -116,7 +117,7 @@ class CourseCard extends StatelessWidget {
                             _buildStatsRow(isDark),
                             const SizedBox(height: 6),
                             // Price Row
-                            _buildPrice(isDark),
+                            _buildPrice(context, isDark),
                           ],
                         ),
                       ],
@@ -131,7 +132,8 @@ class CourseCard extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail(bool isDark) {
+  Widget _buildThumbnail(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     return Stack(
       children: [
         ClipRRect(
@@ -143,12 +145,12 @@ class CourseCard extends StatelessWidget {
                     imageUrl: course.thumbnailUrl!,
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
-                      color: isDark ? AppColors.surfaceDark : AppColors.grey200,
+                      color: theme.colorScheme.surface,
                     ),
                     errorWidget: (_, __, ___) =>
-                        _buildThumbnailFallback(isDark),
+                        _buildThumbnailFallback(context, isDark),
                   )
-                : _buildThumbnailFallback(isDark),
+                : _buildThumbnailFallback(context, isDark),
           ),
         ),
         // Custom Badge, Free Badge, or Discount Badge (Priority Order)
@@ -258,35 +260,34 @@ class CourseCard extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnailFallback(bool isDark) {
+  Widget _buildThumbnailFallback(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.tertiary;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.grey200,
+        color: Color.alphaBlend(
+          accent.withValues(alpha: isDark ? 0.08 : 0.025),
+          theme.cardColor,
+        ),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.grey400.withValues(alpha: isDark ? 0.18 : 0.12),
-              border: Border.all(
-                color:
-                    AppColors.grey400.withValues(alpha: isDark ? 0.34 : 0.28),
-                width: 1.5,
-              ),
-            ),
-            child: Icon(
-              Icons.play_arrow_rounded,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.82)
-                  : AppColors.grey600.withValues(alpha: 0.82),
-              size: 28,
+      child: Center(
+        child: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: accent.withValues(alpha: isDark ? 0.10 : 0.045),
+            border: Border.all(
+              color: accent.withValues(alpha: isDark ? 0.28 : 0.18),
+              width: 1.5,
             ),
           ),
-        ],
+          child: Icon(
+            Icons.play_arrow_rounded,
+            color: accent,
+            size: 28,
+          ),
+        ),
       ),
     );
   }
@@ -329,7 +330,9 @@ class CourseCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice(bool isDark) {
+  Widget _buildPrice(BuildContext context, bool isDark) {
+    final accent = Theme.of(context).colorScheme.tertiary;
+
     if (course.isFree) {
       return Text(
         'course.free'.tr(),
@@ -358,7 +361,7 @@ class CourseCard extends StatelessWidget {
               child: Text(
                 '$currency ${currentPrice.toStringAsFixed(0)}',
                 style: TextStyle(
-                  color: isDark ? AppColors.white : AppColors.primary,
+                  color: isDark ? AppColors.white : accent,
                   fontWeight: FontWeight.w700,
                   fontSize: 13.5,
                 ),

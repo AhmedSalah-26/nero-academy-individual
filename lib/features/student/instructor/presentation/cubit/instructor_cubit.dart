@@ -9,13 +9,13 @@ class InstructorCubit extends Cubit<InstructorState> {
   InstructorCubit({required this.remoteDataSource})
       : super(const InstructorState());
 
-  Future<void> loadInstructor(String instructorId) async {
+  Future<void> loadInstructor(String teacherId) async {
     emit(state.copyWith(status: InstructorStatus.loading));
 
     try {
-      AppLogger.i('🎓 [InstructorCubit] Loading instructor: $instructorId');
+      AppLogger.i('🎓 [InstructorCubit] Loading instructor: $teacherId');
 
-      final instructor = await remoteDataSource.getInstructor(instructorId);
+      final instructor = await remoteDataSource.getInstructor(teacherId);
 
       if (instructor == null) {
         AppLogger.w('🎓 [InstructorCubit] Instructor not found');
@@ -26,7 +26,7 @@ class InstructorCubit extends Cubit<InstructorState> {
         return;
       }
 
-      final courses = await remoteDataSource.getInstructorCourses(instructorId);
+      final courses = await remoteDataSource.getInstructorCourses(teacherId);
 
       AppLogger.success(
           '🎓 [InstructorCubit] Loaded ${courses.length} courses');

@@ -25,11 +25,17 @@ class CourseCardHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardHeight = (screenWidth * 0.26).clamp(95.0, 120.0);
     final borderWidth = isDark ? 1.5 : 1.0;
     final imageSize = cardHeight - (borderWidth * 2);
+    final accent = theme.colorScheme.tertiary;
+    final borderColor = Color.alphaBlend(
+      accent.withValues(alpha: isDark ? 0.34 : 0.16),
+      theme.cardColor,
+    );
     const radius = 14.0;
 
     return GestureDetector(
@@ -37,14 +43,9 @@ class CourseCardHorizontal extends StatelessWidget {
       child: Container(
         height: cardHeight,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: isDark
-                ? AppColors.primary.withValues(alpha: 0.7)
-                : AppColors.primary.withValues(alpha: 0.25),
-            width: borderWidth,
-          ),
+          border: Border.all(color: borderColor, width: borderWidth),
         ),
         child: Padding(
           padding: EdgeInsets.all(borderWidth),
@@ -52,8 +53,8 @@ class CourseCardHorizontal extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius - borderWidth),
             child: Row(
               children: [
-                _buildThumbnail(isDark, imageSize),
-                Expanded(child: _buildContent(isDark, screenWidth)),
+                _buildThumbnail(context, isDark, imageSize),
+                Expanded(child: _buildContent(context, isDark, screenWidth)),
               ],
             ),
           ),
@@ -62,7 +63,14 @@ class CourseCardHorizontal extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail(bool isDark, double size) {
+  Widget _buildThumbnail(BuildContext context, bool isDark, double size) {
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.tertiary;
+    final placeholderColor = Color.alphaBlend(
+      accent.withValues(alpha: isDark ? 0.08 : 0.025),
+      theme.cardColor,
+    );
+
     return Stack(
       children: [
         ClipRRect(
@@ -74,17 +82,17 @@ class CourseCardHorizontal extends StatelessWidget {
                 ? CachedNetworkImage(
                     imageUrl: course.thumbnailUrl!,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                        color:
-                            isDark ? AppColors.surfaceDark : AppColors.grey200),
+                    placeholder: (_, __) => Container(color: placeholderColor),
                     errorWidget: (_, __, ___) => Container(
-                      color: isDark ? AppColors.surfaceDark : AppColors.grey200,
-                      child: const Icon(Icons.play_circle_outline, size: 28),
+                      color: placeholderColor,
+                      child: Icon(Icons.play_circle_outline,
+                          size: 28, color: accent),
                     ),
                   )
                 : Container(
-                    color: isDark ? AppColors.surfaceDark : AppColors.grey200,
-                    child: const Icon(Icons.play_circle_outline, size: 28),
+                    color: placeholderColor,
+                    child: Icon(Icons.play_circle_outline,
+                        size: 28, color: accent),
                   ),
           ),
         ),
@@ -120,7 +128,7 @@ class CourseCardHorizontal extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(bool isDark, double screenWidth) {
+  Widget _buildContent(BuildContext context, bool isDark, double screenWidth) {
     return Padding(
       padding: EdgeInsets.all(screenWidth * 0.028),
       child: Column(
@@ -194,7 +202,7 @@ class CourseCardHorizontal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildRating(),
-              Flexible(child: _buildPrice(isDark)),
+              Flexible(child: _buildPrice(context, isDark)),
             ],
           ),
         ],
@@ -221,7 +229,9 @@ class CourseCardHorizontal extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice(bool isDark) {
+  Widget _buildPrice(BuildContext context, bool isDark) {
+    final accent = Theme.of(context).colorScheme.tertiary;
+
     if (course.isFree) {
       return Text('course.free'.tr(),
           style: AppTextStyles.price
@@ -248,7 +258,7 @@ class CourseCardHorizontal extends StatelessWidget {
           child: Text('EGP ${currentPrice.toStringAsFixed(0)}',
               style: AppTextStyles.price.copyWith(
                 fontSize: 13,
-                color: isDark ? AppColors.white : AppColors.primary,
+                color: isDark ? AppColors.white : accent,
               ),
               overflow: TextOverflow.ellipsis),
         ),
