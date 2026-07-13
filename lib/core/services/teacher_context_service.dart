@@ -161,16 +161,10 @@ class TeacherContextService {
     AppLogger.i(
         '🏫 [TeacherContextService] Checking selected teacher for student: $studentId');
 
-    if (selectedTeacher.value != null || hasCachedTeacher()) {
-      AppLogger.d(
-          '🏫 [TeacherContextService] Teacher already loaded: ${selectedTeacher.value?.name}');
-      return true;
-    }
-
     final client = _client;
     if (client == null) {
       AppLogger.w('[TeacherContextService] Client is null — not initialized');
-      return false;
+      return selectedTeacher.value != null || hasCachedTeacher();
     }
 
     try {
@@ -196,7 +190,7 @@ class TeacherContextService {
       return true;
     } catch (e, stack) {
       AppLogger.e('[TeacherContextService] Error fetching teacher', e, stack);
-      return hasCachedTeacher();
+      return selectedTeacher.value != null || hasCachedTeacher();
     }
   }
 

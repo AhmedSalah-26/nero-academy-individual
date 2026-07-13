@@ -49,6 +49,7 @@ class GlassSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final fieldTextStyle = textStyle ??
         TextStyle(
           fontSize: 15,
@@ -64,7 +65,7 @@ class GlassSearchBar extends StatelessWidget {
     final innerRadius = BorderRadius.circular(borderRadius - borderWidth);
     final borderColor = isDark
         ? Colors.white.withValues(alpha: 0.15)
-        : AppColors.primary.withValues(alpha: 0.32);
+        : primary.withValues(alpha: 0.32);
     final fillColor = isDark
         ? AppColors.surfaceDark.withValues(alpha: 0.92)
         : Colors.white.withValues(alpha: 0.82);
@@ -96,18 +97,18 @@ class GlassSearchBar extends StatelessWidget {
               textInputAction: TextInputAction.search,
               textDirection: textDirection,
               textAlignVertical: TextAlignVertical.center,
-              cursorColor: isDark ? AppColors.grey400 : AppColors.primary,
+              cursorColor: isDark ? AppColors.grey400 : primary,
               style: fieldTextStyle,
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: fieldHintStyle,
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  color: isDark ? AppColors.grey400 : AppColors.primary,
+                  color: isDark ? AppColors.grey400 : primary,
                   size: iconSize,
                 ),
                 suffixIcon: _buildSuffix(isDark),
-                suffixIconColor: isDark ? AppColors.grey400 : AppColors.primary,
+                suffixIconColor: isDark ? AppColors.grey400 : primary,
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,

@@ -67,6 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final screenWidth = MediaQuery.of(context).size.width;
     final currentIndex = widget.navigationShell.currentIndex;
 
@@ -91,8 +92,7 @@ class _MainScreenState extends State<MainScreen> {
           value:
               isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
           child: Scaffold(
-            backgroundColor:
-                isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             extendBody: false,
             body: widget.navigationShell,
             bottomNavigationBar: SafeArea(
@@ -120,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
                         border: Border.all(
                           color: isDark
                               ? Colors.white.withValues(alpha: 0.15)
-                              : AppColors.primary.withValues(alpha: 0.25),
+                              : primary.withValues(alpha: 0.25),
                           width: 1.5,
                         ),
                       ),
@@ -132,24 +132,28 @@ class _MainScreenState extends State<MainScreen> {
                             activeIcon: Icons.home_rounded,
                             isSelected: currentIndex == 0,
                             onTap: () => _onTabTapped(0),
+                            primary: primary,
                           ),
                           _NavItem(
                             icon: Icons.play_circle_outline_rounded,
                             activeIcon: Icons.play_circle_rounded,
                             isSelected: currentIndex == 1,
                             onTap: () => _onTabTapped(1),
+                            primary: primary,
                           ),
                           _NavItem(
                             icon: Icons.forum_outlined,
                             activeIcon: Icons.forum_rounded,
                             isSelected: currentIndex == 2,
                             onTap: () => _onTabTapped(2),
+                            primary: primary,
                           ),
                           _NavItem(
                             icon: Icons.person_outline_rounded,
                             activeIcon: Icons.person_rounded,
                             isSelected: currentIndex == 3,
                             onTap: () => _onTabTapped(3),
+                            primary: primary,
                           ),
                         ],
                       ),
@@ -191,12 +195,14 @@ class _NavItem extends StatelessWidget {
   final IconData activeIcon;
   final bool isSelected;
   final VoidCallback onTap;
+  final Color primary;
 
   const _NavItem({
     required this.icon,
     required this.activeIcon,
     required this.isSelected,
     required this.onTap,
+    required this.primary,
   });
 
   @override
@@ -214,11 +220,11 @@ class _NavItem extends StatelessWidget {
         padding: EdgeInsets.all(padding),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.04)
+              ? primary.withValues(alpha: isDark ? 0.08 : 0.04)
               : Colors.transparent,
           border: isSelected
               ? Border.all(
-                  color: AppColors.primary.withValues(
+                  color: primary.withValues(
                     alpha: isDark ? 0.22 : 0.16,
                   ),
                   width: 1,
@@ -230,7 +236,7 @@ class _NavItem extends StatelessWidget {
           isSelected ? activeIcon : icon,
           size: iconSize,
           color: isSelected
-              ? AppColors.primary
+              ? primary
               : (isDark ? AppColors.grey400 : AppColors.grey500),
         ),
       ),

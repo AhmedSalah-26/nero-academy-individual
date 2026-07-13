@@ -26,6 +26,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -33,13 +34,11 @@ class ProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: borderColor ??
-              (isDark
-                  ? AppColors.borderDark
-                  : AppColors.primary.withValues(alpha: 0.14)),
+              (isDark ? AppColors.borderDark : primary.withValues(alpha: 0.14)),
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.10),
+            color: primary.withValues(alpha: isDark ? 0.08 : 0.10),
             blurRadius: 22,
             offset: const Offset(0, 10),
           ),
@@ -69,15 +68,15 @@ class ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardDark : AppColors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? AppColors.borderDark
-              : AppColors.primary.withValues(alpha: 0.12),
+          color:
+              isDark ? AppColors.borderDark : primary.withValues(alpha: 0.12),
         ),
         boxShadow: [
           BoxShadow(
@@ -172,15 +171,15 @@ class CourseThumbnailPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
-      child:
-          const Icon(Icons.school_outlined, color: AppColors.primary, size: 28),
+      child: Icon(Icons.school_outlined, color: primary, size: 28),
     );
   }
 }
@@ -246,13 +245,13 @@ class StudentProfileSliverHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return SliverAppBar(
       expandedHeight: 118,
       toolbarHeight: 58,
       pinned: true,
       elevation: 0,
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       foregroundColor: isDark ? AppColors.white : AppColors.textMainLight,
       leading: Padding(
         padding: const EdgeInsetsDirectional.only(start: 12),
@@ -278,14 +277,14 @@ class StudentProfileSliverHeader extends StatelessWidget {
             color: isDark ? AppColors.surfaceDark : AppColors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.18),
+              color: primary.withValues(alpha: 0.18),
             ),
           ),
           child: TabBar(
             controller: tabController,
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
-              color: AppColors.primary,
+              color: primary,
               borderRadius: BorderRadius.circular(11),
             ),
             dividerColor: Colors.transparent,

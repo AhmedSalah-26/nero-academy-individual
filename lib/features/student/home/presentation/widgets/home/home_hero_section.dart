@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:lms_platform/core/services/teacher_context_service.dart';
 import 'package:lms_platform/core/shared_widgets/glass_search_bar.dart';
-import 'package:lms_platform/core/theme/app_colors.dart';
 import 'home_app_bar.dart';
 
 class HomeSliverAppBar extends StatelessWidget {
@@ -24,8 +23,7 @@ class HomeSliverAppBar extends StatelessWidget {
     return SliverAppBar(
       pinned: true,
       elevation: 0,
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       expandedHeight: expandedHeight,
       toolbarHeight: toolbarHeight,
       titleSpacing: 0,

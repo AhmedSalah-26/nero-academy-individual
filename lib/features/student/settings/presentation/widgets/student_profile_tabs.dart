@@ -35,6 +35,7 @@ class StudentOverviewTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final completed = enrollments
         .where((e) =>
             (e['progress_percentage'] as num?)?.toDouble() == 100 ||
@@ -59,7 +60,7 @@ class StudentOverviewTab extends StatelessWidget {
         // Overall progress
         ProfileCard(
           isDark: isDark,
-          borderColor: AppColors.primary.withValues(alpha: 0.16),
+          borderColor: primary.withValues(alpha: 0.16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -68,10 +69,10 @@ class StudentOverviewTab extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                        color: primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.trending_up_rounded,
-                        color: AppColors.primary, size: 20),
+                    child: Icon(Icons.trending_up_rounded,
+                        color: primary, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -141,7 +142,7 @@ class StudentOverviewTab extends StatelessWidget {
                 icon: Icons.timer_outlined,
                 label: isArabic ? 'وقت المشاهدة' : 'Watch Time',
                 value: _watchStr,
-                color: AppColors.primary,
+                color: primary,
                 isDark: isDark),
             ProfileStatCard(
                 icon: Icons.quiz_outlined,

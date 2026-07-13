@@ -109,7 +109,7 @@ class _EmptyStateState extends State<EmptyState>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final config = _getConfig();
+    final config = _getConfig(Theme.of(context).colorScheme.primary);
 
     if (widget.compact) {
       return _buildCompact(isDark, config);
@@ -326,7 +326,7 @@ class _EmptyStateState extends State<EmptyState>
     );
   }
 
-  _EmptyStateConfig _getConfig() {
+  _EmptyStateConfig _getConfig(Color primary) {
     switch (widget.type) {
       case EmptyStateType.courses:
         return _EmptyStateConfig(
@@ -335,7 +335,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.courses_message'.tr(),
           actionText: 'empty.browse_courses'.tr(),
           actionIcon: Icons.explore_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.cart:
         return _EmptyStateConfig(
@@ -344,7 +344,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.cart_message'.tr(),
           actionText: 'empty.browse_courses'.tr(),
           actionIcon: Icons.explore_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.wishlist:
         return _EmptyStateConfig(
@@ -353,7 +353,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.wishlist_message'.tr(),
           actionText: 'empty.explore_courses'.tr(),
           actionIcon: Icons.explore_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.search:
         return _EmptyStateConfig(
@@ -362,7 +362,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.search_message'.tr(),
           actionText: 'empty.clear_filters'.tr(),
           actionIcon: Icons.filter_alt_off_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.notifications:
         return _EmptyStateConfig(
@@ -371,7 +371,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.notifications_message'.tr(),
           actionText: 'empty.refresh'.tr(),
           actionIcon: Icons.refresh_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.certificates:
         return _EmptyStateConfig(
@@ -380,7 +380,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.certificates_message'.tr(),
           actionText: 'empty.start_learning'.tr(),
           actionIcon: Icons.play_arrow_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.myLearning:
         return _EmptyStateConfig(
@@ -389,7 +389,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.my_learning_message'.tr(),
           actionText: 'empty.browse_courses'.tr(),
           actionIcon: Icons.explore_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.instructors:
         return _EmptyStateConfig(
@@ -398,7 +398,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.instructors_message'.tr(),
           actionText: 'empty.clear_filters'.tr(),
           actionIcon: Icons.filter_alt_off_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.reviews:
         return _EmptyStateConfig(
@@ -407,7 +407,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.reviews_message'.tr(),
           actionText: 'empty.write_review'.tr(),
           actionIcon: Icons.edit_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.qa:
         return _EmptyStateConfig(
@@ -416,7 +416,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.qa_message'.tr(),
           actionText: 'empty.ask_question'.tr(),
           actionIcon: Icons.add_comment_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.generic:
         return _EmptyStateConfig(
@@ -425,7 +425,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.generic_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.lessons:
         return _EmptyStateConfig(
@@ -434,7 +434,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.lessons_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.notes:
         return _EmptyStateConfig(
@@ -443,7 +443,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.notes_message'.tr(),
           actionText: 'empty.add_note'.tr(),
           actionIcon: Icons.add_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.bookmarks:
         return _EmptyStateConfig(
@@ -452,7 +452,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.bookmarks_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.attachments:
         return _EmptyStateConfig(
@@ -461,7 +461,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.attachments_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.announcements:
         return _EmptyStateConfig(
@@ -470,7 +470,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.announcements_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.quizzes:
         return _EmptyStateConfig(
@@ -479,7 +479,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.quizzes_message'.tr(),
           actionText: 'empty.go_back'.tr(),
           actionIcon: Icons.arrow_back_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
       case EmptyStateType.forum:
         return _EmptyStateConfig(
@@ -488,7 +488,7 @@ class _EmptyStateState extends State<EmptyState>
           message: 'empty.forum_message'.tr(),
           actionText: 'empty.start_conversation'.tr(),
           actionIcon: Icons.chat_rounded,
-          color: AppColors.primary,
+          color: primary,
         );
     }
   }

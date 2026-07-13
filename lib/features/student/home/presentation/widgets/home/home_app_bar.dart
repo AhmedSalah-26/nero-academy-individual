@@ -22,6 +22,7 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth * 0.04;
     final verticalPadding = screenWidth * 0.018;
@@ -66,7 +67,7 @@ class HomeAppBar extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.right,
                       style: AppTextStyles.headlineMedium.copyWith(
-                        color: AppColors.primaryDark,
+                        color: primary,
                         fontWeight: FontWeight.w800,
                         fontSize: (screenWidth * 0.040).clamp(15.0, 17.0),
                         fontFamily: 'Almarai',
@@ -89,6 +90,7 @@ class HomeAppBar extends StatelessWidget {
                       label: 'تنبيهات',
                       onTap: () => AppRouter.goToNotifications(context),
                       hasNotification: hasUnread,
+                      primary: primary,
                     );
                   },
                 ),
@@ -102,6 +104,7 @@ class HomeAppBar extends StatelessWidget {
                       onTap: () => AppRouter.goToCart(context),
                       badgeCount: state.itemsCount,
                       compactBadge: true,
+                      primary: primary,
                     );
                   },
                 ),
@@ -110,12 +113,14 @@ class HomeAppBar extends StatelessWidget {
                   icon: Icons.history_rounded,
                   label: 'سجل التعلم',
                   onTap: () => AppRouter.goToHistory(context),
+                  primary: primary,
                 ),
                 const SizedBox(width: 6),
                 _QuickAction(
                   icon: Icons.favorite_border_rounded,
                   label: 'المفضلة',
                   onTap: () => AppRouter.goToWishlist(context),
+                  primary: primary,
                 ),
               ],
             ),
@@ -133,6 +138,7 @@ class _QuickAction extends StatelessWidget {
   final bool hasNotification;
   final int? badgeCount;
   final bool compactBadge;
+  final Color primary;
 
   const _QuickAction({
     required this.icon,
@@ -141,6 +147,7 @@ class _QuickAction extends StatelessWidget {
     this.hasNotification = false,
     this.badgeCount,
     this.compactBadge = false,
+    required this.primary,
   });
 
   @override
@@ -163,11 +170,11 @@ class _QuickAction extends StatelessWidget {
               color: isDark ? AppColors.cardDark : AppColors.white,
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.26),
+                color: primary.withValues(alpha: 0.26),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.06),
+                  color: primary.withValues(alpha: 0.06),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -175,7 +182,7 @@ class _QuickAction extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: AppColors.primary,
+              color: primary,
               size: iconSize,
             ),
           ),

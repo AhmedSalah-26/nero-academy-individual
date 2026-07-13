@@ -45,13 +45,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
-        color: AppColors.primary,
+        color: primary,
         backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
         child: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
             }
-            return _buildContent(state, isDark);
+            return _buildContent(state, isDark, primary);
           },
         ),
       ),
@@ -85,16 +85,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildContent(ProfileState state, bool isDark) {
+  Widget _buildContent(ProfileState state, bool isDark, Color primary) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         children: [
-          _buildHeader(state, isDark),
+          _buildHeader(state, isDark, primary),
           const SizedBox(height: 24),
           _buildStats(state, isDark),
           const SizedBox(height: 24),
-          _buildMenuSection(isDark),
+          _buildMenuSection(isDark, primary),
           const SizedBox(height: 24),
           _buildLogoutButton(isDark),
           const SizedBox(height: 100),
@@ -103,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader(ProfileState state, bool isDark) {
+  Widget _buildHeader(ProfileState state, bool isDark, Color primary) {
     return Padding(
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
@@ -119,20 +119,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.4),
+                color: primary.withValues(alpha: 0.4),
                 width: 2,
               ),
             ),
             child: CircleAvatar(
               radius: 45,
               backgroundColor: isDark
-                  ? AppColors.primary.withValues(alpha: 0.25)
-                  : AppColors.primary.withValues(alpha: 0.15),
+                  ? primary.withValues(alpha: 0.25)
+                  : primary.withValues(alpha: 0.15),
               backgroundImage: state.userAvatar != null
                   ? NetworkImage(state.userAvatar!)
                   : null,
               child: state.userAvatar == null
-                  ? const Icon(Icons.person, size: 45, color: AppColors.primary)
+                  ? Icon(Icons.person, size: 45, color: primary)
                   : null,
             ),
           ),
@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuSection(bool isDark) {
+  Widget _buildMenuSection(bool isDark, Color primary) {
     final isArabic = context.locale.languageCode == 'ar';
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -238,6 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: 'dashboard.admin_dashboard'.tr(),
                         onTap: () => AppRouter.goToAdminDashboard(context),
                         isDark: isDark,
+                        primary: primary,
                       ),
                       _buildDivider(isDark),
                     ],
@@ -251,6 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: 'dashboard.instructor_dashboard'.tr(),
                         onTap: () => AppRouter.goToInstructorDashboard(context),
                         isDark: isDark,
+                        primary: primary,
                       ),
                       _buildDivider(isDark),
                     ],
@@ -265,6 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: isArabic ? 'تغيير المدرس' : 'Change Teacher',
                         onTap: () => AppRouter.goToSelectTeacher(context),
                         isDark: isDark,
+                        primary: primary,
                       ),
                       _buildDivider(isDark),
                       _buildMenuItem(
@@ -272,6 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: isArabic ? 'ملف التعلم' : 'Learning Profile',
                         onTap: () => AppRouter.goToStudentProfile(context),
                         isDark: isDark,
+                        primary: primary,
                       ),
                       _buildDivider(isDark),
                     ],
@@ -285,6 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'profile.edit_profile'.tr(),
               onTap: () => AppRouter.goToEditProfile(context),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -292,6 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'settings.notifications'.tr(),
               onTap: () => AppRouter.goToNotifications(context),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -299,6 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'my_learning.my_learning'.tr(),
               onTap: () => AppRouter.goToMyLearning(context),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -306,6 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: isArabic ? 'حالة الطلبات' : 'Orders Status',
               onTap: () => AppRouter.goToOrdersStatus(context),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -313,6 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: isArabic ? 'المنتديات' : 'Forums',
               onTap: () => context.pushNamed('forums-tab'),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -320,6 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'wishlist.wishlist'.tr(),
               onTap: () => context.pushNamed('wishlist'),
               isDark: isDark,
+              primary: primary,
             ),
             _buildDivider(isDark),
             _buildMenuItem(
@@ -327,6 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'settings.settings'.tr(),
               onTap: () => AppRouter.goToSettings(context),
               isDark: isDark,
+              primary: primary,
             ),
           ],
         ),
@@ -339,6 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String title,
     required VoidCallback onTap,
     required bool isDark,
+    required Color primary,
   }) {
     return InkWell(
       onTap: () {
@@ -349,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            Icon(icon, size: 22, color: AppColors.primary),
+            Icon(icon, size: 22, color: primary),
             const SizedBox(width: 14),
             Expanded(
               child: Text(

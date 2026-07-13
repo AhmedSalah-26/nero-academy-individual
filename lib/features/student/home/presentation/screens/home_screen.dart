@@ -91,12 +91,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: BlocConsumer<HomeCubit, HomeState>(
           listener: (context, state) {
             if (state.isError && state.errorMessage != null) {
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, state) {
             return RefreshIndicator(
               onRefresh: _onRefresh,
-              color: AppColors.primary,
+              color: primary,
               backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
               displacement: 40,
               child: CustomScrollView(
