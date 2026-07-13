@@ -58,7 +58,7 @@ class _ShimmerCardState extends State<_ShimmerCard>
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.isDark ? AppColors.cardDark : AppColors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(

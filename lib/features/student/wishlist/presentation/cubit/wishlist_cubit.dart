@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms_platform/core/base/base_state.dart';
+import 'package:lms_platform/core/errors/failures.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/student/wishlist/domain/entities/wishlist_item_entity.dart';
 import 'package:lms_platform/features/student/wishlist/domain/usecases/get_wishlist_usecase.dart';
@@ -51,27 +54,43 @@ class WishlistCubit extends Cubit<WishlistState> {
     // Show loading state
     _safeEmit(state.copyWith(status: StateStatus.loading));
 
-    final result = await getWishlistUseCase(GetWishlistParams(userId: userId));
+    try {
+      final result = await getWishlistUseCase(GetWishlistParams(userId: userId))
+          .timeout(const Duration(seconds: 15));
 
-    result.fold(
-      (failure) {
-        AppLogger.e(
-            '[WishlistCubit] Failed to load wishlist: ${failure.message}');
-        _safeEmit(state.copyWith(
-          status: StateStatus.error,
-          failure: failure,
-        ));
-      },
-      (items) {
-        AppLogger.success('[WishlistCubit] Wishlist loaded: ${items.length}');
-        final courseIds = items.map((e) => e.courseId).toSet();
-        _safeEmit(state.copyWith(
-          status: StateStatus.success,
-          items: items,
-          wishlistCourseIds: courseIds,
-        ));
-      },
-    );
+      result.fold(
+        (failure) {
+          AppLogger.e(
+              '[WishlistCubit] Failed to load wishlist: ${failure.message}');
+          _safeEmit(state.copyWith(
+            status: StateStatus.error,
+            failure: failure,
+          ));
+        },
+        (items) {
+          AppLogger.success('[WishlistCubit] Wishlist loaded: ${items.length}');
+          final courseIds = items.map((e) => e.courseId).toSet();
+          _safeEmit(state.copyWith(
+            status: StateStatus.success,
+            items: items,
+            wishlistCourseIds: courseIds,
+            clearFailure: true,
+          ));
+        },
+      );
+    } on TimeoutException {
+      AppLogger.e('[WishlistCubit] Wishlist load timed out');
+      _safeEmit(state.copyWith(
+        status: StateStatus.error,
+        failure: const NetworkFailure('Wishlist loading timed out'),
+      ));
+    } catch (e, stack) {
+      AppLogger.e('[WishlistCubit] Unexpected wishlist load error', e, stack);
+      _safeEmit(state.copyWith(
+        status: StateStatus.error,
+        failure: ServerFailure(e.toString()),
+      ));
+    }
   }
 
   /// Refresh wishlist

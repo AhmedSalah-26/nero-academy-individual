@@ -32,8 +32,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final isArabic = context.locale.languageCode == 'ar';
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -42,6 +41,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: RefreshIndicator(
                 onRefresh: () =>
                     context.read<NotificationsCubit>().refreshNotifications(),
+                color: Theme.of(context).colorScheme.tertiary,
+                backgroundColor: Theme.of(context).cardColor,
                 child: BlocBuilder<NotificationsCubit, NotificationsState>(
                   builder: (context, state) {
                     if (state is NotificationsLoading) {
@@ -81,9 +82,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildHeader(BuildContext context, bool isDark, bool isArabic) {
     final screenWidth = MediaQuery.of(context).size.width;
     final iconSize = (screenWidth * 0.06).clamp(22.0, 26.0);
+    final actionColor = Theme.of(context).colorScheme.tertiary;
 
     return Container(
-      color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      color: Theme.of(context).scaffoldBackgroundColor,
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.04,
         vertical: screenWidth * 0.025,
@@ -96,7 +98,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.cardDark : AppColors.grey100,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -135,9 +137,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: IconButton.filledTonal(
                         visualDensity: VisualDensity.compact,
                         style: IconButton.styleFrom(
-                          backgroundColor:
-                              AppColors.primary.withValues(alpha: 0.12),
-                          foregroundColor: AppColors.primary,
+                          backgroundColor: actionColor.withValues(alpha: 0.12),
+                          foregroundColor: actionColor,
                         ),
                         onPressed: () {
                           context.read<NotificationsCubit>().markAllAsRead();
@@ -262,6 +263,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final languageCode = isArabic ? 'ar' : 'en';
     final title = notification.getTitle(languageCode);
     final body = notification.getBody(languageCode);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return SwipeToDelete(
       key: Key(notification.id),
@@ -280,10 +282,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: notification.isRead
-                  ? (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-                  : (isDark
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : AppColors.primaryLight.withValues(alpha: 0.3)),
+                  ? Theme.of(context).cardColor
+                  : primary.withValues(alpha: isDark ? 0.16 : 0.12),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -335,8 +335,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
+                              decoration: BoxDecoration(
+                                color: primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -435,9 +435,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Color _getTypeColor(NotificationType type) {
+    final primary = Theme.of(context).colorScheme.primary;
     switch (type) {
       case NotificationType.instructorMessage:
-        return AppColors.primary;
+        return primary;
       case NotificationType.courseUpdate:
       case NotificationType.newLesson:
         return AppColors.info;
@@ -450,7 +451,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case NotificationType.paymentConfirmed:
         return AppColors.success;
       case NotificationType.announcement:
-        return AppColors.primary;
+        return primary;
       case NotificationType.promotion:
         return AppColors.error;
       case NotificationType.reminder:

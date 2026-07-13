@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/routing/app_router.dart';
 import 'package:lms_platform/core/shared_widgets/responsive_dialog.dart';
-import 'package:lms_platform/core/theme/app_colors.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/core/utils/toast_utils.dart';
 import 'package:lms_platform/features/student/cart/presentation/cubit/cart_cubit.dart';
@@ -56,8 +55,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<WishlistCubit, WishlistState>(
         builder: (context, state) {
           return Column(
@@ -126,8 +124,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: AppColors.primary,
-      backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+      color: Theme.of(context).colorScheme.tertiary,
+      backgroundColor: Theme.of(context).cardColor,
       child: isScrollableContent
           ? content
           : SingleChildScrollView(

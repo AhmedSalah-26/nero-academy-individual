@@ -32,6 +32,9 @@ class WishlistItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final actionColor = Theme.of(context).colorScheme.tertiary;
+    final cardColor = Theme.of(context).cardColor;
     const radius = 16.0;
 
     return GestureDetector(
@@ -43,25 +46,23 @@ class WishlistItemCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.cardDark.withValues(alpha: 0.78)
+                  ? cardColor.withValues(alpha: 0.78)
                   : Colors.white.withValues(alpha: 0.72),
               borderRadius: BorderRadius.circular(radius),
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.14)
-                    : AppColors.primary.withValues(alpha: 0.18),
+                    : primary.withValues(alpha: 0.18),
                 width: 1.4,
               ),
               boxShadow: [
                 BoxShadow(
-                  color:
-                      AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.12),
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
                   blurRadius: 18,
                   offset: const Offset(0, 5),
                 ),
                 BoxShadow(
-                  color:
-                      AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.06),
+                  color: primary.withValues(alpha: isDark ? 0.08 : 0.06),
                   blurRadius: 26,
                   spreadRadius: 2,
                 ),
@@ -69,8 +70,8 @@ class WishlistItemCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildMainContent(isDark),
-                _buildFooter(isDark),
+                _buildMainContent(isDark, primary, actionColor, cardColor),
+                _buildFooter(isDark, primary, actionColor),
               ],
             ),
           ),
@@ -79,28 +80,33 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(bool isDark) {
+  Widget _buildMainContent(
+    bool isDark,
+    Color primary,
+    Color actionColor,
+    Color cardColor,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildThumbnail(isDark),
+          _buildThumbnail(isDark, cardColor),
           const SizedBox(width: 14),
-          Expanded(child: _buildContent(isDark)),
-          _buildFavoriteButton(isDark),
+          Expanded(child: _buildContent(isDark, primary)),
+          _buildFavoriteButton(isDark, actionColor),
         ],
       ),
     );
   }
 
-  Widget _buildThumbnail(bool isDark) {
+  Widget _buildThumbnail(bool isDark, Color cardColor) {
     return Container(
       width: 96,
       height: 96,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: isDark ? AppColors.surfaceDark : AppColors.grey100,
+        color: isDark ? cardColor : AppColors.grey100,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -108,16 +114,17 @@ class WishlistItemCard extends StatelessWidget {
             ? Image.network(
                 item.thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildPlaceholder(isDark),
+                errorBuilder: (_, __, ___) =>
+                    _buildPlaceholder(isDark, cardColor),
               )
-            : _buildPlaceholder(isDark),
+            : _buildPlaceholder(isDark, cardColor),
       ),
     );
   }
 
-  Widget _buildPlaceholder(bool isDark) {
+  Widget _buildPlaceholder(bool isDark, Color cardColor) {
     return Container(
-      color: isDark ? AppColors.surfaceDark : AppColors.grey100,
+      color: isDark ? cardColor : AppColors.grey100,
       child: Center(
         child: Icon(
           Icons.play_circle_outline_rounded,
@@ -128,7 +135,7 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(bool isDark) {
+  Widget _buildContent(bool isDark, Color primary) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,7 +165,7 @@ class WishlistItemCard extends StatelessWidget {
         const SizedBox(height: 6),
         _buildRating(isDark),
         const SizedBox(height: 8),
-        _buildPrice(isDark),
+        _buildPrice(isDark, primary),
       ],
     );
   }
@@ -188,7 +195,7 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPrice(bool isDark) {
+  Widget _buildPrice(bool isDark, Color primary) {
     if (item.isEnrolled) {
       return Text(
         'wishlist.purchased'.tr(),
@@ -211,7 +218,7 @@ class WishlistItemCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isDark ? AppColors.textMainDark : AppColors.primary,
+            color: isDark ? AppColors.textMainDark : primary,
           ),
         ),
         if (hasDiscount) ...[
@@ -273,9 +280,9 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFavoriteButton(bool isDark) {
+  Widget _buildFavoriteButton(bool isDark, Color actionColor) {
     if (isRemoving) {
-      return const SizedBox(
+      return SizedBox(
         width: 36,
         height: 36,
         child: Center(
@@ -284,7 +291,7 @@ class WishlistItemCard extends StatelessWidget {
             height: 22,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: AppColors.primary,
+              color: actionColor,
             ),
           ),
         ),
@@ -300,7 +307,7 @@ class WishlistItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(bool isDark) {
+  Widget _buildFooter(bool isDark, Color primary, Color actionColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -312,7 +319,7 @@ class WishlistItemCard extends StatelessWidget {
           top: BorderSide(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.08)
-                : AppColors.primary.withValues(alpha: 0.12),
+                : primary.withValues(alpha: 0.12),
             width: 1,
           ),
         ),
@@ -337,13 +344,13 @@ class WishlistItemCard extends StatelessWidget {
               ),
             ],
           ),
-          _buildActionButton(isDark),
+          _buildActionButton(isDark, actionColor),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(bool isDark) {
+  Widget _buildActionButton(bool isDark, Color actionColor) {
     // Show "View Content" for enrolled courses
     if (item.isEnrolled) {
       return TextButton.icon(
@@ -388,13 +395,12 @@ class WishlistItemCard extends StatelessWidget {
     return TextButton(
       onPressed: isAddingToCart ? null : onAddToCart,
       style: TextButton.styleFrom(
-        backgroundColor: isDark
-            ? AppColors.primary
-            : AppColors.primary.withValues(alpha: 0.1),
-        foregroundColor: isDark ? Colors.white : AppColors.primary,
+        backgroundColor:
+            isDark ? actionColor : actionColor.withValues(alpha: 0.1),
+        foregroundColor: isDark ? Colors.white : actionColor,
         disabledBackgroundColor: isDark
-            ? AppColors.primary.withValues(alpha: 0.5)
-            : AppColors.primary.withValues(alpha: 0.05),
+            ? actionColor.withValues(alpha: 0.5)
+            : actionColor.withValues(alpha: 0.05),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -411,7 +417,7 @@ class WishlistItemCard extends StatelessWidget {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: isDark ? Colors.white : AppColors.primary,
+                      color: isDark ? Colors.white : actionColor,
                     ),
                   ),
                 ],

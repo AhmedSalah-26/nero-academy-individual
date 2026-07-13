@@ -18,9 +18,10 @@ class WishlistFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actionColor = Theme.of(context).colorScheme.tertiary;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        color: Theme.of(context).cardColor,
         border: Border(
           bottom: BorderSide(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -39,6 +40,7 @@ class WishlistFilterTabs extends StatelessWidget {
               isSelected: isSelected,
               onTap: () => onFilterChanged(filter),
               isDark: isDark,
+              actionColor: actionColor,
             );
           }).toList(),
         ),
@@ -63,12 +65,14 @@ class _FilterTab extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final bool isDark;
+  final Color actionColor;
 
   const _FilterTab({
     required this.label,
     required this.isSelected,
     required this.onTap,
     required this.isDark,
+    required this.actionColor,
   });
 
   @override
@@ -80,7 +84,7 @@ class _FilterTab extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isSelected ? AppColors.primary : Colors.transparent,
+              color: isSelected ? actionColor : Colors.transparent,
               width: 2,
             ),
           ),
@@ -91,7 +95,7 @@ class _FilterTab extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: isSelected
-                ? AppColors.primary
+                ? actionColor
                 : (isDark ? AppColors.grey400 : AppColors.grey500),
           ),
         ),

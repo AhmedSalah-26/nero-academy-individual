@@ -23,6 +23,7 @@ class WishlistBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actionColor = Theme.of(context).colorScheme.tertiary;
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -31,7 +32,7 @@ class WishlistBottomBar extends StatelessWidget {
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        color: Theme.of(context).cardColor,
         border: Border(
           top: BorderSide(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -121,7 +122,7 @@ class WishlistBottomBar extends StatelessWidget {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: actionColor,
                 foregroundColor: Colors.white,
                 disabledBackgroundColor:
                     isDark ? AppColors.grey700 : AppColors.grey200,
@@ -132,7 +133,7 @@ class WishlistBottomBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 4,
-                shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                shadowColor: actionColor.withValues(alpha: 0.3),
               ),
             ),
           ),

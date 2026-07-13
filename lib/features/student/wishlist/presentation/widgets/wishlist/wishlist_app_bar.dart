@@ -25,8 +25,12 @@ class WishlistAppBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         decoration: BoxDecoration(
           color: isDark
-              ? AppColors.backgroundDark.withValues(alpha: 0.95)
-              : AppColors.backgroundLight.withValues(alpha: 0.95),
+              ? Theme.of(context)
+                  .scaffoldBackgroundColor
+                  .withValues(alpha: 0.95)
+              : Theme.of(context)
+                  .scaffoldBackgroundColor
+                  .withValues(alpha: 0.95),
           border: Border(
             bottom: BorderSide(
               color: isDark

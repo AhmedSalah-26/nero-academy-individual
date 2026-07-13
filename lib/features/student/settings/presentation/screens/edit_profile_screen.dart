@@ -278,13 +278,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final actionColor = Theme.of(context).colorScheme.tertiary;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           'profile.edit_profile'.tr(),
           style: TextStyle(
@@ -306,8 +306,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   )
                 : Text(
                     'common.save'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.primary,
+                    style: TextStyle(
+                      color: actionColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -322,7 +322,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  _buildAvatarSection(isDark),
+                  _buildAvatarSection(isDark, primary, actionColor),
                   if (_isInstructor) ...[
                     const SizedBox(height: 24),
                     _buildCoverImageSection(isDark),
@@ -355,7 +355,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildAvatarSection(bool isDark) {
+  Widget _buildAvatarSection(
+    bool isDark,
+    Color primary,
+    Color actionColor,
+  ) {
     return Column(
       children: [
         GestureDetector(
@@ -367,23 +371,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.4),
+                    color: primary.withValues(alpha: 0.4),
                     width: 2,
                   ),
                 ),
                 child: CircleAvatar(
                   radius: 55,
                   backgroundColor: isDark
-                      ? AppColors.primary.withValues(alpha: 0.25)
-                      : AppColors.primary.withValues(alpha: 0.15),
+                      ? primary.withValues(alpha: 0.25)
+                      : primary.withValues(alpha: 0.15),
                   backgroundImage: _avatarBytes != null
                       ? MemoryImage(_avatarBytes!)
                       : (_currentAvatarUrl != null
                           ? NetworkImage(_currentAvatarUrl!)
                           : null),
                   child: _avatarBytes == null && _currentAvatarUrl == null
-                      ? const Icon(Icons.person,
-                          size: 55, color: AppColors.primary)
+                      ? Icon(Icons.person, size: 55, color: primary)
                       : null,
                 ),
               ),
@@ -393,12 +396,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: actionColor,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark
-                          ? AppColors.backgroundDark
-                          : AppColors.backgroundLight,
+                          ? Theme.of(context).scaffoldBackgroundColor
+                          : Theme.of(context).scaffoldBackgroundColor,
                       width: 2,
                     ),
                   ),
@@ -494,7 +497,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             width: double.infinity,
             height: 180,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.cardDark : AppColors.grey100,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark ? AppColors.borderDark : AppColors.borderLight,
