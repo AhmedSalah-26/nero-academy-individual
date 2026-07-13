@@ -41,8 +41,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: BlocBuilder<ForumsListCubit, ForumsListState>(
           builder: (context, state) {
@@ -59,6 +58,8 @@ class _ForumsListViewState extends State<_ForumsListView> {
                             refresh: true,
                           );
                     },
+                    color: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor: Theme.of(context).cardColor,
                     child: _buildBody(context, state, isArabic, isDark),
                   ),
                 ),
@@ -134,6 +135,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
       child: Row(
         children: [
           _buildForumTabItem(
+            context: context,
             label: isArabic ? '\u0627\u0644\u0643\u0644' : 'All',
             isSelected: selectedIndex == 0,
             isDark: isDark,
@@ -141,6 +143,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
           ),
           const SizedBox(width: 12),
           _buildForumTabItem(
+            context: context,
             label: isArabic ? '\u062c\u0645\u0627\u0639\u064a\u0629' : 'Groups',
             isSelected: selectedIndex == 1,
             isDark: isDark,
@@ -148,6 +151,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
           ),
           const SizedBox(width: 12),
           _buildForumTabItem(
+            context: context,
             label: isArabic ? '\u062e\u0627\u0635\u0629' : 'Private',
             isSelected: selectedIndex == 2,
             isDark: isDark,
@@ -164,20 +168,21 @@ class _ForumsListViewState extends State<_ForumsListView> {
   }
 
   Widget _buildForumTabItem({
+    required BuildContext context,
     required String label,
     required bool isSelected,
     required bool isDark,
     required VoidCallback onTap,
   }) {
+    final buttonColor = Theme.of(context).colorScheme.tertiary;
+    final cardColor = Theme.of(context).cardColor;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.cardDark : AppColors.white),
+          color: isSelected ? buttonColor : cardColor,
           borderRadius: BorderRadius.circular(24),
           border: isSelected
               ? null
@@ -187,7 +192,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
+                    color: buttonColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -213,6 +218,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
       BuildContext context, ForumsListState state, bool isArabic, bool isDark) {
     final selectedIndex =
         state.typeFilter == null ? 0 : (state.typeFilter == 'multi' ? 1 : 2);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -249,11 +255,11 @@ class _ForumsListViewState extends State<_ForumsListView> {
                   width: tabWidth,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: primary,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.25),
+                        color: primary.withValues(alpha: 0.25),
                         blurRadius: 4,
                         offset: const Offset(0, 1.5),
                       ),
@@ -382,6 +388,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
       itemCount: 6,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
+        final primary = Theme.of(context).colorScheme.primary;
         return SlideFadeIn.fromBottom(
           delay: Duration(milliseconds: index < 8 ? 60 * index : 480),
           child: ShimmerEffect(
@@ -390,12 +397,12 @@ class _ForumsListViewState extends State<_ForumsListView> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.cardDark : AppColors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark
-                      ? AppColors.primary.withValues(alpha: 0.7)
-                      : AppColors.primary.withValues(alpha: 0.25),
+                      ? primary.withValues(alpha: 0.7)
+                      : primary.withValues(alpha: 0.25),
                   width: isDark ? 1.5 : 1.2,
                 ),
               ),
@@ -480,6 +487,7 @@ class _ForumsListViewState extends State<_ForumsListView> {
   Widget _buildConversationTile(BuildContext context, Conversation conversation,
       bool isArabic, bool isDark) {
     final isGroup = conversation.type == ConversationType.multi;
+    final primary = Theme.of(context).colorScheme.primary;
     final title = conversation.displayTitle;
     final lastMessage = conversation.lastMessage;
     final lastMessageText = lastMessage?.messageText ?? '';
@@ -505,12 +513,12 @@ class _ForumsListViewState extends State<_ForumsListView> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark
-                ? AppColors.primary.withValues(alpha: 0.7)
-                : AppColors.primary.withValues(alpha: 0.25),
+                ? primary.withValues(alpha: 0.7)
+                : primary.withValues(alpha: 0.25),
             width: isDark ? 1.5 : 1.2,
           ),
         ),
@@ -523,20 +531,20 @@ class _ForumsListViewState extends State<_ForumsListView> {
                 width: 64,
                 height: 64,
                 child: Container(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: primary.withValues(alpha: 0.1),
                   child: conversation.otherUserAvatar != null
                       ? Image.network(
                           conversation.otherUserAvatar!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Icon(
                             isGroup ? Icons.group : Icons.person,
-                            color: AppColors.primary,
+                            color: primary,
                             size: 24,
                           ),
                         )
                       : Icon(
                           isGroup ? Icons.group : Icons.person,
-                          color: AppColors.primary,
+                          color: primary,
                           size: 28,
                         ),
                 ),

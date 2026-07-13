@@ -131,29 +131,33 @@ class MyApp extends StatelessWidget {
         baseTheme.colorScheme.secondary;
     final background = teacherTheme.backgroundFor(isDarkMode) ??
         baseTheme.scaffoldBackgroundColor;
+    final button = teacherTheme.buttonFor(isDarkMode) ?? primary;
+    final card = teacherTheme.cardFor(isDarkMode) ?? baseTheme.cardColor;
 
     return baseTheme.copyWith(
       primaryColor: primary,
       scaffoldBackgroundColor: background,
+      cardColor: card,
       colorScheme: baseTheme.colorScheme.copyWith(
         primary: primary,
         secondary: secondary,
         surface: background,
+        tertiary: button,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: baseTheme.elevatedButtonTheme.style?.copyWith(
-          backgroundColor: WidgetStatePropertyAll(primary),
+          backgroundColor: WidgetStatePropertyAll(button),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: baseTheme.textButtonTheme.style?.copyWith(
-          foregroundColor: WidgetStatePropertyAll(primary),
+          foregroundColor: WidgetStatePropertyAll(button),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: baseTheme.outlinedButtonTheme.style?.copyWith(
-          foregroundColor: WidgetStatePropertyAll(primary),
-          side: WidgetStatePropertyAll(BorderSide(color: primary)),
+          foregroundColor: WidgetStatePropertyAll(button),
+          side: WidgetStatePropertyAll(BorderSide(color: button)),
         ),
       ),
     );

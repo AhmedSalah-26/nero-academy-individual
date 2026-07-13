@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    final primary = Theme.of(context).colorScheme.tertiary;
     final screenWidth = MediaQuery.of(context).size.width;
     final currentIndex = widget.navigationShell.currentIndex;
 

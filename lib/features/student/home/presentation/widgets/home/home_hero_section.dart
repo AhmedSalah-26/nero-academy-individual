@@ -81,7 +81,8 @@ class _HeroVisual extends StatelessWidget {
         ValueListenableBuilder<SelectedTeacher?>(
           valueListenable: TeacherContextService.instance.selectedTeacher,
           builder: (context, teacher, _) {
-            final customImageUrl = (teacher?.theme.logoUrl ?? '').trim();
+            final customImageUrl =
+                (teacher?.theme.coverFor(isDark) ?? '').trim();
             final fallbackAsset = isDark
                 ? 'assets/default_identity/default_teacher_cover_dark.png'
                 : 'assets/default_identity/default_teacher_cover_light.png';

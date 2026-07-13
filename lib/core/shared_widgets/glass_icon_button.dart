@@ -31,13 +31,15 @@ class GlassIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final actionColor = Theme.of(context).colorScheme.tertiary;
     final numberBadgeScale = compactBadge ? 0.78 : 1.0;
     const borderWidth = 1.5;
     final radius = BorderRadius.circular(borderRadius);
     final innerRadius = BorderRadius.circular(borderRadius - borderWidth);
     final borderColor = isDark
         ? Colors.white.withValues(alpha: 0.15)
-        : AppColors.primary.withValues(alpha: 0.28);
+        : primary.withValues(alpha: 0.28);
     final fillColor = isDark
         ? AppColors.surfaceDark.withValues(alpha: 0.86)
         : Colors.white.withValues(alpha: 0.74);
@@ -67,7 +69,7 @@ class GlassIconButton extends StatelessWidget {
                     icon,
                     size: iconSize,
                     color: iconColor ??
-                        (isDark ? AppColors.textMainDark : AppColors.primary),
+                        (isDark ? AppColors.textMainDark : primary),
                   ),
                 ),
               ),
@@ -90,13 +92,11 @@ class GlassIconButton extends StatelessWidget {
                 minHeight: size * 0.17 * numberBadgeScale,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: actionColor,
                 borderRadius:
                     BorderRadius.circular(size * 0.18 * numberBadgeScale),
                 border: Border.all(
-                  color: isDark
-                      ? AppColors.backgroundDark
-                      : AppColors.backgroundLight,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   width: compactBadge ? 1.2 : 1.5,
                 ),
               ),

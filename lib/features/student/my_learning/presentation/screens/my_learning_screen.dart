@@ -70,8 +70,7 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: BlocConsumer<MyLearningCubit, MyLearningState>(
           listener: (context, state) {
             if (state.isError && state.errorMessage != null) {
@@ -86,9 +85,8 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: _onRefresh,
-                    color: AppColors.primary,
-                    backgroundColor:
-                        isDark ? AppColors.cardDark : AppColors.white,
+                    color: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor: Theme.of(context).cardColor,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       switchInCurve: Curves.easeInOut,
@@ -117,9 +115,9 @@ class _MyLearningScreenState extends State<MyLearningScreen> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.backgroundDark.withValues(alpha: 0.95)
-                : AppColors.backgroundLight.withValues(alpha: 0.95),
+            color: Theme.of(context)
+                .scaffoldBackgroundColor
+                .withValues(alpha: 0.95),
             border: Border(
               bottom: BorderSide(
                 color: isDark

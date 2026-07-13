@@ -23,6 +23,8 @@ class ContinueLearningCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final buttonColor = Theme.of(context).colorScheme.tertiary;
     final title = enrollment.getTitle(locale);
     final progress = enrollment.progressPercentage.round();
     final remaining = _formatDuration(enrollment.remainingMinutes);
@@ -34,7 +36,7 @@ class ContinueLearningCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
             color: isDark
@@ -44,12 +46,12 @@ class ContinueLearningCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.2),
+              color: primary.withValues(alpha: isDark ? 0.25 : 0.2),
               blurRadius: 20,
               offset: const Offset(0, 6),
             ),
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+              color: primary.withValues(alpha: isDark ? 0.15 : 0.1),
               blurRadius: 30,
               spreadRadius: 4,
             ),
@@ -62,7 +64,7 @@ class ContinueLearningCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildThumbnail(isDark),
+                _buildThumbnail(isDark, primary),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -70,10 +72,10 @@ class ContinueLearningCard extends StatelessWidget {
                     children: [
                       Text(
                         'my_learning.continue_learning'.tr().toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: primary,
                           letterSpacing: 1,
                         ),
                       ),
@@ -111,9 +113,10 @@ class ContinueLearningCard extends StatelessWidget {
                             enrollment.accessExpiresAt!, locale, isDark),
                       ],
                       const SizedBox(height: 16),
-                      _buildProgressSection(progress, remaining, isDark),
+                      _buildProgressSection(
+                          progress, remaining, isDark, primary),
                       const SizedBox(height: 16),
-                      _buildResumeButton(),
+                      _buildResumeButton(buttonColor),
                     ],
                   ),
                 ),
@@ -125,25 +128,22 @@ class ContinueLearningCard extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail(bool isDark) {
+  Widget _buildThumbnail(bool isDark, Color primary) {
     final placeholderWidget = Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [
-                  AppColors.primary.withValues(alpha: 0.3),
-                  AppColors.surfaceDark
-                ]
-              : [AppColors.primary.withValues(alpha: 0.1), AppColors.grey100],
+              ? [primary.withValues(alpha: 0.3), AppColors.surfaceDark]
+              : [primary.withValues(alpha: 0.1), AppColors.grey100],
         ),
       ),
       child: Center(
         child: Icon(
           Icons.play_circle_filled_rounded,
           size: 56,
-          color: AppColors.primary.withValues(alpha: 0.7),
+          color: primary.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -206,7 +206,12 @@ class ContinueLearningCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressSection(int progress, String remaining, bool isDark) {
+  Widget _buildProgressSection(
+    int progress,
+    String remaining,
+    bool isDark,
+    Color primary,
+  ) {
     return Column(
       children: [
         Row(
@@ -235,7 +240,7 @@ class ContinueLearningCard extends StatelessWidget {
           child: LinearProgressIndicator(
             value: enrollment.progressPercentage / 100,
             backgroundColor: isDark ? AppColors.grey700 : AppColors.grey100,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            valueColor: AlwaysStoppedAnimation<Color>(primary),
             minHeight: 8,
           ),
         ),
@@ -243,7 +248,7 @@ class ContinueLearningCard extends StatelessWidget {
     );
   }
 
-  Widget _buildResumeButton() {
+  Widget _buildResumeButton(Color buttonColor) {
     final isActive = enrollment.isCurrentlyAvailable;
     return SizedBox(
       width: double.infinity,
@@ -267,7 +272,7 @@ class ContinueLearningCard extends StatelessWidget {
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: buttonColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(

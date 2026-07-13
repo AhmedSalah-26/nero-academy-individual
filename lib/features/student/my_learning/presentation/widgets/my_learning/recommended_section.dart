@@ -24,6 +24,7 @@ class RecommendedSection extends StatelessWidget {
     if (courses.isEmpty) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +47,10 @@ class RecommendedSection extends StatelessWidget {
                 onTap: onSeeAll,
                 child: Text(
                   'common.see_all'.tr(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: primary,
                   ),
                 ),
               ),
@@ -96,13 +97,14 @@ class _RecommendedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = course.getTitle(locale);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 240,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark
@@ -154,15 +156,15 @@ class _RecommendedCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'my_learning.next_step'.tr().toUpperCase(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: primary,
                         letterSpacing: 0.5,
                       ),
                     ),

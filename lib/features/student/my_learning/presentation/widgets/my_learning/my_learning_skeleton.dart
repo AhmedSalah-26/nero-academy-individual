@@ -143,7 +143,7 @@ class _EnrolledCourseCardSkeleton extends StatelessWidget {
     return Container(
       height: cardHeight,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark ? Colors.white10 : AppColors.grey100,

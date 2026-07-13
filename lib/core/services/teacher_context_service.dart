@@ -49,10 +49,18 @@ class TeacherThemeConfig {
   final Color? lightPrimaryColor;
   final Color? lightSecondaryColor;
   final Color? lightBackgroundColor;
+  final Color? lightButtonColor;
+  final Color? lightCardColor;
   final Color? darkPrimaryColor;
   final Color? darkSecondaryColor;
   final Color? darkBackgroundColor;
+  final Color? darkButtonColor;
+  final Color? darkCardColor;
   final String? logoUrl;
+  final String? lightLogoUrl;
+  final String? darkLogoUrl;
+  final String? lightCoverUrl;
+  final String? darkCoverUrl;
   final String? welcomeText;
 
   const TeacherThemeConfig({
@@ -62,10 +70,18 @@ class TeacherThemeConfig {
     this.lightPrimaryColor,
     this.lightSecondaryColor,
     this.lightBackgroundColor,
+    this.lightButtonColor,
+    this.lightCardColor,
     this.darkPrimaryColor,
     this.darkSecondaryColor,
     this.darkBackgroundColor,
+    this.darkButtonColor,
+    this.darkCardColor,
     this.logoUrl,
+    this.lightLogoUrl,
+    this.darkLogoUrl,
+    this.lightCoverUrl,
+    this.darkCoverUrl,
     this.welcomeText,
   });
 
@@ -79,11 +95,19 @@ class TeacherThemeConfig {
           _parseColor(json['light_secondary_color'] as String?),
       lightBackgroundColor:
           _parseColor(json['light_background_color'] as String?),
+      lightButtonColor: _parseColor(json['light_button_color'] as String?),
+      lightCardColor: _parseColor(json['light_card_color'] as String?),
       darkPrimaryColor: _parseColor(json['dark_primary_color'] as String?),
       darkSecondaryColor: _parseColor(json['dark_secondary_color'] as String?),
       darkBackgroundColor:
           _parseColor(json['dark_background_color'] as String?),
+      darkButtonColor: _parseColor(json['dark_button_color'] as String?),
+      darkCardColor: _parseColor(json['dark_card_color'] as String?),
       logoUrl: json['logo_url'] as String?,
+      lightLogoUrl: json['light_logo_url'] as String?,
+      darkLogoUrl: json['dark_logo_url'] as String?,
+      lightCoverUrl: json['light_cover_url'] as String?,
+      darkCoverUrl: json['dark_cover_url'] as String?,
       welcomeText: json['welcome_text'] as String?,
     );
   }
@@ -95,9 +119,13 @@ class TeacherThemeConfig {
       lightPrimaryColor != null ||
       lightSecondaryColor != null ||
       lightBackgroundColor != null ||
+      lightButtonColor != null ||
+      lightCardColor != null ||
       darkPrimaryColor != null ||
       darkSecondaryColor != null ||
-      darkBackgroundColor != null;
+      darkBackgroundColor != null ||
+      darkButtonColor != null ||
+      darkCardColor != null;
 
   Color? primaryFor(bool isDarkMode) => isDarkMode
       ? darkPrimaryColor ?? primaryColor
@@ -110,6 +138,19 @@ class TeacherThemeConfig {
   Color? backgroundFor(bool isDarkMode) => isDarkMode
       ? darkBackgroundColor ?? backgroundColor
       : lightBackgroundColor ?? backgroundColor;
+
+  Color? buttonFor(bool isDarkMode) => isDarkMode
+      ? darkButtonColor ?? primaryFor(true)
+      : lightButtonColor ?? primaryFor(false);
+
+  Color? cardFor(bool isDarkMode) =>
+      isDarkMode ? darkCardColor : lightCardColor;
+
+  String? logoFor(bool isDarkMode) =>
+      isDarkMode ? darkLogoUrl ?? logoUrl : lightLogoUrl ?? logoUrl;
+
+  String? coverFor(bool isDarkMode) =>
+      isDarkMode ? darkCoverUrl ?? logoUrl : lightCoverUrl ?? logoUrl;
 
   static Color? _parseColor(String? value) {
     if (value == null || value.trim().isEmpty) return null;

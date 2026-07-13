@@ -51,13 +51,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final buttonColor = Theme.of(context).colorScheme.tertiary;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor:
-            isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text(
           'settings.settings'.tr(),
           style: TextStyle(
@@ -71,8 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
-        color: AppColors.primary,
-        backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
+        color: buttonColor,
+        backgroundColor: Theme.of(context).cardColor,
         child: BlocBuilder<SettingsCubit, SettingsState>(
           builder: (context, state) {
             if (state.isLoading) {
@@ -81,14 +81,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: SizedBox(height: 500, child: AppLoadingState()),
               );
             }
-            return _buildContent(state, isDark);
+            return _buildContent(state, isDark, primary, buttonColor);
           },
         ),
       ),
     );
   }
 
-  Widget _buildContent(SettingsState state, bool isDark) {
+  Widget _buildContent(
+    SettingsState state,
+    bool isDark,
+    Color primary,
+    Color buttonColor,
+  ) {
     int sectionIndex = 0;
 
     return SingleChildScrollView(
@@ -105,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 _buildSectionTitle('settings.preferences'.tr(), isDark),
                 const SizedBox(height: 12),
-                _buildPreferencesCard(state, isDark),
+                _buildPreferencesCard(state, isDark, primary, buttonColor),
               ],
             ),
           ),
@@ -118,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 _buildSectionTitle('settings.legal_support'.tr(), isDark),
                 const SizedBox(height: 12),
-                _buildSupportCard(isDark),
+                _buildSupportCard(isDark, buttonColor),
               ],
             ),
           ),
@@ -160,16 +165,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildPreferencesCard(SettingsState state, bool isDark) {
+  Widget _buildPreferencesCard(
+    SettingsState state,
+    bool isDark,
+    Color primary,
+    Color buttonColor,
+  ) {
     return Card(
-      color: isDark ? AppColors.cardDark : AppColors.white,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
           // Language
           ExpansionTile(
-            leading:
-                const Icon(Icons.language, size: 22, color: AppColors.primary),
+            leading: Icon(Icons.language, size: 22, color: primary),
             title: Text(
               'settings.language'.tr(),
               style: TextStyle(
@@ -199,7 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: Icon(
               isDark ? Icons.dark_mode : Icons.light_mode,
               size: 22,
-              color: AppColors.primary,
+              color: primary,
             ),
             title: Text(
               'settings.dark_mode'.tr(),
@@ -212,16 +221,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: Switch(
               value: state.isDarkMode,
               onChanged: (v) => context.read<SettingsCubit>().toggleDarkMode(v),
-              activeTrackColor: AppColors.primary,
+              activeTrackColor: buttonColor,
             ),
           ),
           if (!_isGuest) ...[
             // Notifications
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.notifications_outlined,
                 size: 22,
-                color: AppColors.primary,
+                color: primary,
               ),
               title: Text(
                 'settings.notifications'.tr(),
@@ -235,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: state.notificationsEnabled,
                 onChanged: (v) =>
                     context.read<SettingsCubit>().toggleNotifications(v),
-                activeTrackColor: AppColors.primary,
+                activeTrackColor: buttonColor,
               ),
             ),
             // Learning Profile for students
@@ -247,10 +256,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return Column(
                     children: [
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.school_outlined,
                           size: 22,
-                          color: AppColors.primary,
+                          color: primary,
                         ),
                         title: Text(
                           isArabic ? 'تغيير المدرس' : 'Change Teacher',
@@ -268,10 +277,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () => AppRouter.goToSelectTeacher(context),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.analytics_outlined,
                           size: 22,
-                          color: AppColors.primary,
+                          color: primary,
                         ),
                         title: Text(
                           isArabic ? 'ملف التعلم' : 'Learning Profile',
@@ -300,15 +309,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSupportCard(bool isDark) {
+  Widget _buildSupportCard(bool isDark, Color buttonColor) {
     return Column(
       children: [
         // Help Center - expandable card
         ExpandableCard(
           header: Row(
             children: [
-              const Icon(Icons.help_outline,
-                  size: 22, color: AppColors.primary),
+              Icon(Icons.help_outline, size: 22, color: buttonColor),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -342,7 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ElevatedButton(
                   onPressed: () => AppRouter.goToHelpSupport(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: buttonColor,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -364,8 +372,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ExpandableCard(
           header: Row(
             children: [
-              const Icon(Icons.shield_outlined,
-                  size: 22, color: AppColors.primary),
+              Icon(Icons.shield_outlined, size: 22, color: buttonColor),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -405,7 +412,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: buttonColor,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -427,8 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ExpandableCard(
           header: Row(
             children: [
-              const Icon(Icons.description_outlined,
-                  size: 22, color: AppColors.primary),
+              Icon(Icons.description_outlined, size: 22, color: buttonColor),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -462,7 +468,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: ElevatedButton(
                   onPressed: () => AppRouter.goToTermsOfService(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: buttonColor,
                     foregroundColor: AppColors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
@@ -499,6 +505,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildLanguageOption(
       String code, String name, String current, bool isDark) {
     final isSelected = code == current;
+    final primary = Theme.of(context).colorScheme.primary;
     return ListTile(
       onTap: () {
         context.read<SettingsCubit>().updateLanguage(code);
@@ -509,17 +516,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: TextStyle(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           color: isSelected
-              ? AppColors.primary
+              ? primary
               : (isDark ? AppColors.textMainDark : AppColors.textMainLight),
         ),
       ),
-      trailing:
-          isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
+      trailing: isSelected ? Icon(Icons.check, color: primary) : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
           color: isSelected
-              ? AppColors.primary
+              ? primary
               : (isDark ? AppColors.grey700 : AppColors.grey200),
         ),
       ),

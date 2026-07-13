@@ -94,7 +94,9 @@ class _AppButtonState extends State<AppButton>
   }
 
   Widget _buildButton(bool isDark) {
-    final glowColor = _getBackgroundColor();
+    final actionColor = Theme.of(context).colorScheme.tertiary;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final glowColor = _getBackgroundColor(actionColor);
 
     switch (widget.variant) {
       case AppButtonVariant.primary:
@@ -118,28 +120,27 @@ class _AppButtonState extends State<AppButton>
           ),
           child: ElevatedButton(
             onPressed: widget.isLoading ? null : _handlePress,
-            style: _getElevatedStyle(isDark),
+            style: _getElevatedStyle(isDark, actionColor),
             child: _buildChild(Colors.white),
           ),
         );
       case AppButtonVariant.secondary:
         return ElevatedButton(
           onPressed: widget.isLoading ? null : _handlePress,
-          style: _getSecondaryStyle(isDark),
-          child: _buildChild(AppColors.primary),
+          style: _getSecondaryStyle(isDark, actionColor),
+          child: _buildChild(actionColor),
         );
       case AppButtonVariant.outline:
         return OutlinedButton(
           onPressed: widget.isLoading ? null : _handlePress,
-          style: _getOutlineStyle(isDark),
-          child:
-              _buildChild(isDark ? AppColors.primaryLight : AppColors.primary),
+          style: _getOutlineStyle(isDark, actionColor),
+          child: _buildChild(actionColor),
         );
       case AppButtonVariant.text:
         return TextButton(
           onPressed: widget.isLoading ? null : _handlePress,
-          style: _getTextStyle(),
-          child: _buildChild(AppColors.primary),
+          style: _getTextStyle(actionColor),
+          child: _buildChild(primaryColor),
         );
     }
   }
@@ -211,26 +212,27 @@ class _AppButtonState extends State<AppButton>
     }
   }
 
-  Color _getBackgroundColor() {
+  Color _getBackgroundColor(Color actionColor) {
     switch (widget.variant) {
       case AppButtonVariant.primary:
-        return AppColors.primary;
+        return actionColor;
       case AppButtonVariant.success:
         return AppColors.success;
       case AppButtonVariant.error:
         return AppColors.error;
       default:
-        return AppColors.primary;
+        return actionColor;
     }
   }
 
-  ButtonStyle _getElevatedStyle(bool isDark) {
+  ButtonStyle _getElevatedStyle(bool isDark, Color actionColor) {
+    final backgroundColor = _getBackgroundColor(actionColor);
     return ElevatedButton.styleFrom(
-      backgroundColor: _getBackgroundColor(),
+      backgroundColor: backgroundColor,
       foregroundColor: Colors.white,
       elevation: 0,
       padding: _getPadding(),
-      shadowColor: _getBackgroundColor().withValues(alpha: 0.5),
+      shadowColor: backgroundColor.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       textStyle: TextStyle(
         fontFamily: 'Almarai',
@@ -240,12 +242,12 @@ class _AppButtonState extends State<AppButton>
     );
   }
 
-  ButtonStyle _getSecondaryStyle(bool isDark) {
+  ButtonStyle _getSecondaryStyle(bool isDark, Color actionColor) {
     return ElevatedButton.styleFrom(
       backgroundColor: isDark
-          ? AppColors.primary.withValues(alpha: 0.15)
-          : AppColors.primaryLight.withValues(alpha: 0.3),
-      foregroundColor: AppColors.primary,
+          ? actionColor.withValues(alpha: 0.15)
+          : actionColor.withValues(alpha: 0.12),
+      foregroundColor: actionColor,
       elevation: 0,
       padding: _getPadding(),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -257,13 +259,13 @@ class _AppButtonState extends State<AppButton>
     );
   }
 
-  ButtonStyle _getOutlineStyle(bool isDark) {
+  ButtonStyle _getOutlineStyle(bool isDark, Color actionColor) {
     return OutlinedButton.styleFrom(
-      foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+      foregroundColor: actionColor,
       padding: _getPadding(),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       side: BorderSide(
-        color: isDark ? AppColors.primaryLight : AppColors.primary,
+        color: actionColor,
         width: 1.5,
       ),
       textStyle: TextStyle(
@@ -274,9 +276,9 @@ class _AppButtonState extends State<AppButton>
     );
   }
 
-  ButtonStyle _getTextStyle() {
+  ButtonStyle _getTextStyle(Color actionColor) {
     return TextButton.styleFrom(
-      foregroundColor: AppColors.primary,
+      foregroundColor: actionColor,
       padding: _getPadding(),
       textStyle: TextStyle(
         fontFamily: 'Almarai',

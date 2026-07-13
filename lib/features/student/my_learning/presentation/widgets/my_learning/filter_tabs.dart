@@ -22,6 +22,8 @@ class FilterTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final buttonColor = Theme.of(context).colorScheme.tertiary;
+    final cardColor = Theme.of(context).cardColor;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -34,6 +36,8 @@ class FilterTabs extends StatelessWidget {
             isSelected: currentFilter == MyLearningFilter.inProgress,
             onTap: () => _onTap(MyLearningFilter.inProgress),
             isDark: isDark,
+            buttonColor: buttonColor,
+            cardColor: cardColor,
           ),
           const SizedBox(width: 12),
           _FilterChip(
@@ -42,6 +46,8 @@ class FilterTabs extends StatelessWidget {
             isSelected: currentFilter == MyLearningFilter.completed,
             onTap: () => _onTap(MyLearningFilter.completed),
             isDark: isDark,
+            buttonColor: buttonColor,
+            cardColor: cardColor,
           ),
           const SizedBox(width: 12),
           _FilterChip(
@@ -49,6 +55,8 @@ class FilterTabs extends StatelessWidget {
             isSelected: currentFilter == MyLearningFilter.all,
             onTap: () => _onTap(MyLearningFilter.all),
             isDark: isDark,
+            buttonColor: buttonColor,
+            cardColor: cardColor,
           ),
         ],
       ),
@@ -67,6 +75,8 @@ class _FilterChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final bool isDark;
+  final Color buttonColor;
+  final Color cardColor;
 
   const _FilterChip({
     required this.label,
@@ -74,6 +84,8 @@ class _FilterChip extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.isDark,
+    required this.buttonColor,
+    required this.cardColor,
   });
 
   @override
@@ -84,9 +96,7 @@ class _FilterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.cardDark : AppColors.white),
+          color: isSelected ? buttonColor : cardColor,
           borderRadius: BorderRadius.circular(24),
           border: isSelected
               ? null
@@ -96,7 +106,7 @@ class _FilterChip extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
+                    color: buttonColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -123,7 +133,7 @@ class _FilterChip extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.white.withValues(alpha: 0.2)
-                      : AppColors.primary.withValues(alpha: 0.1),
+                      : buttonColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -131,7 +141,7 @@ class _FilterChip extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? AppColors.white : AppColors.primary,
+                    color: isSelected ? AppColors.white : buttonColor,
                   ),
                 ),
               ),

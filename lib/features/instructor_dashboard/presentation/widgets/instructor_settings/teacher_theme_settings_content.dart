@@ -27,6 +27,10 @@ class _TeacherThemeSettingsContentState
   final _picker = ImagePicker();
   final _coverUrlController = TextEditingController();
   final _logoUrlController = TextEditingController();
+  final _lightCoverUrlController = TextEditingController();
+  final _darkCoverUrlController = TextEditingController();
+  final _lightLogoUrlController = TextEditingController();
+  final _darkLogoUrlController = TextEditingController();
   final _welcomeController = TextEditingController();
 
   bool _isLoading = true;
@@ -41,9 +45,13 @@ class _TeacherThemeSettingsContentState
   Color _lightPrimaryColor = _parseColor(_defaultPrimary);
   Color _lightSecondaryColor = _parseColor(_defaultSecondary);
   Color _lightBackgroundColor = _parseColor(_defaultLightBackground);
+  Color _lightButtonColor = _parseColor(_defaultPrimary);
+  Color _lightCardColor = _parseColor('#FFFFFF');
   Color _darkPrimaryColor = _parseColor(_defaultPrimary);
   Color _darkSecondaryColor = _parseColor(_defaultSecondary);
   Color _darkBackgroundColor = _parseColor(_defaultDarkBackground);
+  Color _darkButtonColor = _parseColor(_defaultPrimary);
+  Color _darkCardColor = _parseColor('#071720');
   _ThemeModePreview _previewMode = _ThemeModePreview.dark;
 
   @override
@@ -56,6 +64,10 @@ class _TeacherThemeSettingsContentState
   void dispose() {
     _coverUrlController.dispose();
     _logoUrlController.dispose();
+    _lightCoverUrlController.dispose();
+    _darkCoverUrlController.dispose();
+    _lightLogoUrlController.dispose();
+    _darkLogoUrlController.dispose();
     _welcomeController.dispose();
     super.dispose();
   }
@@ -80,6 +92,8 @@ class _TeacherThemeSettingsContentState
 
       _teacherId = teacher['id'] as String;
       _logoUrlController.text = teacher['avatar_url'] as String? ?? '';
+      _lightLogoUrlController.text = _logoUrlController.text;
+      _darkLogoUrlController.text = _logoUrlController.text;
 
       final themeData = _firstMap(teacher['teacher_themes']);
       if (themeData != null) {
@@ -100,6 +114,14 @@ class _TeacherThemeSettingsContentState
           themeData['light_background_color'] as String? ??
               _defaultLightBackground,
         );
+        _lightButtonColor = _parseColor(
+          themeData['light_button_color'] as String? ??
+              legacyPrimary ??
+              _defaultPrimary,
+        );
+        _lightCardColor = _parseColor(
+          themeData['light_card_color'] as String? ?? '#FFFFFF',
+        );
         _darkPrimaryColor = _parseColor(
           themeData['dark_primary_color'] as String? ??
               legacyPrimary ??
@@ -115,12 +137,30 @@ class _TeacherThemeSettingsContentState
               legacyBackground ??
               _defaultDarkBackground,
         );
+        _darkButtonColor = _parseColor(
+          themeData['dark_button_color'] as String? ??
+              legacyPrimary ??
+              _defaultPrimary,
+        );
+        _darkCardColor = _parseColor(
+          themeData['dark_card_color'] as String? ?? '#071720',
+        );
         _coverUrlController.text = themeData['logo_url'] as String? ??
             teacher['cover_image_url'] as String? ??
             '';
+        _lightCoverUrlController.text =
+            themeData['light_cover_url'] as String? ?? _coverUrlController.text;
+        _darkCoverUrlController.text =
+            themeData['dark_cover_url'] as String? ?? _coverUrlController.text;
+        _lightLogoUrlController.text =
+            themeData['light_logo_url'] as String? ?? _logoUrlController.text;
+        _darkLogoUrlController.text =
+            themeData['dark_logo_url'] as String? ?? _logoUrlController.text;
         _welcomeController.text = themeData['welcome_text'] as String? ?? '';
       } else {
         _coverUrlController.text = teacher['cover_image_url'] as String? ?? '';
+        _lightCoverUrlController.text = _coverUrlController.text;
+        _darkCoverUrlController.text = _coverUrlController.text;
       }
 
       if (mounted) setState(() => _isLoading = false);
@@ -158,9 +198,11 @@ class _TeacherThemeSettingsContentState
     });
 
     try {
+      final modePrefix =
+          _previewMode == _ThemeModePreview.dark ? 'dark' : 'light';
       final fileName = target == _ThemeImageTarget.cover
-          ? 'theme_cover.jpg'
-          : 'theme_logo.jpg';
+          ? '${modePrefix}_theme_cover.jpg'
+          : '${modePrefix}_theme_logo.jpg';
       final path = 'teacher_themes/$teacherId/$fileName';
 
       await _client.storage.from('avatars').uploadBinary(
@@ -178,8 +220,10 @@ class _TeacherThemeSettingsContentState
 
       setState(() {
         if (target == _ThemeImageTarget.cover) {
+          _currentCoverController.text = cacheBusted;
           _coverUrlController.text = cacheBusted;
         } else {
+          _currentLogoController.text = cacheBusted;
           _logoUrlController.text = cacheBusted;
         }
       });
@@ -210,6 +254,10 @@ class _TeacherThemeSettingsContentState
     try {
       final coverUrl = _emptyToNull(_coverUrlController.text);
       final logoUrl = _emptyToNull(_logoUrlController.text);
+      final lightCoverUrl = _emptyToNull(_lightCoverUrlController.text);
+      final darkCoverUrl = _emptyToNull(_darkCoverUrlController.text);
+      final lightLogoUrl = _emptyToNull(_lightLogoUrlController.text);
+      final darkLogoUrl = _emptyToNull(_darkLogoUrlController.text);
 
       await _client.from('teacher_themes').upsert({
         'teacher_id': teacherId,
@@ -219,17 +267,25 @@ class _TeacherThemeSettingsContentState
         'light_primary_color': _colorToHex(_lightPrimaryColor),
         'light_secondary_color': _colorToHex(_lightSecondaryColor),
         'light_background_color': _colorToHex(_lightBackgroundColor),
+        'light_button_color': _colorToHex(_lightButtonColor),
+        'light_card_color': _colorToHex(_lightCardColor),
         'dark_primary_color': _colorToHex(_darkPrimaryColor),
         'dark_secondary_color': _colorToHex(_darkSecondaryColor),
         'dark_background_color': _colorToHex(_darkBackgroundColor),
+        'dark_button_color': _colorToHex(_darkButtonColor),
+        'dark_card_color': _colorToHex(_darkCardColor),
         'logo_url': coverUrl,
+        'light_cover_url': lightCoverUrl,
+        'dark_cover_url': darkCoverUrl,
+        'light_logo_url': lightLogoUrl,
+        'dark_logo_url': darkLogoUrl,
         'welcome_text': _emptyToNull(_welcomeController.text),
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'teacher_id');
 
       await _client.from('teachers').update({
-        'avatar_url': logoUrl,
-        'cover_image_url': coverUrl,
+        'avatar_url': logoUrl ?? darkLogoUrl ?? lightLogoUrl,
+        'cover_image_url': coverUrl ?? darkCoverUrl ?? lightCoverUrl,
       }).eq('id', teacherId);
 
       _syncSelectedTeacherTheme(teacherId, logoUrl);
@@ -266,10 +322,18 @@ class _TeacherThemeSettingsContentState
         lightPrimaryColor: _lightPrimaryColor,
         lightSecondaryColor: _lightSecondaryColor,
         lightBackgroundColor: _lightBackgroundColor,
+        lightButtonColor: _lightButtonColor,
+        lightCardColor: _lightCardColor,
         darkPrimaryColor: _darkPrimaryColor,
         darkSecondaryColor: _darkSecondaryColor,
         darkBackgroundColor: _darkBackgroundColor,
+        darkButtonColor: _darkButtonColor,
+        darkCardColor: _darkCardColor,
         logoUrl: _emptyToNull(_coverUrlController.text),
+        lightLogoUrl: _emptyToNull(_lightLogoUrlController.text),
+        darkLogoUrl: _emptyToNull(_darkLogoUrlController.text),
+        lightCoverUrl: _emptyToNull(_lightCoverUrlController.text),
+        darkCoverUrl: _emptyToNull(_darkCoverUrlController.text),
         welcomeText: _emptyToNull(_welcomeController.text),
       ),
     );
@@ -286,6 +350,23 @@ class _TeacherThemeSettingsContentState
   Color get _currentBackgroundColor => _previewMode == _ThemeModePreview.dark
       ? _darkBackgroundColor
       : _lightBackgroundColor;
+
+  Color get _currentButtonColor => _previewMode == _ThemeModePreview.dark
+      ? _darkButtonColor
+      : _lightButtonColor;
+
+  Color get _currentCardColor =>
+      _previewMode == _ThemeModePreview.dark ? _darkCardColor : _lightCardColor;
+
+  TextEditingController get _currentCoverController =>
+      _previewMode == _ThemeModePreview.dark
+          ? _darkCoverUrlController
+          : _lightCoverUrlController;
+
+  TextEditingController get _currentLogoController =>
+      _previewMode == _ThemeModePreview.dark
+          ? _darkLogoUrlController
+          : _lightLogoUrlController;
 
   void _setCurrentPrimaryColor(Color color) {
     if (_previewMode == _ThemeModePreview.dark) {
@@ -308,6 +389,22 @@ class _TeacherThemeSettingsContentState
       _darkBackgroundColor = color;
     } else {
       _lightBackgroundColor = color;
+    }
+  }
+
+  void _setCurrentButtonColor(Color color) {
+    if (_previewMode == _ThemeModePreview.dark) {
+      _darkButtonColor = color;
+    } else {
+      _lightButtonColor = color;
+    }
+  }
+
+  void _setCurrentCardColor(Color color) {
+    if (_previewMode == _ThemeModePreview.dark) {
+      _darkCardColor = color;
+    } else {
+      _lightCardColor = color;
     }
   }
 
@@ -347,8 +444,10 @@ class _TeacherThemeSettingsContentState
           primary: _currentPrimaryColor,
           secondary: _currentSecondaryColor,
           background: _currentBackgroundColor,
-          logoUrl: _logoUrlController.text,
-          coverUrl: _coverUrlController.text,
+          button: _currentButtonColor,
+          card: _currentCardColor,
+          logoUrl: _currentLogoController.text,
+          coverUrl: _currentCoverController.text,
           logoBytes: _logoPreviewBytes,
           coverBytes: _coverPreviewBytes,
           isDarkPreview: _previewMode == _ThemeModePreview.dark,
@@ -400,6 +499,26 @@ class _TeacherThemeSettingsContentState
                       setState(() => _setCurrentBackgroundColor(color)),
                 ),
               ),
+              _ColorSelectorTile(
+                title: 'لون الأزرار',
+                color: _currentButtonColor,
+                onTap: () => _openColorSheet(
+                  title: 'لون الأزرار',
+                  selected: _currentButtonColor,
+                  onSelected: (color) =>
+                      setState(() => _setCurrentButtonColor(color)),
+                ),
+              ),
+              _ColorSelectorTile(
+                title: 'خلفية الكروت',
+                color: _currentCardColor,
+                onTap: () => _openColorSheet(
+                  title: 'خلفية الكروت',
+                  selected: _currentCardColor,
+                  onSelected: (color) =>
+                      setState(() => _setCurrentCardColor(color)),
+                ),
+              ),
             ],
           ),
         ),
@@ -413,13 +532,14 @@ class _TeacherThemeSettingsContentState
               _ImageUploadTile(
                 title: 'الشعار',
                 subtitle: 'يظهر مع بيانات المدرس',
-                url: _logoUrlController.text,
+                url: _currentLogoController.text,
                 bytes: _logoPreviewBytes,
                 isUploading: _isUploadingLogo,
                 icon: Icons.badge_rounded,
                 onUpload: () => _pickAndUploadImage(_ThemeImageTarget.logo),
                 onClear: () {
                   setState(() {
+                    _currentLogoController.clear();
                     _logoUrlController.clear();
                     _logoPreviewBytes = null;
                   });
@@ -429,7 +549,7 @@ class _TeacherThemeSettingsContentState
               _ImageUploadTile(
                 title: 'صورة الكفر',
                 subtitle: 'تظهر في الصفحة الرئيسية للطالب',
-                url: _coverUrlController.text,
+                url: _currentCoverController.text,
                 bytes: _coverPreviewBytes,
                 isUploading: _isUploadingCover,
                 icon: Icons.wallpaper_rounded,
@@ -437,6 +557,7 @@ class _TeacherThemeSettingsContentState
                 onUpload: () => _pickAndUploadImage(_ThemeImageTarget.cover),
                 onClear: () {
                   setState(() {
+                    _currentCoverController.clear();
                     _coverUrlController.clear();
                     _coverPreviewBytes = null;
                   });
@@ -1063,6 +1184,8 @@ class _ThemePreview extends StatelessWidget {
   final Color primary;
   final Color secondary;
   final Color background;
+  final Color button;
+  final Color card;
   final String logoUrl;
   final String coverUrl;
   final Uint8List? logoBytes;
@@ -1073,6 +1196,8 @@ class _ThemePreview extends StatelessWidget {
     required this.primary,
     required this.secondary,
     required this.background,
+    required this.button,
+    required this.card,
     required this.logoUrl,
     required this.coverUrl,
     required this.logoBytes,
@@ -1132,6 +1257,32 @@ class _ThemePreview extends StatelessWidget {
                       Container(height: 8, width: 150, color: primary),
                       const SizedBox(height: 7),
                       Container(height: 8, width: 108, color: secondary),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Container(
+                            width: 86,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: button,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Container(
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: card,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: primary.withValues(alpha: 0.25),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

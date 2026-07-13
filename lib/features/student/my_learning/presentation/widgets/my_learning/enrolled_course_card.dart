@@ -20,6 +20,7 @@ class EnrolledCourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final title = enrollment.getTitle(locale);
     final progress = enrollment.progressPercentage.round();
     final remaining = _formatDuration(enrollment.remainingMinutes);
@@ -29,12 +30,12 @@ class EnrolledCourseCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.cardDark : AppColors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDark
-                ? AppColors.primary.withValues(alpha: 0.7)
-                : AppColors.primary.withValues(alpha: 0.25),
+                ? primary.withValues(alpha: 0.7)
+                : primary.withValues(alpha: 0.25),
             width: isDark ? 1.5 : 1,
           ),
         ),
@@ -81,7 +82,7 @@ class EnrolledCourseCard extends StatelessWidget {
                       backgroundColor:
                           isDark ? AppColors.grey700 : AppColors.grey100,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(progress),
+                        _getProgressColor(progress, primary),
                       ),
                       minHeight: 6,
                     ),
@@ -95,7 +96,7 @@ class EnrolledCourseCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _getProgressColor(progress),
+                          color: _getProgressColor(progress, primary),
                         ),
                       ),
                       Text(
@@ -238,9 +239,9 @@ class EnrolledCourseCard extends StatelessWidget {
     );
   }
 
-  Color _getProgressColor(int progress) {
+  Color _getProgressColor(int progress, Color primary) {
     if (progress >= 80) return AppColors.success;
-    if (progress >= 30) return AppColors.primary;
+    if (progress >= 30) return primary;
     return AppColors.warning;
   }
 
