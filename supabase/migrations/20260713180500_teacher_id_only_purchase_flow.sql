@@ -181,6 +181,218 @@ begin
 end;
 $$;
 
+drop policy if exists courses_insert_own on public.courses;
+drop policy if exists courses_update_own on public.courses;
+drop policy if exists courses_delete_own on public.courses;
+drop policy if exists sections_manage_own on public.sections;
+drop policy if exists lessons_manage_own on public.lessons;
+drop policy if exists lesson_attachments_manage_own on public.lesson_attachments;
+drop policy if exists certificates_select_instructor on public.certificates;
+drop policy if exists quizzes_manage_own on public.quizzes;
+drop policy if exists quiz_questions_manage_own on public.quiz_questions;
+drop policy if exists quiz_attempts_select_instructor on public.quiz_attempts;
+drop policy if exists "Enrolled users can manage reviews" on public.course_reviews;
+
+create policy courses_insert_own
+on public.courses
+for insert
+to authenticated
+with check (
+  teacher_id = public.current_teacher_id()
+  or public.current_profile_role() = 'admin'
+);
+
+create policy courses_update_own
+on public.courses
+for update
+to authenticated
+using (
+  teacher_id = public.current_teacher_id()
+  or public.current_profile_role() = 'admin'
+)
+with check (
+  teacher_id = public.current_teacher_id()
+  or public.current_profile_role() = 'admin'
+);
+
+create policy courses_delete_own
+on public.courses
+for delete
+to authenticated
+using (
+  teacher_id = public.current_teacher_id()
+  or public.current_profile_role() = 'admin'
+);
+
+create policy sections_manage_own
+on public.sections
+for all
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = sections.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = sections.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy lessons_manage_own
+on public.lessons
+for all
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = lessons.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = lessons.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy lesson_attachments_manage_own
+on public.lesson_attachments
+for all
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.lessons l
+    join public.courses c on c.id = l.course_id
+    where l.id = lesson_attachments.lesson_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.lessons l
+    join public.courses c on c.id = l.course_id
+    where l.id = lesson_attachments.lesson_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy certificates_select_instructor
+on public.certificates
+for select
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or user_id = auth.uid()
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = certificates.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy quizzes_manage_own
+on public.quizzes
+for all
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = quizzes.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = quizzes.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy quiz_questions_manage_own
+on public.quiz_questions
+for all
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.quizzes q
+    join public.courses c on c.id = q.course_id
+    where q.id = quiz_questions.quiz_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.quizzes q
+    join public.courses c on c.id = q.course_id
+    where q.id = quiz_questions.quiz_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy quiz_attempts_select_instructor
+on public.quiz_attempts
+for select
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or user_id = auth.uid()
+  or exists (
+    select 1
+    from public.quizzes q
+    join public.courses c on c.id = q.course_id
+    where q.id = quiz_attempts.quiz_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+);
+
+create policy "Enrolled users can manage reviews"
+on public.course_reviews
+for all
+to authenticated
+using (
+  user_id = auth.uid()
+  or public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.courses c
+    where c.id = course_reviews.course_id
+      and c.teacher_id = public.current_teacher_id()
+  )
+)
+with check (
+  user_id = auth.uid()
+  or public.current_profile_role() = 'admin'
+);
+
 alter table public.manual_purchase_request_items
   drop column if exists instructor_id;
 
