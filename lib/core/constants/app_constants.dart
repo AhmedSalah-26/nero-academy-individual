@@ -16,7 +16,7 @@ class AppConstants {
   static const String supabaseJwtAnonKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ndWRhbHNjY25yYWd1YWppcWt1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTkxOTksImV4cCI6MjA5OTQzNTE5OX0.umuFbHzz_ZR0OauUhJaUaqzu9ByWmEMHJGOkZ4Vxsro';
   static const String googleWebClientId =
-      '1083887222364-3jlne3f2n5jqdht1nvbp4i0trev8sgca.apps.googleusercontent.com';
+      '901902911640-jq1q4pd0gpdvk2g08dinoaet502jcj8r.apps.googleusercontent.com';
 
   // Storage Buckets
   static const String avatarsBucket = 'avatars';
