@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -82,9 +83,7 @@ class _SplashBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final splashText =
-        isArabic ? "منصة نسق التعليمية" : "Nasaq Learning Platform";
+    final splashText = 'app_name'.tr();
 
     return Container(
       width: double.infinity,

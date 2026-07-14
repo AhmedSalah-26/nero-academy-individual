@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lms_platform/core/animations/animations.dart';
+import 'package:lms_platform/core/constants/app_constants.dart';
 import 'package:lms_platform/core/routing/app_router.dart';
 import 'package:lms_platform/core/theme/app_colors.dart';
 import 'package:lms_platform/core/services/user_role_service.dart';
@@ -141,7 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             delay: Duration(milliseconds: 100 * sectionIndex++),
             child: Center(
               child: Text(
-                'Version 2.4.0',
+                'Version ${AppConstants.appVersion}',
                 style: TextStyle(
                   fontSize: 12,
                   color: isDark ? AppColors.grey600 : AppColors.grey400,
