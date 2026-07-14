@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
@@ -12,6 +12,15 @@ class InstructorQADataSource {
 
   String get _userId => _client.auth.currentUser!.id;
 
+  Future<String?> _resolveTeacherId() async {
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    return teacher?['id'] as String?;
+  }
+
   /// Get questions
   Future<List<InstructorQuestionModel>> getQuestions({
     QAStatus? status,
@@ -21,6 +30,9 @@ class InstructorQADataSource {
   }) async {
     AppLogger.d('[$_tag] getQuestions: status=$status, courseId=$courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
       var query = _client.from('qa_questions').select('''
             *,
             course:courses!inner(title_ar, teacher_id),
@@ -30,7 +42,7 @@ class InstructorQADataSource {
               *,
               user:profiles(name, avatar_url)
             )
-          ''').eq('course.teacher_id', _userId);
+          ''').eq('course.teacher_id', teacherId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (status != null && status != QAStatus.all) {

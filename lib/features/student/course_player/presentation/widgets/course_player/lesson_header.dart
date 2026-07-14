@@ -63,8 +63,8 @@ class LessonHeader extends StatelessWidget {
                     Text(
                       '${'course_player.section'.tr()} ${sectionIndex + 1} • ${'course_player.lesson'.tr()} ${lessonIndex + 1}',
                       textAlign: TextAlign.start,
-                      style: const TextStyle(
-                        color: AppColors.primary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         height: 1.35,
@@ -111,7 +111,7 @@ class LessonHeader extends StatelessWidget {
                   icon: Icon(
                     isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                     color: isBookmarked
-                        ? AppColors.primary
+                        ? Theme.of(context).colorScheme.primary
                         : (isDark
                             ? AppColors.textMutedDark
                             : AppColors.textMutedLight),

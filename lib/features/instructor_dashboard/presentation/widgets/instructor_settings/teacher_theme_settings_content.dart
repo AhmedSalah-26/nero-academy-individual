@@ -694,6 +694,7 @@ class _TeacherThemeSettingsContentState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    _previewMode = isDark ? _ThemeModePreview.dark : _ThemeModePreview.light;
 
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
@@ -722,16 +723,6 @@ class _TeacherThemeSettingsContentState
       padding: const EdgeInsets.all(16),
       children: [
         _HeaderCard(isDark: isDark),
-        const SizedBox(height: 14),
-        _ModeSelector(
-          value: _previewMode,
-          onChanged: (value) {
-            setState(() {
-              _previewMode = value;
-            });
-          },
-          isDark: isDark,
-        ),
         const SizedBox(height: 14),
         _PresetThemeSection(
           presets: _themePresets,

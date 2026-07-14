@@ -1198,6 +1198,11 @@ class AppRouter {
           if (!hasTeacher) {
             return '/select-teacher';
           }
+        } else if (role == 'instructor') {
+          await TeacherContextService.instance.ensureInitialized(
+            Supabase.instance.client,
+          );
+          await TeacherContextService.instance.loadAndSelectInstructorTheme(user.id);
         }
       }
 

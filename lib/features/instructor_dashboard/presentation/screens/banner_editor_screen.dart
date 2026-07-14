@@ -367,14 +367,34 @@ class _BannerEditorScreenState extends State<BannerEditorScreen> {
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(type.$3, size: 16),
+                      Icon(
+                        type.$3,
+                        size: 16,
+                        color: isSelected
+                            ? AppColors.primary
+                            : (isDark ? AppColors.grey400 : AppColors.grey700),
+                      ),
                       const SizedBox(width: 4),
                       Text(type.$2),
                     ],
                   ),
                   selected: isSelected,
                   onSelected: (_) => setState(() => _linkType = type.$1),
-                  selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  checkmarkColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected
+                        ? AppColors.primary
+                        : (isDark ? AppColors.white : AppColors.textMainLight),
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontFamily: 'Almarai',
+                  ),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                    width: isSelected ? 1.5 : 1.0,
+                  ),
                 );
               }).toList(),
             ),

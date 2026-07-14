@@ -160,10 +160,10 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: AppColors.primary, size: 22),
+          child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -373,12 +373,12 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.play_lesson_outlined,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 22,
             ),
           ),
@@ -403,7 +403,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
               ),
             ),
           ),
-          iconColor: AppColors.primary,
+          iconColor: Theme.of(context).colorScheme.primary,
           collapsedIconColor:
               widget.isDark ? AppColors.grey400 : AppColors.grey600,
           children: group.quizzes.map(_buildQuizItem).toList(),
@@ -450,12 +450,12 @@ class _QuizzesSectionState extends State<QuizzesSection> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.quiz,
-        color: AppColors.primary,
+        color: Theme.of(context).colorScheme.primary,
         size: 24,
       ),
     );

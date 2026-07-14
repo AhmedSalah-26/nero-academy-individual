@@ -113,7 +113,7 @@ class QuizResultsScreen extends StatelessWidget {
                       ? CompletionType.trophy
                       : CompletionType.checkmark,
                   size: 120,
-                  color: attempt.passed ? AppColors.success : AppColors.primary,
+                  color: attempt.passed ? AppColors.success : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 // Score Circle

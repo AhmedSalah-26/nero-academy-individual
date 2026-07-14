@@ -127,23 +127,23 @@ class _InstructorProfileScreenState extends State<InstructorProfileScreen> {
                       color: isDark ? AppColors.surfaceDark : AppColors.grey200,
                     ),
                     errorWidget: (_, __, ___) => Container(
-                      color: AppColors.primary.withValues(alpha: 0.2),
-                      child: const Center(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                      child: Center(
                         child: Icon(
                           Icons.person,
                           size: 80,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                   )
                 : Container(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    child: const Center(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                    child: Center(
                       child: Icon(
                         Icons.person,
                         size: 80,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -166,7 +166,7 @@ class _InstructorProfileScreenState extends State<InstructorProfileScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           width: 3,
                         ),
                       ),
@@ -261,15 +261,15 @@ class _InstructorProfileScreenState extends State<InstructorProfileScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           skill,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       );
@@ -363,7 +363,7 @@ class _InstructorProfileScreenState extends State<InstructorProfileScreen> {
 
   Widget _buildAvatarPlaceholder(String name) {
     return Container(
-      color: AppColors.primary,
+      color: Theme.of(context).colorScheme.primary,
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : 'I',

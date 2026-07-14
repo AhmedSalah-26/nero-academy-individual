@@ -35,45 +35,113 @@ class _CourseForumsManagementScreenState
 
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        throw Exception('User not authenticated');
+      if (userId == null) throw Exception('User not authenticated');
+
+      List<ManagedCourse> rows;
+      try {
+        // Try RPC first
+        final response = await _supabase
+            .rpc('get_instructor_forum_courses', params: {'p_user_id': userId});
+        rows = (response as List)
+            .map((row) => ManagedCourse.fromJson(row as Map<String, dynamic>))
+            .toList();
+      } on PostgrestException catch (e) {
+        if (e.code != 'PGRST202') rethrow;
+        // RPC missing → fallback: resolve teacher_id then query directly
+        rows = await _loadCoursesFallback(userId);
       }
 
-      final response = await _supabase
-          .rpc('get_instructor_forum_courses', params: {'p_user_id': userId});
-
-      final rows = (response as List)
-          .map((row) => ManagedCourse.fromJson(row as Map<String, dynamic>))
-          .toList();
-
       if (!mounted) return;
-      setState(() {
-        _courses = rows;
-      });
+      setState(() => _courses = rows);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-      });
+      setState(() => _error = e.toString());
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  /// Direct DB fallback when the RPC is not deployed yet.
+  Future<List<ManagedCourse>> _loadCoursesFallback(String userId) async {
+    // Resolve real teachers.id from profile_id
+    final teacherRow = await _supabase
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+    final teacherId = teacherRow?['id'] as String?;
+    if (teacherId == null) return const [];
+
+    final coursesResp = await _supabase
+        .from('courses')
+        .select('id, title_ar, title_en')
+        .eq('teacher_id', teacherId)
+        .order('created_at', ascending: false);
+
+    final courses = coursesResp as List;
+    if (courses.isEmpty) return const [];
+
+    final courseIds = courses.map((c) => c['id'] as String).toList();
+    final groupsResp = await _supabase
+        .from('conversations')
+        .select('course_id')
+        .eq('type', 'multi')
+        .inFilter('course_id', courseIds);
+
+    final groupedIds = (groupsResp as List)
+        .map((g) => g['course_id'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    return courses.map((c) {
+      final id = c['id'] as String;
+      return ManagedCourse(
+        id: id,
+        titleAr: c['title_ar'] as String? ?? '',
+        titleEn: c['title_en'] as String? ?? '',
+        hasGroup: groupedIds.contains(id),
+      );
+    }).toList();
+  }
+
   Future<void> _toggleCourseGroup(ManagedCourse course, bool enabled) async {
-    setState(() {
-      _busyCourseId = course.id;
-    });
+    setState(() => _busyCourseId = course.id);
 
     try {
-      await _supabase.rpc('set_course_group_enabled', params: {
-        'p_course_id': course.id,
-        'p_enabled': enabled,
-      });
+      try {
+        await _supabase.rpc('set_course_group_enabled', params: {
+          'p_course_id': course.id,
+          'p_enabled': enabled,
+        });
+      } on PostgrestException catch (e) {
+        if (e.code != 'PGRST202') rethrow;
+        // RPC missing → fallback direct DB operation
+        if (enabled) {
+          // Check if a group already exists before inserting
+          final existing = await _supabase
+              .from('conversations')
+              .select('id')
+              .eq('course_id', course.id)
+              .eq('type', 'multi')
+              .maybeSingle();
+          if (existing == null) {
+            await _supabase.from('conversations').insert({
+              'course_id': course.id,
+              'type': 'multi',
+              'title': course.titleAr.isNotEmpty
+                  ? course.titleAr
+                  : course.titleEn,
+              'created_by': _supabase.auth.currentUser!.id,
+            });
+          }
+        } else {
+          await _supabase
+              .from('conversations')
+              .delete()
+              .eq('course_id', course.id)
+              .eq('type', 'multi');
+        }
+      }
 
       if (!mounted) return;
       setState(() {
@@ -83,15 +151,10 @@ class _CourseForumsManagementScreenState
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
-      if (mounted) {
-        setState(() {
-          _busyCourseId = null;
-        });
-      }
+      if (mounted) setState(() => _busyCourseId = null);
     }
   }
 

@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:lms_platform/features/student/payments_history/domain/entities/payment_entity.dart';
 
 class PaymentCard extends StatelessWidget {
@@ -404,6 +406,34 @@ class PaymentCard extends StatelessWidget {
                 theme,
                 isTotal: true,
               ),
+
+              if (payment.isPending) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _contactTeacherWhatsapp(context, payment.id),
+                    icon: const Icon(Icons.chat_rounded, color: Colors.white),
+                    label: Text(
+                      isRtl ? 'تأكيد الطلب عبر واتساب' : 'Confirm Order via WhatsApp',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Almarai',
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -500,4 +530,118 @@ class PaymentCard extends StatelessWidget {
   String get _shortOrderId => payment.id.length <= 8
       ? payment.id.toUpperCase()
       : payment.id.substring(0, 8).toUpperCase();
+
+  Future<void> _contactTeacherWhatsapp(BuildContext context, String orderId) async {
+    final isRtl = Localizations.localeOf(context).languageCode == 'ar';
+
+    // Show a loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    String? phone;
+    try {
+      final supabase = Supabase.instance.client;
+
+      // 1. Try manual_purchase_request_items
+      final requestItem = await supabase
+          .from('manual_purchase_request_items')
+          .select('teacher_id')
+          .eq('parent_enrollment_id', orderId)
+          .limit(1)
+          .maybeSingle();
+
+      if (requestItem != null && requestItem['teacher_id'] != null) {
+        final teacher = await supabase
+            .from('teachers')
+            .select('profile_id')
+            .eq('id', requestItem['teacher_id'] as String)
+            .maybeSingle();
+
+        if (teacher != null && teacher['profile_id'] != null) {
+          final profile = await supabase
+              .from('profiles')
+              .select('phone')
+              .eq('id', teacher['profile_id'] as String)
+              .maybeSingle();
+          phone = profile?['phone'] as String?;
+        }
+      }
+
+      // 2. Fallback: if not found, get any admin or instructor phone
+      if (phone == null || phone.isEmpty) {
+        final fallback = await supabase
+            .from('profiles')
+            .select('phone')
+            .inFilter('role', ['admin', 'instructor'])
+            .not('phone', 'is', null)
+            .limit(1)
+            .maybeSingle();
+        phone = fallback?['phone'] as String?;
+      }
+    } catch (e) {
+      debugPrint('Error loading instructor phone for WhatsApp: $e');
+    }
+
+    // Dismiss loading dialog
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+
+    if (phone == null || phone.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isRtl 
+                ? 'عذراً، لم نتمكن من العثور على رقم تواصل المدرس'
+                : 'Sorry, could not find contact number for the teacher.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Normalize phone
+    String normalized = phone.replaceAll(RegExp(r'\D'), '');
+    if (normalized.startsWith('00')) {
+      normalized = normalized.substring(2);
+    } else if (normalized.startsWith('0') && normalized.length == 11) {
+      normalized = '2$normalized';
+    }
+
+    // Open WhatsApp
+    final text = Uri.encodeComponent(
+      isRtl
+          ? 'مرحباً، أود تأكيد الطلب الخاص بي برقم: $orderId'
+          : 'Hello, I would like to confirm my order with ID: $orderId',
+    );
+    final uri = Uri.parse('whatsapp://send?phone=$normalized&text=$text');
+    final fallbackUri = Uri.parse(
+        'https://api.whatsapp.com/send?phone=$normalized&text=$text');
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isRtl
+                ? 'فشل فتح واتساب. رقم الهاتف: +$normalized'
+                : 'Failed to open WhatsApp. Phone: +$normalized'),
+          ),
+        );
+      }
+    }
+  }
 }

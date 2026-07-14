@@ -76,10 +76,26 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) return;
 
+      // Resolve the real teachers.id (not profile_id) first
+      final teacherRow = await supabase
+          .from('teachers')
+          .select('id')
+          .eq('profile_id', userId)
+          .maybeSingle();
+      final teacherId = teacherRow?['id'] as String?;
+
+      if (teacherId == null) {
+        setState(() {
+          _courses = [];
+          _isLoadingCourses = false;
+        });
+        return;
+      }
+
       final response = await supabase
           .from('courses')
           .select('id, title_ar, title_en')
-          .eq('teacher_id', userId)
+          .eq('teacher_id', teacherId)
           .order('created_at', ascending: false);
 
       AppLogger.d(

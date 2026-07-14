@@ -57,13 +57,30 @@ class _StudentsProgressSheetScreenState
     try {
       final client = Supabase.instance.client;
       final currentUserId = client.auth.currentUser?.id;
+
       if (currentUserId == null) throw Exception('Not logged in');
+
+      // Resolve the real teachers.id (not profile_id) first
+      final teacherRow = await client
+          .from('teachers')
+          .select('id')
+          .eq('profile_id', currentUserId)
+          .maybeSingle();
+      final teacherId = teacherRow?['id'] as String?;
+
+      if (teacherId == null) {
+        setState(() {
+          _rows = [];
+          _isLoading = false;
+        });
+        return;
+      }
 
       var query = client.from('enrollments').select('''
         id, enrolled_at, last_accessed_at, completed_at, progress_percentage, status, user_id,
         profiles!enrollments_user_id_fkey(id, name, email, phone, avatar_url, created_at, is_active),
         courses!inner(id, title_ar, title_en, total_lessons, teacher_id)
-      ''').eq('courses.teacher_id', currentUserId);
+      ''').eq('courses.teacher_id', teacherId);
 
       if (widget.courseId != null) {
         query = query.eq('course_id', widget.courseId!);
@@ -82,7 +99,7 @@ class _StudentsProgressSheetScreenState
             .from('quiz_attempts')
             .select(
                 'user_id, score, passed, quizzes!inner(courses!inner(teacher_id))')
-            .eq('quizzes.courses.teacher_id', currentUserId)
+            .eq('quizzes.courses.teacher_id', teacherId)
             .inFilter('user_id', studentIds.toList());
         for (final q in quizData as List) {
           final uid = q['user_id'] as String? ?? '';

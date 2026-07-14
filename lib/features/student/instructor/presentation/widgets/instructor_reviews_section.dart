@@ -70,15 +70,15 @@ class InstructorReviewsSection extends StatelessWidget {
                   ),
                 ],
               ),
-              if (onSeeAllTap != null)
+              if (onSeeAllTap != null && reviews.isNotEmpty)
                 GestureDetector(
                   onTap: onSeeAllTap,
                   child: Text(
                     'home.see_all'.tr(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

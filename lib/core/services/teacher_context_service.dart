@@ -389,6 +389,30 @@ class TeacherContextService {
     await _setSelectedTeacher(teacher);
   }
 
+  Future<void> loadAndSelectInstructorTheme(String profileId) async {
+    AppLogger.i('🏫 [TeacherContextService] Loading theme for instructor profile: $profileId');
+    final client = _requireClient();
+    try {
+      final response = await client
+          .from('teachers')
+          .select('id, display_name, avatar_url, teacher_themes(*)')
+          .eq('profile_id', profileId)
+          .maybeSingle();
+
+      if (response == null) {
+        AppLogger.w('[TeacherContextService] No teacher record found for profile $profileId');
+        return;
+      }
+
+      final selected = SelectedTeacher.fromJson(response);
+      AppLogger.success(
+          '[TeacherContextService] Instructor theme loaded: ${selected.name} (id: ${selected.id}) — hasTheme: ${selected.theme.hasColors}');
+      await _setSelectedTeacher(selected);
+    } catch (e, stack) {
+      AppLogger.e('[TeacherContextService] Error loading instructor theme', e, stack);
+    }
+  }
+
   Future<void> _setSelectedTeacher(SelectedTeacher teacher) async {
     selectedTeacher.value = teacher;
     await _prefs?.setString(_selectedTeacherIdKey, teacher.id);

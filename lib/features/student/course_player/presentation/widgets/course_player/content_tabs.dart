@@ -30,18 +30,19 @@ class ContentTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildTab(0, 'course_player.lectures'.tr()),
-          _buildTab(1, 'course_player.more'.tr()),
-          _buildTab(2, 'course_player.qa'.tr()),
-          _buildTab(3, 'course_player.quizzes'.tr()),
-          _buildTab(4, 'course_player.rating'.tr()),
+          _buildTab(context, 0, 'course_player.lectures'.tr()),
+          _buildTab(context, 1, 'course_player.more'.tr()),
+          _buildTab(context, 2, 'course_player.qa'.tr()),
+          _buildTab(context, 3, 'course_player.quizzes'.tr()),
+          _buildTab(context, 4, 'course_player.rating'.tr()),
         ],
       ),
     );
   }
 
-  Widget _buildTab(int index, String label) {
+  Widget _buildTab(BuildContext context, int index, String label) {
     final isSelected = currentIndex == index;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Expanded(
       child: InkWell(
@@ -51,7 +52,7 @@ class ContentTabs extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.transparent,
+                color: isSelected ? primary : Colors.transparent,
                 width: 2.4,
               ),
             ),
@@ -64,7 +65,7 @@ class ContentTabs extends StatelessWidget {
               maxLines: 1,
               style: TextStyle(
                 color: isSelected
-                    ? AppColors.primary
+                    ? primary
                     : (isDark
                         ? AppColors.textMutedDark
                         : AppColors.textMutedLight),

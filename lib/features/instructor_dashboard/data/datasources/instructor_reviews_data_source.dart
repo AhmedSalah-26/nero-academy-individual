@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/data/models/instructor_models.dart';
 
@@ -11,6 +11,15 @@ class InstructorReviewsDataSource {
 
   String get _userId => _client.auth.currentUser!.id;
 
+  Future<String?> _resolveTeacherId() async {
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    return teacher?['id'] as String?;
+  }
+
   /// Get reviews
   Future<List<InstructorReviewModel>> getReviews({
     String? courseId,
@@ -21,10 +30,13 @@ class InstructorReviewsDataSource {
   }) async {
     AppLogger.d('[$_tag] getReviews: courseId=$courseId, page=$page');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
       var query = _client
           .from('course_reviews')
           .select('''*, course:courses!inner(title_ar, teacher_id),
-            user:profiles(name, avatar_url)''').eq('course.teacher_id', _userId);
+            user:profiles(name, avatar_url)''').eq('course.teacher_id', teacherId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (minRating != null) query = query.gte('rating', minRating);

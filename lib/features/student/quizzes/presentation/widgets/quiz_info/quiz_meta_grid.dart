@@ -42,7 +42,7 @@ class QuizMetaGrid extends StatelessWidget {
           icon: Icons.help_outline_rounded,
           label: LocaleKeys.quiz_questions.tr(),
           value: '${quiz.totalQuestions} ${LocaleKeys.quiz_question.tr()}',
-          color: AppColors.primary,
+          color: Theme.of(context).colorScheme.primary,
         ),
         _buildMetaItem(
           context,

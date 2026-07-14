@@ -28,7 +28,7 @@ class QuizInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? AppColors.primary.withValues(alpha: 0.5)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
               : AppColors.borderLight,
           width: isDark ? 1.2 : 1,
         ),

@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:lms_platform/core/animations/widgets/feedback/error_shake.dart';
-import 'package:lms_platform/core/theme/app_colors.dart';
 import 'package:lms_platform/features/student/cart/presentation/cubit/cart_state.dart';
 import 'cart_app_bar.dart';
 import 'cart_item_card.dart';
@@ -97,15 +96,15 @@ class _CartContentState extends State<CartContent> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${widget.state.itemsCount} ${widget.state.itemsCount == 1 ? 'course.course'.tr() : 'cart.courses'.tr()}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),

@@ -167,7 +167,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                 decoration: BoxDecoration(
                   color: isLowTime
                       ? AppColors.error.withValues(alpha: 0.1)
-                      : AppColors.primary.withValues(alpha: 0.1),
+                      : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -176,7 +176,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                     Icon(
                       Icons.timer,
                       size: 18,
-                      color: isLowTime ? AppColors.error : AppColors.primary,
+                      color: isLowTime ? AppColors.error : Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -184,7 +184,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'monospace',
-                        color: isLowTime ? AppColors.error : AppColors.primary,
+                        color: isLowTime ? AppColors.error : Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],

@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/entities/instructor_entities.dart';
 import 'package:lms_platform/features/instructor_dashboard/domain/repositories/instructor_repository.dart';
@@ -12,6 +12,19 @@ class InstructorEnrollmentsDataSource {
   InstructorEnrollmentsDataSource(this._client);
 
   String get _userId => _client.auth.currentUser!.id;
+  String? _cachedTeacherId;
+
+  /// Resolves the teachers.id (NOT profile_id) for the current user.
+  Future<String?> _resolveTeacherId() async {
+    if (_cachedTeacherId != null) return _cachedTeacherId;
+    final row = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    _cachedTeacherId = row?['id'] as String?;
+    return _cachedTeacherId;
+  }
 
   /// Get enrollments
   Future<List<InstructorEnrollmentModel>> getEnrollments({
@@ -24,10 +37,13 @@ class InstructorEnrollmentsDataSource {
   }) async {
     AppLogger.d('[$_tag] getEnrollments: status=$status, courseId=$courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
       var query = _client
           .from('enrollments')
           .select('''*, course:courses!inner(title_ar, teacher_id),
-            user:profiles!enrollments_user_id_fkey(name, avatar_url)''').eq('course.teacher_id', _userId);
+            user:profiles!enrollments_user_id_fkey(name, avatar_url)''').eq('course.teacher_id', teacherId);
 
       if (courseId != null) query = query.eq('course_id', courseId);
       if (status != null && status != InstructorEnrollmentStatus.all) {
@@ -63,11 +79,14 @@ class InstructorEnrollmentsDataSource {
   Future<bool> extendEnrollmentAccess(String enrollmentId, int days) async {
     AppLogger.d('[$_tag] extendEnrollmentAccess: $enrollmentId, days=$days');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       final enrollment = await _client
           .from('enrollments')
           .select('access_expires_at, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.teacher_id', _userId)
+          .eq('course.teacher_id', teacherId)
           .single();
 
       DateTime newExpiry;
@@ -96,11 +115,14 @@ class InstructorEnrollmentsDataSource {
   Future<bool> resetEnrollmentProgress(String enrollmentId) async {
     AppLogger.d('[$_tag] resetEnrollmentProgress: $enrollmentId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       final enrollment = await _client
           .from('enrollments')
           .select('user_id, course_id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.teacher_id', _userId)
+          .eq('course.teacher_id', teacherId)
           .single();
 
       final odId = enrollment['user_id'] as String;
@@ -135,11 +157,14 @@ class InstructorEnrollmentsDataSource {
     AppLogger.d(
         '[$_tag] updateEnrollmentStatus: $enrollmentId, status=$status');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       await _client
           .from('enrollments')
           .select('id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.teacher_id', _userId)
+          .eq('course.teacher_id', teacherId)
           .single();
 
       final updateData = <String, dynamic>{
@@ -169,12 +194,15 @@ class InstructorEnrollmentsDataSource {
   Future<bool> markAsCompleted(String enrollmentId) async {
     AppLogger.d('[$_tag] markAsCompleted: $enrollmentId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       // Verify instructor owns this enrollment
       await _client
           .from('enrollments')
           .select('id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.teacher_id', _userId)
+          .eq('course.teacher_id', teacherId)
           .single();
 
       await _client.from('enrollments').update({
@@ -197,17 +225,20 @@ class InstructorEnrollmentsDataSource {
     AppLogger.d(
         '[$_tag] enrollStudent: studentId=$studentId, courseId=$courseId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       await _client
           .from('courses')
           .select('id')
           .eq('id', courseId)
-          .eq('teacher_id', _userId)
+          .eq('teacher_id', teacherId)
           .single();
 
       await _client.from('enrollments').insert({
         'user_id': studentId,
         'course_id': courseId,
-        'teacher_id': _userId,
+        'teacher_id': teacherId,
         'price': 0,
         'discount': 0,
         'status': 'active',
@@ -229,11 +260,14 @@ class InstructorEnrollmentsDataSource {
   Future<bool> unenrollStudent(String enrollmentId) async {
     AppLogger.d('[$_tag] unenrollStudent: $enrollmentId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return false;
+
       final enrollment = await _client
           .from('enrollments')
           .select('course_id, user_id, course:courses!inner(teacher_id)')
           .eq('id', enrollmentId)
-          .eq('course.teacher_id', _userId)
+          .eq('course.teacher_id', teacherId)
           .single();
 
       final courseId = enrollment['course_id'] as String;
@@ -269,17 +303,20 @@ class InstructorEnrollmentsDataSource {
       String studentId) async {
     AppLogger.d('[$_tag] getAvailableCoursesForStudent: $studentId');
     try {
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
       final allCourses = await _client
           .from('courses')
           .select('id, title_ar, title_en, thumbnail_url')
-          .eq('teacher_id', _userId)
+          .eq('teacher_id', teacherId)
           .eq('is_published', true);
 
       final enrolledResponse = await _client
           .from('enrollments')
           .select('course_id, course:courses!inner(teacher_id)')
           .eq('user_id', studentId)
-          .eq('course.teacher_id', _userId);
+          .eq('course.teacher_id', teacherId);
 
       final enrolledCourseIds = (enrolledResponse as List)
           .map((e) => e['course_id'] as String)

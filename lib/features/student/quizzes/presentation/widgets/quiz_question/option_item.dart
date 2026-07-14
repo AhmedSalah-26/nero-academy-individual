@@ -25,6 +25,7 @@ class OptionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
 
     return GestureDetector(
       onTap: onTap,
@@ -33,12 +34,12 @@ class OptionItem extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.05)
+              ? primary.withValues(alpha: isDark ? 0.15 : 0.05)
               : (isDark ? AppColors.surfaceDark : AppColors.white),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary
+                ? primary
                 : (isDark ? AppColors.borderDark : AppColors.borderLight),
             width: isSelected ? 2 : 1,
           ),
@@ -55,7 +56,7 @@ class OptionItem extends StatelessWidget {
         child: Row(
           children: [
             // Radio/Checkbox indicator
-            _buildIndicator(),
+            _buildIndicator(context),
             const SizedBox(width: AppSpacing.md),
 
             // Option Text
@@ -65,7 +66,7 @@ class OptionItem extends StatelessWidget {
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected
-                      ? AppColors.primary
+                      ? primary
                       : (isDark
                           ? AppColors.textMainDark
                           : AppColors.textMainLight),
@@ -75,9 +76,9 @@ class OptionItem extends StatelessWidget {
 
             // Check icon when selected
             if (isSelected)
-              const Icon(
+              Icon(
                 Icons.check_circle,
-                color: AppColors.primary,
+                color: primary,
                 size: 24,
               ),
           ],
@@ -86,18 +87,19 @@ class OptionItem extends StatelessWidget {
     );
   }
 
-  Widget _buildIndicator() {
+  Widget _buildIndicator(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     if (isMultiple) {
       // Checkbox style
       return Container(
         width: 22,
         height: 22,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? primary : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected
-                ? AppColors.primary
+                ? primary
                 : (isDark ? AppColors.grey600 : AppColors.grey300),
             width: 2,
           ),
@@ -119,7 +121,7 @@ class OptionItem extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(
             color: isSelected
-                ? AppColors.primary
+                ? primary
                 : (isDark ? AppColors.grey600 : AppColors.grey300),
             width: 2,
           ),
@@ -129,9 +131,9 @@ class OptionItem extends StatelessWidget {
                 child: Container(
                   width: 10,
                   height: 10,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary,
+                    color: primary,
                   ),
                 ),
               )

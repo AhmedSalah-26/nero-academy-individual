@@ -37,7 +37,7 @@ class QuestionCard extends StatelessWidget {
             _buildBadge(
               context,
               '${question.points} ${question.points > 1 ? 'نقاط' : 'نقطة'}',
-              AppColors.primary,
+              Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: AppSpacing.sm),
             _buildBadge(

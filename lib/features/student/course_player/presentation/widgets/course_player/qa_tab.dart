@@ -15,10 +15,11 @@ class QATab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       children: [
         // Ask question button
-        _buildAskQuestionButton(),
+        _buildAskQuestionButton(primary),
         // Empty state or questions list
         Expanded(
           child: _buildEmptyState(),
@@ -27,11 +28,11 @@ class QATab extends StatelessWidget {
     );
   }
 
-  Widget _buildAskQuestionButton() {
+  Widget _buildAskQuestionButton(Color primary) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Material(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onAskQuestion,
@@ -41,13 +42,13 @@ class QATab extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.help_outline,
-                    color: AppColors.primary, size: 20),
+                Icon(Icons.help_outline,
+                    color: primary, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'course_player.ask_question'.tr(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: primary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),

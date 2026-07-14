@@ -31,7 +31,7 @@ class CartItemCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: isDark ? 0.1 : 0.08),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: isDark ? 0.1 : 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -46,9 +46,9 @@ class CartItemCard extends StatelessWidget {
               _buildThumbnail(isDark),
               const SizedBox(width: 10),
               // Content
-              Expanded(child: _buildContent(isDark)),
+              Expanded(child: _buildContent(context, isDark)),
               // Price & Remove
-              _buildPriceAndRemove(isDark),
+              _buildPriceAndRemove(context, isDark),
             ],
           ),
         ),
@@ -60,7 +60,7 @@ class CartItemCard extends StatelessWidget {
     AppRouter.goToCourseDetails(context, item.courseId);
   }
 
-  Widget _buildPriceAndRemove(bool isDark) {
+  Widget _buildPriceAndRemove(BuildContext context, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -73,7 +73,7 @@ class CartItemCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isDark ? AppColors.white : AppColors.primary,
+            color: isDark ? AppColors.white : Theme.of(context).colorScheme.primary,
           ),
         ),
         if (item.discountPercentage != null && !item.isFree) ...[
@@ -131,7 +131,7 @@ class CartItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(bool isDark) {
+  Widget _buildContent(BuildContext context, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -154,10 +154,10 @@ class CartItemCard extends StatelessWidget {
             item.pricingOption!.durationDays == null
                 ? item.pricingOption!.label
                 : '${item.pricingOption!.label} - ${item.pricingOption!.durationDays} ${locale == 'ar' ? 'يوم' : 'days'}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

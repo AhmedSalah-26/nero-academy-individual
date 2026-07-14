@@ -13,6 +13,22 @@ class InstructorEarningsDataSource {
   InstructorEarningsDataSource(this._client);
 
   String get _userId => _client.auth.currentUser!.id;
+  String? _cachedTeacherId;
+
+  Future<String> _currentTeacherId() async {
+    final cached = _cachedTeacherId;
+    if (cached != null) return cached;
+
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+
+    final teacherId = teacher?['id'] as String? ?? _userId;
+    _cachedTeacherId = teacherId;
+    return teacherId;
+  }
 
   // ─────────────────────────────────────────────────────
   // WALLET SUMMARY
@@ -22,29 +38,28 @@ class InstructorEarningsDataSource {
   Future<WalletSummaryModel> getWalletSummary() async {
     AppLogger.d('[$_tag] getWalletSummary: userId=$_userId');
     try {
+      final teacherId = await _currentTeacherId();
       final response = await _client
-          .from('instructor_earnings')
-          .select('net_amount, status')
-          .eq('teacher_id', _userId);
+          .from('manual_purchase_request_items')
+          .select('price, discount, parent_enrollments!inner(payment_status)')
+          .eq('teacher_id', teacherId)
+          .eq('parent_enrollments.payment_status', 'paid');
 
       final rows = response as List;
       double totalEarnings = 0;
-      double available = 0;
 
       for (final row in rows) {
-        final amount = (row['net_amount'] as num?)?.toDouble() ?? 0;
-        totalEarnings += amount;
-        if (row['status'] == 'available' || row['status'] == 'paid') {
-          available += amount;
-        }
+        final price = (row['price'] as num?)?.toDouble() ?? 0;
+        final discount = (row['discount'] as num?)?.toDouble() ?? 0;
+        totalEarnings += (price - discount).clamp(0, double.infinity);
       }
 
       AppLogger.success(
-          '[$_tag] getWalletSummary: totalEarnings=$totalEarnings, available=$available');
+          '[$_tag] getWalletSummary: totalEarnings=$totalEarnings');
 
       return WalletSummaryModel(
-        teacherId: _userId,
-        availableBalance: available,
+        teacherId: teacherId,
+        availableBalance: totalEarnings,
         pendingBalance: 0,
         totalEarnings: totalEarnings,
         totalWithdrawn: 0,
@@ -72,14 +87,15 @@ class InstructorEarningsDataSource {
     AppLogger.d(
         '[$_tag] getTransactions: courseId=$courseId, status=$status, page=$page');
     try {
+      final teacherId = await _currentTeacherId();
       var query = _client
-          .from('instructor_earnings')
+          .from('manual_purchase_request_items')
           .select(
-              'id, teacher_id, course_id, net_amount, gross_amount, coupon_discount, platform_fee, status, created_at, courses(title_ar, title_en)')
-          .eq('teacher_id', _userId);
+              'id, teacher_id, course_id, price, original_price, discount, created_at, courses(title_ar, title_en), parent_enrollments!inner(payment_status)')
+          .eq('teacher_id', teacherId)
+          .eq('parent_enrollments.payment_status', 'paid');
 
       if (courseId != null) query = query.eq('course_id', courseId);
-      if (status != null) query = query.eq('status', status);
       if (startDate != null) {
         query = query.gte('created_at', startDate.toIso8601String());
       }
@@ -101,10 +117,11 @@ class InstructorEarningsDataSource {
           userId: e['teacher_id'] as String,
           courseId: e['course_id'] as String?,
           courseName: courseName,
-          amount: (e['gross_amount'] as num?)?.toDouble() ?? 0,
-          commission: (e['platform_fee'] as num?)?.toDouble() ?? 0,
-          couponDiscount: (e['coupon_discount'] as num?)?.toDouble() ?? 0,
-          status: EarningStatus.fromString(e['status'] as String?),
+          amount: (e['price'] as num?)?.toDouble() ?? 0,
+          commission: 0,
+          originalPrice: (e['original_price'] as num?)?.toDouble() ?? 0,
+          couponDiscount: (e['discount'] as num?)?.toDouble() ?? 0,
+          status: EarningStatus.available,
           sourceType: EarningSourceType.courseSale,
           createdAt: DateTime.parse(e['created_at'] as String),
         );

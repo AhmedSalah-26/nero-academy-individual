@@ -57,9 +57,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               AppRouter.goToPaymentSuccess(context, state.order!.id);
             }
           } else if (state.failure != null) {
+            String errorMsg = state.errorMessage ?? 'errors.unknown'.tr();
+            if (errorMsg.contains('pending purchase request') ||
+                errorMsg.contains('pending manual request')) {
+              errorMsg = 'errors.pending_purchase_request'.tr();
+            }
             AnimatedSnackbar.showError(
               context: context,
-              message: state.errorMessage ?? 'errors.unknown'.tr(),
+              message: errorMsg,
             );
           }
         },

@@ -11,6 +11,19 @@ class InstructorStudentsDataSource {
   InstructorStudentsDataSource(this._client);
 
   String get _userId => _client.auth.currentUser!.id;
+  String? _cachedTeacherId;
+
+  /// Resolves the teachers.id (NOT profile_id) for the current user.
+  Future<String?> _resolveTeacherId() async {
+    if (_cachedTeacherId != null) return _cachedTeacherId;
+    final row = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+    _cachedTeacherId = row?['id'] as String?;
+    return _cachedTeacherId;
+  }
 
   /// Get students enrolled in instructor's courses
   Future<List<InstructorStudentModel>> getStudents({
@@ -30,7 +43,12 @@ class InstructorStudentsDataSource {
               created_at, updated_at
             ),
             course:courses!inner(id, title_ar, title_en, teacher_id)
-          ''').eq('course.teacher_id', _userId);
+          ''');
+
+      // Resolve the real teachers.id before filtering
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+      query = query.eq('course.teacher_id', teacherId);
 
       if (courseId != null) {
         query = query.eq('course_id', courseId);
@@ -120,12 +138,18 @@ class InstructorStudentsDataSource {
   /// Get student enrollments
   Future<List<StudentEnrollmentDetail>> getStudentEnrollments(
       String studentId) async {
-    AppLogger.d(
-        '[$_tag] getStudentEnrollments: studentId=$studentId, teacherId=$_userId');
+      AppLogger.d(
+          '[$_tag] getStudentEnrollments: studentId=$studentId');
     try {
-      // First, get all courses owned by this instructor
-      final instructorCourses =
-          await _client.from('courses').select('id').eq('teacher_id', _userId);
+      // Resolve the real teachers.id before filtering
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
+      // Get all courses owned by this instructor
+      final instructorCourses = await _client
+          .from('courses')
+          .select('id')
+          .eq('teacher_id', teacherId);
 
       final courseIds =
           (instructorCourses as List).map((c) => c['id'] as String).toList();
@@ -161,12 +185,18 @@ class InstructorStudentsDataSource {
   /// Get student progress
   Future<List<StudentCourseProgress>> getStudentProgress(
       String studentId) async {
-    AppLogger.d(
-        '[$_tag] getStudentProgress: studentId=$studentId, teacherId=$_userId');
+      AppLogger.d(
+          '[$_tag] getStudentProgress: studentId=$studentId');
     try {
-      // First, get all courses owned by this instructor
-      final instructorCourses =
-          await _client.from('courses').select('id').eq('teacher_id', _userId);
+      // Resolve the real teachers.id before filtering
+      final teacherId = await _resolveTeacherId();
+      if (teacherId == null) return const [];
+
+      // Get all courses owned by this instructor
+      final instructorCourses = await _client
+          .from('courses')
+          .select('id')
+          .eq('teacher_id', teacherId);
 
       final courseIds =
           (instructorCourses as List).map((c) => c['id'] as String).toList();

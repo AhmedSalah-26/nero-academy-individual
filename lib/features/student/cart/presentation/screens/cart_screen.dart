@@ -88,7 +88,7 @@ class _CartScreenState extends State<CartScreen> {
 
           return RefreshIndicator(
             onRefresh: _onRefresh,
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
             child: SlideFadeIn.fromBottom(
               duration: const Duration(milliseconds: 500),
@@ -113,7 +113,7 @@ class _CartScreenState extends State<CartScreen> {
   Widget _wrapStaticRefresh(Widget child, bool isDark) {
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: AppColors.primary,
+      color: Theme.of(context).colorScheme.primary,
       backgroundColor: isDark ? AppColors.cardDark : AppColors.white,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

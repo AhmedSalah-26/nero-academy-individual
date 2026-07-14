@@ -189,10 +189,19 @@ class ForumsListCubit extends Cubit<ForumsListState> {
     }
 
     try {
+      // Resolve the real teachers.id (not profile_id) before filtering
+      final teacherRow = await _supabase
+          .from('teachers')
+          .select('id')
+          .eq('profile_id', userId)
+          .maybeSingle();
+      final teacherId = teacherRow?['id'] as String?;
+      if (teacherId == null) return const [];
+
       final coursesResponse = await _supabase
           .from('courses')
           .select('id, title_ar, title_en')
-          .eq('teacher_id', userId)
+          .eq('teacher_id', teacherId)
           .order('created_at', ascending: false);
 
       final courses = coursesResponse as List;

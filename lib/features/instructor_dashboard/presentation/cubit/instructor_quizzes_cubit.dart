@@ -40,9 +40,27 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
 
       AppLogger.d('[$_tag] Loading quizzes for instructor: $userId');
 
+      // Resolve the real teachers.id (not profile_id) first
+      final teacherRow = await _supabase
+          .from('teachers')
+          .select('id')
+          .eq('profile_id', userId)
+          .maybeSingle();
+      final teacherId = teacherRow?['id'] as String?;
+
+      if (teacherId == null) {
+        AppLogger.w('[$_tag] No teacher record found for profile: $userId');
+        emit(state.copyWith(
+          status: InstructorQuizzesStatus.success,
+          quizzes: [],
+          hasMore: false,
+        ));
+        return;
+      }
+
       // Get instructor's courses first
       final coursesResponse =
-          await _supabase.from('courses').select('id').eq('teacher_id', userId);
+          await _supabase.from('courses').select('id').eq('teacher_id', teacherId);
 
       final courseIds =
           (coursesResponse as List).map((c) => c['id'] as String).toList();
@@ -229,7 +247,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
 
   Future<bool> toggleQuizPublished(String quizId, bool isPublished) async {
     AppLogger.i(
-        'ðŸ“ [$_tag] toggleQuizPublished: quizId=$quizId, isPublished=$isPublished');
+        '📝 [$_tag] toggleQuizPublished: quizId=$quizId, isPublished=$isPublished');
 
     try {
       await _supabase.from('quizzes').update({
@@ -420,7 +438,7 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
     bool replaceExisting = false,
   }) async {
     AppLogger.i(
-        'ðŸ“ [$_tag] addQuestionsBulk: quizId=$quizId, count=${questions.length}, replaceExisting=$replaceExisting');
+        '📝 [$_tag] addQuestionsBulk: quizId=$quizId, count=${questions.length}, replaceExisting=$replaceExisting');
     if (questions.isEmpty) return true;
 
     List<Map<String, dynamic>> previousQuestions = const [];

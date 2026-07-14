@@ -55,7 +55,8 @@
     "foreign_key": "Cannot delete this item as it's linked to other data",
     "unique": "This data already exists",
     "required_fields": "Some required fields are empty",
-    "invalid_video_url": "Invalid video URL"
+    "invalid_video_url": "Invalid video URL",
+    "pending_purchase_request": "You already have a pending purchase request for this teacher. Please wait for review."
   },
   "error_state": {
     "network_title": "Connection lost",

@@ -495,7 +495,6 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       final finalTotal =
           (total - couponDiscountTotal).clamp(0, double.infinity);
-      final isFreeOrder = false;
       final teacherIds =
           processedItems.map((item) => item['teacherId'] as String).toSet();
       if (teacherIds.length != 1) {
@@ -515,7 +514,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
       if ((pendingTeacherOrder as List).isNotEmpty) {
         AppLogger.w(
-            'ðŸ›’ [Checkout] User already has a pending manual request for teacher: $orderTeacherId');
+            '🛒 [Checkout] User already has a pending manual request for teacher: $orderTeacherId');
         throw const ValidationException(
             'You already have a pending purchase request for this teacher. '
             'Please wait for review before submitting another request.');
@@ -560,8 +559,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         }
       }
 
-      // Free orders are enrolled immediately. Paid manual requests only create
-      // order items; enrollments are created by the instructor approval RPC.
+      // Cart checkout always creates a manual request. Enrollments are created
+      // later by the instructor/admin approval RPC.
       for (final processed in processedItems) {
         final courseId = processed['courseId'] as String;
         final priceAtAdd = processed['effectivePrice'] as double;
@@ -573,112 +572,16 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         AppLogger.i(
             '🛒 [Checkout] Processing course: $courseId, price: $priceAtAdd, originalPrice: $originalPrice, couponDiscount: $itemCouponDiscount');
 
-        if (!isFreeOrder) {
-          await supabase.from('manual_purchase_request_items').insert({
-            'parent_enrollment_id': parentEnrollmentId,
-            'user_id': userId,
-            'course_id': courseId,
-            'teacher_id': teacherId,
-            'price': priceAtAdd,
-            'original_price': originalPrice,
-            'discount': itemCouponDiscount,
-            'pricing_option': pricingOption,
-          });
-          continue;
-        }
-
-        final existing = await supabase
-            .from('enrollments')
-            .select('id, status')
-            .eq('user_id', userId)
-            .eq('course_id', courseId)
-            .maybeSingle();
-
-        if (existing == null) {
-          AppLogger.i('🛒 [Checkout] Creating new enrollment...');
-
-          // This path is only for free orders; paid manual orders continue above.
-          final enrollmentResponse = await supabase
-              .from('enrollments')
-              .insert({
-                'user_id': userId,
-                'course_id': courseId,
-                'teacher_id': teacherId,
-                'parent_enrollment_id': parentEnrollmentId,
-                'status': 'active',
-                'progress_percentage': 0,
-                'completed_lessons': 0,
-                'price': priceAtAdd,
-                'pricing_option': pricingOption,
-                'discount': itemCouponDiscount,
-                'total_watch_time': 0,
-                'enrolled_at': DateTime.now().toIso8601String(),
-              })
-              .select('id')
-              .single();
-
-          final enrollmentId = enrollmentResponse['id'] as String;
-          AppLogger.i(
-              '🛒 [Checkout] Enrollment created with ID: $enrollmentId');
-
-          // Create instructor earning record (if paid course and has instructor)
-          if (priceAtAdd > 0) {
-            AppLogger.i('🛒 [Checkout] Creating instructor earning record...');
-
-            try {
-              // Default revenue share to 70.0%
-              double revenueShare = 70.0;
-
-              AppLogger.i(
-                  '🛒 [Checkout] Instructor revenue_share: $revenueShare%');
-
-              // Calculate earnings based on EFFECTIVE price (after course discount)
-              final instructorShare =
-                  (priceAtAdd * (revenueShare / 100)).round().toDouble();
-              final platformFee = priceAtAdd - instructorShare;
-
-              // Net instructor earning = instructorShare - itemCouponDiscount
-              final netInstructorEarning =
-                  (instructorShare - itemCouponDiscount)
-                      .clamp(0, double.infinity)
-                      .toDouble();
-
-              AppLogger.i(
-                  '🛒 [Checkout] Earnings: effective=$priceAtAdd, original=$originalPrice, '
-                  'share=$instructorShare, fee=$platformFee, couponDiscount=$itemCouponDiscount, '
-                  'netEarning=$netInstructorEarning');
-
-              // Note: earnings_transactions will be created automatically by trigger
-              // when enrollment status changes to 'active'
-
-              AppLogger.success(
-                  '🛒 [Checkout] Instructor earning will be created by trigger! '
-                  'Effective=$priceAtAdd, Original=$originalPrice, Share=$instructorShare, '
-                  'Fee=$platformFee, CouponDiscount=$itemCouponDiscount, Net=$netInstructorEarning');
-            } catch (earningError) {
-              AppLogger.e(
-                  '🛒 [Checkout] Failed to create instructor earning: $earningError');
-              // Don't throw - enrollment was successful, just log the error
-            }
-          }
-        } else {
-          final existingStatus = existing['status'] as String?;
-          if (existingStatus == 'pending') {
-            AppLogger.i(
-                '🛒 [Checkout] Updating existing pending enrollment...');
-            await supabase.from('enrollments').update({
-              'parent_enrollment_id': parentEnrollmentId,
-              'status': 'active',
-              'price': priceAtAdd,
-              'pricing_option': pricingOption,
-              'discount': itemCouponDiscount,
-              'enrolled_at': DateTime.now().toIso8601String(),
-            }).eq('id', existing['id']);
-          } else {
-            AppLogger.w(
-                '🛒 [Checkout] User already enrolled in course $courseId (status: $existingStatus)');
-          }
-        }
+        await supabase.from('manual_purchase_request_items').insert({
+          'parent_enrollment_id': parentEnrollmentId,
+          'user_id': userId,
+          'course_id': courseId,
+          'teacher_id': teacherId,
+          'price': priceAtAdd,
+          'original_price': originalPrice,
+          'discount': itemCouponDiscount,
+          'pricing_option': pricingOption,
+        });
       }
 
       await supabase.from('cart_items').delete().eq('user_id', userId);
@@ -691,8 +594,8 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
         'user_id': userId,
         'total_amount': finalTotal,
         'currency': 'EGP',
-        'status': isFreeOrder ? 'completed' : 'pending',
-        'payment_method': isFreeOrder ? 'free' : 'manual',
+        'status': 'pending',
+        'payment_method': 'manual',
         'created_at': DateTime.now().toIso8601String(),
       });
     } on PostgrestException catch (e) {

@@ -11,32 +11,37 @@ class InstructorStatsDataSource {
   InstructorStatsDataSource(this._client);
 
   String get _userId => _client.auth.currentUser!.id;
+  String? _cachedTeacherId;
+
+  Future<String> _currentTeacherId() async {
+    final cached = _cachedTeacherId;
+    if (cached != null) return cached;
+
+    final teacher = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', _userId)
+        .maybeSingle();
+
+    final teacherId = teacher?['id'] as String? ?? _userId;
+    _cachedTeacherId = teacherId;
+    return teacherId;
+  }
 
   /// Get dashboard statistics
   Future<InstructorDashboardStatsModel> getDashboardStats() async {
-    AppLogger.d('[$_tag] getDashboardStats: Starting RPC call');
-    try {
-      final response = await _client.rpc('get_instructor_dashboard_stats');
-      AppLogger.d('[$_tag] getDashboardStats: Raw response: $response');
-
-      final stats = InstructorDashboardStatsModel.fromJson(
-          response as Map<String, dynamic>);
-      AppLogger.success('[$_tag] getDashboardStats success');
-      return stats;
-    } catch (e, s) {
-      AppLogger.e('[$_tag] getDashboardStats error', e, s);
-      AppLogger.w('[$_tag] Using fallback stats calculation');
-      return _calculateStatsFallback();
-    }
+    AppLogger.d('[$_tag] getDashboardStats: calculating from teacher_id data');
+    return _calculateStatsFallback();
   }
 
   /// Fallback method to calculate stats manually
   Future<InstructorDashboardStatsModel> _calculateStatsFallback() async {
     try {
+      final teacherId = await _currentTeacherId();
       final coursesResponse = await _client
           .from('courses')
           .select('id, is_published')
-          .eq('teacher_id', _userId);
+          .eq('teacher_id', teacherId);
       final courses = coursesResponse as List;
       final totalCourses = courses.length;
       final publishedCourses =
@@ -44,8 +49,8 @@ class InstructorStatsDataSource {
 
       final enrollmentsResponse = await _client
           .from('enrollments')
-          .select('id, user_id, course:courses!inner(teacher_id)')
-          .eq('course.teacher_id', _userId);
+          .select('id, user_id')
+          .eq('teacher_id', teacherId);
       final enrollments = enrollmentsResponse as List;
       final totalEnrollments = enrollments.length;
       final uniqueStudents =
@@ -54,7 +59,7 @@ class InstructorStatsDataSource {
       final reviewsResponse = await _client
           .from('course_reviews')
           .select('rating, course:courses!inner(teacher_id)')
-          .eq('course.teacher_id', _userId);
+          .eq('course.teacher_id', teacherId);
       final reviews = reviewsResponse as List;
       final totalReviews = reviews.length;
       final avgRating = reviews.isEmpty
@@ -100,18 +105,32 @@ class InstructorStatsDataSource {
       DateTime start, DateTime end) async {
     AppLogger.d('[$_tag] getRevenueChart: start=$start, end=$end');
     try {
-      final response =
-          await _client.rpc('get_instructor_revenue_chart', params: {
-        'p_start_date': start.toIso8601String(),
-        'p_end_date': end.toIso8601String(),
-      });
+      final teacherId = await _currentTeacherId();
+      final response = await _client
+          .from('manual_purchase_request_items')
+          .select(
+              'price, discount, parent_enrollments!inner(payment_status, paid_at)')
+          .eq('teacher_id', teacherId)
+          .eq('parent_enrollments.payment_status', 'paid')
+          .gte('parent_enrollments.paid_at', start.toIso8601String())
+          .lte('parent_enrollments.paid_at', end.toIso8601String());
 
-      final dataPoints = (response as List).map((e) {
-        return ChartDataPoint(
-          label: e['label'] as String? ?? '',
-          value: (e['value'] as num?)?.toDouble() ?? 0,
-        );
-      }).toList();
+      final totalsByDate = <String, double>{};
+      for (final row in response as List) {
+        final parent = row['parent_enrollments'] as Map<String, dynamic>?;
+        final paidAt = parent?['paid_at'] as String?;
+        if (paidAt == null) continue;
+
+        final date = paidAt.substring(0, 10);
+        final price = (row['price'] as num?)?.toDouble() ?? 0;
+        final discount = (row['discount'] as num?)?.toDouble() ?? 0;
+        totalsByDate[date] = (totalsByDate[date] ?? 0) + (price - discount);
+      }
+
+      final dataPoints = totalsByDate.entries
+          .map((e) => ChartDataPoint(label: e.key, value: e.value))
+          .toList()
+        ..sort((a, b) => a.label.compareTo(b.label));
 
       AppLogger.success('[$_tag] getRevenueChart: ${dataPoints.length} points');
       return dataPoints;
@@ -125,36 +144,17 @@ class InstructorStatsDataSource {
   Future<List<ChartDataPoint>> getEnrollmentsChart(
       DateTime start, DateTime end) async {
     AppLogger.d('[$_tag] getEnrollmentsChart: start=$start, end=$end');
-    try {
-      final response =
-          await _client.rpc('get_instructor_enrollments_chart', params: {
-        'p_start_date': start.toIso8601String(),
-        'p_end_date': end.toIso8601String(),
-      });
-
-      final dataPoints = (response as List).map((e) {
-        return ChartDataPoint(
-          label: e['label'] as String? ?? '',
-          value: (e['value'] as num?)?.toDouble() ?? 0,
-        );
-      }).toList();
-
-      AppLogger.success(
-          '[$_tag] getEnrollmentsChart: ${dataPoints.length} points');
-      return dataPoints;
-    } catch (e) {
-      AppLogger.w('[$_tag] getEnrollmentsChart RPC failed, using fallback: $e');
-      return _getEnrollmentsChartFallback(start, end);
-    }
+    return _getEnrollmentsChartFallback(start, end);
   }
 
   Future<List<ChartDataPoint>> _getEnrollmentsChartFallback(
       DateTime start, DateTime end) async {
     try {
+      final teacherId = await _currentTeacherId();
       final response = await _client
           .from('enrollments')
-          .select('enrolled_at, course:courses!inner(teacher_id)')
-          .eq('course.teacher_id', _userId)
+          .select('enrolled_at')
+          .eq('teacher_id', teacherId)
           .gte('enrolled_at', start.toIso8601String())
           .lte('enrolled_at', end.toIso8601String());
 

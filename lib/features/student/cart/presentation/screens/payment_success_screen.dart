@@ -238,8 +238,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                 onPressed: () => AppRouter.goToHome(context),
                 child: Text(
                   'payment.back_to_home'.tr(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -315,7 +315,7 @@ class _InfoTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary),
+          Icon(icon, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

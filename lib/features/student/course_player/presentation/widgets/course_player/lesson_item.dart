@@ -32,6 +32,7 @@ class LessonItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = context.locale.languageCode;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Directionality(
       textDirection: ui.TextDirection.rtl,
@@ -45,18 +46,18 @@ class LessonItem extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _backgroundColor(),
+                color: _backgroundColor(primary),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: isCurrentLesson
-                      ? AppColors.primary.withValues(alpha: 0.28)
+                      ? primary.withValues(alpha: 0.28)
                       : Colors.transparent,
                 ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildLeadingIcon(),
+                  _buildLeadingIcon(primary),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -64,7 +65,7 @@ class LessonItem extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            _buildLessonNumber(),
+                            _buildLessonNumber(primary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -72,7 +73,7 @@ class LessonItem extends StatelessWidget {
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   color: isCurrentLesson
-                                      ? AppColors.primary
+                                      ? primary
                                       : (isDark
                                           ? AppColors.textMainDark
                                           : AppColors.textMainLight),
@@ -94,7 +95,7 @@ class LessonItem extends StatelessWidget {
                           runSpacing: 6,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            if (isCurrentLesson) _buildPlayingBadge(),
+                            if (isCurrentLesson) _buildPlayingBadge(primary),
                             if (hasQuiz) _buildQuizBadge(),
                             Text(
                               isCurrentLesson
@@ -102,7 +103,7 @@ class LessonItem extends StatelessWidget {
                                   : _subtitleText(),
                               style: TextStyle(
                                 color: isCurrentLesson
-                                    ? AppColors.primary.withValues(alpha: 0.82)
+                                    ? primary.withValues(alpha: 0.82)
                                     : (isDark
                                         ? AppColors.textMutedDark
                                         : AppColors.textMutedLight),
@@ -122,7 +123,7 @@ class LessonItem extends StatelessWidget {
                       icon: Icon(
                         isCompleted ? Icons.download_done : Icons.download,
                         color: isCompleted
-                            ? AppColors.primary
+                            ? primary
                             : (isDark
                                 ? AppColors.textMutedDark
                                 : AppColors.textMutedLight),
@@ -139,14 +140,14 @@ class LessonItem extends StatelessWidget {
     );
   }
 
-  Color _backgroundColor() {
+  Color _backgroundColor(Color primary) {
     if (isCurrentLesson) {
-      return AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.08);
+      return primary.withValues(alpha: isDark ? 0.16 : 0.08);
     }
     return isDark ? AppColors.surfaceDark : AppColors.white;
   }
 
-  Widget _buildLeadingIcon() {
+  Widget _buildLeadingIcon(Color primary) {
     final bool isFileLessonType = lesson.type == LessonType.document ||
         lesson.type == LessonType.resource;
 
@@ -170,21 +171,21 @@ class LessonItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: isLocked
             ? (isDark ? AppColors.cardDark : const Color(0xFFF3EEF9))
-            : AppColors.primary,
+            : primary,
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: color, size: 18),
     );
   }
 
-  Widget _buildLessonNumber() {
+  Widget _buildLessonNumber(Color primary) {
     return Container(
       width: 24,
       height: 24,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isCurrentLesson
-            ? AppColors.primary.withValues(alpha: 0.12)
+            ? primary.withValues(alpha: 0.12)
             : (isDark ? AppColors.cardDark : const Color(0xFFF5F0FB)),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -192,7 +193,7 @@ class LessonItem extends StatelessWidget {
         lessonNumber > 0 ? '$lessonNumber' : '1',
         style: TextStyle(
           color: isCurrentLesson
-              ? AppColors.primary
+              ? primary
               : (isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
           fontSize: 12,
           fontWeight: FontWeight.w800,
@@ -201,14 +202,14 @@ class LessonItem extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayingBadge() {
+  Widget _buildPlayingBadge(Color primary) {
     final bool isFileLessonType = lesson.type == LessonType.document ||
         lesson.type == LessonType.resource;
     final label = isFileLessonType ? 'الملف' : 'قيد التشغيل';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: primary,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(

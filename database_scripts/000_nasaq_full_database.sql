@@ -2320,7 +2320,7 @@ BEGIN
         cp.user_id,
         p.name AS user_name,
         p.avatar_url AS user_avatar,
-        cp.role,
+        cp.role::text,
         cp.is_banned,
         cp.ban_reason AS banned_reason,
         v_conversation_title AS conversation_title
@@ -2594,7 +2594,7 @@ AS $$
       AND p.role = 'instructor'
       AND p.is_active = TRUE
       AND p.is_banned = FALSE
-      AND (c.teacher_id = auth.uid() OR public.is_admin())
+      AND (c.teacher_id = public.current_teacher_id() OR public.is_admin())
   );
 $$;
 
@@ -3220,7 +3220,7 @@ BEGIN
     cp.user_id,
     p.name AS user_name,
     p.avatar_url AS user_avatar,
-    cp.role,
+    cp.role::text,
     COALESCE(cp.is_banned, FALSE) AS is_banned,
     cp.ban_reason AS banned_reason,
     v_conversation_title AS conversation_title

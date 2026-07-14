@@ -109,7 +109,7 @@ class _QASectionState extends State<QASection> {
         icon: const Icon(Icons.add),
         label: Text('course_player.ask_question'.tr()),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 48),
           shape: RoundedRectangleBorder(
@@ -423,7 +423,7 @@ class _QASectionState extends State<QASection> {
               contentController.text,
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
             ),
             child: Text('common.submit'.tr()),

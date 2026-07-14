@@ -31,6 +31,7 @@ class _ManualPurchaseRequestsScreenState
   var _isLoading = true;
   var _actionOrderId = '';
   String? _error;
+  String? _teacherId; // resolved from teachers table
   List<_ManualPurchaseRequest> _requests = const [];
 
   @override
@@ -53,6 +54,16 @@ class _ManualPurchaseRequestsScreenState
     });
 
     try {
+      // Resolve real teachers.id (NOT auth profile_id)
+      _teacherId ??= await _resolveTeacherId();
+      if (_teacherId == null) {
+        setState(() {
+          _isLoading = false;
+          _error = 'Teacher profile not found';
+        });
+        return;
+      }
+
       final response = await _client
           .from('parent_enrollments')
           .select('''
@@ -64,6 +75,7 @@ class _ManualPurchaseRequestsScreenState
               courses:course_id (title_ar, title_en, thumbnail_url)
             )
           ''')
+          .eq('teacher_id', _teacherId!)
           .eq('payment_method', 'manual')
           .inFilter('payment_status', _manualStatuses)
           .order('created_at', ascending: false);
@@ -85,6 +97,18 @@ class _ManualPurchaseRequestsScreenState
         _isLoading = false;
       });
     }
+  }
+
+  /// Resolves the teachers.id from the teachers table using the auth profile_id.
+  Future<String?> _resolveTeacherId() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return null;
+    final row = await _client
+        .from('teachers')
+        .select('id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+    return row?['id'] as String?;
   }
 
   List<_ManualPurchaseRequest> _requestsFor(String status) =>

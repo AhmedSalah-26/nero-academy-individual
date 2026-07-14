@@ -55,10 +55,28 @@ class _CourseSelectionDialogState extends State<CourseSelectionDialog> {
         throw Exception('User not authenticated');
       }
 
+      // Resolve the real teachers.id (not profile_id) first
+      final teacherRow = await supabase
+          .from('teachers')
+          .select('id')
+          .eq('profile_id', userId)
+          .maybeSingle();
+      final teacherId = teacherRow?['id'] as String?;
+
+      if (teacherId == null) {
+        if (mounted) {
+          setState(() {
+            _courses = [];
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+
       final response = await supabase
           .from('courses')
           .select('id, title_ar, title_en, thumbnail_url, is_published')
-          .eq('teacher_id', userId)
+          .eq('teacher_id', teacherId)
           .order('created_at', ascending: false);
 
       if (mounted) {

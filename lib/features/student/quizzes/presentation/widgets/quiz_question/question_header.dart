@@ -54,8 +54,8 @@ class QuestionHeader extends StatelessWidget {
               value: progress,
               minHeight: 8,
               backgroundColor: isDark ? AppColors.grey700 : AppColors.grey200,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.primary,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
               ),
             ),
           ),

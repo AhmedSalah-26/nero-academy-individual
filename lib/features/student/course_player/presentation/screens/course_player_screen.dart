@@ -292,9 +292,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? AppColors.primaryOnDark
-                            : AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

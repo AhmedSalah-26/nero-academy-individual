@@ -207,7 +207,7 @@ class _QuizInfoScreenState extends State<QuizInfoScreen> {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               decoration: BoxDecoration(
                 color:
-                    state.canStartQuiz ? AppColors.primary : AppColors.grey400,
+                    state.canStartQuiz ? Theme.of(context).colorScheme.primary : AppColors.grey400,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

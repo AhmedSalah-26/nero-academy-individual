@@ -29,6 +29,7 @@ class BottomActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == ui.TextDirection.rtl;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
@@ -52,7 +53,7 @@ class BottomActionBar extends StatelessWidget {
                 flex: 2,
                 child: isLastLesson
                     ? _buildCompleteCourseButton()
-                    : _buildNextLessonButton(isRtl),
+                    : _buildNextLessonButton(isRtl, primary),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -113,14 +114,14 @@ class BottomActionBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNextLessonButton(bool isRtl) {
+  Widget _buildNextLessonButton(bool isRtl, Color primary) {
     return Material(
       color: hasNextLesson
-          ? AppColors.primary
-          : AppColors.primary.withValues(alpha: 0.5),
+          ? primary
+          : primary.withValues(alpha: 0.5),
       borderRadius: BorderRadius.circular(12),
       elevation: hasNextLesson ? 4 : 0,
-      shadowColor: AppColors.primary.withValues(alpha: 0.3),
+      shadowColor: primary.withValues(alpha: 0.3),
       child: InkWell(
         onTap: hasNextLesson ? onNextLessonTap : null,
         borderRadius: BorderRadius.circular(12),

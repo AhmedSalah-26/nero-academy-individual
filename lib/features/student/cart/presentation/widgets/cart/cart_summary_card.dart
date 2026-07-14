@@ -24,6 +24,7 @@ class CartSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -32,12 +33,12 @@ class CartSummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.2 : 0.15),
+            color: primary.withValues(alpha: isDark ? 0.2 : 0.15),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.1 : 0.08),
+            color: primary.withValues(alpha: isDark ? 0.1 : 0.08),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -99,7 +100,7 @@ class CartSummaryCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onCheckout,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(

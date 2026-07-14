@@ -52,7 +52,7 @@ class ReviewsSection extends StatelessWidget {
                       isDark ? AppColors.textMainDark : AppColors.textMainLight,
                 ),
               ),
-              if (onSeeAll != null)
+              if (onSeeAll != null && reviews.isNotEmpty)
                 TextButton(
                   onPressed: onSeeAll,
                   child: Text(
@@ -76,11 +76,9 @@ class ReviewsSection extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Reviews List (show first 3)
-            ...reviews.take(3).map((review) => Builder(
-                  builder: (context) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildReviewCard(context, review, isDark),
-                  ),
+            ...reviews.take(3).map((review) => Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: ReviewCard(review: review, isDark: isDark),
                 )),
           ],
         ],
@@ -182,9 +180,21 @@ class ReviewsSection extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildReviewCard(
-      BuildContext context, ReviewEntity review, bool isDark) {
+/// Individual Review Card Widget
+class ReviewCard extends StatelessWidget {
+  final ReviewEntity review;
+  final bool isDark;
+
+  const ReviewCard({
+    super.key,
+    required this.review,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accent = theme.colorScheme.tertiary;
 
