@@ -290,10 +290,10 @@ class _LoginScreenState extends State<LoginScreen> {
       shaderCallback: (bounds) => gradient.createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: const Text(
-        'نسق',
+      child: Text(
+        'app_name'.tr(),
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'Almarai',
           fontSize: 22,
           fontWeight: FontWeight.w800,

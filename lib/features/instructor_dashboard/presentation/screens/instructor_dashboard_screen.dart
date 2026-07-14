@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lms_platform/core/services/teacher_context_service.dart';
 import 'package:lms_platform/core/animations/animations.dart';
 import 'package:lms_platform/core/shared_widgets/dashboard/dashboard_widgets.dart';
 import 'package:lms_platform/features/student/course_forum/presentation/screens/forums_list_screen.dart';
@@ -118,6 +120,10 @@ class _InstructorDashboardScreenState extends State<InstructorDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId != null) {
+      TeacherContextService.instance.loadAndSelectInstructorTheme(userId);
+    }
     context.read<InstructorDashboardCubit>().loadAll();
   }
 

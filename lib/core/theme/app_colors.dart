@@ -1,25 +1,27 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:lms_platform/core/services/teacher_context_service.dart';
+import 'package:lms_platform/core/services/theme_service.dart';
 
 /// App Colors - Based on Design System
 class AppColors {
   AppColors._();
 
   // ============ Primary Colors ============
-  static const Color primary = Color(0xFF00BEB8);
-  static const Color primaryLight = Color(0xFF54ECE3);
-  static const Color primaryDark = Color(0xFF008686);
+  static const Color primary = DynamicPrimaryColor();
+  static const Color primaryLight = DynamicPrimaryLightColor();
+  static const Color primaryDark = DynamicPrimaryDarkColor();
 
   // Primary for dark mode (brighter/more visible)
-  static const Color primaryOnDark = Color(0xFF20E5DC);
+  static const Color primaryOnDark = DynamicPrimaryOnDarkColor();
 
   // ============ Background Colors ============
-  static const Color backgroundLight = Color(0xFFF4F9FA);
-  static const Color backgroundDark = Color(0xFF01060B);
+  static const Color backgroundLight = DynamicBackgroundLightColor();
+  static const Color backgroundDark = DynamicBackgroundDarkColor();
 
   // ============ Surface Colors ============
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF05111B);
-  static const Color cardDark = Color(0xFF081A27);
+  static const Color surfaceLight = DynamicSurfaceLightColor();
+  static const Color surfaceDark = DynamicSurfaceDarkColor();
+  static const Color cardDark = DynamicCardDarkColor();
 
   // ============ Text Colors ============
   static const Color textMainLight = Color(0xFF071722);
@@ -51,8 +53,8 @@ class AppColors {
       Color(0xFFE59819); // Original color for backgrounds
 
   // ============ Border Colors ============
-  static const Color borderLight = Color(0xFFD6E5EA);
-  static const Color borderDark = Color(0xFF0F2B39);
+  static const Color borderLight = DynamicBorderLightColor();
+  static const Color borderDark = DynamicBorderDarkColor();
 
   // ============ Common Colors ============
   static const Color white = Color(0xFFFFFFFF);
@@ -76,4 +78,173 @@ class AppColors {
   static const Color shimmerHighlight = Color(0xFFF5FBFC);
   static const Color shimmerBaseDark = Color(0xFF071822);
   static const Color shimmerHighlightDark = Color(0xFF0C2737);
+}
+
+// ============ Dynamic Color Overrides ============
+
+class DynamicPrimaryColor extends Color {
+  const DynamicPrimaryColor() : super(0xFF00BEB8);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final isDark = ThemeService.instance.isDarkMode.value;
+      final color = teacher.theme.primaryFor(isDark);
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF00BEB8;
+  }
+}
+
+class DynamicPrimaryLightColor extends Color {
+  const DynamicPrimaryLightColor() : super(0xFF54ECE3);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final isDark = ThemeService.instance.isDarkMode.value;
+      final color = teacher.theme.secondaryFor(isDark);
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF54ECE3;
+  }
+}
+
+class DynamicPrimaryDarkColor extends Color {
+  const DynamicPrimaryDarkColor() : super(0xFF008686);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.darkPrimaryColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF008686;
+  }
+}
+
+class DynamicPrimaryOnDarkColor extends Color {
+  const DynamicPrimaryOnDarkColor() : super(0xFF20E5DC);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.darkPrimaryColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF20E5DC;
+  }
+}
+
+class DynamicBackgroundLightColor extends Color {
+  const DynamicBackgroundLightColor() : super(0xFFF4F9FA);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.lightBackgroundColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFFF4F9FA;
+  }
+}
+
+class DynamicBackgroundDarkColor extends Color {
+  const DynamicBackgroundDarkColor() : super(0xFF01060B);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.darkBackgroundColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF01060B;
+  }
+}
+
+class DynamicSurfaceLightColor extends Color {
+  const DynamicSurfaceLightColor() : super(0xFFFFFFFF);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.lightCardColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFFFFFFFF;
+  }
+}
+
+class DynamicSurfaceDarkColor extends Color {
+  const DynamicSurfaceDarkColor() : super(0xFF05111B);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.darkCardColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF05111B;
+  }
+}
+
+class DynamicCardDarkColor extends Color {
+  const DynamicCardDarkColor() : super(0xFF081A27);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final color = teacher.theme.darkCardColor;
+      if (color != null) return color.toARGB32();
+    }
+    return 0xFF081A27;
+  }
+}
+
+class DynamicBorderLightColor extends Color {
+  const DynamicBorderLightColor() : super(0xFFD6E5EA);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final isDark = ThemeService.instance.isDarkMode.value;
+      final primary = teacher.theme.primaryFor(isDark) ?? const Color(0xFF00BEB8);
+      final card = teacher.theme.cardFor(isDark) ?? const Color(0xFFFFFFFF);
+      final color = Color.alphaBlend(
+        primary.withValues(alpha: isDark ? 0.35 : 0.22),
+        card,
+      );
+      return color.toARGB32();
+    }
+    return 0xFFD6E5EA;
+  }
+}
+
+class DynamicBorderDarkColor extends Color {
+  const DynamicBorderDarkColor() : super(0xFF0F2B39);
+
+  @override
+  int get value {
+    final teacher = TeacherContextService.instance.selectedTeacher.value;
+    if (teacher != null && teacher.theme.hasColors) {
+      final primary = teacher.theme.darkPrimaryColor ?? const Color(0xFF20E5DC);
+      final card = teacher.theme.darkCardColor ?? const Color(0xFF081A27);
+      final color = Color.alphaBlend(
+        primary.withValues(alpha: 0.35),
+        card,
+      );
+      return color.toARGB32();
+    }
+    return 0xFF0F2B39;
+  }
 }

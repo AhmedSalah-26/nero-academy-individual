@@ -329,12 +329,14 @@ class _TeacherThemeSettingsContentState
       String teacherId, String? logoUrl) async {
     final selectedTeacher =
         TeacherContextService.instance.selectedTeacher.value;
-    if (selectedTeacher == null || selectedTeacher.id != teacherId) return;
+
+    final name = selectedTeacher?.name ?? 'مدرس';
+    final avatar = logoUrl ?? selectedTeacher?.avatarUrl;
 
     await TeacherContextService.instance.updateSelectedTeacher(SelectedTeacher(
-      id: selectedTeacher.id,
-      name: selectedTeacher.name,
-      avatarUrl: logoUrl ?? selectedTeacher.avatarUrl,
+      id: teacherId,
+      name: name,
+      avatarUrl: avatar,
       theme: TeacherThemeConfig(
         primaryColor: _darkPrimaryColor,
         secondaryColor: _darkSecondaryColor,
@@ -349,7 +351,7 @@ class _TeacherThemeSettingsContentState
         darkBackgroundColor: _darkBackgroundColor,
         darkButtonColor: _darkButtonColor,
         darkCardColor: _darkCardColor,
-        logoUrl: _emptyToNull(_coverUrlController.text),
+        logoUrl: logoUrl,
         lightLogoUrl: _emptyToNull(_lightLogoUrlController.text),
         darkLogoUrl: _emptyToNull(_darkLogoUrlController.text),
         lightCoverUrl: _emptyToNull(_lightCoverUrlController.text),
