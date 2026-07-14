@@ -21,18 +21,11 @@ ALTER TABLE public.enrollments
   DROP COLUMN IF EXISTS refund_reason,
   DROP COLUMN IF EXISTS refunded_at;
 
--- 3. Drop unused columns from payment_requests table
-ALTER TABLE public.payment_requests
-  DROP COLUMN IF EXISTS proof_image_url,
-  DROP COLUMN IF EXISTS student_note,
-  DROP COLUMN IF EXISTS teacher_note,
-  DROP COLUMN IF EXISTS reviewed_by,
-  DROP COLUMN IF EXISTS reviewed_at;
-
--- 4. Drop unused columns from teacher_settings table
-ALTER TABLE public.teacher_settings
-  DROP COLUMN IF EXISTS allow_public_profile,
-  DROP COLUMN IF EXISTS allow_student_switching,
-  DROP COLUMN IF EXISTS manual_payment_instructions;
+-- 3. Drop unused tables completely (with CASCADE to clean up dependent triggers/RLS)
+DROP TABLE IF EXISTS public.certificates CASCADE;
+DROP TABLE IF EXISTS public.coupon_categories CASCADE;
+DROP TABLE IF EXISTS public.payment_requests CASCADE;
+DROP TABLE IF EXISTS public.teacher_settings CASCADE;
+DROP TABLE IF EXISTS public.announcement_reads CASCADE;
 
 COMMIT;
