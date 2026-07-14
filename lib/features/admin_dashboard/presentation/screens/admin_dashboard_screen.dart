@@ -6,6 +6,7 @@ import 'package:lms_platform/features/admin_dashboard/presentation/cubit/admin_d
 import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_analytics/admin_analytics_content.dart';
 import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_courses/admin_courses_content.dart';
 import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_home/admin_home_content.dart';
+import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_teacher_subscriptions/admin_teacher_subscriptions_content.dart';
 import 'package:lms_platform/features/admin_dashboard/presentation/widgets/admin_users/admin_users_content.dart';
 
 /// Admin Dashboard Screen
@@ -40,6 +41,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       labelAr: '\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a',
       icon: Icons.analytics_rounded,
     ),
+    DashboardNavItem(
+      label: 'Teacher Subscriptions',
+      labelAr:
+          '\u0627\u0634\u062a\u0631\u0627\u0643\u0627\u062a \u0627\u0644\u0645\u062f\u0631\u0633\u064a\u0646',
+      icon: Icons.workspace_premium_rounded,
+    ),
   ];
 
   @override
@@ -56,6 +63,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       1 => const AdminUsersContent(),
       2 => const AdminCoursesContent(),
       3 => const AdminAnalyticsContent(),
+      4 => const AdminTeacherSubscriptionsContent(),
       _ => const AdminHomeContent(),
     };
   }

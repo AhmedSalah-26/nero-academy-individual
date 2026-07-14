@@ -126,6 +126,7 @@ import 'package:lms_platform/features/student/settings/presentation/cubit/profil
 // Admin Dashboard Feature
 import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_courses_data_source.dart';
 import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_stats_data_source.dart';
+import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_teacher_subscriptions_data_source.dart';
 import 'package:lms_platform/features/admin_dashboard/data/datasources/admin_users_data_source.dart';
 import 'package:lms_platform/features/admin_dashboard/data/repositories/admin_repository_impl.dart';
 import 'package:lms_platform/features/admin_dashboard/domain/repositories/admin_repository.dart';
@@ -542,6 +543,8 @@ void _initAdminDashboard() {
       () => AdminUsersDataSource(sl()));
   sl.registerLazySingleton<AdminCoursesDataSource>(
       () => AdminCoursesDataSource(sl()));
+  sl.registerLazySingleton<AdminTeacherSubscriptionsDataSource>(
+      () => AdminTeacherSubscriptionsDataSource(sl()));
 
   // Repository - Uses multiple data sources
   sl.registerLazySingleton<AdminRepository>(() => AdminRepositoryImpl(
@@ -555,6 +558,7 @@ void _initAdminDashboard() {
   sl.registerFactory(() => AdminUsersCubit(sl<AdminRepository>()));
   sl.registerFactory(() => AdminCoursesCubit(sl<AdminRepository>()));
   sl.registerFactory(() => AdminAnalyticsCubit(sl<AdminRepository>()));
+  sl.registerFactory(() => AdminTeacherSubscriptionsCubit(sl()));
 }
 
 void _initInstructorDashboard() {

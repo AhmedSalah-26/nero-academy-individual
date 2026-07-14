@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lms_platform/core/di/injection_container.dart';
 import 'package:lms_platform/core/services/app_logger.dart';
 import 'package:lms_platform/core/services/teacher_context_service.dart';
+import 'package:lms_platform/core/services/teacher_subscription_service.dart';
 import 'package:lms_platform/core/services/user_role_service.dart';
 import 'package:lms_platform/core/services/reports_service.dart';
 import 'package:lms_platform/core/animations/page_transitions.dart';
@@ -101,6 +102,7 @@ import 'package:lms_platform/features/admin_dashboard/presentation/screens/user_
 // Instructor Dashboard
 import 'package:lms_platform/features/instructor_dashboard/presentation/cubit/instructor_cubits.dart';
 import 'package:lms_platform/features/instructor_dashboard/presentation/screens/instructor_dashboard_screen.dart';
+import 'package:lms_platform/features/instructor_dashboard/presentation/screens/subscription_expired_screen.dart';
 import 'package:lms_platform/features/instructor_dashboard/presentation/screens/course_editor_screen.dart';
 import 'package:lms_platform/features/instructor_dashboard/presentation/screens/course_enrollments_screen.dart'
     as instructor_enrollments;
@@ -692,6 +694,7 @@ class AppRouter {
             BlocProvider(create: (_) => sl<AdminUsersCubit>()),
             BlocProvider(create: (_) => sl<AdminCoursesCubit>()),
             BlocProvider(create: (_) => sl<AdminAnalyticsCubit>()),
+            BlocProvider(create: (_) => sl<AdminTeacherSubscriptionsCubit>()),
           ],
           child: const AdminDashboardScreen(),
         ),
@@ -808,6 +811,12 @@ class AppRouter {
           ],
           child: const InstructorDashboardScreen(),
         ),
+      ),
+
+      GoRoute(
+        path: '/instructor-subscription-expired',
+        name: 'instructor-subscription-expired',
+        builder: (context, state) => const SubscriptionExpiredScreen(),
       ),
 
       // Course Editor - New Course
@@ -1183,6 +1192,7 @@ class AppRouter {
         '/forgot-password',
         '/reset-password',
         '/interests',
+        '/instructor-subscription-expired',
       };
 
       if (user != null &&
@@ -1202,7 +1212,8 @@ class AppRouter {
           await TeacherContextService.instance.ensureInitialized(
             Supabase.instance.client,
           );
-          await TeacherContextService.instance.loadAndSelectInstructorTheme(user.id);
+          await TeacherContextService.instance
+              .loadAndSelectInstructorTheme(user.id);
         }
       }
 
@@ -1230,6 +1241,11 @@ class AppRouter {
         final isInstructor = await UserRoleService.isInstructor();
         if (!isInstructor) {
           return '/home';
+        }
+        final hasActiveSubscription =
+            await TeacherSubscriptionService.hasActiveSubscription();
+        if (!hasActiveSubscription) {
+          return '/instructor-subscription-expired';
         }
       }
 

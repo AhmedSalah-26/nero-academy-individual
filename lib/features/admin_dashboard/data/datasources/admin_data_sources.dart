@@ -10,3 +10,4 @@ library;
 export 'admin_stats_data_source.dart';
 export 'admin_users_data_source.dart';
 export 'admin_courses_data_source.dart';
+export 'admin_teacher_subscriptions_data_source.dart';
