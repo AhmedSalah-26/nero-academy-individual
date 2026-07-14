@@ -1,8 +1,8 @@
 flutter_native_splash:
   color: "#181A20"
   color_dark: "#181A20"
-  background_image: "assets/default_identity/splach.png"
-  background_image_dark: "assets/default_identity/splach.png"
+  background_image: "assets/default_identity/splach-v2.png"
+  background_image_dark: "assets/default_identity/splach-v2.png"
   fullscreen: true
   android: true
   ios: true

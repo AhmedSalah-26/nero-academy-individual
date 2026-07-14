@@ -1,6 +1,6 @@
-# Nero Academy
+# Nasaq Academy
 
-Nero Academy is a Flutter learning management app for students, instructors, admins, and parents. The app supports Arabic and English, course discovery, learning progress, quizzes, forums, direct chat, instructor tools, admin operations, parent monitoring, cart and checkout, and Paymob payments backed by Supabase.
+Nasaq Academy is a Flutter learning management app for students, instructors, admins, and parents. The app supports Arabic and English, course discovery, learning progress, quizzes, forums, direct chat, instructor tools, admin operations, parent monitoring, cart and checkout, and Paymob payments backed by Supabase.
 
 ## Screenshots
 

@@ -91,7 +91,7 @@ class _SplashBody extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppColors.backgroundDark,
         image: DecorationImage(
-          image: AssetImage('assets/default_identity/splach.png'),
+          image: AssetImage('assets/default_identity/splach-v2.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -109,32 +109,50 @@ class _SplashBody extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          splashText,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Almarai',
-                            shadows: [
-                              Shadow(
-                                color: Colors.black54,
-                                offset: Offset(0, 2),
-                                blurRadius: 4,
-                              ),
-                            ],
+                        Container(
+                          width: 220,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween<double>(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 1800),
+                            builder: (context, value, child) {
+                              return FractionallySizedBox(
+                                widthFactor: value,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF00E5FF),
+                                        Color(0xFF2962FF),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF2962FF).withValues(alpha: 0.4),
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white.withValues(alpha: 0.8),
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'common.loading'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            fontFamily: 'Almarai',
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],

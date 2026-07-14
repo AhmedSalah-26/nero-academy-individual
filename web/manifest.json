@@ -1,11 +1,11 @@
 {
-    "name": "Nero Academy",
-    "short_name": "Nero Academy",
+    "name": "Nasaq Academy",
+    "short_name": "Nasaq Academy",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Yalla Course - Online Learning Platform",
+    "description": "Nasaq Academy - Online Learning Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
