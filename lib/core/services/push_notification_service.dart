@@ -4,6 +4,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 class PushNotificationService {
   static const String appId = "19cc330b-c04c-4568-a34e-05cb98e1a385";
   static bool _isInitialized = false;
+  static String? _pendingUserId;
+  static String _pendingRole = 'student';
 
   static Future<void> initialize() async {
     if (_isInitialized || kIsWeb) return;
@@ -22,6 +24,13 @@ class PushNotificationService {
 
       _isInitialized = true;
       debugPrint('[PushNotificationService] OneSignal initialized successfully');
+
+      // Auth restoration can finish before OneSignal initialization. Keep the
+      // identity and apply it now so targeted pushes work on every app launch.
+      final pendingUserId = _pendingUserId;
+      if (pendingUserId != null) {
+        login(pendingUserId, role: _pendingRole);
+      }
     } catch (e, stackTrace) {
       debugPrint('[PushNotificationService] Error initializing OneSignal: $e');
       debugPrint('[PushNotificationService] Stack trace: $stackTrace');
@@ -31,7 +40,11 @@ class PushNotificationService {
   /// Link Supabase User ID to OneSignal and set role tag for targeting
   /// role: 'admin', 'student', 'instructor', 'parent'
   static void login(String userId, {String role = 'student'}) {
-    if (!_isInitialized || kIsWeb) return;
+    if (kIsWeb) return;
+
+    _pendingUserId = userId;
+    _pendingRole = role;
+    if (!_isInitialized) return;
 
     try {
       // ربط الـ Supabase user ID بـ OneSignal
@@ -49,6 +62,8 @@ class PushNotificationService {
 
   /// Unlink user ID on logout
   static void logout() {
+    _pendingUserId = null;
+    _pendingRole = 'student';
     if (!_isInitialized || kIsWeb) return;
 
     try {
