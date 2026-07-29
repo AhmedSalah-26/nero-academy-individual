@@ -14,8 +14,9 @@ SECURITY DEFINER
 SET search_path = public, extensions, pg_temp
 AS $$
 DECLARE
-  v_supabase_url TEXT := current_setting('app.supabase_url', true);
-  v_service_role_key TEXT := current_setting('app.service_role_key', true);
+  v_function_url CONSTANT TEXT :=
+    'https://ubjhdafxmncfbaldfivd.supabase.co/functions/v1/notify-content-update';
+  v_webhook_key TEXT;
   v_old_record JSONB := NULL;
 BEGIN
   IF NOT (
@@ -30,11 +31,19 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Never make saving content fail when deployment settings are missing.
-  IF NULLIF(v_supabase_url, '') IS NULL
-     OR NULLIF(v_service_role_key, '') IS NULL THEN
+  -- The public project API key is stored encrypted in Supabase Vault instead
+  -- of relying on custom PostgreSQL settings, which hosted projects may block.
+  SELECT decrypted_secret
+  INTO v_webhook_key
+  FROM vault.decrypted_secrets
+  WHERE name = 'content_push_webhook_key'
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  -- Never make saving content fail when deployment configuration is missing.
+  IF NULLIF(v_webhook_key, '') IS NULL THEN
     RAISE WARNING
-      'Content push skipped: app.supabase_url or app.service_role_key is not configured';
+      'Content push skipped: Vault secret content_push_webhook_key is not configured';
     RETURN NEW;
   END IF;
 
@@ -43,10 +52,11 @@ BEGIN
   END IF;
 
   PERFORM net.http_post(
-    url := rtrim(v_supabase_url, '/') || '/functions/v1/notify-content-update',
+    url := v_function_url,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || v_service_role_key
+      'Authorization', 'Bearer ' || v_webhook_key,
+      'apikey', v_webhook_key
     ),
     body := jsonb_build_object(
       'type', TG_OP,
@@ -78,9 +88,9 @@ REVOKE ALL ON FUNCTION notify_content_push_on_publish() FROM PUBLIC;
 
 SELECT '041 - Content publish push webhook installed successfully' AS status;
 
--- Required once per hosted database:
--- ALTER DATABASE postgres
---   SET "app.supabase_url" = 'https://ubjhdafxmncfbaldfivd.supabase.co';
--- ALTER DATABASE postgres
---   SET "app.service_role_key" = '<SUPABASE_SERVICE_ROLE_KEY>';
--- SELECT pg_reload_conf();
+-- Required once per hosted database (use the project's public anon key):
+-- SELECT vault.create_secret(
+--   '<SUPABASE_ANON_KEY>',
+--   'content_push_webhook_key',
+--   'Authenticates the content publish database webhook'
+-- );
