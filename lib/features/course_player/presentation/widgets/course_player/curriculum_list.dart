@@ -16,6 +16,7 @@ class CurriculumList extends StatelessWidget {
   final bool isDark;
   final ValueChanged<LessonEntity> onLessonTap;
   final bool Function(String lessonId) isLessonCompleted;
+  final bool Function(String lessonId) isLessonLocked;
   final int Function(SectionEntity section) getSectionCompletedCount;
 
   const CurriculumList({
@@ -27,6 +28,7 @@ class CurriculumList extends StatelessWidget {
     required this.isDark,
     required this.onLessonTap,
     required this.isLessonCompleted,
+    required this.isLessonLocked,
     required this.getSectionCompletedCount,
   });
 
@@ -133,6 +135,10 @@ class CurriculumList extends StatelessWidget {
           section: section,
           sectionIndex: sectionIndex,
           completedCount: getSectionCompletedCount(section),
+          isLocked: !sections
+              .take(sectionIndex)
+              .expand((item) => item.lessons)
+              .every((lesson) => !isLessonLocked(lesson.id)),
           isDark: isDark,
           showDivider: sectionIndex > 0,
           lessonProgressLabel: lessonProgressLabel,
@@ -150,9 +156,7 @@ class CurriculumList extends StatelessWidget {
           final isCurrentLesson = currentLesson?.id == lesson.id;
           final isCompleted = isLessonCompleted(lesson.id);
 
-          // Determine if lesson is locked
-          // For now, only lock if not preview and not enrolled
-          final isLocked = !lesson.isPreview && !lesson.isPublished;
+          final isLocked = !lesson.isPublished || isLessonLocked(lesson.id);
 
           return LessonItem(
             lesson: lesson,

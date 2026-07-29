@@ -116,6 +116,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
   @override
   void didPopNext() {
     di.sl<VideoPlayerNotifierService>().setPlayerScreenActive(true);
+    context.read<CoursePlayerCubit>().refreshLearningAccess();
     super.didPopNext();
   }
 
@@ -200,7 +201,8 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         courseId: widget.courseId,
         enrollmentId: widget.enrollmentId,
         courseTitle: widget.courseTitle,
-        initialLessonId: cubit.state.currentLesson?.id ?? widget.initialLessonId,
+        initialLessonId:
+            cubit.state.currentLesson?.id ?? widget.initialLessonId,
         instructorId: widget.instructorId,
         instructorName: widget.instructorName,
         instructorAvatar: widget.instructorAvatar,
@@ -414,8 +416,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
           ),
         ),
         BottomActionBar(
-          hasNextLesson: state.hasNextLesson ||
-              (state.isLastLesson && !state.allLessonsCompleted),
+          hasNextLesson: state.canAdvanceFromCurrentLesson,
           isLastLesson: state.showCompleteCourseButton,
           isCompletingCourse: state.isMarkingComplete,
           isDark: isDark,
@@ -560,6 +561,7 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
                 context.read<CoursePlayerCubit>().selectLesson(lesson);
               },
               isLessonCompleted: state.isLessonCompleted,
+              isLessonLocked: (lessonId) => !state.isLessonUnlocked(lessonId),
               getSectionCompletedCount: state.getSectionCompletedCount,
             );
           },
@@ -588,23 +590,22 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         return const SizedBox.shrink();
       case 3: // Quizzes
         if (state.courseId != null) {
-          return SizedBox(
-            height: maxH,
-            child: QuizzesSection(
-              isDark: isDark,
-              courseId: state.courseId!,
-              sections: state.sections,
-              repository: di.sl<QuizzesRepository>(),
-              onQuizTap: (quiz) {
-                AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
-                context.goNamed(
-                  'quiz-info',
-                  pathParameters: {'quizId': quiz.id},
-                  queryParameters:
-                      _buildQuizNavigationQueryParameters(state, quiz),
-                );
-              },
-            ),
+          // The course page already owns vertical scrolling. Reporting the
+          // section's full height keeps long quiz lists reachable.
+          return QuizzesSection(
+            isDark: isDark,
+            courseId: state.courseId!,
+            sections: state.sections,
+            repository: di.sl<QuizzesRepository>(),
+            onQuizTap: (quiz) {
+              AppLogger.i('📝 [Screen] Quiz tapped: ${quiz.id}');
+              context.goNamed(
+                'quiz-info',
+                pathParameters: {'quizId': quiz.id},
+                queryParameters:
+                    _buildQuizNavigationQueryParameters(state, quiz),
+              );
+            },
           );
         }
         return const SizedBox.shrink();

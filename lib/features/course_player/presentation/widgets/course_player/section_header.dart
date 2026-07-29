@@ -9,6 +9,7 @@ class SectionHeader extends StatelessWidget {
   final SectionEntity section;
   final int sectionIndex;
   final int completedCount;
+  final bool isLocked;
   final bool isDark;
   final bool showDivider;
   final String? lessonProgressLabel;
@@ -18,6 +19,7 @@ class SectionHeader extends StatelessWidget {
     required this.section,
     required this.sectionIndex,
     required this.completedCount,
+    this.isLocked = false,
     required this.isDark,
     this.showDivider = true,
     this.lessonProgressLabel,
@@ -42,6 +44,16 @@ class SectionHeader extends StatelessWidget {
               : AppColors.backgroundLight.withValues(alpha: 0.45),
           child: Row(
             children: [
+              if (isLocked) ...[
+                Icon(
+                  Icons.lock_outline_rounded,
+                  size: 17,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
+                const SizedBox(width: 8),
+              ],
               Expanded(
                 child: Text(
                   section.getTitle(locale),

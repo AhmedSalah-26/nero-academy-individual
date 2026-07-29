@@ -32,6 +32,7 @@ interface Lesson {
   file_url: string;
   file_name: string;
   video_duration?: number;
+  is_mandatory?: boolean;
 }
 
 interface Section {
@@ -130,6 +131,8 @@ export default function CoursePlayerPage() {
   const [course, setCourse] = useState<CourseSummary | null>(null);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedQuizIds, setCompletedQuizIds] = useState<string[]>([]);
+  const [accessMessage, setAccessMessage] = useState('');
   const [lastPositions, setLastPositions] = useState<Record<string, number>>({});
   const [enrollmentId, setEnrollmentId] = useState('');
   const [quizzes, setQuizzes] = useState<QuizItem[]>([]);
@@ -156,17 +159,13 @@ export default function CoursePlayerPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
   const [activeBottomSheet, setActiveBottomSheet] = useState<'notes' | 'bookmarks' | 'announcements' | 'attachments' | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = typeof document !== 'undefined';
   const mediaStageRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef({ position: 0, duration: 0, watchTime: 0 });
   const watchTimesRef = useRef<Record<string, number>>({});
   const userId = user?.id;
 
   const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (authLoading || !courseId) return;
@@ -260,15 +259,63 @@ export default function CoursePlayerPage() {
         const flatLoadedLessons = fullSections.flatMap((section) => section.lessons);
         const requestedLesson = requestedLessonId ? flatLoadedLessons.find((lesson) => lesson.id === requestedLessonId) : null;
         const completedLessonSet = new Set((progressData || []).filter((p) => p.is_completed).map((p) => p.lesson_id as string));
-        const firstIncompleteLesson = flatLoadedLessons.find((lesson) => !completedLessonSet.has(lesson.id));
-        setActiveLesson(requestedLesson || firstIncompleteLesson || flatLoadedLessons[0] || null);
-
         const { data: quizData } = await supabase.from('quizzes').select('*, quiz_questions(count)')
           .eq('course_id', courseId).eq('is_published', true).order('created_at');
-        setQuizzes(((quizData || []) as QuizItem[]).map((quiz) => ({
+        const loadedQuizzes = ((quizData || []) as QuizItem[]).map((quiz) => ({
           ...quiz,
           total_questions: quiz.quiz_questions?.[0]?.count ?? quiz.total_questions ?? 0,
-        })));
+        }));
+        setQuizzes(loadedQuizzes);
+
+        const loadedQuizIds = loadedQuizzes.map((quiz) => quiz.id);
+        let completedQuizIdSet = new Set<string>();
+        if (loadedQuizIds.length > 0) {
+          const { data: attemptData } = await supabase
+            .from('quiz_attempts')
+            .select('quiz_id')
+            .eq('enrollment_id', enrollData.id)
+            .in('quiz_id', loadedQuizIds)
+            .not('completed_at', 'is', null);
+          completedQuizIdSet = new Set(
+            (attemptData || []).map((attempt) => attempt.quiz_id as string),
+          );
+        }
+        setCompletedQuizIds([...completedQuizIdSet]);
+
+        const incompleteQuizLessonIdSet = new Set(
+          loadedQuizzes
+            .filter((quiz) => quiz.lesson_id && !completedQuizIdSet.has(quiz.id))
+            .map((quiz) => quiz.lesson_id as string),
+        );
+        const canOpenLoadedLesson = (lessonId: string) => {
+          const targetIndex = flatLoadedLessons.findIndex(
+            (lesson) => lesson.id === lessonId,
+          );
+          if (targetIndex < 0) return false;
+          return flatLoadedLessons.slice(0, targetIndex).every((lesson) => {
+            if (lesson.is_mandatory === false) return true;
+            return completedLessonSet.has(lesson.id)
+              && !incompleteQuizLessonIdSet.has(lesson.id);
+          });
+        };
+        const safeRequestedLesson = requestedLesson
+          && canOpenLoadedLesson(requestedLesson.id)
+          ? requestedLesson
+          : null;
+        const firstAccessibleIncompleteLesson = flatLoadedLessons.find(
+          (lesson) =>
+            !completedLessonSet.has(lesson.id)
+            && canOpenLoadedLesson(lesson.id),
+        );
+        const firstAccessibleLesson = flatLoadedLessons.find((lesson) =>
+          canOpenLoadedLesson(lesson.id),
+        );
+        setActiveLesson(
+          safeRequestedLesson
+          || firstAccessibleIncompleteLesson
+          || firstAccessibleLesson
+          || null,
+        );
 
         const { data: bookmarksData } = await supabase.from('bookmarks').select('id, lesson_id, created_at, lessons(title_ar, title_en)')
           .eq('user_id', currentUserId).eq('course_id', courseId).order('created_at', { ascending: false });
@@ -309,26 +356,40 @@ export default function CoursePlayerPage() {
   }, [activeLesson, courseId, userId]);
 
   const saveProgress = useCallback(async (lessonId: string, isCompleted: boolean) => {
-    if (!userId) return;
+    if (!userId) return false;
     const { position, watchTime } = progressRef.current;
     const total = (watchTimesRef.current[lessonId] || 0) + Math.max(0, watchTime);
-    const { error } = await supabase.rpc('update_lesson_progress', {
+    const { data, error } = await supabase.rpc('update_lesson_progress', {
       p_lesson_id: lessonId, p_watch_time: Math.round(total),
       p_last_position: Math.round(position), p_is_completed: isCompleted,
     });
-    if (!error) { watchTimesRef.current[lessonId] = total; progressRef.current.watchTime = 0; }
+    if (error || (data as { success?: boolean } | null)?.success === false) {
+      return false;
+    }
+    watchTimesRef.current[lessonId] = total;
+    progressRef.current.watchTime = 0;
+    return true;
   }, [userId]);
 
   const toggleCompleted = useCallback(async (lessonId: string) => {
-    const completed = !completedLessons.includes(lessonId);
-    await saveProgress(lessonId, completed);
-    const newCompleted = completed ? [...completedLessons, lessonId] : completedLessons.filter((id) => id !== lessonId);
+    if (completedLessons.includes(lessonId)) return;
+    const saved = await saveProgress(lessonId, true);
+    if (!saved) {
+      setAccessMessage(
+        lang === 'ar'
+          ? 'أكمل كويزات الدرس والمحتوى السابق أولًا.'
+          : 'Complete the lesson quizzes and previous content first.',
+      );
+      return;
+    }
+    setAccessMessage('');
+    const newCompleted = [...completedLessons, lessonId];
     setCompletedLessons(newCompleted);
     const totalLessons = sections.flatMap((s) => s.lessons).length;
-    if (completed && newCompleted.length === totalLessons && totalLessons > 0) {
+    if (newCompleted.length === totalLessons && totalLessons > 0) {
       setShowCompletionDialog(true);
     }
-  }, [completedLessons, saveProgress, sections]);
+  }, [completedLessons, lang, saveProgress, sections]);
 
   const handleVideoProgress = useCallback((position: number, duration: number) => {
     progressRef.current.position = position;
@@ -463,7 +524,15 @@ export default function CoursePlayerPage() {
   const activeSection = activeIndex >= 0 ? flatLessons[activeIndex].section : null;
   const previousLesson = activeIndex > 0 ? flatLessons[activeIndex - 1].lesson : null;
   const nextLesson = activeIndex >= 0 && activeIndex < flatLessons.length - 1 ? flatLessons[activeIndex + 1].lesson : null;
-  const progress = flatLessons.length ? Math.round((completedLessons.length / flatLessons.length) * 100) : 0;
+  const mandatoryLessons = flatLessons.filter(
+    ({ lesson }) => lesson.is_mandatory !== false,
+  );
+  const completedMandatoryLessons = mandatoryLessons.filter(({ lesson }) =>
+    completedLessons.includes(lesson.id),
+  ).length;
+  const progress = mandatoryLessons.length
+    ? Math.round((completedMandatoryLessons / mandatoryLessons.length) * 100)
+    : 0;
   const title = activeLesson ? (lang === 'ar' ? activeLesson.title_ar : activeLesson.title_en) : '';
   const sectionTitle = activeSection ? (lang === 'ar' ? activeSection.title_ar : activeSection.title_en) : '';
   const allAttachments = [
@@ -477,8 +546,38 @@ export default function CoursePlayerPage() {
   const lessonQuizzes = quizzes.filter((quiz) => quiz.lesson_id);
   const generalQuizzes = quizzes.filter((quiz) => !quiz.section_id && !quiz.lesson_id);
   const hasGroupLinks = Boolean(groupLinks.whatsapp || groupLinks.telegram || groupLinks.facebook);
+  const incompleteQuizLessonIds = new Set(
+    lessonQuizzes
+      .filter((quiz) => !completedQuizIds.includes(quiz.id))
+      .map((quiz) => quiz.lesson_id as string),
+  );
+  const isLessonUnlocked = (lessonId: string) => {
+    const targetIndex = flatLessons.findIndex(
+      ({ lesson }) => lesson.id === lessonId,
+    );
+    if (targetIndex < 0) return false;
+    return flatLessons.slice(0, targetIndex).every(({ lesson }) => {
+      if (lesson.is_mandatory === false) return true;
+      return completedLessons.includes(lesson.id)
+        && !incompleteQuizLessonIds.has(lesson.id);
+    });
+  };
+  const canAdvance = Boolean(
+    activeLesson
+    && nextLesson
+    && !incompleteQuizLessonIds.has(activeLesson.id),
+  );
   const selectLesson = (lesson: Lesson | null) => {
     if (!lesson) return;
+    if (!isLessonUnlocked(lesson.id)) {
+      setAccessMessage(
+        lang === 'ar'
+          ? 'أكمل الدروس والكويزات السابقة أولًا.'
+          : 'Complete the previous lessons and quizzes first.',
+      );
+      return;
+    }
+    setAccessMessage('');
     setActiveLesson(lesson);
     window.history.replaceState(null, '', `/learn/${courseId}?lesson=${lesson.id}`);
     if (window.innerWidth < 900) setSidebarOpen(false);
@@ -486,6 +585,14 @@ export default function CoursePlayerPage() {
 
   const handleCompleteAndNext = async () => {
     if (!activeLesson) return;
+    if (incompleteQuizLessonIds.has(activeLesson.id)) {
+      setAccessMessage(
+        lang === 'ar'
+          ? 'أكمل كل كويزات هذا الدرس قبل الانتقال للدرس التالي.'
+          : 'Complete all quizzes for this lesson before continuing.',
+      );
+      return;
+    }
     if (!completedLessons.includes(activeLesson.id)) {
       await toggleCompleted(activeLesson.id);
     }
@@ -557,24 +664,43 @@ export default function CoursePlayerPage() {
           <section className={styles.curriculumCard}>
             <div className={styles.cardTitle}><VideoLibrary fontSize="small" /><strong>{lang === 'ar' ? 'محتوى الكورس' : 'Course content'}</strong></div>
             <div className={styles.curriculum}>
-              {sections.map((section) => (
+              {sections.map((section) => {
+                const sectionLocked = section.lessons.length > 0
+                  && !isLessonUnlocked(section.lessons[0].id);
+                return (
                 <div key={section.id} className={styles.sectionGroup}>
-                  <h4>{lang === 'ar' ? section.title_ar : section.title_en}</h4>
+                  <h4>
+                    {sectionLocked && <Lock fontSize="small" />}
+                    {lang === 'ar' ? section.title_ar : section.title_en}
+                  </h4>
                   {section.lessons.map((lesson, index) => {
                     const isActive = lesson.id === activeLesson?.id;
                     const isDone = completedLessons.includes(lesson.id);
+                    const isLocked = !isLessonUnlocked(lesson.id);
                     return (
-                      <button key={lesson.id} onClick={() => selectLesson(lesson)} className={isActive ? styles.activeLesson : ''}>
-                        <span>{isDone ? <CheckCircle fontSize="small" /> : isActive ? <PlayArrow fontSize="small" /> : <Lock fontSize="small" />}</span>
+                      <button
+                        key={lesson.id}
+                        onClick={() => selectLesson(lesson)}
+                        className={isActive ? styles.activeLesson : ''}
+                        disabled={isLocked}
+                        title={isLocked
+                          ? (lang === 'ar' ? 'أكمل المحتوى السابق أولًا' : 'Complete previous content first')
+                          : undefined}
+                      >
+                        <span>{isDone ? <CheckCircle fontSize="small" /> : isLocked ? <Lock fontSize="small" /> : <PlayArrow fontSize="small" />}</span>
                         <strong>{lang === 'ar' ? lesson.title_ar : lesson.title_en}</strong>
                         <small>{lesson.video_duration ? `${Math.round(lesson.video_duration / 60)}:00` : `0${index + 1}`}</small>
                       </button>
                     );
                   })}
                 </div>
-              ))}
+              )})}
             </div>
           </section>
+
+          {accessMessage && (
+            <p className={styles.accessMessage}>{accessMessage}</p>
+          )}
 
           {activeLesson && (
             <div className={styles.sidebarNav}>
@@ -600,6 +726,7 @@ export default function CoursePlayerPage() {
               ) : (
                 <button
                   onClick={handleCompleteAndNext}
+                  disabled={!canAdvance}
                   className={`${styles.sidebarNavBtn} ${styles.sidebarNavNext}`}
                   aria-label={lang === 'ar' ? 'التالي' : 'Next'}
                 >

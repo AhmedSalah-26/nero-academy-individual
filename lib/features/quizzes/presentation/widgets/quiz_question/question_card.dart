@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/utils/arabic_utils.dart';
 import '../../../domain/entities/quiz_question_entity.dart';
 import 'option_item.dart';
 
@@ -36,13 +37,17 @@ class QuestionCard extends StatelessWidget {
           children: [
             _buildBadge(
               context,
-              '${question.points} ${question.points > 1 ? 'نقاط' : 'نقطة'}',
+              locale == 'ar'
+                  ? '${question.points} ${question.points > 1 ? 'نقاط' : 'نقطة'}'
+                  : '${question.points} ${question.points == 1 ? 'point' : 'points'}',
               AppColors.primary,
             ),
             const SizedBox(width: AppSpacing.sm),
             _buildBadge(
               context,
-              question.questionType.displayNameAr,
+              locale == 'ar'
+                  ? question.questionType.displayNameAr
+                  : question.questionType.displayNameEn,
               isDark ? AppColors.grey600 : AppColors.grey400,
               isOutlined: true,
             ),
@@ -86,11 +91,20 @@ class QuestionCard extends StatelessWidget {
 
         // Question Text (if exists)
         if (hasText) ...[
-          Text(
-            questionText,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              height: 1.4,
+          Directionality(
+            textDirection: ArabicUtils.containsArabic(questionText)
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                questionText,
+                textAlign: TextAlign.start,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  height: 1.4,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

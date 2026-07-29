@@ -99,6 +99,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             quizzes.where((quiz) => quiz.isCourseLevelQuiz).toList();
         final sectionQuizGroups = _groupSectionQuizzes(sectionQuizzes);
         final lessonQuizGroups = _groupLessonQuizzes(lessonQuizzes);
+        final isArabic = context.locale.languageCode == 'ar';
 
         return ListView(
           shrinkWrap: true,
@@ -107,8 +108,10 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           children: [
             if (sectionQuizzes.isNotEmpty) ...[
               _buildSectionHeader(
-                title: 'اختبارات السيكشنات',
-                subtitle: 'اختبارات مرتبطة بسيكشن كامل',
+                title: isArabic ? 'اختبارات السيكشنات' : 'Section quizzes',
+                subtitle: isArabic
+                    ? 'اختبارات مرتبطة بسيكشن كامل'
+                    : 'Quizzes linked to a full section',
                 icon: Icons.view_agenda_outlined,
               ),
               const SizedBox(height: 12),
@@ -117,8 +120,10 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ],
             if (lessonQuizzes.isNotEmpty) ...[
               _buildSectionHeader(
-                title: 'اختبارات الدروس',
-                subtitle: 'اختبارات مرتبطة بدروس محددة داخل الكورس',
+                title: isArabic ? 'اختبارات الدروس' : 'Lesson quizzes',
+                subtitle: isArabic
+                    ? 'اختبارات مرتبطة بدروس محددة داخل الكورس'
+                    : 'Quizzes linked to specific lessons',
                 icon: Icons.menu_book_outlined,
               ),
               const SizedBox(height: 12),
@@ -127,8 +132,10 @@ class _QuizzesSectionState extends State<QuizzesSection> {
             ],
             if (courseQuizzes.isNotEmpty) ...[
               _buildSectionHeader(
-                title: 'اختبار شامل',
-                subtitle: 'اختبارات على محتوى الكورس بالكامل',
+                title: isArabic ? 'اختبار شامل' : 'Course quizzes',
+                subtitle: isArabic
+                    ? 'اختبارات على محتوى الكورس بالكامل'
+                    : 'Quizzes covering the full course',
                 icon: Icons.school_outlined,
               ),
               const SizedBox(height: 12),
@@ -334,7 +341,9 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}',
+              locale == 'ar'
+                  ? '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}'
+                  : '$quizCount ${quizCount == 1 ? 'quiz' : 'quizzes'}',
               style: TextStyle(
                 color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                 fontSize: 12,
@@ -395,7 +404,9 @@ class _QuizzesSectionState extends State<QuizzesSection> {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}',
+              locale == 'ar'
+                  ? '$quizCount ${quizCount == 1 ? 'اختبار' : 'اختبارات'}'
+                  : '$quizCount ${quizCount == 1 ? 'quiz' : 'quizzes'}',
               style: TextStyle(
                 color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                 fontSize: 12,
@@ -462,11 +473,13 @@ class _QuizzesSectionState extends State<QuizzesSection> {
   }
 
   Widget _buildQuizInfo(QuizEntity quiz) {
+    final locale = context.locale.languageCode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _cleanDisplayText(quiz.titleAr),
+          _cleanDisplayText(quiz.getTitle(locale)),
           style: TextStyle(
             color: widget.isDark ? AppColors.white : AppColors.textMainLight,
             fontWeight: FontWeight.w600,
@@ -484,7 +497,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
               ),
               const SizedBox(width: 4),
               Text(
-                'اختبار سيكشن',
+                locale == 'ar' ? 'اختبار سيكشن' : 'Section quiz',
                 style: TextStyle(
                   color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                   fontSize: 12,
@@ -504,7 +517,7 @@ class _QuizzesSectionState extends State<QuizzesSection> {
               ),
               const SizedBox(width: 4),
               Text(
-                'اختبار درس',
+                locale == 'ar' ? 'اختبار درس' : 'Lesson quiz',
                 style: TextStyle(
                   color: widget.isDark ? AppColors.grey400 : AppColors.grey600,
                   fontSize: 12,

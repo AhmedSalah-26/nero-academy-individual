@@ -86,6 +86,13 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
         // Load all lesson progress first to find first incomplete lesson
         final progressMap = await _fetchAllLessonProgress(enrollmentId);
+        final incompleteQuizLessonIds =
+            await _fetchIncompleteQuizLessonIds(courseId, enrollmentId);
+        final accessState = state.copyWith(
+          sections: sections,
+          progressMap: progressMap,
+          incompleteQuizLessonIds: incompleteQuizLessonIds,
+        );
 
         // Find initial lesson
         LessonEntity? initialLesson;
@@ -93,7 +100,8 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
           for (final section in sections) {
             final lesson =
                 section.lessons.where((l) => l.id == initialLessonId);
-            if (lesson.isNotEmpty) {
+            if (lesson.isNotEmpty &&
+                accessState.isLessonUnlocked(lesson.first.id)) {
               initialLesson = lesson.first;
               break;
             }
@@ -105,7 +113,8 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
           for (final section in sections) {
             for (final lesson in section.lessons) {
               final progress = progressMap[lesson.id];
-              if (progress == null || !progress.isCompleted) {
+              if ((progress == null || !progress.isCompleted) &&
+                  accessState.isLessonUnlocked(lesson.id)) {
                 initialLesson = lesson;
                 break;
               }
@@ -115,16 +124,11 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
         }
 
         // Default to first lesson if all completed or no lessons
-        initialLesson ??=
-            sections.isNotEmpty && sections.first.lessons.isNotEmpty
-                ? sections.first.lessons.first
-                : null;
+        initialLesson ??= accessState.firstAccessibleIncompleteLesson;
 
-        _safeEmit(state.copyWith(
+        _safeEmit(accessState.copyWith(
           status: StateStatus.success,
-          sections: sections,
           currentLesson: initialLesson,
-          progressMap: progressMap,
         ));
 
         // Load course attachments
@@ -196,6 +200,35 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
     return progressMap;
   }
 
+  Future<Set<String>> _fetchIncompleteQuizLessonIds(
+    String courseId,
+    String enrollmentId,
+  ) async {
+    final result = await repository.getIncompleteQuizLessonIds(
+      courseId: courseId,
+      enrollmentId: enrollmentId,
+    );
+    return result.fold(
+      (failure) {
+        AppLogger.e(
+          '[CoursePlayer] Failed to load quiz completion: ${failure.message}',
+        );
+        return <String>{};
+      },
+      (lessonIds) => lessonIds,
+    );
+  }
+
+  Future<void> refreshLearningAccess() async {
+    final courseId = state.courseId;
+    final enrollmentId = state.enrollmentId;
+    if (courseId == null || enrollmentId == null || _isClosed) return;
+
+    final lessonIds =
+        await _fetchIncompleteQuizLessonIds(courseId, enrollmentId);
+    _safeEmit(state.copyWith(incompleteQuizLessonIds: lessonIds));
+  }
+
   /// Load lesson details
   Future<void> _loadLessonDetails(String lessonId) async {
     if (_isClosed) return;
@@ -246,6 +279,12 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
   /// Select a lesson
   Future<void> selectLesson(LessonEntity lesson) async {
     if (_isClosed) return;
+    if (!state.isLessonUnlocked(lesson.id)) {
+      AppLogger.w(
+        '[CoursePlayer] Complete previous lessons and quizzes first',
+      );
+      return;
+    }
     AppLogger.i('🎬 [CoursePlayer] Selecting lesson: ${lesson.id}');
 
     // Dismiss the media notification / stop any background video
@@ -305,6 +344,13 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
   /// Go to next lesson (marks current as complete first)
   Future<void> nextLesson() async {
+    if (!state.canAdvanceFromCurrentLesson) {
+      AppLogger.w(
+        '[CoursePlayer] Complete the current lesson quizzes before continuing',
+      );
+      return;
+    }
+
     // Mark current lesson as complete before moving to next
     if (state.currentLesson != null && state.enrollmentId != null) {
       if (!state.isLessonCompleted(state.currentLesson!.id)) {

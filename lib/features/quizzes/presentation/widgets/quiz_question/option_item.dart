@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/utils/arabic_utils.dart';
 import '../../../domain/entities/quiz_question_entity.dart';
 
 /// Option Item - Single option for a question
@@ -25,62 +26,70 @@ class OptionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final optionText = option.getText(locale);
+    final optionDirection = ArabicUtils.containsArabic(optionText)
+        ? TextDirection.rtl
+        : TextDirection.ltr;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.05)
-              : (isDark ? AppColors.surfaceDark : AppColors.white),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
+    return Directionality(
+      textDirection: optionDirection,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary
-                : (isDark ? AppColors.borderDark : AppColors.borderLight),
-            width: isSelected ? 2 : 1,
+                ? AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.05)
+                : (isDark ? AppColors.surfaceDark : AppColors.white),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : (isDark ? AppColors.borderDark : AppColors.borderLight),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
-          boxShadow: isSelected
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            // Radio/Checkbox indicator
-            _buildIndicator(),
-            const SizedBox(width: AppSpacing.md),
+          child: Row(
+            children: [
+              // Radio/Checkbox indicator
+              _buildIndicator(),
+              const SizedBox(width: AppSpacing.md),
 
-            // Option Text
-            Expanded(
-              child: Text(
-                option.getText(locale),
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.primary
-                      : (isDark
-                          ? AppColors.textMainDark
-                          : AppColors.textMainLight),
+              // Option Text
+              Expanded(
+                child: Text(
+                  optionText,
+                  textAlign: TextAlign.start,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected
+                        ? AppColors.primary
+                        : (isDark
+                            ? AppColors.textMainDark
+                            : AppColors.textMainLight),
+                  ),
                 ),
               ),
-            ),
 
-            // Check icon when selected
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: 24,
-              ),
-          ],
+              // Check icon when selected
+              if (isSelected)
+                const Icon(
+                  Icons.check_circle,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+            ],
+          ),
         ),
       ),
     );

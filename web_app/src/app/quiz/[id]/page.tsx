@@ -382,7 +382,7 @@ export default function QuizPage() {
           <article className={styles.questionCard}>
             <div className={styles.questionTitleRow}>
               <span>{currentIndex + 1}</span>
-              <h2>{lang === 'ar' ? currentQuestion.question_ar : currentQuestion.question_en || currentQuestion.question_ar}</h2>
+              <h2 dir="auto">{lang === 'ar' ? currentQuestion.question_ar : currentQuestion.question_en || currentQuestion.question_ar}</h2>
               <b>{currentQuestion.points || 1} {lang === 'ar' ? 'نقطة' : 'pt'}</b>
             </div>
             {currentQuestion.image_url && (
@@ -403,7 +403,7 @@ export default function QuizPage() {
                       className={`${styles.option} ${selected ? styles.selectedOption : ''}`}
                     >
                       <span>{selected ? <Check fontSize="small" /> : String.fromCharCode(65 + index)}</span>
-                      <strong>{lang === 'ar' ? option.text_ar : option.text_en || option.text_ar}</strong>
+                      <strong dir="auto">{lang === 'ar' ? option.text_ar : option.text_en || option.text_ar}</strong>
                     </button>
                   );
                 })}
@@ -474,8 +474,8 @@ export default function QuizPage() {
                 <article className={styles.reviewCard} key={question.id}>
                   <div className={isCorrect ? styles.reviewCorrect : styles.reviewWrong}>{isCorrect ? <CheckCircle fontSize="small" /> : <Cancel fontSize="small" />}</div>
                   <div>
-                    <h3>{index + 1}. {lang === 'ar' ? question.question_ar : question.question_en || question.question_ar}</h3>
-                    <p>{lang === 'ar' ? question.explanation_ar : question.explanation_en || question.explanation_ar}</p>
+                    <h3 dir="auto">{index + 1}. {lang === 'ar' ? question.question_ar : question.question_en || question.question_ar}</h3>
+                    <p dir="auto">{lang === 'ar' ? question.explanation_ar : question.explanation_en || question.explanation_ar}</p>
                   </div>
                 </article>
               );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/utils/arabic_utils.dart';
 import '../../../domain/entities/quiz_question_entity.dart';
 import '../../../domain/entities/quiz_attempt_entity.dart';
 
@@ -160,11 +161,21 @@ class _AnswerReviewCard extends StatelessWidget {
               children: [
                 // Question text
                 if (question.getQuestion(locale).isNotEmpty)
-                  Text(
-                    question.getQuestion(locale),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
+                  Directionality(
+                    textDirection:
+                        ArabicUtils.containsArabic(question.getQuestion(locale))
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        question.getQuestion(locale),
+                        textAlign: TextAlign.start,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
                   ),
                 // Question image
@@ -292,11 +303,17 @@ class _AnswerReviewCard extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Text(
-            value,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: color,
+          child: Directionality(
+            textDirection: ArabicUtils.containsArabic(value)
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            child: Text(
+              value,
+              textAlign: TextAlign.start,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ),
         ),

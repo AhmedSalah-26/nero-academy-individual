@@ -203,10 +203,12 @@
   display: grid;
   grid-template-columns: 78px minmax(0, 1fr);
   gap: 14px;
+  /* Keep the navigator column stable while text follows the UI locale. */
   direction: ltr;
 }
 
 .questionLayout > * { direction: rtl; }
+:global(html[dir="ltr"]) .questionLayout > * { direction: ltr; }
 .questionNavigator {
   align-self: start;
   padding: 10px;

@@ -24,6 +24,7 @@ class CoursePlayerState extends Equatable {
   final List<AttachmentEntity> courseAttachments;
   final CourseGroupLinks groupLinks;
   final Map<String, LessonProgressEntity> progressMap;
+  final Set<String> incompleteQuizLessonIds;
   final int currentTabIndex;
   final bool isBookmarked;
   final bool isMarkingComplete;
@@ -45,6 +46,7 @@ class CoursePlayerState extends Equatable {
     this.courseAttachments = const [],
     this.groupLinks = const CourseGroupLinks(),
     this.progressMap = const {},
+    this.incompleteQuizLessonIds = const {},
     this.currentTabIndex = 0,
     this.isBookmarked = false,
     this.isMarkingComplete = false,
@@ -75,8 +77,14 @@ class CoursePlayerState extends Equatable {
 
   /// Check if all lessons are completed (for showing complete course button)
   bool get allLessonsCompleted {
-    if (allLessons.isEmpty) return false;
-    return allLessons.every((lesson) => isLessonCompleted(lesson.id));
+    final mandatoryLessons =
+        allLessons.where((lesson) => lesson.isMandatory).toList();
+    if (mandatoryLessons.isEmpty) return false;
+    return mandatoryLessons.every(
+      (lesson) =>
+          isLessonCompleted(lesson.id) &&
+          !incompleteQuizLessonIds.contains(lesson.id),
+    );
   }
 
   /// Show complete course button only when on last lesson and all lessons are completed
@@ -110,11 +118,16 @@ class CoursePlayerState extends Equatable {
 
   /// Get completed lessons count
   int get completedLessonsCount {
-    return progressMap.values.where((p) => p.isCompleted).length;
+    return allLessons
+        .where(
+          (lesson) => lesson.isMandatory && isLessonCompleted(lesson.id),
+        )
+        .length;
   }
 
   /// Get total lessons count
-  int get totalLessonsCount => allLessons.length;
+  int get totalLessonsCount =>
+      allLessons.where((lesson) => lesson.isMandatory).length;
 
   /// Get overall progress percentage
   double get overallProgress {
@@ -127,12 +140,55 @@ class CoursePlayerState extends Equatable {
     return progressMap[lessonId]?.isCompleted ?? false;
   }
 
+  /// A lesson opens only after all mandatory lessons before it are completed
+  /// and every published quiz attached to those lessons is submitted.
+  bool isLessonUnlocked(String lessonId) {
+    final targetIndex =
+        allLessons.indexWhere((lesson) => lesson.id == lessonId);
+    if (targetIndex < 0) return false;
+
+    for (var index = 0; index < targetIndex; index++) {
+      final previousLesson = allLessons[index];
+      if (!previousLesson.isMandatory) continue;
+      if (!isLessonCompleted(previousLesson.id) ||
+          incompleteQuizLessonIds.contains(previousLesson.id)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool isSectionUnlocked(SectionEntity section) {
+    if (section.lessons.isEmpty) return true;
+    return isLessonUnlocked(section.lessons.first.id);
+  }
+
+  bool get canAdvanceFromCurrentLesson {
+    final lesson = currentLesson;
+    if (lesson == null) return false;
+    final hasDestination =
+        hasNextLesson || (isLastLesson && !allLessonsCompleted);
+    return hasDestination && !incompleteQuizLessonIds.contains(lesson.id);
+  }
+
   /// Get first incomplete lesson
   LessonEntity? get firstIncompleteLesson {
     return allLessons.firstWhere(
       (lesson) => !isLessonCompleted(lesson.id),
       orElse: () => allLessons.first,
     );
+  }
+
+  LessonEntity? get firstAccessibleIncompleteLesson {
+    for (final lesson in allLessons) {
+      if (isLessonUnlocked(lesson.id) && !isLessonCompleted(lesson.id)) {
+        return lesson;
+      }
+    }
+    for (final lesson in allLessons) {
+      if (isLessonUnlocked(lesson.id)) return lesson;
+    }
+    return null;
   }
 
   /// Get section completed count
@@ -158,6 +214,7 @@ class CoursePlayerState extends Equatable {
     List<AttachmentEntity>? courseAttachments,
     CourseGroupLinks? groupLinks,
     Map<String, LessonProgressEntity>? progressMap,
+    Set<String>? incompleteQuizLessonIds,
     int? currentTabIndex,
     bool? isBookmarked,
     bool? isMarkingComplete,
@@ -180,6 +237,8 @@ class CoursePlayerState extends Equatable {
       courseAttachments: courseAttachments ?? this.courseAttachments,
       groupLinks: groupLinks ?? this.groupLinks,
       progressMap: progressMap ?? this.progressMap,
+      incompleteQuizLessonIds:
+          incompleteQuizLessonIds ?? this.incompleteQuizLessonIds,
       currentTabIndex: currentTabIndex ?? this.currentTabIndex,
       isBookmarked: isBookmarked ?? this.isBookmarked,
       isMarkingComplete: isMarkingComplete ?? this.isMarkingComplete,
@@ -204,6 +263,7 @@ class CoursePlayerState extends Equatable {
         courseAttachments,
         groupLinks,
         progressMap,
+        incompleteQuizLessonIds,
         currentTabIndex,
         isBookmarked,
         isMarkingComplete,

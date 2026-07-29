@@ -34,6 +34,11 @@ abstract class CoursePlayerRemoteDataSource {
     required String enrollmentId,
   });
 
+  Future<Set<String>> getIncompleteQuizLessonIds({
+    required String courseId,
+    required String enrollmentId,
+  });
+
   Future<LessonProgressModel> updateLessonProgress({
     required String lessonId,
     required String enrollmentId,

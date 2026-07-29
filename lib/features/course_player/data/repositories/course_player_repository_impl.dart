@@ -99,6 +99,22 @@ class CoursePlayerRepositoryImpl implements CoursePlayerRepository {
   }
 
   @override
+  Future<Either<Failure, Set<String>>> getIncompleteQuizLessonIds({
+    required String courseId,
+    required String enrollmentId,
+  }) async {
+    try {
+      final lessonIds = await remoteDataSource.getIncompleteQuizLessonIds(
+        courseId: courseId,
+        enrollmentId: enrollmentId,
+      );
+      return Right(lessonIds);
+    } catch (e) {
+      return Left(ErrorHandler.handle(e).failure);
+    }
+  }
+
+  @override
   Future<Either<Failure, LessonProgressEntity>> updateLessonProgress({
     required String lessonId,
     required String enrollmentId,

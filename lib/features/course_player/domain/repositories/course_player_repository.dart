@@ -38,6 +38,12 @@ abstract class CoursePlayerRepository {
     required String enrollmentId,
   });
 
+  /// Lesson IDs that still have at least one unsubmitted published quiz.
+  Future<Either<Failure, Set<String>>> getIncompleteQuizLessonIds({
+    required String courseId,
+    required String enrollmentId,
+  });
+
   /// Update lesson progress (watched seconds, position)
   Future<Either<Failure, LessonProgressEntity>> updateLessonProgress({
     required String lessonId,
