@@ -552,7 +552,10 @@
     "invalid_preview_link": "Invalid preview video link",
     "cannot_open_preview": "Couldn't open preview video",
     "courses": "course",
-    "get_for_free": "Get for Free"
+    "get_for_free": "Get for Free",
+    "subscription_expired": "Subscription package expired",
+    "renew_to_continue": "Renew to continue learning",
+    "renew_subscription": "Renew Subscription"
   },
   "instructor": {
     "instructor": "Instructor",

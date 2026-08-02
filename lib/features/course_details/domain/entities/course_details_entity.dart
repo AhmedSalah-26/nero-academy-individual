@@ -10,7 +10,8 @@ enum EnrollmentStatus {
   notEnrolled,
   inCart,
   enrolled,
-  completed;
+  completed,
+  expired;
 
   static EnrollmentStatus fromString(String? value) {
     switch (value?.toLowerCase()) {
@@ -18,6 +19,8 @@ enum EnrollmentStatus {
         return EnrollmentStatus.enrolled;
       case 'completed':
         return EnrollmentStatus.completed;
+      case 'expired':
+        return EnrollmentStatus.expired;
       default:
         return EnrollmentStatus.notEnrolled;
     }
@@ -173,8 +176,12 @@ class CourseDetailsEntity extends Equatable {
     if (isFree || currentPrice <= 0) return null;
     if (pricingOptions.isNotEmpty) {
       final option = pricingOptions.first;
-      if (option.discountPrice == null || option.discountPrice! >= option.price) return null;
-      return ((option.price - option.discountPrice!) / option.price * 100).round();
+      if (option.discountPrice == null ||
+          option.discountPrice! >= option.price) {
+        return null;
+      }
+      return ((option.price - option.discountPrice!) / option.price * 100)
+          .round();
     }
     if (discountPrice == null || discountPrice! >= price) return null;
     // If flash sale, only show discount when active
@@ -195,6 +202,9 @@ class CourseDetailsEntity extends Equatable {
   bool get isEnrolled =>
       enrollmentStatus == EnrollmentStatus.enrolled ||
       enrollmentStatus == EnrollmentStatus.completed;
+
+  bool get isSubscriptionExpired =>
+      enrollmentStatus == EnrollmentStatus.expired;
 
   @override
   List<Object?> get props => [

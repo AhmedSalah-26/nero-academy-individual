@@ -572,7 +572,10 @@
     "invalid_preview_link": "رابط فيديو المعاينة غير صالح",
     "cannot_open_preview": "تعذر فتح فيديو المعاينة",
     "courses": "دورة",
-    "get_for_free": "احصل عليه مجاناً"
+    "get_for_free": "احصل عليه مجاناً",
+    "subscription_expired": "باكدج انتهى الاشتراك",
+    "renew_to_continue": "جدد الاشتراك لاستكمال التعلم",
+    "renew_subscription": "تجديد الاشتراك"
   },
   "instructor": {
     "instructor": "المدرس",

@@ -162,7 +162,7 @@ class CourseDetailsRemoteDataSourceImpl
         // Check enrollment status
         final enrollmentResult = await supabaseClient
             .from('enrollments')
-            .select('id, status, progress_percentage')
+            .select('id, status, progress_percentage, access_expires_at')
             .eq('user_id', userId)
             .eq('course_id', courseId)
             .limit(1)
@@ -171,6 +171,15 @@ class CourseDetailsRemoteDataSourceImpl
         if (enrollmentResult != null) {
           enrollmentId = enrollmentResult['id'] as String?;
           enrollmentStatus = enrollmentResult['status'] as String?;
+          final accessExpiresAt = _parseDateTime(
+            enrollmentResult['access_expires_at'],
+          );
+          if ((enrollmentStatus == 'active' ||
+                  enrollmentStatus == 'completed') &&
+              accessExpiresAt != null &&
+              !accessExpiresAt.isAfter(DateTime.now().toUtc())) {
+            enrollmentStatus = 'expired';
+          }
           progressPercentage =
               (enrollmentResult['progress_percentage'] as num?)?.toDouble() ??
                   0;
@@ -625,6 +634,39 @@ class CourseDetailsRemoteDataSourceImpl
 
       final parentEnrollmentId = parentEnrollmentResponse['id'] as String;
 
+      final existingEnrollment = await supabaseClient
+          .from('enrollments')
+          .select('id, status, access_expires_at')
+          .eq('user_id', userId)
+          .eq('course_id', courseId)
+          .maybeSingle();
+
+      final now = DateTime.now().toUtc();
+
+      if (existingEnrollment != null) {
+        final existingStatus = existingEnrollment['status'] as String?;
+        final accessExpiresAt =
+            _parseDateTime(existingEnrollment['access_expires_at']);
+        final isExpired = existingStatus == 'expired' ||
+            ((existingStatus == 'active' || existingStatus == 'completed') &&
+                accessExpiresAt != null &&
+                !accessExpiresAt.isAfter(now));
+
+        if (existingStatus == 'pending' || isExpired) {
+          await supabaseClient.from('enrollments').update({
+            'parent_enrollment_id': parentEnrollmentId,
+            'status': 'active',
+            'price': 0,
+            'discount': 0,
+            'access_expires_at': null,
+            'enrolled_at': now.toIso8601String(),
+          }).eq('id', existingEnrollment['id']);
+          return;
+        }
+
+        throw const ServerException('cart.already_enrolled');
+      }
+
       await supabaseClient.from('enrollments').insert({
         'user_id': userId,
         'course_id': courseId,
@@ -636,12 +678,18 @@ class CourseDetailsRemoteDataSourceImpl
         'price': 0,
         'discount': 0,
         'total_watch_time': 0,
-        'enrolled_at': DateTime.now().toIso8601String(),
+        'enrolled_at': now.toIso8601String(),
       });
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value.toUtc();
+    return DateTime.tryParse(value.toString())?.toUtc();
   }
 }

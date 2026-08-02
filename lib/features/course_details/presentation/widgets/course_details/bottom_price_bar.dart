@@ -62,6 +62,32 @@ class BottomPriceBar extends StatelessWidget {
   }
 
   Widget _buildPriceSection(bool isDark) {
+    if (course.isSubscriptionExpired) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'course_details.subscription_expired'.tr(),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.warning,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'course_details.renew_to_continue'.tr(),
+            style: TextStyle(
+              fontSize: 12,
+              color:
+                  isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            ),
+          ),
+        ],
+      );
+    }
+
     if (course.isFree) {
       return Text(
         'course_details.free'.tr(),
@@ -135,7 +161,12 @@ class BottomPriceBar extends StatelessWidget {
     VoidCallback? onPressed;
     Color buttonColor = AppColors.primary;
 
-    if (course.isEnrolled) {
+    if (course.isSubscriptionExpired) {
+      buttonText = 'course_details.renew_subscription'.tr();
+      onPressed =
+          course.isFree || course.currentPrice == 0 ? onEnroll : onAddToCart;
+      buttonColor = AppColors.warning;
+    } else if (course.isEnrolled) {
       buttonText = course.progressPercentage > 0
           ? 'course_details.continue_learning'.tr()
           : 'course_details.start_learning'.tr();

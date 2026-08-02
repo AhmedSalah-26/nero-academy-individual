@@ -48,11 +48,12 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       // Fetch active/completed enrollments to filter them out of the cart
       final enrolledResponse = await supabase
           .from('enrollments')
-          .select('course_id')
+          .select('course_id, access_expires_at')
           .eq('user_id', userId)
           .inFilter('status', ['active', 'completed']);
 
       final enrolledIds = (enrolledResponse as List)
+          .where((e) => !_isAccessExpired(e['access_expires_at']))
           .map((e) => e['course_id'] as String)
           .toSet();
 
@@ -97,14 +98,17 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       // Check if user is already enrolled in this course
       final enrollment = await supabase
           .from('enrollments')
-          .select('id, status')
+          .select('id, status, access_expires_at')
           .eq('user_id', userId)
           .eq('course_id', courseId)
           .maybeSingle();
 
       if (enrollment != null) {
         final status = enrollment['status'] as String?;
-        if (status == 'active' || status == 'completed') {
+        final isExpired = status == 'expired' ||
+            ((status == 'active' || status == 'completed') &&
+                _isAccessExpired(enrollment['access_expires_at']));
+        if ((status == 'active' || status == 'completed') && !isExpired) {
           throw const ValidationException('cart.already_enrolled');
         } else if (status == 'pending') {
           throw const ValidationException('cart.pending_enrollment');
@@ -359,12 +363,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
       // to prevent unique constraint violation on enrollments table
       final enrolledCheck = await supabase
           .from('enrollments')
-          .select('course_id')
+          .select('course_id, access_expires_at')
           .eq('user_id', userId)
           .inFilter('status', ['active', 'completed']);
 
-      final alreadyEnrolledIds =
-          (enrolledCheck as List).map((e) => e['course_id'] as String).toSet();
+      final alreadyEnrolledIds = (enrolledCheck as List)
+          .where((e) => !_isAccessExpired(e['access_expires_at']))
+          .map((e) => e['course_id'] as String)
+          .toSet();
 
       final filteredCartItems = (cartItems as List)
           .where((item) => !alreadyEnrolledIds.contains(item['course_id']))
@@ -560,7 +566,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
         final existing = await supabase
             .from('enrollments')
-            .select('id, status')
+            .select('id, status, access_expires_at')
             .eq('user_id', userId)
             .eq('course_id', courseId)
             .maybeSingle();
@@ -648,7 +654,10 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
           }
         } else {
           final existingStatus = existing['status'] as String?;
-          if (existingStatus == 'pending') {
+          final existingIsExpired = existingStatus == 'expired' ||
+              ((existingStatus == 'active' || existingStatus == 'completed') &&
+                  _isAccessExpired(existing['access_expires_at']));
+          if (existingStatus == 'pending' || existingIsExpired) {
             AppLogger.i(
                 '🛒 [Checkout] Updating existing pending enrollment...');
             await supabase.from('enrollments').update({
@@ -657,6 +666,7 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
               'price': priceAtAdd,
               'pricing_option': pricingOption,
               'discount': itemCouponDiscount,
+              'access_expires_at': null,
               'enrolled_at': DateTime.now().toIso8601String(),
             }).eq('id', existing['id']);
           } else {
@@ -735,9 +745,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
   DateTime? _parseDateTime(dynamic value) {
     if (value == null) return null;
-    if (value is DateTime) return value;
-    if (value is String) return DateTime.tryParse(value);
+    if (value is DateTime) return value.toUtc();
+    if (value is String) return DateTime.tryParse(value)?.toUtc();
     return null;
+  }
+
+  bool _isAccessExpired(dynamic value) {
+    final expiresAt = _parseDateTime(value);
+    return expiresAt != null && !expiresAt.isAfter(DateTime.now().toUtc());
   }
 
   CoursePricingOption? _resolveSelectedPricingOption(
