@@ -49,14 +49,26 @@ mixin CoursePlayerProgressMixin {
     try {
       final quizRows = await client
           .from('quizzes')
-          .select('id, lesson_id')
+          .select('id, lesson_id, available_until')
           .eq('course_id', courseId)
           .eq('is_published', true)
           .not('lesson_id', 'is', null);
 
+      final now = DateTime.now().toUtc();
+
+      // Filter out expired quizzes — if the quiz window has closed the student
+      // can no longer take it, so we should not keep the lesson locked.
       final quizzes = (quizRows as List)
           .whereType<Map<String, dynamic>>()
-          .where((row) => row['id'] != null && row['lesson_id'] != null)
+          .where((row) {
+            if (row['id'] == null || row['lesson_id'] == null) return false;
+            final availableUntil = row['available_until'] as String?;
+            if (availableUntil != null) {
+              final until = DateTime.parse(availableUntil).toUtc();
+              if (now.isAfter(until)) return false; // expired → ignore
+            }
+            return true;
+          })
           .toList();
       if (quizzes.isEmpty) return <String>{};
 

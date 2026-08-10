@@ -71,11 +71,24 @@ class CourseDetailsRemoteDataSourceImpl
         throw const ServerException('Course not found');
       }
 
-      // Extract quizzes count
+      // Extract quizzes count — handle int, String, or BigInt from Supabase
       final quizzesData = data['quizzes'] as List?;
-      final quizzesCount = quizzesData?.isNotEmpty == true
-          ? quizzesData!.first['count'] as int? ?? 0
-          : 0;
+      int quizzesCount = 0;
+      if (quizzesData != null && quizzesData.isNotEmpty) {
+        final firstItem = quizzesData.first;
+        if (firstItem is Map<String, dynamic>) {
+          final countVal = firstItem['count'];
+          if (countVal is int) {
+            quizzesCount = countVal;
+          } else if (countVal != null) {
+            quizzesCount = int.tryParse(countVal.toString()) ?? 0;
+          }
+        }
+      }
+      // Fallback: use the DB field if the aggregation returned 0
+      if (quizzesCount == 0) {
+        quizzesCount = data['total_quizzes'] as int? ?? 0;
+      }
       data['total_quizzes'] = quizzesCount;
 
       // Get instructor_profiles for additional stats
@@ -210,6 +223,30 @@ class CourseDetailsRemoteDataSourceImpl
 
       if (!isOwnerInstructor) {
         _filterUnpublishedCurriculumForStudent(data);
+      }
+
+      // Calculate total_duration from sections data (sum of video_duration in
+      // seconds, converted to minutes). This ensures the value is always
+      // up-to-date even if the courses.total_duration DB column is stale.
+      final finalSectionsForDuration =
+          (data['sections'] as List?)?.cast<dynamic>() ?? [];
+      int computedTotalDurationSeconds = 0;
+      for (final section in finalSectionsForDuration) {
+        if (section is Map<String, dynamic>) {
+          final lessons = (section['lessons'] as List?)?.cast<dynamic>() ?? [];
+          for (final lesson in lessons) {
+            if (lesson is Map<String, dynamic>) {
+              computedTotalDurationSeconds +=
+                  (lesson['video_duration'] as int? ?? 0);
+            }
+          }
+        }
+      }
+      final computedTotalDurationMinutes =
+          (computedTotalDurationSeconds / 60).round();
+      // Use computed duration; fall back to DB value only if computed is 0
+      if (computedTotalDurationMinutes > 0) {
+        data['total_duration'] = computedTotalDurationMinutes;
       }
 
       return CourseDetailsModel.fromJson(data);

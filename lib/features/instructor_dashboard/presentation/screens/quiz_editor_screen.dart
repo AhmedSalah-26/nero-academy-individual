@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/routing/app_router.dart';
 import '../cubit/instructor_quizzes_cubit.dart';
 import '../widgets/instructor_quizzes/quiz_form_widgets.dart';
+
+enum _QuizScope { course, section, lesson }
 
 /// Quiz Editor Screen - Full page for editing quiz settings
 class QuizEditorScreen extends StatefulWidget {
@@ -34,6 +38,18 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
   DateTime? _availableFrom;
   DateTime? _availableUntil;
 
+  // Course / scope selection
+  List<Map<String, dynamic>> _courses = [];
+  List<Map<String, dynamic>> _sections = [];
+  List<Map<String, dynamic>> _lessons = [];
+  String? _selectedCourseId;
+  String? _selectedSectionId;
+  String? _selectedLessonId;
+  bool _isLoadingCourses = true;
+  bool _isLoadingSections = false;
+  bool _isLoadingLessons = false;
+  _QuizScope _quizScope = _QuizScope.course;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +68,22 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
     _showCorrectAnswers = widget.quiz?.showCorrectAnswers ?? true;
     _availableFrom = widget.quiz?.availableFrom?.toLocal();
     _availableUntil = widget.quiz?.availableUntil?.toLocal();
+
+    // Pre-fill scope from existing quiz
+    if (widget.quiz != null) {
+      _selectedCourseId = widget.quiz!.courseId;
+      _selectedSectionId = widget.quiz!.sectionId;
+      _selectedLessonId = widget.quiz!.lessonId;
+      if (widget.quiz!.lessonId != null) {
+        _quizScope = _QuizScope.lesson;
+      } else if (widget.quiz!.sectionId != null) {
+        _quizScope = _QuizScope.section;
+      } else {
+        _quizScope = _QuizScope.course;
+      }
+    }
+
+    _loadCourses();
   }
 
   @override
@@ -61,6 +93,72 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
     _passingScoreController.dispose();
     _timeLimitController.dispose();
     super.dispose();
+  }
+
+  // ── Data loaders ─────────────────────────────────────────────────────────
+
+  Future<void> _loadCourses() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final response = await supabase
+          .from('courses')
+          .select('id, title_ar, title_en')
+          .eq('instructor_id', userId)
+          .order('created_at', ascending: false);
+
+      if (!mounted) return;
+      setState(() {
+        _courses = List<Map<String, dynamic>>.from(response as List);
+        _isLoadingCourses = false;
+      });
+
+      // Pre-load sections/lessons if course is already selected
+      if (_selectedCourseId != null) {
+        await _loadCourseContent(_selectedCourseId!);
+      }
+    } catch (e) {
+      AppLogger.e('[QuizEditorScreen] Error loading courses: $e');
+      if (mounted) setState(() => _isLoadingCourses = false);
+    }
+  }
+
+  Future<void> _loadCourseContent(String courseId) async {
+    setState(() {
+      _isLoadingSections = true;
+      _isLoadingLessons = true;
+    });
+    try {
+      final supabase = Supabase.instance.client;
+      final sectionsResponse = await supabase
+          .from('sections')
+          .select('id, title_ar, title_en, sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order');
+      final lessonsResponse = await supabase
+          .from('lessons')
+          .select('id, section_id, title_ar, title_en, sort_order')
+          .eq('course_id', courseId)
+          .order('sort_order');
+
+      if (!mounted) return;
+      setState(() {
+        _sections = List<Map<String, dynamic>>.from(sectionsResponse as List);
+        _lessons = List<Map<String, dynamic>>.from(lessonsResponse as List);
+        _isLoadingSections = false;
+        _isLoadingLessons = false;
+      });
+    } catch (e) {
+      AppLogger.e('[QuizEditorScreen] Error loading course content: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingSections = false;
+          _isLoadingLessons = false;
+        });
+      }
+    }
   }
 
   @override
@@ -85,6 +183,10 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
             children: [
               _buildInfoCard(isArabic, isDark),
               const SizedBox(height: 20),
+              _buildCourseSection(isArabic, isDark),
+              const SizedBox(height: 20),
+              _buildQuizScopeSection(isArabic, isDark),
+              const SizedBox(height: 20),
               _buildTitleSection(isArabic, isDark),
               const SizedBox(height: 20),
               _buildSettingsSection(isArabic, isDark),
@@ -92,6 +194,7 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
               _buildAvailabilitySection(isArabic, isDark),
               const SizedBox(height: 20),
               _buildOptionsSection(isArabic, isDark),
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -126,6 +229,208 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCourseSection(bool isArabic, bool isDark) {
+    return QuizSectionCard(
+      icon: Icons.school,
+      iconColor: AppColors.primary,
+      title: isArabic ? 'اختر الكورس' : 'Select Course',
+      isRequired: true,
+      isArabic: isArabic,
+      isDark: isDark,
+      child: _isLoadingCourses
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : DropdownButtonFormField<String>(
+              initialValue: _selectedCourseId,
+              isExpanded: true,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: isArabic ? 'اختر الكورس' : 'Select course',
+                prefixIcon: const Icon(Icons.book_outlined),
+              ),
+              items: _courses.map((course) {
+                return DropdownMenuItem<String>(
+                  value: course['id'] as String,
+                  child: Text(
+                    isArabic
+                        ? course['title_ar'] ?? ''
+                        : course['title_en'] ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCourseId = value;
+                  _selectedSectionId = null;
+                  _selectedLessonId = null;
+                  _sections = [];
+                  _lessons = [];
+                });
+                if (value != null) {
+                  _loadCourseContent(value);
+                }
+              },
+              validator: (value) {
+                if (value == null) {
+                  return isArabic
+                      ? 'يرجى اختيار الكورس'
+                      : 'Please select a course';
+                }
+                return null;
+              },
+            ),
+    );
+  }
+
+  Widget _buildQuizScopeSection(bool isArabic, bool isDark) {
+    final isCourseLevelQuiz = _quizScope == _QuizScope.course;
+    return QuizSectionCard(
+      icon: Icons.account_tree_outlined,
+      iconColor: AppColors.info,
+      title: isArabic ? 'نطاق الاختبار' : 'Quiz Scope',
+      isRequired: true,
+      isArabic: isArabic,
+      isDark: isDark,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SegmentedButton<_QuizScope>(
+            segments: [
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.course,
+                icon: const Icon(Icons.school_outlined),
+                label: Text(isArabic ? 'اختبار شامل' : 'Course quiz'),
+              ),
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.section,
+                icon: const Icon(Icons.view_agenda_outlined),
+                label: Text(isArabic ? 'اختبار سيكشن' : 'Section quiz'),
+              ),
+              ButtonSegment<_QuizScope>(
+                value: _QuizScope.lesson,
+                icon: const Icon(Icons.menu_book_outlined),
+                label: Text(isArabic ? 'اختبار درس' : 'Lesson quiz'),
+              ),
+            ],
+            selected: {_quizScope},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _quizScope = selection.first;
+                if (_quizScope == _QuizScope.course) {
+                  _selectedSectionId = null;
+                  _selectedLessonId = null;
+                } else if (_quizScope == _QuizScope.section) {
+                  _selectedLessonId = null;
+                }
+              });
+              if (!isCourseLevelQuiz &&
+                  _selectedCourseId != null &&
+                  _lessons.isEmpty &&
+                  !_isLoadingLessons) {
+                _loadCourseContent(_selectedCourseId!);
+              }
+            },
+          ),
+          if (!isCourseLevelQuiz) ...[
+            const SizedBox(height: 16),
+            if (_selectedCourseId == null)
+              Text(
+                isArabic
+                    ? 'اختر الكورس أولاً لعرض الدروس'
+                    : 'Select a course first to load lessons',
+                style: TextStyle(
+                  color: isDark ? AppColors.textMutedDark : AppColors.grey600,
+                ),
+              )
+            else if (_isLoadingSections || _isLoadingLessons)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else ...[
+              DropdownButtonFormField<String>(
+                initialValue: _selectedSectionId,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: isArabic ? 'اختر السيكشن' : 'Select section',
+                  prefixIcon: const Icon(Icons.view_agenda_outlined),
+                ),
+                items: _sections.map((section) {
+                  return DropdownMenuItem<String>(
+                    value: section['id'] as String,
+                    child: Text(
+                      isArabic
+                          ? section['title_ar'] ?? ''
+                          : section['title_en'] ?? section['title_ar'] ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedSectionId = value;
+                    _selectedLessonId = null;
+                  });
+                },
+                validator: (value) {
+                  if (!isCourseLevelQuiz && value == null) {
+                    return isArabic
+                        ? 'يرجى اختيار السيكشن'
+                        : 'Please select a section';
+                  }
+                  return null;
+                },
+              ),
+              if (_quizScope == _QuizScope.lesson) ...[
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedLessonId,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: isArabic ? 'اختر الدرس' : 'Select lesson',
+                    prefixIcon: const Icon(Icons.play_lesson_outlined),
+                  ),
+                  items: _lessons
+                      .where((lesson) =>
+                          _selectedSectionId == null ||
+                          lesson['section_id'] == _selectedSectionId)
+                      .map((lesson) {
+                    return DropdownMenuItem<String>(
+                      value: lesson['id'] as String,
+                      child: Text(
+                        isArabic
+                            ? lesson['title_ar'] ?? ''
+                            : lesson['title_en'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => _selectedLessonId = value),
+                  validator: (value) {
+                    if (_quizScope == _QuizScope.lesson && value == null) {
+                      return isArabic
+                          ? 'يرجى اختيار الدرس'
+                          : 'Please select a lesson';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ],
+          ],
         ],
       ),
     );
@@ -557,6 +862,16 @@ class _QuizEditorScreenState extends State<QuizEditorScreen> {
       'available_until': _availableUntil,
       'clear_available_from': _availableFrom == null,
       'clear_available_until': _availableUntil == null,
+      // Scope fields
+      if (_selectedCourseId != null) 'course_id': _selectedCourseId,
+      'section_id': _quizScope == _QuizScope.course
+          ? null
+          : _selectedSectionId,
+      'lesson_id': _quizScope == _QuizScope.lesson
+          ? _selectedLessonId
+          : null,
+      'clear_section_id': _quizScope == _QuizScope.course,
+      'clear_lesson_id': _quizScope != _QuizScope.lesson,
     };
 
     final success = await widget.onSave(data);

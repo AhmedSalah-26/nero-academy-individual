@@ -170,6 +170,11 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
   /// Update quiz
   Future<bool> updateQuiz({
     required String quizId,
+    String? courseId,
+    String? sectionId,
+    String? lessonId,
+    bool clearSectionId = false,
+    bool clearLessonId = false,
     String? titleAr,
     String? titleEn,
     String? descriptionAr,
@@ -190,6 +195,17 @@ class InstructorQuizzesCubit extends Cubit<InstructorQuizzesState> {
 
     try {
       final updates = <String, dynamic>{};
+      if (courseId != null) updates['course_id'] = courseId;
+      if (clearSectionId) {
+        updates['section_id'] = null;
+      } else if (sectionId != null) {
+        updates['section_id'] = sectionId;
+      }
+      if (clearLessonId) {
+        updates['lesson_id'] = null;
+      } else if (lessonId != null) {
+        updates['lesson_id'] = lessonId;
+      }
       if (titleAr != null) updates['title_ar'] = titleAr;
       if (titleEn != null) updates['title_en'] = titleEn;
       if (descriptionAr != null) updates['description_ar'] = descriptionAr;

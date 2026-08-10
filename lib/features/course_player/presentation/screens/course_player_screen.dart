@@ -550,15 +550,27 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         return FutureBuilder<List<QuizEntity>>(
           future: _courseQuizzesFuture,
           builder: (context, snapshot) {
+            final quizzes = snapshot.data ?? const [];
             return CurriculumList(
               sections: state.sections,
               currentLesson: state.currentLesson,
               completedLessons: const {},
-              quizzes: snapshot.data ?? const [],
+              quizzes: quizzes,
               isDark: isDark,
-              onLessonTap: (lesson) {
+              onLessonTap: (lesson) async {
                 HapticFeedback.lightImpact();
-                context.read<CoursePlayerCubit>().selectLesson(lesson);
+                final isArabic =
+                    Localizations.localeOf(context).languageCode == 'ar';
+                final result = await context
+                    .read<CoursePlayerCubit>()
+                    .selectLesson(lesson);
+                if (!mounted) return;
+                _handleLessonSelectResult(
+                  result: result,
+                  lesson: lesson,
+                  quizzes: quizzes,
+                  isArabic: isArabic,
+                );
               },
               isLessonCompleted: state.isLessonCompleted,
               isLessonLocked: (lessonId) => !state.isLessonUnlocked(lessonId),
@@ -623,6 +635,77 @@ class _CoursePlayerScreenState extends State<CoursePlayerScreen>
         return const SizedBox.shrink();
       default:
         return const SizedBox.shrink();
+    }
+  }
+
+  /// Shows contextual snackbar feedback after attempting to open a lesson.
+  void _handleLessonSelectResult({
+    required LessonSelectResult result,
+    required LessonEntity lesson,
+    required List<QuizEntity> quizzes,
+    required bool isArabic,
+  }) {
+    switch (result) {
+      case LessonSelectResult.success:
+        // Check if the lesson has a quiz with an expired window — inform the student
+        final hasExpiredQuiz = quizzes.any(
+          (q) => q.lessonId == lesson.id && q.isExpired,
+        );
+        if (hasExpiredQuiz) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.lock_clock_rounded,
+                      color: Colors.white, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      isArabic
+                          ? 'انتهى وقت الاختبار المرتبط بهذا الدرس — يمكنك مشاهدة الدرس بدون اختبار'
+                          : 'The quiz for this lesson has expired — you can still watch the lesson',
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: AppColors.warning,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+        break;
+
+      case LessonSelectResult.lockedByPreviousContent:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.lock_outline, color: Colors.white, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    isArabic
+                        ? 'أكمل الدروس والاختبارات السابقة أولاً لفتح هذا الدرس'
+                        : 'Complete previous lessons and quizzes to unlock this lesson',
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.textMutedLight,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        break;
+
+      case LessonSelectResult.quizExpired:
+        // This case is kept for extensibility but currently handled in data layer
+        break;
     }
   }
 

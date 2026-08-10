@@ -234,7 +234,7 @@ class _YouTubePlayerWidgetState extends State<YouTubePlayerWidget>
           children: [
             YoutubePlayer(
               controller: controller,
-              showVideoProgressIndicator: true,
+              showVideoProgressIndicator: false,
               progressIndicatorColor: AppColors.primary,
               progressColors: const ProgressBarColors(
                 playedColor: AppColors.primary,

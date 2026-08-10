@@ -177,6 +177,11 @@ class _InstructorQuizzesContentState extends State<InstructorQuizzesContent> {
       onSave: (data) async {
         return await context.read<InstructorQuizzesCubit>().updateQuiz(
               quizId: quiz.id,
+              courseId: data['course_id'] as String?,
+              sectionId: data['section_id'] as String?,
+              lessonId: data['lesson_id'] as String?,
+              clearSectionId: data['clear_section_id'] == true,
+              clearLessonId: data['clear_lesson_id'] == true,
               titleAr: data['title_ar'],
               titleEn: data['title_en'],
               passingScore: data['passing_score'],

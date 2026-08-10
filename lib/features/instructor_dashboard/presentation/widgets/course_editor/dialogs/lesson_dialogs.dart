@@ -103,6 +103,7 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
   final titleArController = TextEditingController();
   final titleEnController = TextEditingController();
   final videoUrlController = TextEditingController();
+  final durationController = TextEditingController();
   bool isFree = false;
   bool isPublished = true;
   bool useScheduledPublish = false;
@@ -165,6 +166,16 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
               controller: titleEnController,
               decoration: InputDecoration(
                 labelText: isArabic ? 'العنوان (إنجليزي)' : 'Title (English)',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: durationController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: isArabic ? 'مدة الدرس (دقائق)' : 'Duration (minutes)',
+                hintText: isArabic ? 'مثال: 30' : 'e.g. 30',
+                prefixIcon: const Icon(Icons.timer_outlined),
               ),
             ),
             const SizedBox(height: 16),
@@ -345,6 +356,8 @@ void showAddLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           titleEn: titleEnController.text,
                           type: lessonType,
                           order: 0,
+                          durationMinutes:
+                              int.tryParse(durationController.text) ?? 0,
                           isFree: isFree,
                           isPublished: isPublished,
                           availableFrom: useScheduledPublish ? publishAt : null,
@@ -382,6 +395,9 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
   final titleArController = TextEditingController(text: lesson.titleAr);
   final titleEnController = TextEditingController(text: lesson.titleEn);
   final videoUrlController = TextEditingController(text: lesson.videoUrl ?? '');
+  final durationController = TextEditingController(
+    text: lesson.durationMinutes > 0 ? lesson.durationMinutes.toString() : '',
+  );
   bool isFree = lesson.isFree;
   bool isPublished = lesson.isPublished;
   bool useScheduledPublish =
@@ -446,6 +462,16 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
               controller: titleEnController,
               decoration: InputDecoration(
                 labelText: isArabic ? 'العنوان (إنجليزي)' : 'Title (English)',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: durationController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: isArabic ? 'مدة الدرس (دقائق)' : 'Duration (minutes)',
+                hintText: isArabic ? 'مثال: 30' : 'e.g. 30',
+                prefixIcon: const Icon(Icons.timer_outlined),
               ),
             ),
             const SizedBox(height: 16),
@@ -627,6 +653,9 @@ void showEditLessonDialog(BuildContext context, CourseEditorCubit cubit,
                           titleAr: titleArController.text,
                           titleEn: titleEnController.text,
                           type: lessonType,
+                          durationMinutes:
+                              int.tryParse(durationController.text) ??
+                                  lesson.durationMinutes,
                           isFree: isFree,
                           isPublished: isPublished,
                           availableFrom: useScheduledPublish ? publishAt : null,

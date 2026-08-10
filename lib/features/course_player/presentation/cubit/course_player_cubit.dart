@@ -15,6 +15,19 @@ import '../../domain/usecases/delete_bookmark_usecase.dart';
 import '../../domain/repositories/course_player_repository.dart';
 import 'course_player_state.dart';
 
+/// Result returned by [CoursePlayerCubit.selectLesson]
+enum LessonSelectResult {
+  /// Lesson opened successfully
+  success,
+
+  /// Lesson is locked because a previous mandatory lesson/quiz is incomplete
+  lockedByPreviousContent,
+
+  /// Lesson is locked but the blocking quiz has expired — lesson now accessible
+  /// (caller should refresh access and retry, or just show info)
+  quizExpired,
+}
+
 /// Course Player Cubit
 class CoursePlayerCubit extends Cubit<CoursePlayerState> {
   final GetCourseContentUseCase getCourseContentUseCase;
@@ -276,14 +289,17 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
     }
   }
 
-  /// Select a lesson
-  Future<void> selectLesson(LessonEntity lesson) async {
-    if (_isClosed) return;
+  /// Select a lesson.
+  ///
+  /// Returns a [LessonSelectResult] so the UI layer can show appropriate
+  /// feedback without coupling the cubit to BuildContext / SnackBars.
+  Future<LessonSelectResult> selectLesson(LessonEntity lesson) async {
+    if (_isClosed) return LessonSelectResult.lockedByPreviousContent;
     if (!state.isLessonUnlocked(lesson.id)) {
       AppLogger.w(
         '[CoursePlayer] Complete previous lessons and quizzes first',
       );
-      return;
+      return LessonSelectResult.lockedByPreviousContent;
     }
     AppLogger.i('🎬 [CoursePlayer] Selecting lesson: ${lesson.id}');
 
@@ -316,6 +332,7 @@ class CoursePlayerCubit extends Cubit<CoursePlayerState> {
 
     // Save to history
     _saveToHistory(lesson, progress);
+    return LessonSelectResult.success;
   }
 
   /// Save lesson to history
