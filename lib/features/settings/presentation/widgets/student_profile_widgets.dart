@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import '../../../../core/theme/app_colors.dart';
 
 /// Shared small UI components for student profile screens
@@ -18,17 +17,29 @@ class ProfileCard extends StatelessWidget {
   final bool isDark;
   final Color? borderColor;
 
-  const ProfileCard({super.key, required this.child, required this.isDark, this.borderColor});
+  const ProfileCard(
+      {super.key, required this.child, required this.isDark, this.borderColor});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor ?? (isDark ? AppColors.borderDark : AppColors.borderLight)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10)],
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color:
+              borderColor ?? theme.colorScheme.outline.withValues(alpha: 0.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary
+                .withValues(alpha: isDark ? 0.08 : 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: child,
     );
@@ -54,24 +65,54 @@ class ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : AppColors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(18),
+        border:
+            Border.all(color: color.withValues(alpha: isDark ? 0.32 : 0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary
+                .withValues(alpha: isDark ? 0.06 : 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 6),
-          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
-          const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(fontSize: 11, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
-              textAlign: TextAlign.center),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isDark ? 0.18 : 0.1),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, color: color, size: 19),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -85,17 +126,23 @@ class ProfileMetaItem extends StatelessWidget {
   final bool isDark;
   final Color? color;
 
-  const ProfileMetaItem({super.key, required this.icon, required this.label, required this.isDark, this.color});
+  const ProfileMetaItem(
+      {super.key,
+      required this.icon,
+      required this.label,
+      required this.isDark,
+      this.color});
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? (isDark ? AppColors.textMutedDark : AppColors.textMutedLight);
+    final theme = Theme.of(context);
+    final c = color ?? theme.colorScheme.onSurface.withValues(alpha: 0.65);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 13, color: c),
         const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: c)),
+        Text(label, style: theme.textTheme.labelSmall?.copyWith(color: c)),
       ],
     );
   }
@@ -109,12 +156,14 @@ class CourseThumbnailPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size, height: size,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Icon(Icons.school_outlined, color: AppColors.primary, size: 28),
+      child:
+          const Icon(Icons.school_outlined, color: AppColors.primary, size: 28),
     );
   }
 }
@@ -124,7 +173,8 @@ class ProfileProgressBar extends StatelessWidget {
   final double progress;
   final double height;
 
-  const ProfileProgressBar({super.key, required this.progress, this.height = 8});
+  const ProfileProgressBar(
+      {super.key, required this.progress, this.height = 8});
 
   @override
   Widget build(BuildContext context) {
@@ -146,21 +196,22 @@ class ProfileSectionTitle extends StatelessWidget {
   final String title;
   final bool isDark;
 
-  const ProfileSectionTitle({super.key, required this.title, required this.isDark});
+  const ProfileSectionTitle(
+      {super.key, required this.title, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Text(title,
-        style: TextStyle(
-          fontSize: 16, fontWeight: FontWeight.w700,
-          color: isDark ? AppColors.textMainDark : AppColors.textMainLight,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w800,
+          color: theme.colorScheme.onSurface,
         ));
   }
 }
 
 /// Sliver app bar header for student profile
 class StudentProfileSliverHeader extends StatelessWidget {
-  final Map<String, dynamic>? profile;
   final TabController tabController;
   final bool isDark;
   final bool isArabic;
@@ -168,7 +219,6 @@ class StudentProfileSliverHeader extends StatelessWidget {
 
   const StudentProfileSliverHeader({
     super.key,
-    required this.profile,
     required this.tabController,
     required this.isDark,
     required this.isArabic,
@@ -177,83 +227,59 @@ class StudentProfileSliverHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = profile?['name'] as String? ?? '';
-    final email = profile?['email'] as String? ?? '';
-    final avatarUrl = profile?['avatar_url'] as String?;
-    final joined = profile?['created_at'] != null
-        ? DateFormat('yyyy/MM/dd').format(DateTime.parse(profile!['created_at'] as String))
-        : null;
-
+    final theme = Theme.of(context);
+    final accent = isDark ? AppColors.primaryOnDark : AppColors.primary;
     return SliverAppBar(
-      expandedHeight: 270,
       pinned: true,
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.white,
-      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack),
-      title: Text(isArabic ? 'ملف التعلم' : 'Learning Profile',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      foregroundColor: theme.colorScheme.onSurface,
+      leading:
+          IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack),
+      title: Text(
+        isArabic ? 'ملف التعلم' : 'Learning Profile',
+        style:
+            theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
+        child: Container(
+          height: 48,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primary.withValues(alpha: 0.9), AppColors.primaryLight.withValues(alpha: 0.7)],
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.65),
             ),
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12)],
-                  ),
-                  child: CircleAvatar(
-                    radius: 38,
-                    backgroundColor: Colors.white.withValues(alpha: 0.3),
-                    backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-                    child: avatarUrl == null
-                        ? const Icon(Icons.person, size: 38, color: Colors.white)
-                        : null,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
-                const SizedBox(height: 4),
-                Text(email, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.85))),
-                if (joined != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.calendar_today, size: 11, color: Colors.white.withValues(alpha: 0.8)),
-                      const SizedBox(width: 4),
-                      Text(
-                        (isArabic ? 'انضم: ' : 'Joined: ') + joined,
-                        style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.8)),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
+          child: TabBar(
+            controller: tabController,
+            dividerColor: Colors.transparent,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: accent,
+              borderRadius: BorderRadius.circular(12),
             ),
+            labelColor: isDark ? AppColors.backgroundDark : AppColors.white,
+            unselectedLabelColor:
+                theme.colorScheme.onSurface.withValues(alpha: 0.62),
+            labelStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            tabs: [
+              Tab(text: isArabic ? 'نظرة عامة' : 'Overview'),
+              Tab(text: isArabic ? 'الكورسات' : 'Courses'),
+              Tab(text: isArabic ? 'الاختبارات' : 'Quizzes'),
+            ],
           ),
         ),
-      ),
-      bottom: TabBar(
-        controller: tabController,
-        indicatorColor: AppColors.primary,
-        labelColor: isDark ? AppColors.textMainDark : AppColors.primary,
-        unselectedLabelColor: AppColors.grey500,
-        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-        tabs: [
-          Tab(text: isArabic ? 'نظرة عامة' : 'Overview'),
-          Tab(text: isArabic ? 'الكورسات' : 'Courses'),
-          Tab(text: isArabic ? 'الاختبارات' : 'Quizzes'),
-        ],
       ),
     );
   }

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/services/app_logger.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/loading_state.dart';
 import '../../../../core/shared_widgets/error_state.dart';
@@ -42,7 +43,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
   }
 
   Future<void> _loadData() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final client = Supabase.instance.client;
       final userId = client.auth.currentUser?.id;
@@ -56,7 +60,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
           courses!inner(id, title_ar, title_en, thumbnail_url, total_lessons)
         ''').eq('user_id', userId).order('enrolled_at', ascending: false),
         client.from('quiz_attempts').select('''
-          id, score, passed, started_at, completed_at, time_taken,
+          id, score, passed, started_at, completed_at, time_spent,
           quizzes!inner(id, title_ar, title_en, courses(title_ar, title_en))
         ''').eq('user_id', userId).order('completed_at', ascending: false),
       ]);
@@ -80,8 +84,18 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
           _isLoading = false;
         });
       }
-    } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        '[StudentProfileScreen] Failed to load student profile data',
+        e,
+        stackTrace,
+      );
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -91,15 +105,16 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       body: _isLoading
           ? const AppLoadingState()
           : _error != null
-              ? ErrorState(type: ErrorType.generic, message: _error!, onRetry: _loadData)
+              ? ErrorState(
+                  type: ErrorType.generic, message: _error!, onRetry: _loadData)
               : NestedScrollView(
                   headerSliverBuilder: (_, __) => [
                     StudentProfileSliverHeader(
-                      profile: _profile,
                       tabController: _tabController,
                       isDark: isDark,
                       isArabic: isArabic,
@@ -114,7 +129,8 @@ class _StudentProfileScreenState extends State<StudentProfileScreen>
                         quizAttempts: _quizAttempts,
                         totalLessons: _totalLessons,
                         completedLessons: _completedLessons,
-                        watchSeconds: _profile?['total_watch_time'] as int? ?? 0,
+                        watchSeconds:
+                            _profile?['total_watch_time'] as int? ?? 0,
                         isDark: isDark,
                         isArabic: isArabic,
                       ),
