@@ -212,6 +212,9 @@ class CourseDetailsRemoteDataSourceImpl
       }
 
       // Students should never see unpublished sections/lessons.
+      final explicitlyUnpublishedLessonIds = !isOwnerInstructor
+          ? _collectExplicitlyUnpublishedLessonIds(data)
+          : const <String>{};
       if (!isOwnerInstructor) {
         _filterUnpublishedCurriculumForStudent(data, updateCounts: false);
       }
@@ -219,11 +222,19 @@ class CourseDetailsRemoteDataSourceImpl
       // For non-enrolled users, RLS may return only preview lessons.
       // Fallback to SECURITY DEFINER RPC to get full curriculum metadata
       // so locked lessons are still visible in course details.
-      await _hydratePublicCurriculumIfNeeded(courseId: courseId, data: data);
+      await _hydratePublicCurriculumIfNeeded(
+        courseId: courseId,
+        data: data,
+        excludedLessonIds: explicitlyUnpublishedLessonIds,
+      );
 
       if (!isOwnerInstructor) {
         _filterUnpublishedCurriculumForStudent(data);
       }
+
+      // Some older courses only store the preview URL on the preview lesson.
+      // Promote that URL to the course model so the hero preview button works.
+      _usePreviewLessonUrlWhenCoursePreviewIsMissing(data);
 
       // Calculate total_duration from sections data (sum of video_duration in
       // seconds, converted to minutes). This ensures the value is always
@@ -260,6 +271,7 @@ class CourseDetailsRemoteDataSourceImpl
   Future<void> _hydratePublicCurriculumIfNeeded({
     required String courseId,
     required Map<String, dynamic> data,
+    Set<String> excludedLessonIds = const <String>{},
   }) async {
     final enrollmentStatus =
         EnrollmentStatus.fromString(data['enrollment_status'] as String?);
@@ -270,11 +282,8 @@ class CourseDetailsRemoteDataSourceImpl
     final currentSections = (data['sections'] as List?)?.cast<dynamic>() ?? [];
     final visibleLessonsCount = _countLessonsInSections(currentSections);
     final totalLessons = (data['total_lessons'] as int?) ?? 0;
-
-    // No fallback needed when curriculum is already complete.
-    if (totalLessons <= 0 || visibleLessonsCount >= totalLessons) {
-      return;
-    }
+    final needsCurriculumHydration =
+        totalLessons > 0 && visibleLessonsCount < totalLessons;
 
     final previewVideoByLessonId = _buildPreviewVideoLookup(currentSections);
     final locale = _resolveLocale(data['language'] as String?);
@@ -291,6 +300,13 @@ class CourseDetailsRemoteDataSourceImpl
       if (rpcResult is! Map<String, dynamic>) {
         return;
       }
+
+      final rpcQuizCount = rpcResult['quiz_count'];
+      if (rpcQuizCount != null) {
+        data['total_quizzes'] = _toInt(rpcQuizCount);
+      }
+
+      if (!needsCurriculumHydration) return;
 
       final rpcSections = (rpcResult['sections'] as List?)?.cast<dynamic>();
       if (rpcSections == null || rpcSections.isEmpty) {
@@ -321,6 +337,10 @@ class CourseDetailsRemoteDataSourceImpl
 
           final lessonId = (lessonRaw['id'] ?? '').toString();
           if (lessonId.isEmpty) continue;
+          if (excludedLessonIds.contains(lessonId) ||
+              lessonRaw['is_published'] == false) {
+            continue;
+          }
 
           final lessonTitle = (lessonRaw['title'] ?? '').toString();
           final previewVideo = previewVideoByLessonId[lessonId];
@@ -336,12 +356,14 @@ class CourseDetailsRemoteDataSourceImpl
             'video_duration': _toInt(lessonRaw['duration']),
             'is_preview': lessonRaw['is_preview'] == true,
             'is_mandatory': true,
-            'is_published': true,
+            'is_published': lessonRaw['is_published'] != false,
             'sort_order': lessonIndex,
             'available_from': lessonRaw['available_from'],
             'available_until': lessonRaw['available_until'],
           });
         }
+
+        if (mappedLessons.isEmpty) continue;
 
         mappedSections.add({
           'id': sectionId,
@@ -374,6 +396,23 @@ class CourseDetailsRemoteDataSourceImpl
     return count;
   }
 
+  Set<String> _collectExplicitlyUnpublishedLessonIds(
+      Map<String, dynamic> data) {
+    final result = <String>{};
+    final sections = (data['sections'] as List?)?.cast<dynamic>() ?? [];
+    for (final section in sections) {
+      if (section is! Map<String, dynamic>) continue;
+      final lessons = (section['lessons'] as List?)?.cast<dynamic>() ?? [];
+      for (final lesson in lessons) {
+        if (lesson is! Map<String, dynamic>) continue;
+        if (lesson['is_published'] != false) continue;
+        final lessonId = (lesson['id'] ?? '').toString();
+        if (lessonId.isNotEmpty) result.add(lessonId);
+      }
+    }
+    return result;
+  }
+
   Map<String, Map<String, dynamic>> _buildPreviewVideoLookup(
       List<dynamic> sections) {
     final result = <String, Map<String, dynamic>>{};
@@ -394,6 +433,27 @@ class CourseDetailsRemoteDataSourceImpl
       }
     }
     return result;
+  }
+
+  void _usePreviewLessonUrlWhenCoursePreviewIsMissing(
+      Map<String, dynamic> data) {
+    final coursePreview = (data['preview_video_url'] ?? '').toString().trim();
+    if (coursePreview.isNotEmpty) return;
+
+    final sections = (data['sections'] as List?)?.cast<dynamic>() ?? [];
+    for (final section in sections) {
+      if (section is! Map<String, dynamic>) continue;
+      final lessons = (section['lessons'] as List?)?.cast<dynamic>() ?? [];
+      for (final lesson in lessons) {
+        if (lesson is! Map<String, dynamic> || lesson['is_preview'] != true) {
+          continue;
+        }
+        final lessonPreview = (lesson['video_url'] ?? '').toString().trim();
+        if (lessonPreview.isEmpty) continue;
+        data['preview_video_url'] = lessonPreview;
+        return;
+      }
+    }
   }
 
   String _resolveLocale(String? language) {

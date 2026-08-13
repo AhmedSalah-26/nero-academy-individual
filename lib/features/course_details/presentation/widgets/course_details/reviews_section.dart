@@ -79,7 +79,7 @@ class ReviewsSection extends StatelessWidget {
             ...reviews.take(3).map((review) => Builder(
                   builder: (context) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildReviewCard(context, review, isDark),
+                    child: CourseReviewCard(review: review),
                   ),
                 )),
           ],
@@ -181,9 +181,21 @@ class ReviewsSection extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildReviewCard(
-      BuildContext context, ReviewEntity review, bool isDark) {
+/// Reusable review card used in the course preview and the full reviews page.
+class CourseReviewCard extends StatelessWidget {
+  final ReviewEntity review;
+
+  const CourseReviewCard({
+    super.key,
+    required this.review,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

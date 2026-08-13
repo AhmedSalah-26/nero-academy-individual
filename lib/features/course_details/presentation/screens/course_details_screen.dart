@@ -24,6 +24,7 @@ import '../../domain/entities/lesson_entity.dart';
 import '../cubit/course_details_cubit.dart';
 import '../cubit/course_details_state.dart';
 import 'course_preview_player_screen.dart';
+import 'course_reviews_screen.dart';
 import '../widgets/course_details/course_hero_section.dart';
 import '../widgets/course_details/course_info_section.dart';
 import '../widgets/course_details/instructor_card.dart';
@@ -475,7 +476,15 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   }
 
   void _navigateToReviews(String courseId) {
-    // TODO: Navigate to all reviews
+    final cubit = context.read<CourseDetailsCubit>();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: CourseReviewsScreen(courseId: courseId),
+        ),
+      ),
+    );
   }
 
   void _navigateToCart() {
@@ -595,7 +604,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         } else {
           final errorMsg = cartCubit.state.addToCartError;
           if (errorMsg != null && errorMsg.isNotEmpty) {
-            _showErrorSnackBar(errorMsg.contains('.') ? errorMsg.tr() : errorMsg);
+            _showErrorSnackBar(
+                errorMsg.contains('.') ? errorMsg.tr() : errorMsg);
           } else {
             // Course might be already in cart
             _showInfoSnackBar('cart.already_in_cart'.tr());
@@ -717,7 +727,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 4, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: AppColors.error.withValues(alpha: 0.12),
+                                    color:
+                                        AppColors.error.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(

@@ -81,9 +81,16 @@ class CurriculumSection extends StatelessWidget {
     }
 
     final isArabic = locale == 'ar';
-    final summaryText = isArabic
-        ? '$sections ${'course_details.sections'.tr()} • $lectures ${'course_details.lectures'.tr()} • ${'course_details.total_length'.tr()} $durationText'
-        : '$sections ${'course_details.sections'.tr()} • $lectures ${'course_details.lectures'.tr()} • $durationText ${'course_details.total_length'.tr()}';
+    final summaryParts = <String>[
+      '$sections ${'course_details.sections'.tr()}',
+      '$lectures ${'course_details.lectures'.tr()}',
+    ];
+    if (durationSeconds > 0) {
+      summaryParts.add(isArabic
+          ? '${'course_details.total_length'.tr()} $durationText'
+          : '$durationText ${'course_details.total_length'.tr()}');
+    }
+    final summaryText = summaryParts.join(' • ');
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -154,7 +161,9 @@ class CurriculumSection extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${section.totalLessons} ${'course_details.lectures'.tr()} • ${section.formattedDuration}',
+                          section.totalDuration > 0
+                              ? '${section.totalLessons} ${'course_details.lectures'.tr()} • ${section.formattedDuration}'
+                              : '${section.totalLessons} ${'course_details.lectures'.tr()}',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -252,15 +261,17 @@ class CurriculumSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            // Duration
-            Text(
-              lesson.formattedDuration,
-              style: TextStyle(
-                fontSize: 12,
-                color:
-                    isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            // Duration (only when metadata is available)
+            if (lesson.videoDuration > 0)
+              Text(
+                lesson.formattedDuration,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                ),
               ),
-            ),
           ],
         ),
       ),

@@ -1,10 +1,4 @@
--- ============================================================
--- 039_get_course_details_rpc.sql
--- Creates get_course_details() RPC used by both web and Flutter
--- to fetch full curriculum metadata bypassing RLS.
--- Non-enrolled users see locked lessons, enrolled users see all.
--- ============================================================
-
+-- Return accurate public course metadata without exposing protected quiz data.
 CREATE OR REPLACE FUNCTION public.get_course_details(
   p_course_id UUID,
   p_locale    TEXT DEFAULT 'ar'

@@ -119,6 +119,7 @@ class CourseStatsGrid extends StatelessWidget {
   }
 
   String _formatHours(int minutes) {
+    if (minutes <= 0) return '—';
     final hours = minutes / 60;
     return hours.toStringAsFixed(1);
   }
